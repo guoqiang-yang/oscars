@@ -5,5 +5,7 @@
 	echo "!!!";
 	
 	echo "!!!";
+	
+	echo "test git amend";
 
 	exit;
