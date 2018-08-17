@@ -1,0 +1,102 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        司机订单列表
+    </h1>
+
+    <form class="form-inline" role="form" action="/logistics/driver_order_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>司机id：</label> <input style="width: 80px;" type="text" class="form-control" name="did" value="{{$search_conf.did}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>手机：</label> <input style="width: 120px;" type="text" class="form-control" name="mobile" value="{{$search_conf.mobile}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>姓名：</label> <input style="width:80px;" type="text" class="form-control" name="name" value="{{$search_conf.name}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>来源：</label>
+                <select class="form-control" name="source">
+                <option value="0" {{if empty($search_conf.source)}}selected="selected" {{/if}}>请选择</option>
+                {{foreach $source_list as $sid => $source}}
+                    <option value="{{$sid}}" {{if $search_conf.source== $sid}}selected="selected" {{/if}}>{{$source}}</option>
+                {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>所属库房：</label>
+                <select class="form-control" name="wid">
+                    <option value="0" {{if empty($search_conf.wid)}}selected="selected" {{/if}}>请选择</option>
+                    {{foreach $warehouse as $wid => $name}}
+                    <option value="{{$wid}}" {{if $search_conf.wid==$wid}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>订单id</th>
+                <th>配送日期</th>
+                <th>司机id</th>
+                <th>司机姓名</th>
+                <th>司机电话</th>
+                <th>司机来源</th>
+                <th>所属仓库</th>
+                <th>司机运费</th>
+                <th>是否付款</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{foreach $orders as $order}}
+                <tr>
+                    <td>
+                        {{$order.order.oid}}
+                    </td>
+                    <td>
+                        {{$order.order.delivery_date}}
+                    </td>
+                    <td>
+                        {{$order.driver.did}}
+                    </td>
+                    <td>
+                        {{$order.driver.name}}
+                    </td>
+                    <td>
+                        {{$order.driver.mobile}}
+                    </td>
+                    <td>
+                        {{$order.driver._source}}
+                    </td>
+                    <td>
+                        {{$order.driver.warehouse}}
+                    </td>
+                    <td>
+                        {{$order.info.price / 100}} 元
+                    </td>
+                    <td>
+                        {{if $order.info.paid == 1}}
+                            <span style="color:#00CC33;">【是】</span>
+                        {{else}}
+                            <span style="color:#C71A2A;">【否】</span>
+                        {{/if}}
+                    </td>
+                </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

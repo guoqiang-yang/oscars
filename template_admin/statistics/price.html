@@ -1,0 +1,66 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">金额区间统计</h1>
+
+	<form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right: 20px;">
+				<label>时间：</label>
+				<input type="date" class="form-control" name="start_time" value="{{$start_time}}" style="display: inline-block;width: 170px;"> — <input type="date" class="form-control" name="end_time" value="{{$end_time}}" style="display: inline-block;width: 170px;">
+				<label class="form-group" style="margin-left: 20px;">城市：</label>
+				<select class="form-control" id="city_id" name="city_id" >
+					<option {{if empty($city_id)}}selected="selected"{{/if}} value="all">全部</option>
+					{{foreach $city_list as $id => $city}}
+					<option {{if $id == $city_id}}selected="selected"{{/if}} value="{{$id}}">{{$city}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+			<span style="color:red;">　注意：统计的是“已出库”的订单</span>
+		</div>
+	</form>
+
+	<hr>
+
+	<h3>单笔订单金额</h3>
+	<table class="table table-bordered">
+		<tr>
+			<th>10000以上</th>
+			<th>3000 - 10000</th>
+			<th>1500 - 3000</th>
+			<th>1000 - 1500</th>
+			<th>800 - 1000</th>
+			<th>300 - 800</th>
+			<th>300以下</th>
+		</tr>
+		<tr>
+			<td>{{$data.list[1000000]}}单({{round($data.list[1000000] * 100 / $data.total, 1)}}%)</td>
+			<td>{{$data.list[300000]}}单({{round($data.list[300000] * 100 / $data.total, 1)}}%)</td>
+			<td>{{$data.list[150000]}}单({{round($data.list[150000] * 100 / $data.total, 1)}}%)</td>
+			<td>{{$data.list[100000]}}单({{round($data.list[100000] * 100 / $data.total, 1)}}%)</td>
+			<td>{{$data.list[80000]}}单({{round($data.list[80000] * 100 / $data.total, 1)}}%)</td>
+			<td>{{$data.list[30000]}}单({{round($data.list[30000] * 100 / $data.total, 1)}}%)</td>
+			<td>{{$data.list[0]}}单({{round($data.list[0] * 100 / $data.total, 1)}}%)</td>
+		</tr>
+	</table>
+
+	<h3>用户订单金额</h3>
+	<table class="table table-bordered">
+		<tr>
+			<th>20000以上</th>
+			<th>10000 - 20000</th>
+			<th>5000 - 10000</th>
+			<th>2000 - 5000</th>
+			<th>1000 - 2000</th>
+			<th>1000以下</th>
+		</tr>
+		<tr>
+			<td>{{$data.clist[2000000]}}位({{round($data.clist[2000000] * 100 / $data.ctotal, 1)}}%)</td>
+			<td>{{$data.clist[1000000]}}位({{round($data.clist[1000000] * 100 / $data.ctotal, 1)}}%)</td>
+			<td>{{$data.clist[500000]}}位({{round($data.clist[500000] * 100 / $data.ctotal, 1)}}%)</td>
+			<td>{{$data.clist[200000]}}位({{round($data.clist[200000] * 100 / $data.ctotal, 1)}}%)</td>
+			<td>{{$data.clist[100000]}}位({{round($data.clist[100000] * 100 / $data.ctotal, 1)}}%)</td>
+			<td>{{$data.clist[0]}}位({{round($data.clist[0] * 100 / $data.ctotal, 1)}}%)</td>
+		</tr>
+	</table>
+</div>

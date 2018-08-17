@@ -1,0 +1,167 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">
+        客户应收
+        {{if !empty($_permissions["/crm2/download2"])}}
+        <a href="/crm2/download2.php" class="btn btn-success" style="margin-left:50px;">下载无账期用户欠款信息</a>
+        {{/if}}
+    </h1>
+	
+	<form class="form-inline" role="form" action="/finance/customer_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>手机：</label>
+				<input style="width:150px;" class="form-control" type="text" name="mobile" value="{{$search.mobile}}" >
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>名称：</label>
+				<input style="width: 100px;" type="text" class="form-control" name="name" value="{{$search.name}}">
+			</div>
+
+			<div class="form-group" style="margin-right:20px;">
+				<label>会员ID：</label>
+				<input style="width: 100px;" type="text" class="form-control" name="cid" value="{{$search.cid}}">
+			</div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>客户专员：</label>
+                <select class="form-control" name="sales_suid">
+                    <option value="0" {{if empty($search.sales_suid)}} selected="selected"{{/if}}>请选择</option>
+                    <option value="1" {{if $search.sales_suid==1}} selected="selected"{{/if}}>无销售客户</option>
+                    {{foreach $salesman_list as $man}}
+                    <option value="{{$man.suid}}" {{if $search.sales_suid==$man.suid}}selected="selected"{{/if}}>{{$man.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>账期：</label>
+                <select class="form-control" name="has_payment_days">
+                    <option value="0" {{if $search.has_payment_days == 0}}selected="selected"{{/if}}>所有</option>
+                    <option value="1" {{if $search.has_payment_days == 1}}selected="selected"{{/if}}>有账期</option>
+                    <option value="2" {{if $search.has_payment_days == 2}}selected="selected"{{/if}}>无账期</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+	
+	<hr>
+	
+    <table class="table">
+        <thead>
+            <tr>
+              <th>id</th>
+              <th>名称/联系人</th>
+              <th>门店地址、电话</th>
+              <th style="width:8%;">总购买额/总退款额</th>
+              <th style="width:12%;">
+              {{if "/finance/customer_list.php" == $smarty.server.REQUEST_URI}}
+                  <a href="{{$smarty.server.REQUEST_URI}}?order=account_balance">应收金额</a>
+                  <a href="{{$smarty.server.REQUEST_URI}}?order=account_balance&sort=desc"><strong> ↓ </strong></a>
+                  <a href="{{$smarty.server.REQUEST_URI}}?order=account_balance&sort=asc"><strong> ↑ </strong></a>
+              
+              {{else}}
+                  <a href="{{$smarty.server.REQUEST_URI}}&order=account_balance">应收金额</a>
+                  <a href="{{$smarty.server.REQUEST_URI}}&order=account_balance&sort=desc"><strong> ↓ </strong></a>
+                  <a href="{{$smarty.server.REQUEST_URI}}&order=account_balance&sort=asc"><strong> ↑ </strong></a>
+              
+              {{/if}}
+              </th>
+              
+              <th style="width: 10%;">
+              {{if "/finance/customer_list.php" == $smarty.server.REQUEST_URI}}
+              <a href="{{$smarty.server.REQUEST_URI}}?order=account_amount">账户余额</a>
+              {{else}}
+              <a href="{{$smarty.server.REQUEST_URI}}&order=account_amount">账户余额</a>
+              {{/if}}
+              </th>
+              
+              <th>销售专员</th>
+              <th>操作</th>
+            </tr>
+		</thead>
+		<tbody>
+            {{foreach $customer_list as $customer}}
+			<tr data-cid="{{$customer.cid}}">
+				<td>{{$customer.cid}}</td>
+				<td>{{$customer.name}}
+					{{if $customer.name <> $customer.contact_name}}
+						<br/>
+						{{$customer.contact_name}}
+					{{/if}}
+				</td>
+				<td>
+				  {{$customer.address}}
+				</td>
+                <td>￥{{$customer.total_amount/100}}/￥{{$customer.refund_amount/100}}</td>
+                <td style="color:red;">￥{{$customer.account_balance/100}}</td>
+                <td style="color:blue;">￥{{$customer.account_amount/100}}</td>
+				<td>
+					{{$customer._sales_suid.name}}
+					{{if $customer.sales_suid<>$customer.record_suid && $customer._record_suid.name }}
+						 ({{$customer._record_suid.name}}录入)
+					{{/if}}
+				</td>
+				<td>
+                    <a href="/finance/customer_bill_list.php?cid={{$customer.cid}}" style="margin-right: 10px;">应收明细</a>
+                    <a href="/finance/customer_amount_list.php?cid={{$customer.cid}}" style="margin-right: 10px;">账户余额</a>
+                    <br />
+					<a href="/order/order_list.php?cid={{$customer.cid}}" style="margin-right:10px;">查看订单</a>
+                    <a href="/crm2/coupon_list.php?cid={{$customer.cid}}" style="margin-right:10px;">优惠券列表</a>
+                    {{if !empty($_permissions["/crm2/ajax/send_vip_coupon"]) || !empty($_permissions['/crm2/ajax/send_coupon_temporary'])}}
+                    <br /><a data-cid="{{$customer.cid}}" href="javascript:;" class="send_vip_coupon" data-toggle="modal" data-target="#send_vip_coupon">发放vip现金券</a>
+                    {{/if}}
+				</td>
+			</tr>
+			{{/foreach}}
+		</tbody>
+	</table>
+	
+	<nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+        {{if $show}}
+        <ul style="margin-top: 0;" class="pagination">
+            <li><a style="color:#555;">总金额{{$sum}}元</a></li>
+            <li><a href="/finance/customer_list.php?has_payment_days=1" style="color:#555;">有账期{{$sum_payment_days}}元</a></li>
+            <li><a href="/finance/customer_list.php?has_payment_days=2" style="color:#555;">无账期{{$sum_no_payment_days}}元</a></li>
+            <li><a href="/order/order_list.php?step=7&has_paid=2&has_pdays=2" style="color:#555;">无账期已回单{{$back_amount}}元</a></li>
+            <li><a href="/order/order_list.php?step=5&has_paid=2&has_pdays=2" style="color:#555;">无账期未回单{{$not_back_amount}}元</a></li>
+        </ul>
+        {{/if}}
+	</nav>
+</div>
+<div class="modal fade" id="send_vip_coupon" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:600px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">发放VIP现金券</h4>
+            </div>
+            <div class="modal-body">
+                <input id="send_to_cid" type="hidden" value="0" />
+                <div class="form-group" style="">
+                    <label>现金券类型：</label>
+                    <select class="form-control" id="coupon_id" style="width: 300px; display: inline-block; margin-right: 50px;">
+                        {{foreach $vip_coupon_list as $key => $name}}
+                        <option value="{{$key}}">{{$name}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <div class="form-group" style="">
+                    <label>发放数量：</label>
+                    <select class="form-control" id="coupon_num" style="width: 300px; display: inline-block; margin-right: 50px;">
+                        {{for $i = 1; $i <= 20; $i++}}
+                        <option value="{{$i}}">{{$i}}张</option>
+                        {{/for}}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="send_btn" class="btn btn-primary">发放</button>
+            </div>
+        </div>
+    </div>
+</div>

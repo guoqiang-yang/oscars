@@ -1,0 +1,136 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">出入库历史</h1>
+
+	<form class="form-inline" role="form" action="/warehouse/stock_history.php">
+		<div class="placeholder">
+			{{if count($_allowed_warehouses) > 1}}
+			<div class="form-group" style="margin-right:20px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+                    {{if $_user.wid==0}}
+					<option value="0" {{if !$searchConf.wid}} selected="selected" {{/if}}>全部</option>
+                    {{/if}}
+					{{foreach $_allowed_warehouses as $_wid=>$_wname}}
+					<option value="{{$_wid}}" {{if $wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			{{/if}}
+			<div class="form-group" style="margin-right: 20px;">
+				<label>类型：</label>
+				<select class="form-control" name="type">
+					{{foreach $allType as $_val=>$_name}}
+					<option value="{{$_val}}" {{if $type==$_val}} selected="selected" {{/if}}>{{$_name}}</option>
+					{{/foreach}}
+                    <option value="999"{{if $type==999}} selected="selected" {{/if}} >盘盈盘亏</option>
+				</select>
+			</div>
+
+			<div class="form-group" style="margin-right: 20px;">
+				<label>商品id (sku)：</label>
+				<input type="text" class="form-control" name="sid" value="{{if !empty($sid)}}{{$sid}}{{/if}}" style="width: 100px;">
+			</div>
+			<div class="form-group" style="margin-right: 20px;">
+				<label>盈亏原因：</label>
+				<select class="form-control" name="reason">
+					<option value="">全部</option>
+					{{foreach $reasons as $reason_id => $reason_desc}}
+					<option value="{{$reason_id}}" {{if $reason == $reason_id}}selected{{/if}}>{{$reason_desc}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+        <div>
+            <div class="form-group" style="margin-right:20px;">
+				<label>送货日期：</label> 
+                <input type="date" class="form-control" value="{{$bdate}}" name="bdate">
+                <span> - </span>
+                <input type="date" class="form-control" value="{{$edate}}" name="edate">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+	</form>
+
+	<hr>
+
+    {{if empty($historyList)}} <span style="font-size:25px;">请选择检索条件！！</span> {{else}}
+	<table class="table">
+		<thead>
+		<tr>
+			<th>id</th>
+			<th>skuid</th>
+			<th>名称</th>
+			<th>时间</th>
+			<th style="width:10%;">仓库</th>
+			<th>原库存{{*/被占用*}}</th>
+			<th>进出数量</th>
+			<th>新库存</th>
+			<th style="width:12%;">类型</th>
+			<th style="width:8%">原因</th>
+			<th style="width:8%">备注</th>
+			<th style="width:8%;">操作人</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $historyList as $info}}
+		{{if $info.status == 0}}
+		<tr>
+			<td>{{$info.id}}</td>
+			<td>{{$info.sid}}</td>
+			<td>
+				<a href="/shop/sku_search.php?keyword={{$info.sid}}" target="_blank">{{$info.pinfo.title}}</a>
+			</td>
+			<td>{{$info.ctime}}</td>
+			<td>{{$_all_warehouses[$info.wid]}}</td>
+			<td>{{$info.old_num|string_format:"%d"}}{{*/{{$info.old_occupied|string_format:"%d"}}*}}</td>
+			<td>
+				{{$info.num|string_format:"%d"}}
+			</td>
+			<td>
+				{{$info.old_num + $info.num}}
+			</td>
+			<td>
+				{{$info.type_name}}
+				{{if $info.type == 0}}
+				<a href="/warehouse/edit_stock_in.php?id={{$info.iid}}" target="_blank"> 入库单-{{$info.iid}}</a>
+				{{elseif $info.type == 1}}
+				<a href="/order/order_detail.php?oid={{$info.iid}}" target="_blank"> 查看订单-{{$info.iid}}</a>
+				{{elseif $info.type == 4}}
+				<a href="/order/edit_refund_new.php?rid={{$info.iid}}" target="_blank"> 查看退货-{{$info.iid}}</a>
+				{{elseif $info.type == 5}}
+				<a href="/warehouse/stock_shift_detail.php?ssid={{$info.iid}}" target="_blank"> 查看移库-{{$info.iid}}</a>
+				{{elseif $info.type == 6}}
+				<a href="/warehouse/stock_shift_detail.php?ssid={{$info.iid}}" target="_blank"> 查看移库-{{$info.iid}}</a>
+				{{elseif $info.type == 7}}
+				<a href="/warehouse/edit_stock_in.php?id={{$info.iid}}" target="_blank"> 入库单-{{$info.iid}}</a>
+				{{elseif $info.type == 8}}
+				<a href="/warehouse/stockin_refund_detail.php?srid={{$info.iid}}" target="_blank"> 查看退货-{{$info.iid}}</a>
+				{{elseif $info.type == 12}}
+				<a href="/warehouse/other_stock_out_order_detail.php?oid={{$info.iid}}" target="_blank"> 查看其他出库单-{{$info.iid}}</a>
+				{{elseif $info.type == 13}}
+				<a href="/warehouse/other_stock_in_order_detail.php?oid={{$info.iid}}" target="_blank"> 查看其他入库单-{{$info.iid}}</a>
+                {{elseif $info.type == 14}}
+                <a href="/shop/processed_order_detail.php?id={{$info.iid}}">查看-{{$info.iid}}</a>
+                {{elseif $info.type == 15}}
+                <a href="/shop/processed_order_detail.php?id={{$info.iid}}">查看-{{$info.iid}}</a>
+				{{/if}}
+			</td>
+			<td>{{$reasons[$info.reason]}}</td>
+			<td>{{$info.note}}</td>
+			<td data-uid="{{$info.suid}}">{{$info.uinfo.name}}</td>
+		</tr>
+		{{/if}}
+		{{/foreach}}
+		</tbody>
+	</table>
+	{{/if}}
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>

@@ -1,0 +1,144 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        销售组业绩
+    </h1>
+
+    <form class="form-inline" role="form" action="/statistics/sales_group_performance.php">
+        <div class="placeholder">
+            <input class="form-control" type="date" name="date" value="{{$date}}" placeholder="YYYY-MM-DD">
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left: 20px">查询</button>
+        </div>
+    </form>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr style="height: 60px; background: #FAEBD7">
+            <td width="60px" align="center">团队</td>
+            <td width="60px" align="center">城市</td>
+            <td width="120px" align="center">底线目标</td>
+            <td width="120px" align="center">挑战目标</td>
+            <td width="120px" align="center">日完成量</td>
+            <td width="200px" align="center">当日下单客户数/订单量/销售额</td>
+            <td width="200px" align="center">日均下单客户数/订单量/销售额</td>
+            <td width="120px" align="center">当日完成率</td>
+            <td width="120px" align="center">当月销售额</td>
+            <td width="120px" align="center">月完成率</td>
+            <td width="120px" align="center">上月同期销售额</td>
+            <td width="120px" align="center">同比上月差额</td>
+            {{if $canEdit}}
+            <td width="80px" align="center">操作</td>
+            {{/if}}
+        </tr>
+        </thead>
+
+        <tbody>
+        {{foreach $list as $item}}
+        <tr style="height: 60px">
+            <td width="60px" align="center">{{$item.name}}</td>
+            <td width="60px" align="center">{{$item.city_name}}</td>
+            <td width="120px" align="center" id="floor_target_td">{{$item.floor_target}}</td>
+            <td width="120px" align="center" id="challenge_target_td">{{$item.challenge_target}}</td>
+            <td width="120px" align="center">{{$item.daily_complete_amount}}</td>
+            <td width="200px" align="center">
+                {{$item.today_consumer_num}}/{{$item.today_order_num}}/{{$item.today_amount}}
+            </td>
+            <td width="200px" align="center">
+                {{$item.daily_average_consumer_num}}/{{$item.daily_average_order_num}}/{{$item.daily_average_amount}}
+            </td>
+            <td width="120px" align="center">{{$item.today_complete_rate}}</td>
+            <td width="120px" align="center">{{$item.this_month_amount}}</td>
+            <td width="120px" align="center">{{$item.this_month_rate}}</td>
+            <td width="120px" align="center">{{$item.last_same_period_amount}}</td>
+            <td width="120px" align="center">{{$item.difference}}</td>
+            {{if $canEdit}}
+            <td width="80px" align="center">
+                {{if $item.can_operate == 1}}
+                <u style="color: #428BCA" id="operation">编辑</u>
+                {{/if}}
+            </td>
+            {{/if}}
+            <td id="suid" hidden>{{$item.suid}}</td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+     aria-hidden="true" id="myModal">
+    <div class="modal-dialog modal-lg" style="vertical-align: middle;width: 300px; ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">编辑</h4>
+            </div>
+            <div class="modal-body" align="center">
+                <div>
+                    <label style="margin-right: 10px">底线目标</label>
+                    <input id="floor_target_field" type="text">
+                </div>
+                <div style="margin-top: 10px">
+                    <label style="margin-right: 10px">挑战目标</label>
+                    <input id="challenge_target_field" type="text">
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="button" class="btn btn-default"
+                        style="background: #428BCA; width: 100px;color: white" id="confirm_btn">确定
+                </button>
+                <button type="button" data-dismiss="modal" class="btn btn-default"
+                        style="background: #FA0D1B; width: 100px;color: white">关闭
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function centerModals() {
+        $('#myModal').each(function (i) {
+            var $clone = $(this).clone().css('display', 'block').appendTo('body');
+            var top = Math.round(($clone.height() - $clone.find('.modal-content').height()) / 2);
+            top = top > 0 ? top : 0;
+            $clone.remove();
+            $(this).find('.modal-content').css("margin-top", top);
+        });
+    }
+    var index = 0;
+    $("u#operation").click(function () {
+        index = $("u#operation").index(this);
+        $('#floor_target_field').val($('td#floor_target_td').eq(index).text());
+        $('#challenge_target_field').val($('td#challenge_target_td').eq(index).text());
+        $('#myModal').on('show.bs.modal', centerModals);
+        $('#myModal').modal();
+    });
+
+    $("#confirm_btn").click(function () {
+        var floor_target = Number($('#floor_target_field').val());
+        var challenge_target = Number($('#challenge_target_field').val());
+        if(challenge_target <= floor_target){
+            alert('挑战目标要大于底线目标');
+        }
+        else {
+            var suid = $("td#suid").eq(index).text();
+            $.ajax({
+                url: '/statistics/ajax/modify_amount_target.php',
+                type: 'POST',
+                data: 'floor_target=' + floor_target + '&challenge_target=' + challenge_target + '&suid=' + suid,
+                dataType: 'json',
+                success: function (ret) {
+                    if(ret.error.errno == 1){
+                        $('#myModal').modal('toggle');
+                        window.location.reload();
+                    }
+                    else {
+                        alert(ret.error.errmsg);
+                    }
+                },
+                fail:function (ret) {
+                    alert('更新失败，请重试');
+                }
+            });
+        }
+    });
+</script>

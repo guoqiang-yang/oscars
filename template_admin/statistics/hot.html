@@ -1,0 +1,80 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">
+    热销产品
+  </h1>
+
+  <form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+    <div class="placeholder">
+      <div class="form-group" style="margin-right: 20px;">
+        <label>时间：</label>
+        <input type="date" class="form-control" name="start_time" value="{{$start_time}}" style="display: inline-block;width: 160px;">
+        —
+        <input type="date" class="form-control" name="end_time" value="{{$end_time}}" style="display: inline-block;width: 160px;">
+      </div>
+      <div class="form-group" style="margin-right:20px;">
+        <label>类型：</label>
+        <select class="form-control" name="type">
+          <option value="num" {{if $type == "num"}}selected="selected"{{/if}}>销售量</option>
+          <option value="amount" {{if $type == "amount"}}selected="selected"{{/if}}>销售额</option>
+          <option value="profit" {{if $type == "profit"}}selected="selected"{{/if}}>毛收入</option>
+        </select>
+        <label class="form-group" style="margin-left: 20px;">城市：</label>
+        <select class="form-control" id="city_id" name="city_id" >
+          <option {{if empty($city_id)}}selected="selected"{{/if}} value="0">全部</option>
+          {{foreach $city_list as $id => $city}}
+          <option {{if $id == $city_id}}selected="selected"{{/if}} value="{{$id}}">{{$city}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+    </div>
+  </form>
+
+  <hr>
+
+  {{if count($list) > 0}}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>商品编号</th>
+        <th>商品信息</th>
+        <th>价格</th>
+        <th>类别</th>
+        {{if $type == 'num'}}
+        <th>总销售量（个）</th>
+        {{else if $type == 'amount'}}
+        <th>总销售额（元）</th>
+        {{else}}
+        <th>毛利润（元）</th>
+        {{/if}}
+      </tr>
+    </thead>
+    <tbody>
+    {{foreach $list as $product}}
+    <tr data-pid="{{$product.pid}}" class="_j_product">
+      <td>{{$product.pid}}</td>
+      <td>
+        {{$product.info.title}}
+      </td>
+      <td><span style="color:red;">￥{{$product.info.price/100}}</span>元/{{if $product.info.unit}}{{$product.info.unit}}{{else}}个{{/if}}</td>
+      <td>{{$product._cate1}}-{{$product._cate2}}</td>
+      <td>
+        {{$product.total}}
+      </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+  {{else}}
+    暂无记录
+  {{/if}}
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

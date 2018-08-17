@@ -1,0 +1,6 @@
+* * * * * cd /haocai/app/; /usr/bin/php ./appSche.php >> appSche.log &
+* * * * * /usr/local/bin/memcached -m 20 -p 11211 -u apache -d
+*/5 * * * * /usr/local/coreseek/bin/indexer -c /usr/local/coreseek/etc/csft_mysql.conf --all --rotate
+* * * * * cd /haocai/bin; /bin/sh ./start_dbman.sh  >/dev/null 2>&1
+* * * * * cd /haocai/bin; /bin/sh ./start_proxy.sh  >/dev/null 2>&1
+

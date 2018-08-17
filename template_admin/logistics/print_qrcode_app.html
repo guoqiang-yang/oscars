@@ -1,0 +1,18 @@
+<style type="text/css" media=print>
+    .noprint{display : none }
+</style>
+
+<div align="center" style="">
+    <div class="noprint" style="font-size: 20px; color: red;">
+        二维码只能由库房人员打印！！严禁无库房属性人员打印二维码！！！
+    </div>
+
+
+    <img src="https://api.qrserver.com/v1/create-qr-code/?data={{$url}}" style="height:400px;margin:10px;">
+
+    <div class="noprint">
+        <div style="margin-top:30px;">
+            <input onclick="window.print();" data-oid="{{$order.oid}}" type="button" id="print-order" value="打印" style="font-size: 25px;padding: 5px 15px;">
+        </div>
+    </div>
+</div>

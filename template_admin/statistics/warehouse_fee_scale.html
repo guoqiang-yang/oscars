@@ -1,0 +1,322 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">仓库物流费比</h1>
+
+    <form class="form-inline" role="form" action="">
+        <div class="placeholder">
+            <div class="form-group _j_date_selecter" style="margin-right: 20px;{{if $view_mode == 'month'}}display: none;{{/if}}">
+                <label>日期：</label>
+                <input type="month" class="form-control" name="from_date" value="{{$from_date}}" style="display: inline-block;width: 160px;"> To
+                <input max="{{$yesterday}}" type="month" class="form-control" name="end_date" value="{{$end_date}}" style="display: inline-block;width: 160px;">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+
+    {{if count($data) > 0}}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>仓库</th>
+                {{foreach $data as $wid => $item}}
+                <th>{{$item.wname}}</th>
+                {{/foreach}}
+                <th>总计</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    商品销售额
+                </td>
+                {{foreach $data as $wid => $item}}
+                <td><a target="_blank" href="/statistics/user_purchase.php?view_mode=date&from_date={{$from_date_real}}&end_date={{$end_date_real}}&city=0&wid={{$wid}}"><b>￥{{$item.price_total|number_format}}</b></a></td>
+                {{/foreach}}
+                <td><a target="_blank" href="/statistics/user_purchase.php?view_mode=date&from_date={{$from_date_real}}&end_date={{$end_date_real}}&city=0&wid=0"><b>￥{{$total_data.price_total|number_format}}</b></a></td>
+            </tr>
+            <tr>
+                <td>
+                    退款金额
+                </td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;">
+                    <a target="_blank" href="/statistics/user_purchase.php?view_mode=date&from_date={{$from_date_real}}&end_date={{$end_date_real}}&city=0&wid=0">
+                        ￥{{$item.refund|number_format}}
+                    </a>
+                </td>
+                {{/foreach}}
+                <td style="color:#828282;">
+                    <a target="_blank" href="/statistics/user_purchase.php?view_mode=date&from_date={{$from_date_real}}&end_date={{$end_date_real}}&city=0&wid=0">
+                        ￥{{$total_data.refund|number_format}}
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    优惠金额
+                </td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;">
+                    <a target="_blank" href="/statistics/order_fee_list.php?view_mode=date&from_date={{$from_date_real}}&end_date={{$end_date_real}}&wid={{$wid}}">
+                        ￥{{$item.privilege|number_format}}({{($item.privilege * 100 / ($item.price_total - $item.refund))|string_format:"%.2f"}}%)
+                    </a>
+                </td>
+                {{/foreach}}
+                <td style="color:#828282;">
+                    <a target="_blank" href="/statistics/order_fee_list.php?view_mode=date&from_date={{$from_date_real}}&end_date={{$end_date_real}}&wid={{$wid}}">
+                        ￥{{$total_data.privilege|number_format}}({{($total_data.privilege * 100 / ($total_data.price_total - $total_data.refund))|string_format:"%.2f"}}%)
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    商品毛利率
+                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="(商品销售金额-商品成本)/(商品销售金额)"></span>
+                </td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;">{{$item.gross_profit|string_format:"%.2f"}}%</td>
+                {{/foreach}}
+                <td style="color:#828282;">￥{{$total_data.gross_profit|string_format:"%.2f"}}%</td>
+            </tr>
+            <tr>
+                <td>
+                    物流净补贴
+                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="(支出运费+支出搬运费)-(收入运费+收入搬运费)"></span>
+                    <br />
+                    支出 - 收入
+                </td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;">
+                    <a target="_blank" href="/statistics/logistics_fee_by_wid.php?from_date={{$from_date_real}}&end_date={{$end_date_real}}&wid={{$wid}}">
+                    ￥{{$item.logistics_subsidy|number_format}}<br />
+                    ￥{{$item.logistics_out|number_format}} - ￥{{$item.logistics_in|number_format}}
+                    </a>
+                </td>
+                {{/foreach}}
+                <td style="color:#828282;">
+                    <a target="_blank" href="/statistics/logistics_fee_by_wid.php?from_date={{$from_date_real}}&end_date={{$end_date_real}}&wid=0">
+                    ￥{{$total_data.logistics_subsidy|number_format}}<br />
+                    ￥{{$total_data.logistics_out|number_format}} - ￥{{$total_data.logistics_in|number_format}}
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    物流毛费比
+                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="(支出运费+支出搬运费)/(商品销售金额-退款金额)"></span>
+                    <br />
+                    物流净费比
+                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="物流净补贴/(商品销售金额-退款金额)"></span>
+                </td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;">{{$item.gross_logistics_scale|string_format:"%.2f"}}%<br />{{$item.real_logistics_scale|string_format:"%.2f"}}%</td>
+                {{/foreach}}
+                <td style="color:#828282;">{{$total_data.gross_logistics_scale|string_format:"%.2f"}}%<br />{{$total_data.real_logistics_scale|string_format:"%.2f"}}%</td>
+            </tr>
+            <tr>
+                <td>
+                    净盘亏金额
+                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="盘亏金额-盘盈金额"></span>
+                </td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;">
+                    <a target="_blank" href="/statistics/sku_in_out.php?tab=cate1&date_mode=old&from_date={{$from_date_real}}&end_date={{$end_date_real}}&wid={{$wid}}&unit=num">
+                    ￥{{$item.check_out|number_format}} ({{($item.check_out * 100 / ($item.price_total - $item.refund))|string_format:"%.2f"}}%)
+                    </a>
+                </td>
+                {{/foreach}}
+                <td style="color:#828282;">
+                    <a target="_blank" href="/statistics/sku_in_out.php?tab=cate1&date_mode=old&from_date={{$from_date_real}}&end_date={{$end_date_real}}&wid=0&unit=num">
+                    ￥{{$total_data.check_out|number_format}} ({{($total_data.check_out * 100 / ($total_data.price_total - $total_data.refund))|string_format:"%.2f"}}%)
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    固定投入
+                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="2017年3月之前的按3月数据计算"></span>
+                </td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;">￥{{$item.fixed_input|number_format}} ({{($item.fixed_input * 100 / ($item.price_total - $item.refund))|string_format:"%.2f"}}%)</td>
+                {{/foreach}}
+                <td style="color:#828282;">￥{{$total_data.fixed_input|number_format}} ({{($total_data.fixed_input * 100 / ($total_data.price_total - $total_data.refund))|string_format:"%.2f"}}%)</td>
+            </tr>
+            <tr>
+                <td>
+                    人员工资
+                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="2017年3月之前的按3月数据计算"></span>
+                </td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;">￥{{$item.staff_salary|number_format}} ({{($item.staff_salary * 100 / ($item.price_total - $item.refund))|string_format:"%.2f"}}%)</td>
+                {{/foreach}}
+                <td style="color:#828282;">￥{{$total_data.staff_salary|number_format}} ({{($total_data.staff_salary * 100 / ($total_data.price_total - $total_data.refund))|string_format:"%.2f"}}%)</td>
+            </tr>
+            <tr>
+                <td>
+                    其他变动成本
+                    <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="2017年3月之前的按3月数据计算"></span>
+                </td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;">￥{{$item.other_input|number_format}} ({{($item.other_input * 100 / ($item.price_total - $item.refund))|string_format:"%.2f"}}%)</td>
+                {{/foreach}}
+                <td style="color:#828282;">￥{{$total_data.other_input|number_format}} ({{($total_data.other_input * 100 / ($total_data.price_total - $total_data.refund))|string_format:"%.2f"}}%)</td>
+            </tr>
+            <tr>
+                <td>总费比(不算优惠,不算盘亏)</td>
+                {{foreach $data as $wid => $item}}
+                <td><b>{{$item.total_logistics_scale|string_format:"%.2f"}}%</b></td>
+                {{/foreach}}
+                <td><b>{{$total_data.total_logistics_scale|string_format:"%.2f"}}%</b></td>
+            </tr>
+            <tr>
+                <td>总费比(算优惠)</td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;"><b>{{$item.total_logistics_scale_with_privilege|string_format:"%.2f"}}%</b></td>
+                {{/foreach}}
+                <td style="color:#828282;"><b>{{$total_data.total_logistics_scale_with_privilege|string_format:"%.2f"}}%</b></td>
+            </tr>
+            <tr>
+                <td>总费比(算优惠，盘亏)</td>
+                {{foreach $data as $wid => $item}}
+                <td style="color:#828282;"><b>{{$item.total_logistics_scale_with_privilege_checkout|string_format:"%.2f"}}%</b></td>
+                {{/foreach}}
+                <td style="color:#828282;"><b>{{$total_data.total_logistics_scale_with_privilege_checkout|string_format:"%.2f"}}%</b></td>
+            </tr>
+            <tr>
+              <td>总费用(算优惠，盘亏)</td>
+              {{foreach $data as $wid => $item}}
+              <td style="color:#828282;"><b>￥{{$item.total_fee|number_format}}</b></td>
+              {{/foreach}}
+              <td style="color:#828282;"><b>￥{{$total_data.total_fee|number_format}}</b></td>
+            </tr>
+        </tbody>
+    </table>
+    {{else}}
+    暂无记录
+    {{/if}}
+
+
+    <div style="overflow: auto;">
+        <h3>
+            库房费用
+            <a href="javascript:;" data-toggle="modal" data-target="#edit_fee_dlg"  style="margin-left: 50px;" class="btn btn-success">新增费用</a>
+        </h3>
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th>月份</th>
+                <th>库房</th>
+                <th>固定投入</th>
+                <th>人员工资</th>
+                <th>其他变动成本</th>
+                <th>线下物流费用</th>
+                <th>编辑人</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{foreach $warehouse_fee as $item}}
+            <tr>
+                <td>
+                    <span id="month_{{$item.id}}">{{$item.month}}</span>
+                </td>
+                <td>
+                    <span>{{$item._warehouse}}</span>
+                    <span id="wid_{{$item.id}}" style="display: none;">{{$item.wid}}</span>
+                </td>
+                <td>
+                    ￥<span>{{number_format($item.fixed_input, 2)}}</span>
+                    <span id="fixed_input_{{$item.id}}" style="display: none;">{{$item.fixed_input}}</span>
+                </td>
+                <td>
+                    ￥<span>{{number_format($item.staff_salary, 2)}}</span>
+                    <span id="staff_salary_{{$item.id}}" style="display: none;">{{$item.staff_salary}}</span>
+                </td>
+                <td>
+                    ￥<span>{{number_format($item.other_input, 2)}}</span>
+                    <span id="other_input_{{$item.id}}" style="display: none;">{{$item.other_input}}</span>
+                </td>
+                <td>
+                    ￥<span>{{number_format($item.offline_logistics_fee, 2)}}</span>
+                    <span id="offline_logistics_fee_{{$item.id}}" style="display: none;">{{$item.offline_logistics_fee}}</span>
+                </td>
+                <td>
+                    <span>{{$item._suser.name}}</span>
+                </td>
+                <td>
+                    <a href="javascript:;" class="edit_warehouse_fee" data-id="{{$item.id}}">编辑</a>
+                </td>
+            </tr>
+            {{/foreach}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade _j_dialog" id="edit_fee_dlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">编辑库房费用</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <input type="hidden" id="id" value="0" />
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">月份：</label>
+                        <div class="col-sm-7">
+                            <input type="month" class="form-control" id="month" value="{{$order.freight/100}}" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">库房：</label>
+                        <div class="col-sm-7">
+                            <select id="wid" class="form-control">
+                                <option value="0">请选择</option>
+                                {{foreach $warehouse_list as $wid => $wname}}
+                                <option value="{{$wid}}">{{$wname}}</option>
+                                {{/foreach}}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">固定投入：</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="fixed_input" value="" style="display:inline-block;width:200px;" /> 元
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">人员工资：</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="staff_salary" value="" style="display:inline-block;width:200px;" /> 元
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">其他变动成本：</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="other_input" value="" style="display:inline-block;width: 200px;" /> 元
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">线下物流费用：</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="offline_logistics_fee" value="" style="display:inline-block;width: 200px;" /> 元
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="save">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>

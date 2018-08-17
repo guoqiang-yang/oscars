@@ -1,0 +1,314 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    {{if !empty($stock_in)}}
+        {{$id = $stock_in.info.id}}
+        {{$products = $stock_in.products}}
+        {{$idtype="02"}}
+    {{else}}
+        {{$id = $order.info.id}} {{$products = $order.products[1]}}
+        {{$idtype="01"}}
+    {{/if}}
+    <h1 class="page-header">
+	    {{if $id}}查看{{else}}新建{{/if}}入库单
+	    {{if $stock_in.info.status == 1}}
+	    <span style="color: red;">【已删除】</span>
+	    {{/if}}
+    </h1>
+
+    <form class="form-horizontal" role="form">
+        {{include "warehouse/block_edit_stock_in.html"}}
+        
+        {{*该页面只能 普采入库*}}
+        <input type="hidden" name="source" value="1">
+        
+        {{if $order.info.source != 1}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">采购单类型：</label>
+
+            <div class="col-sm-8">
+                <span class="text-value" style="color:red;font-size:20px;font-weight:bold;">{{$order.info._source}}</span>
+            </div>
+        </div>
+        {{/if}}
+        {{if !empty($stock_in)}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">入库单类型：</label>
+
+            <div class="col-sm-8">
+                <span class="text-value" style="color:red;font-size:20px;font-weight:bold;">
+                    {{if $stock_in.info.source==1}}普采入库{{else}}临采入库{{/if}}
+                </span>
+                <span style="font-size:18px;"> - {{$managing_modes[$stock_in.info.managing_mode]}}</span>
+                {{if $stock_in.info.paid==1}}
+                <span style="color:green;">【已付】</span>
+                {{elseif $stock_in.info.paid==2}}
+                <span style="color:blue;">【采购已兑账】</span>
+                {{elseif $stock_in.info.paid==3}}
+                <span style="color:limegreen;">【兑账未支付】</span>
+                {{else}}
+                <span style="color:red;">【未付】</span>
+                {{/if}}
+            </div>
+        </div>
+        {{/if}}
+        
+        <div class="form-group">
+            <label class="col-sm-2 control-label">入库清单：</label>
+
+            <div class="col-sm-10">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>{{if $id}}条码{{else}}id{{/if}}</th>
+                        <th>名称</th>
+                        <th>类别</th>
+                        <th>单位</th>
+                        {{if !empty($_permissions['hc_show_inorder_product_price'])}}
+                        <th>单价</th>
+                        {{/if}}
+                        <th>应收</th>
+                        <th>实收</th>
+                        <th>货位</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{foreach $products as $productItem}}
+                    <tr class="_j_product" data-sid="{{$productItem.sid}}" data-source="{{$productItem.source}}">
+                        <td>
+                          {{if $id}}
+                            {{*01-{{$id}}-*}}{{$productItem.sid}}
+                          {{else}}
+                            {{$productItem.sid}}
+                          {{/if}}
+                        </td>
+                        <td>
+                            <a href="/shop/edit_sku.php?sid={{$productItem.sid}}" target="_blank">{{$productItem.sku.title}}</a>
+                        </td>
+                        <td>
+                            {{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}
+                        </td>
+                        <td>{{$productItem.sku.unit}}</td>
+                        {{if !empty($_permissions['hc_show_inorder_product_price'])}}
+                        <td>
+                            <input type="text" class="form-control" name="price" value="{{$productItem.price/100}}" style="width:60px;display:inline;" disabled="true">元
+                        </td>
+                        {{/if}}
+                        <td>
+                          {{$productItem.num - $productItem._stock_in}}
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="num" value="{{$productItem.num - $productItem._stock_in}}" style="width:80px;" {{if !empty($stock_in)}}disabled="true" {{/if}}>
+                        </td>
+                        <td>
+                          {{if !empty($productItem.location)}}
+                          <span>{{$productItem.location}}</span>
+                          {{else}}
+                          -
+                          {{/if}}
+                        </td>
+                        <td>
+                            {{if !empty($stock_in) && $stock_in.info.paid==0 && empty($productItem.location) && $productItem.status == 0}}
+                            <a href="javascript:;" class="_j_del_stockin" data-optype="del_product" data-id="{{$stock_in.info.id}}" data-sid="{{$productItem.sid}}" style="margin-right: 10px;">删除</a>
+                            {{/if}}
+                            {{if !empty($_permissions['/warehouse/stock_history'])}}
+                            <a href="/warehouse/stock_history.php?type=-1&wid=3&sid={{$productItem.sid}}" target="_blank">库存</a>
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/foreach}}
+                    
+                    {{if $order.info.price>0 && !empty($_permissions['hc_show_inorder_product_price'])}}
+                    <tr>
+                        <td>数量:&nbsp;{{count($products)}}</td>
+                        <td>价格汇总:&nbsp;￥{{if $id}}{{$stock_in.info.price/100}}{{else}}{{$order.info.price/100}}{{/if}}</td>
+                    </tr>
+                    {{/if}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-sm-2 control-label">退货清单：</label>
+
+            <div class="col-sm-8">
+                {{if !empty($stock_in.refund_products)}}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>退货单ID</th>
+                        <th>id</th>
+                        <th>名称</th>
+                        <th>类别</th>
+                        {{if $_isAdmin || $_isBuyer}}
+                        <th>单价</th>
+                        {{/if}}
+                        <th>数量</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{foreach $stock_in.refund_products as $_refund}}
+                    {{foreach $_refund as $rp}}
+                    <tr>
+                        <td>
+                            <a href="/warehouse/stockin_refund_detail.php?srid={{$rp.srid}}" target="_blank">{{$rp.srid}}</a>
+                        </td>
+                        <td>{{$rp.sid}}</td>
+                        <td>{{$rp.sku.title}}</td>
+                        <td>
+                            {{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}
+                        </td>
+                        <td>￥{{$rp.price/100}}</td>
+                        <td>{{$rp.num}}</td>
+                    </tr>
+                    {{/foreach}}
+                    {{/foreach}}
+                    {{if ($_isAdmin || $_isBuyer || $_isFinance)}}
+                    <tr>
+                        <td>退货总价:</td>
+                        <td colspan="5">￥{{$stock_in.info.refund_price/100}}</td>
+                    </tr>
+                    {{/if}}
+                    </tbody>
+                </table>
+                {{else}} <span style="font-size: 20px; color:red;">无退货商品</span> {{/if}}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                {{if empty($stock_in)}}
+                    {{if $order.info.source != 2 && !empty($_permissions['/warehouse/ajax/save_stock_in'])}}
+                    <button type="button" class="btn btn-primary" id="_j_btn_save_stock_in" style="margin-right:20px;">确认入库</button>
+                    {{/if}}
+                {{elseif $stock_in.info.status == 0}}    
+                    {{if $stock_in.info.source!=2 && $stock_in.info.step<3 && !empty($_permissions['/warehouse/shelved_detail'])}}
+                    <a href="/warehouse/shelved_detail.php?objid={{$id}}&type=1" class="btn btn-primary" style="margin-right:20px;background-color:darkblue;" target="_blank">上架</a>
+                    {{/if}}
+
+                    <!--{{if $stock_in.info.paid!=1 && ($stock_in.info.price-$stock_in.info.refund_price)>0 && !empty($_permissions['/warehouse/ajax/confirm_paid'])}}-->
+                    <!--<a href="javascript:void(0);" class="btn btn-primary" data-toggle="modal" data-target="#confirmPaidModal" style="margin-right:20px;">付款</a>-->
+                    <!--{{/if}}-->
+                    
+                    {{if !empty($_permissions['/warehouse/in_order_list'])}}
+                    <a href="/warehouse/detail_in_order.php?oid={{$stock_in.info.oid}}" class="btn btn-default" style="margin-right:20px;" target="_blank">查看采购订单</a>
+                    {{/if}}
+                    
+                    {{if $order.info.source !=4 && ($stock_in.info.source==2 ||$stock_in.info.step>1) && !empty($_permissions['/warehouse/ajax/refund_stockin'])}}
+                    <a href="javascript:;" class="btn btn-primary" id="_j_stockIn_Refund" data-id="{{$stock_in.info.id}}" style="margin-right: 20px;">退货</a>
+                    {{/if}}
+                    
+                    {{if !empty($_permissions['/warehouse/stock_in_print'])}}
+                    <a href="/warehouse/stock_in_print.php?id={{$stock_in.info.id}}&type=1" class="btn btn-default" style="margin-right:20px;" target="_blank">打印收货单</a>
+                    <a href="/warehouse/stock_in_print.php?id={{$stock_in.info.id}}&type=2" class="btn btn-default" style="margin-right:20px;" target="_blank">打印上架单</a>
+                    {{/if}}
+                {{else}}
+                    <div>
+                        <span style="color:red;font-size:28px;">入库单状态：异常！！</span>
+                    </div>
+                {{/if}}
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade _j_dialog" id="confirmPaidModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.info.oid}}">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">财务付款</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    {{*
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">类型：</label>
+
+                        <div class="col-sm-7">
+                            <input style="margin-right: 5%" type="radio" value="1" name="adtype"> <span style="margin-right: 10%">应付增加</span> <input style="margin-right: 5%" class="" type="radio" value="2" name="adtype"> <span style="margin-right: 10%">应付减少</span>
+                        </div>
+                    </div>
+                    *}}
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">支付方式：</label>
+
+                        <div class="col-sm-7">
+                            <select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+                                {{if $stock_in.info.payment_type==0}}
+                                <option value="0">请选择</option>
+                                {{/if}}
+                                {{foreach $payment_types as $type_id => $type_name}}
+                                <option value="{{$type_id}}" {{if $stock_in.info.payment_type== $type_id}}selected="selected" {{/if}}>{{$type_name}}</option>
+                                {{/foreach}}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">款项来源：</label>
+
+                        <div class="col-sm-7">
+                            <select class="form-control" name="paid_source" style="display:inline-block;width:150px;">
+                                {{if $stock_in.info.paid_source==0}}
+                                <option value="0">请选择</option>
+                                {{/if}}
+                                {{foreach $paid_sources as $id => $desc}}
+                                <option value="{{$id}}" {{if $stock_in.info.paid_source==$id||($id==99&&$stock_in.info.payment_type==1)}}selected="selected"{{/if}}>{{$desc}}</option>
+                                {{/foreach}}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">金额：</label>
+
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" name="real_amount" placeholder="金额" value="{{($stock_in.info.price-$stock_in.info.refund_price)/100}}" style="display:inline-block;width:100px;">元
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">备注：</label>
+
+                        <div class="col-sm-7">
+                            <textarea class="form-control" rows="2" name="note">采购单ID：{{$order.info.oid}}</textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+
+                        <div class="col-sm-7">
+                            <span class="text-value" style="color:red; font-size:18px;">
+                                {{if $stock_in.info.paid==0}}等待：采购兑账！{{elseif $stock_in.info.paid==2}}等待：财务兑账！！{{/if}}
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="_j_btn_confirm_paid" data-sid={{$order.info.sid}} data-id="{{$stock_in.info.id}}" data-type="1" {{if $stock_in.info.paid!=3}}disabled=true;{{/if}}>确认付款</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade _j_dialog" id="stockinRefundModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:1000px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">入库单退货</h4>
+            </div>
+            <div class="modal-body">
+                <div id="stockInProductArea"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="_j_btn_create_refund">确认退货</button>
+            </div>
+        </div>
+    </div>
+</div>

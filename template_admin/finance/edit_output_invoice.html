@@ -1,0 +1,233 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if $info.id}}编辑{{else}}添加{{/if}}发票</h1>
+	<form class="form-horizontal" role="form">
+        <input type="hidden" name="id" value="{{$info.id}}">
+        <div class="form-group">
+			<label class="col-sm-2 control-label">客户ID：</label>
+			<div class="col-sm-4">
+				<input type="text" name="cid" class="form-control" value="{{$cid}}" readonly>
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">合同编号：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="contract_number" value="{{$info.contract_number}}" maxlength="120">
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">开票城市：</label>
+			<div class="col-sm-4">
+				<select name="city_id" class="form-control" data-city="{{$info.city_id}}"  style="width: 30%;">
+					<option value="0">请选择</option>
+                    {{foreach $city_list as $key=>$city}}
+                    <option value="{{$key}}" {{if $info.city_id == $key}}selected="selected"{{/if}}>{{$city}}</option>
+                    {{/foreach}}
+				</select>
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">发票类型：</label>
+            <div class="col-sm-4">
+                <select name="invoice_type" class="form-control _j_invoice_type_change" style="width: 30%;">
+                    <option value="0">请选择</option>
+                    {{foreach $invoice_types as $key=>$type}}
+                    <option value="{{$key}}" {{if $info.invoice_type == $key}}selected="selected"{{/if}}>{{$type}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">开票名称：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="title" value="{{$info.title}}" maxlength="120">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">付款单位：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="pay_company" value="{{$info.pay_company}}" maxlength="120">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">开票订单：</label>
+            <div class="col-sm-8">
+                <table class="table" style="border: solid 1px #ccc;">
+                    <tr style="background-color: #d8d6d6;">
+                        <th>订单ID</th>
+                        <th>付款方式</th>
+                        <th>付款时间</th>
+                        <th>商品金额</th>
+                        <th>服务费金额</th>
+                        <th>实付金额</th>
+                        <th>操作</th>
+                    </tr>
+                    <tbody id="bill_ids">
+                    {{foreach $info['bill_orders'] as $item}}
+                    <tr id="bill_{{$item.oid}}">
+                        <td><input type="hidden" name="bill_ids" value="{{$item.oid}}">订单ID：<a href="/order/order_detail.php?oid={{$item.oid}}" target="_blank">{{$item.oid}}</a></td>
+                        <td>{{$item.payment_type}}</td>
+                        <td>{{$item.pay_time}}</td>
+                        <td>{{$item.price/100}}</td>
+                        <td>{{($item.customer_carriage/100)+($item.freight/100)}}</td>
+                        <td>{{$item.real_amount/100}}</td>
+                        <td>{{if $info.step<3}}<a href="javascript:;" onclick="_onDeleteBillId(this);">移除</a>{{/if}}</td>
+                    </tr>
+                    {{/foreach}}
+                    </tbody>
+                </table>
+                <div>
+                    {{if $info.step<3}}<a href="javascript:;" class="add_bill_ids">+继续添加</a>{{/if}}
+                    <span style="color: red; margin-left: 240px;">商品金额：¥&emsp;<span id="show_price_amount">{{if $info.afterCalculation_invoice_amount > 0}}{{$info.afterCalculation_invoice_amount}}{{else}}0.00{{/if}}</span></span>
+                    <span style="color: red; margin-left: 5px;">服务费金额：¥&emsp;<span id="show_customerCarriage_amount">{{if $info.afterCalculation_service_amount > 0}}{{$info.afterCalculation_service_amount}}{{else}}0.00{{/if}}</span></span>
+                    <span style="color: red; float: right;">实付金额：¥&emsp;<span id="show_order_amount">{{if $info.real_amount > 0}}{{$info.real_amount}}{{else}}0.00{{/if}}</span></span></div>
+                </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">开票订单金额：</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control _j_invoice_order_amount" name="invoice_amount" value="{{$info.invoice_amount}}" onkeypress="if(!this.value.match(/^[\+\-]?\d*?\.?\d*?$/))this.value=this.t_value;else this.t_value=this.value;if(this.value.match(/^(?:[\+\-]?\d+(?:\.\d+)?)?$/))this.o_value=this.value" onkeyup="if(!this.value.match(/^[\+\-]?\d*?\.?\d*?$/))this.value=this.t_value;else this.t_value=this.value;if(this.value.match(/^(?:[\+\-]?\d+(?:\.\d+)?)?$/))this.o_value=this.value" onblur="if(!this.value.match(/^(?:[\+\-]?\d+(?:\.\d+)?|\.\d*?)?$/))this.value=this.o_value;else{if(this.value.match(/^\.\d+$/))this.value=0+this.value;if(this.value.match(/^\.$/))this.value=0;this.o_value=this.value}" maxlength="11">
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">服务费：</label>
+            <div class="col-sm-6">
+                <select class="form-control" name="service_type"  style="width: 20%; float: left; margin-right: 20px;">
+                    <option value="0">请选择</option>
+                    <option value="1" {{if $info.service_type == 1}}selected="selected"{{/if}}>不开票</option>
+                    <option value="2" {{if $info.service_type == 2}}selected="selected"{{/if}}>开票</option>
+                </select>
+                <input type="text" style="width: 25%; float: left;" name="service_amount" class="form-control" value="{{$info.service_amount}}">
+                <div id="service_tip" style="color: red; clear: both; margin-top: 5px;">{{if $info.invoice_amount>0}}*开票服务费(MAX)：¥ {{($info.invoice_amount * 0.08 )|string_format:"%.2f"}}，不开票服务票：¥ {{($info.invoice_amount * 0.06)|string_format:"%.2f"}}{{/if}}</div>
+            </div>
+        </div>
+        {{if $info.step>3}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">开票日期：</label>
+            <div class="col-sm-4">
+                <input type="date" class="form-control" name="invoice_day" value="{{$info.invoice_day}}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">批次：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="batch" value="{{$info.batch}}" maxlength="60">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">票号：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="number" value="{{$info.number}}" maxlength="60">
+            </div>
+        </div>
+        {{/if}}
+        {{if !empty($info)}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">商品清单：</label>
+            <div class="col-sm-8">
+                <table class="table">
+                    <tr>
+                        <th>财务商品ID</th>
+                        <th>商品名</th>
+                        <th>分类</th>
+                        <th>采购单价</th>
+                        <th>开票单价</th>
+                        <th>开票数量</th>
+                        <th>总金额</th>
+                        <th>操作</th>
+                    </tr>
+                    <tbody>
+                    {{foreach $info.products as $product}}
+                    <tr>
+                        <td>{{$product.pid}}</td>
+                        <td>{{$product.title}}</td>
+                        <td>{{$product._cate1}}</td>
+                        <td>{{$product.cost/100}}</td>
+                        <td>¥{{$product.price/100}}</td>
+                        <td>{{$product.num}}</td>
+                        <td>{{$product.amount/100}}</td>
+                        <td><a href="javascript:;" class="delete_input_product" data-id="{{$info.id}}" data-pid="{{$product.pid}}">删除</a></td>
+                    </tr>
+                    {{/foreach}}
+                    {{if isset($info.products_amount)}}
+                    <tr>
+                        <td colspan="7" style="color: red; text-align: right;">价格总汇：¥&nbsp;{{$info.products_amount/100}}</td>
+                    </tr>
+                    {{/if}}
+                    </tbody>
+                </table>
+                {{if $info.step == 1 || $info.step == 2 || $info.step == 4}}
+                <div><a href="javascript:;" id="add_product" data-toggle="modal" data-target="#dlgAddProduct">+添加商品</a></div>
+                {{/if}}
+            </div>
+        </div>
+        {{/if}}
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+                {{if empty($info)}}
+                <button type="button" class="btn btn-primary" id="_j_save_invoice" data-step="" style="margin-right:20px;">添加</button>
+                {{/if}}
+                {{if $info.step ==1 || ($info.step==4 && ($is_finance || $is_admin))}}
+				<button type="button" class="btn btn-primary" id="_j_save_invoice" data-step="{{$info.step}}" style="margin-right:20px;">保存修改</button>
+                {{/if}}
+                {{if $info.step ==2}}
+                <button type="button" class="btn btn-primary" id="_j_save_invoice" data-step="{{$info.step}}" style="margin-right:20px;">重新提交</button>
+                <button type="button" class="btn btn-danger delete_invoice" id="_j_delete_invoice" data-id="{{$info.id}}" style="margin-right:20px;">删除</button>
+                {{/if}}
+                {{if $info.step == 1 && !empty($_permissions['/crm2/ajax/audit_output_invoice'])}}
+                <button type="button" class="btn btn-primary" id="_j_sale_audit_invoice" data-step="{{$info.step}}" data-id="{{$info.id}}" style="margin-right:20px;">审核通过</button>
+                {{/if}}
+                {{if $info.step == 3 && !empty($_permissions['/finance/ajax/confirm_output_invoice'])}}
+                <button type="button" class="btn btn-primary" id="_j_finance_confirm_invoice" data-step="{{$info.step}}" data-id="{{$info.id}}" style="margin-right:20px;">确认受理</button>
+                {{/if}}
+                {{if ($info.step == 1 || $info.step == 3) && !empty($_permissions['/crm2/ajax/rebut_output_invoice'])}}
+                <button type="button" class="btn btn-danger" id="_j_rebut_invoice" data-step="{{$info.step}}" data-id="{{$info.id}}" style="margin-right:20px;">驳回</button>
+                {{/if}}
+                {{if $info.step == 4 && !empty($_permissions['/finance/ajax/finished_output_invoice'])}}
+                <button type="button" class="btn btn-primary" id="_j_finished_invoice" data-step="{{$info.step}}" data-id="{{$info.id}}" style="margin-right:20px;">已开票</button>
+                {{/if}}
+			</div>
+		</div>
+	</form>
+</div>
+
+<!-- Modal -->
+<div class="modal fade _j_dialog" id="BillIdsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">可开票订单</h4>
+            </div>
+            <div class="placeholder form-inline" style="text-align: right; margin: 10px;">
+                <div class="form-group">
+                    <input type="text" class="form-control" style="width: 120px; margin-right: 20px;" name="search_oid" placeholder="请输入订单oid" value="{{$oid}}">
+                </div>
+                <div class="form-group"><a href="javascript:;" class="btn btn-primary _j_search_bill_oid">搜索</a></div>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_add_bill_ids">确认选择</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dlgAddProduct" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-id="{{$info.id}}">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div id="product_list_container">
+                {{include "finance/dlg_product_list.html"}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="_j_btn_save_products" data-oid="{{$order.oid}}">确认选择</button>
+            </div>
+        </div>
+    </div>
+</div>

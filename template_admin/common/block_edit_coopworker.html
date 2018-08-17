@@ -1,0 +1,196 @@
+<input type="hidden" class="edit_coopworker_price_param" name="id" value="{{$coopworker_order.id}}">
+<input type="hidden" class="edit_coopworker_price_param" name="refer_price" value="{{$coopworker_order.refer_price/100}}">
+{{if $template == 'driver_1'}}
+<input type="hidden" class="edit_coopworker_price_param" name="base_price" value="{{$coopworker_order.base_price/100}}">
+<div class="edit_coopworker_srcinfo" style="height: 30px; margin-left: -12px;">
+    <span class="col-sm-3">{{$coopworker_order._driver.name}}</span><span class="col-sm-3">{{$coopworker_order._driver.mobile}}</span>
+    <span class="col-sm-3 total_price">￥{{$coopworker_order.price/100}}元</span>
+    <span><a class="count_total_driver_price" data-decline-fee="{{$decline_fee}}" href="javascript: void(0);">计算应付</a></span>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right">推荐运费：</div>
+    <div style="width: 30%; float: left; text-align: left" class="refer_price">{{$coopworker_order.refer_price/100}}元</div>
+    <div style="width: 50%; float: left;">车型：{{$car_models[$coopworker_order.car_model]}}</div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">趟数：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <select name="times" class="form-control edit_coopworker_price_param driver_times" style="width: 50%;">
+            {{for $i = 1 to 5}}
+            <option value="{{$i}}" {{if $i == $coopworker_order.times}}selected{{/if}}>{{$i}}</option>
+            {{/for}}
+        </select>
+    </div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">拉垃圾：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="trash_price" value="{{($coopworker_order._other_price.1)/100}}" placeholder="填写金额范围在1元-245元（包含245元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">二环订单：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="second_ring_road_price" value="{{($coopworker_order._other_price.2)/100}}" placeholder="填写金额范围在1元-20元（包含20元）"  style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">奖励：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="reward_price" value="{{($coopworker_order._other_price.3)/100}}" placeholder="请填写奖励金额（单位：元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">处罚：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="fine_price" value="{{($coopworker_order._other_price.4)/100}}" placeholder="请填写处罚金额（单位：元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">其他车型：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="other_price" value="{{($coopworker_order._other_price.5)/100}}" placeholder="请填写其他车型金额（单位：元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 100px;">
+    <div style="width: 20%; float: left; text-align: right">备注：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <textarea name="money_note" class="form-control edit_coopworker_price_param" rows="4" placeholder="奖励、处罚、其他车型必填！">{{$coopworker_order.money_note}}</textarea>
+    </div>
+</div>
+{{elseif $template == 'carrier_1'}}
+<div class="edit_coopworker_srcinfo" style="height: 30px; margin-left: -12px;">
+    <span class="col-sm-3">{{$coopworker_order._carrier.name}}</span><span class="col-sm-3">{{$coopworker_order._carrier.mobile}}</span>
+    <span class="col-sm-3 total_price">￥{{$coopworker_order.price/100}}元</span>
+    <span><a class="count_total_carrier_price" href="javascript: void(0);">计算应付</a></span>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right">推荐上楼费：</div>
+    <div style="width: 15%; float: left; text-align: left" class="refer_price">{{$coopworker_order.refer_price/100}}元</div>
+    <span style="color: #ff0000;font-size: 12px;">*如果存在多个搬运工总应得搬运费不允许大于推荐费用</span>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">应得搬运费：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="base_price" value="{{$coopworker_order.base_price/100}}" data-base-price="" placeholder="填写范围不得超过推荐上楼费" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">奖励：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="reward_price" value="{{($coopworker_order._other_price.3)/100}}" placeholder="请填写奖励金额（单位：元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">处罚：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="fine_price" value="{{($coopworker_order._other_price.4)/100}}" placeholder="请填写处罚金额（单位：元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">其他费用：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="other_price" value="{{($coopworker_order._other_price.5)/100}}" placeholder="请填写其他费用（单位：元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 100px;">
+    <div style="width: 20%; float: left; text-align: right">备注：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <textarea name="money_note" class="form-control edit_coopworker_price_param" rows="4" placeholder="奖励、处罚、其他费用必填！">{{$coopworker_order.money_note}}</textarea>
+    </div>
+</div>
+{{elseif $template == 'driver_2' || $template == 'driver_3' || $template == 'driver_4' || $template == 'driver_5'}}
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">司机：</div>
+    <div style="width: 30%; float: left; text-align: left; padding-top: 8px;">{{$coopworker_order._driver.name}}</div>
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">车型：</div>
+    <div style="width: 20%; float: left; text-align: left; padding-top: 8px;">{{$car_models[$coopworker_order.car_model]}}</div>
+</div>
+<div style="width: 100%; height: 50px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">距离：</div>
+    <div style="width: 30%; float: left; text-align: left; padding-top: 8px;">
+        <span>{{$distance}}</span>km
+    </div>
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">推荐运费：</div>
+    <div style="width: 20%; float: left; text-align: left; padding-top: 8px;" class="refer_price">{{$coopworker_order.refer_price/100}}元</div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">运费：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="price" value="{{$coopworker_order.price/100}}" placeholder="请填写运费（单位：元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 100px;">
+    <div style="width: 20%; float: left; text-align: right">备注：</div>
+    <div style="width: 64%; float: left; text-align: left">
+        <textarea name="money_note" class="form-control edit_coopworker_price_param" rows="4" placeholder="录入费用与推荐费用不一致时，必填！">{{$coopworker_order.money_note}}</textarea>
+    </div>
+</div>
+{{elseif $template == 'carrier_2'}}
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">搬运工：</div>
+    <div style="width: 20%; float: left; text-align: left; padding-top: 8px;">{{$coopworker_order._driver.name}}{{if $coopworker_order.user_type == 1}}【司机】{{/if}}</div>
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">车型：</div>
+    <div style="width: 20%; float: left; text-align: left; padding-top: 8px;">{{$car_models[$coopworker_order.car_model]}}</div>
+</div>
+<div style="width: 100%; height: 50px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">推荐搬运费：</div>
+    <div style="width: 20%; float: left; text-align: left; padding-top: 8px;" class="refer_price">{{$coopworker_order.refer_price/100}}元</div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">搬运费：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="price" value="{{$coopworker_order.price/100}}" placeholder="请填写运费（单位：元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 100px;">
+    <div style="width: 20%; float: left; text-align: right">备注：</div>
+    <div style="width: 64%; float: left; text-align: left">
+        <textarea name="money_note" class="form-control edit_coopworker_price_param" rows="4" placeholder="录入费用与推荐费用不一致时，必填！">{{$coopworker_order.money_note}}</textarea>
+    </div>
+</div>
+{{elseif $template == 'carrier_3'}}
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">搬运工：</div>
+    <div style="width: 20%; float: left; text-align: left; padding-top: 8px;">{{$coopworker_order._driver.name}}{{if $coopworker_order.user_type == 1}}【司机】{{/if}}</div>
+</div>
+<div style="width: 100%; height: 50px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">推荐搬运费：</div>
+    <div style="width: 20%; float: left; text-align: left; padding-top: 8px;" class="refer_price">{{$coopworker_order.refer_price/100}}元</div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">搬运费：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="price" value="{{$coopworker_order.price/100}}" placeholder="请填写运费（单位：元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 100px;">
+    <div style="width: 20%; float: left; text-align: right">备注：</div>
+    <div style="width: 64%; float: left; text-align: left">
+        <textarea name="money_note" class="form-control edit_coopworker_price_param" rows="4" placeholder="录入费用与推荐费用不一致时，必填！">{{$coopworker_order.money_note}}</textarea>
+    </div>
+</div>
+{{elseif $template == 'carrier_4'}}
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">搬运工：</div>
+    <div style="width: 20%; float: left; text-align: left; padding-top: 8px;">{{$coopworker_order._driver.name}}{{if $coopworker_order.user_type == 1}}【司机】{{/if}}</div>
+</div>
+<div style="width: 100%; height: 50px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">推荐搬运费：</div>
+    <div style="width: 20%; float: left; text-align: left; padding-top: 8px;" class="refer_price">{{$coopworker_order.refer_price/100}}元</div>
+</div>
+<div style="width: 100%; height: 40px;">
+    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">搬运费：</div>
+    <div style="width: 80%; float: left; text-align: left">
+        <input class="form-control edit_coopworker_price_param" name="price" value="{{$coopworker_order.price/100}}" placeholder="请填写运费（单位：元）" style="width:80%; display: inline;">
+    </div>
+</div>
+<div style="width: 100%; height: 100px;">
+    <div style="width: 20%; float: left; text-align: right">备注：</div>
+    <div style="width: 64%; float: left; text-align: left">
+        <textarea name="money_note" class="form-control edit_coopworker_price_param" rows="4" placeholder="录入费用与推荐费用不一致时，必填！">{{$coopworker_order.money_note}}</textarea>
+    </div>
+</div>
+{{else}}
+<h1>请联系运营</h1>
+{{/if}}

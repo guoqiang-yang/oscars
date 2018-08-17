@@ -1,0 +1,183 @@
+<div style="display: none;" id="area-json">
+    {{$area}}
+</div>
+<div style="display: none;" id="city-json">
+    {{$city}}
+</div>
+<div style="display: none;" id="distinct-json">
+    {{$distinct}}
+</div>
+
+<input type="hidden" id="cur_city" value="{{$cur_city}}" />
+
+    <input type="hidden" id="order-price" value="{{$order.info.price}}" />
+    <input type="hidden" id="carry-fee" value="{{$carry_fee}}" />
+    <input type="hidden" id="carry-fee-ele" value="{{$carry_fee_ele}}" />
+    <input type="hidden" id="no_carry_privilege" value="{{$no_carry_privilege}}" />
+    <input type="hidden" id="order-service" value="{{$order.info.service}}" />
+
+    <!--input type="hidden" class="form-control" name="contact_uid" value="{{$order.info.contact_uid}}"-->
+    <input type="hidden" class="form-control" name="uid" value="{{if $order.info.uid}}{{$order.info.uid}}{{else}}{{$customer._user.uid}}{{/if}}">
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">会员ID：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="cid" value="{{if $order.info.cid}}{{$order.info.cid}}{{else}}{{$customer.cid}}{{/if}}" readonly="true">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">联系人：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="contact_name" value="{{if $order.info.contact_name}}{{$order.info.contact_name}}{{else}}{{$customer._user.name}}{{/if}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">联系电话：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="contact_phone" value="{{if $order.info.contact_phone}}{{$order.info.contact_phone}}{{else}}{{$customer._user.mobile}}{{/if}}">
+      </div>
+    </div>
+    
+    {{*
+    <div class="form-group">
+        <label class="col-sm-2 control-label">工地地址：</label> 
+        
+        <div class="col-sm-8">
+            <input type="text" class="form-control" name="address" value="{{$order.info.address}}">
+        </div>
+    </div>
+    *}}
+    
+    <div id="addr_community" class="form-group">
+        <label class="col-sm-2 control-label">小区名称：</label>
+
+        <div class="col-sm-4">
+          <input type="text" class="form-control" id="auto_suggest_position" name="community_name" value="{{$order.info._community_name}}" placeholder="请输入小区、写字楼或商场名称">
+          <input type="hidden" name="community_id" value="">
+          <input type="hidden" name="community_address" value="">
+        </div>
+        <a class="btn btn-default" data-toggle="modal" id="show_add_new_community">添加/查看小区</a>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">具体地址：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="addr_detail" value="{{$order.info._address}}" placeholder="楼号、单元、门牌号">
+      </div>
+    </div>
+	
+    <div class="form-group">
+      <label class="col-sm-2 control-label">工地位置：</label>
+        <div style="width: 200px;" id="city" class="col-sm-3">
+            <select style="width: 150px;" id="select-city" class="form-control" name="city" data-id="{{$order.info.city}}">
+            </select>
+        </div>
+        <div id="district" class="col-sm-3">
+            <select style="width: 150px;" id="select-district" class="form-control" name="district" data-id="{{$order.info.district}}">
+            </select>
+        </div>
+        <div style="width: 200px;display: none;" id="area" class="col-sm-3">
+            <select style="width: 150px;" id="select-area" class="form-control" name="area" data-id="{{$order.info.area}}">
+            </select>
+        </div>
+    </div>
+    
+    <div class="form-group">
+      <label class="col-sm-2 control-label" style="color:red;">仓库位置：</label>
+
+      <div class="col-sm-8">
+        <select class="form-control" name="wid" style="display:inline-block;width:150px;" {{if $order.info.step>2}} disabled="true"{{/if}}>
+					<option value="0" selected="selected">请选择</option>
+          {{foreach $warehouses as $_wid => $_wname}}
+          <option value="{{$_wid}}" {{if $order.info.wid == $_wid}}selected="selected"{{/if}}>{{$_wname}}</option>
+          {{/foreach}}
+        </select>
+        {{if $order.info.step>2}}
+        <span style="color:red;">（若修改仓库，通过 "修改商品" 退回到客服未确认状态！）</span>
+        {{/if}}
+      </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">送货日期：</label>
+
+        <div class="col-sm-3">
+            <input type="text" class="form-control" name="delivery_date" value="{{if $order.delivery_date}}{{$order.delivery_date}}{{else}}{{$smarty.now|date_format:" %Y-%m-%d"}}{{/if}}">
+        </div>
+        <div class="col-sm-3">
+            <select class="form-control" name="delivery_time">
+	            <option value="0">请选择</option>
+                {{foreach $delivery_time as $key => $val}}
+                    {{if empty($order.info.delivery_date)}}
+                        {{if $key == $suugest_hour}}
+                            <option value="{{$key}}" selected="selected">{{$val}}</option>
+                        {{else}}
+                            <option value="{{$key}}">{{$val}}</option>
+                        {{/if}}
+                    {{else}}
+                        {{if $key == $order.info.delivery_time}}
+                            <option value="{{$key}}" selected="selected">{{$val}}</option>
+                        {{else}}
+                            <option value="{{$key}}">{{$val}}</option>
+                        {{/if}}
+                    {{/if}}
+                {{/foreach}}
+            </select>
+        </div>
+    </div>
+    {{if isset($order) && $order.info.step>=2}}
+    <div class="form-group">
+      <label class="col-sm-2 control-label">送货方式：</label>
+
+      <div class="col-sm-5">
+        {{foreach $delivery_types as $_dkey=>$_dvalue}}
+        <label class="radio-inline">
+         <input type="radio" name="delivery_type"  class="_j_chg_delivery_type" value="{{$_dkey}}" {{if $delivery_type==$_dkey}}checked="checked"{{/if}} {{if $order.info.step>4}}disabled="true"{{/if}}> {{$_dvalue}} 
+        </label>
+        {{/foreach}}
+      </div>
+    </div>
+    {{/if}}
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">搬运：</label>
+
+      <div class="col-sm-8">
+          <select id="service" style="display: inline-block; width: 150px; margin-right: 20px;" class="form-control" name="service">
+              <option {{if $order.info.service == 0}}selected="selected"{{/if}} value="0">不上楼</option>
+              <option {{if $order.info.service == 1}}selected="selected"{{/if}} value="1">电梯上楼</option>
+              <option {{if $order.info.service == 2}}selected="selected"{{/if}} value="2">楼梯上楼</option>
+          </select>
+          <select id="floor-num" style="display: inline-block; width: 150px; margin-right: 20px;{{if $order.info.service != 2}}display:none;{{/if}}" class="form-control" name="floor-num">
+              <option {{if $order.info.floor_num == 1}}selected="selected"{{/if}} value="1">1层</option>
+              <option {{if $order.info.floor_num == 2}}selected="selected"{{/if}} value="2">2层</option>
+              <option {{if $order.info.floor_num == 3}}selected="selected"{{/if}} value="3">3层</option>
+              <option {{if $order.info.floor_num == 4}}selected="selected"{{/if}} value="4">4层</option>
+              <option {{if $order.info.floor_num == 5}}selected="selected"{{/if}} value="5">5层</option>
+              <option {{if $order.info.floor_num == 6}}selected="selected"{{/if}} value="6">6层</option>
+          </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">备注：</label>
+
+      <div class="col-sm-8">
+        <textarea class="form-control" rows="2" name="note">{{$order.info.note nofilter}}</textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">付款方式：</label>
+
+      <div class="col-sm-8">
+        <select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+          {{foreach $payment_types as $type_id => $type_name}}
+          <option value="{{$type_id}}" {{if $order.info.payment_type == $type_id}}selected="selected"{{/if}}>{{$type_name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+    </div>
+    
+    {{include "order/block_add_community.html"}}

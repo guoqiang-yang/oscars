@@ -1,0 +1,25 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">同步员工钉钉信息结果</h1>
+
+	<table class="table" width="95%">
+		<thead>
+		<tr>
+			<th>ID</th>
+			<th>姓名</th>
+			<th>手机</th>
+			<th>钉钉UserId</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $modify_users as $staff}}
+		<tr data-suid="{{$staff.suid}}">
+			<td>{{$staff.suid}}</td>
+			<td>{{$staff.name}}</td>
+			<td>{{$staff.mobile}}</td>
+			<td>{{$staff.ding_id}}</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+</div>

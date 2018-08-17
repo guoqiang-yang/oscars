@@ -1,0 +1,73 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">日结款详情（ID：{{$bill_info.bid}}）</h1>
+	<table class="table">
+		<tr>
+			<td style="width: 300px;text-align: right;">经销商：</td>
+            <td>{{$bill_info.agent_name}}({{$bill_info.aid}})</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">结算日期：</td>
+            <td>{{$bill_info.day}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">订单总金额：</td>
+            <td>{{$bill_info.order_price/100}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">退款总金额：</td>
+            <td>
+                {{$bill_info.refund_price/100}}
+            </td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">结算金额：</td>
+            <td>{{$bill_info.price/100}}</td>
+		</tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">日结订单：</td>
+            <td>
+                <table class="table table-striped">
+                    <tr>
+                        <th>订单ID</th>
+                        <th>仓库</th>
+                        <th>付款时间</th>
+                        <th>回单时间</th>
+                        <th>货款金额</th>
+                    </tr>
+                    {{foreach $bill_info.order_list as $item}}
+                    <tr>
+                        <td><a href="/order/order_detail.php?oid={{$item.oid}}" target="_blank">{{$item.oid}}</a></td>
+                        <td>{{$item.wid}}</td>
+                        <td>{{$item.pay_time}}</td>
+                        <td>{{$item.back_time}}</td>
+                        <td>{{($item.price-$item.privilege)/100}}</td>
+                    </tr>
+                    {{/foreach}}
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">日结退单：</td>
+            <td>
+                <table class="table table-striped">
+                    <tr>
+                        <th>退单ID</th>
+                        <th>订单ID</th>
+                        <th>仓库</th>
+                        <th>付款时间</th>
+                        <th>货款金额</th>
+                    </tr>
+                    {{foreach $bill_info.refund_list as $item}}
+                    <tr>
+                        <td><a href="/order/edit_refund_new.php?rid={{$item.rid}}" target="_blank">{{$item.rid}}</a></td>
+                        <td><a href="/order/order_detail.php?oid={{$item.oid}}" target="_blank">{{$item.oid}}</a></td>
+                        <td>{{$item.wid}}</td>
+                        <td>{{$item.paid_time}}</td>
+                        <td>{{($item.price-$item.refund_privilege)/100}}</td>
+                    </tr>
+                    {{/foreach}}
+                </table>
+            </td>
+        </tr>
+	</table>
+</div>

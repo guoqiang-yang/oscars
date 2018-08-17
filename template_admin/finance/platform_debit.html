@@ -1,0 +1,181 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">平台结款</h1>
+	
+	<form class="form-horizontal" role="form" action="/finance/platform_debit.php">
+        <input type="hidden" name="cid" value="{{$cid}}">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+                <label class="col-sm-2 control-label">付款客户：</label>
+                <div class="col-sm-10">
+                    <span class="text-value">【客户ID】{{$cid}}</span>
+                    <span class="text-value">【名称】{{$order_info.cinfo.name}}</span>
+                    <span class="text-value" style="color:red;">【账户余额】{{$order_info.cinfo.account_amount/100}}元</span>
+                    <span class="text-value" style="color:blue;">【服务返点】{{$cid_conf.rebate*100}}%</span>
+                </div>
+			</div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px; ">
+                <label class="col-sm-2 control-label">订单号：</label>
+                <div class="col-sm-5">
+                    <textarea class="form-control" rows="3" name="oids">{{$oids}}</textarea>
+                    <span style="color:red;">半角逗号分隔！</span>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="btn_search" style="position:relative;top:38px;left:50px;">查询</button>
+            </div>
+		</div>
+	</form>
+	
+	<hr>
+  
+	{{if !empty($order_info.orders) || !empty($order_info.abnormal_orders)}}
+  <form class="form-horizontal" role="form"> 
+    
+    <div class="order-bottom">
+        <!--div class="form-group">
+        <label class="col-sm-2 control-label">客户信息：</label>
+        <div class="col-sm-8">
+          <span class="text-value">【姓名】{{$customer.name}}</span>
+          
+          <span class="text-value">【联系方式】{{$customer.phone}}</span>
+        </div>
+        </div-->
+        
+        <div class="form-group">
+          <label class="col-sm-2 control-label">应收款汇总：</label>
+          <div class="col-sm-8">
+            <span class="text-value">【总计】{{$order_info.prices.total/100}}元</span>
+            <span class="text-value" style="color:red;">【应付】{{$order_info.prices.need_pay/100}}元</span>
+            <span class="text-value" style="color:blue">【返点】{{$order_info.prices.case_back/100}}元</span>
+            <span class="text-value">【已付】{{$order_info.prices.paid/100}}元</span>
+          </div>
+        </div>
+        
+        <hr>
+        
+        <div class="form-group">
+            <label class="col-sm-2 control-label">订单明细：</label>
+            <div class="col-sm-10">
+            {{if !empty($order_info.orders)}}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>订单ID</th>
+                        <th>仓库ID</th>
+                        <th>货款</th>
+                        <th>运费</th>
+                        <th>搬运费</th>
+                        <th>优惠</th>
+                        <th>退款</th>
+                        <th>已支付</th>
+                        <th>应收款</th>
+                        <th>服务费</th>
+                        <th style="width:10%;">送货日期</th>
+                        <th style="width:12%;">备注</th>
+                        <th>实际支付(元)</th>
+                        <th>抹零(元)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{foreach $order_info.orders as $one}}
+                <tr class="wait_paid_order" data-oid="{{$one.oid}}">
+                  <td><a href="/order/order_detail.php?oid={{$one.oid}}" target="_blank">{{$one.oid}}</a></td>
+                  <td>{{$one.wid}}</td>
+                  <td>￥{{$one.price/100}}</td>
+                  <td>￥{{$one.freight/100}}</td>
+                  <td>￥{{$one.customer_carriage/100}}</td>
+                  <td>￥{{$one.privilege/100}}</td>
+                  <td>￥{{$one.refund/100}}</td>
+                  <td>￥{{$one.real_amount/100}}</td>
+                  <td  style="color:red;">￥{{$one._need_pay/100}}</td>
+                  <td>￥{{$one._server_fee/100}}</td>
+                  <td>{{$one.delivery_date}}</td>
+                  <td>{{$one.note}}</td>
+                  <td>
+                      <input name="real_paid" value="{{$one._need_pay/100}}" style="width:75px;">
+                  </td>
+                  <td>
+                      <input name="moling" value="0" style="width:50px;">
+                  </td>
+                </tr>
+                {{/foreach}}
+                </tbody>	
+            </table>
+            {{else}}
+            <div>
+                <span style="font-size: 20px; color:red;">暂无订单！！</span>
+            </div>
+            {{/if}}
+        </div>
+      </div>
+      
+      <hr>
+      
+      {{if !empty($order_info.abnormal_orders)}}
+      <div class="form-group">
+        <label class="col-sm-2 control-label">异常订单：</label>
+        <div class="col-sm-10">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>订单ID</th>
+                        <th>仓库ID</th>
+                        <th>货款</th>
+                        <th>运费</th>
+                        <th>搬运费</th>
+                        <th>优惠</th>
+                        <th>退款</th>
+                        <th>已支付</th>
+                        <th style="width:10%;">送货日期</th>
+                        <th style="width:14%;">原因</th>
+                    </tr>
+                </thead>
+              <tbody>
+              {{foreach $order_info.abnormal_orders as $one}}
+              <tr>
+                <td><a href="/order/order_detail.php?oid={{$one.oid}}" target="_blank">{{$one.oid}}</a></td>
+                <td>{{$one.wid}}</td>
+                <td>￥{{$one.price/100}}</td>
+                <td>￥{{$one.freight/100}}</td>
+                <td>￥{{$one.customer_carriage/100}}</td>
+                <td>￥{{$one.privilege/100}}</td>
+                <td>￥{{$one.refund/100}}</td>
+                <td>￥{{$one.real_amount/100}}</td>
+                <td>{{$one.delivery_date}}</td>
+                <td style="color:red; font-weight:bold;">{{$one._unpay_reason}}</td>
+              </tr>
+              {{/foreach}}
+              </tbody>	
+            </table>
+        </div>
+      </div>
+      {{/if}}
+      
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+            {{if !empty($_permissions['/finance/platform_debit'])}}
+                {{if $order_info.can_pay}}
+                  <div class="form-group">
+                    <a href="javascript:;" class="btn btn-primary" id="paid_platform_debit">收款</a>
+                    
+                    <span style="font-size:20px;color:brown;margin-left:30px;">{{if $cid_conf.pay_coop_fee}}结算全部费用{{else}}仅结算订单商品费用{{/if}}</span>
+                  </div>
+                  {{else}}
+                  <span style="color:red; font-size: 25px;">{{$order_info.reason}}</span>
+                  {{/if}}
+              {{/if}}
+            </div>
+        </div>
+    </form>
+	{{else}}
+    
+	<div style="font-size: 16px;">
+        <span style="color:red;">功能下线！！</span>
+    </div>
+	{{/if}}
+
+</div>
+
+

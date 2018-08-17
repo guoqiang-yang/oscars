@@ -1,0 +1,39 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        文章详情
+    </h1>
+    <div class="col-lg-12" style="margin-left: -15px;">
+        <div class="input-group" style="float:left;margin-right: 100px">
+            {{if !empty($_permissions["/activity/add_article"])}}
+            <a type="button" style="margin-left:20px;" class="btn btn-default" onClick="javascript:window.location.href='/activity/add_article.php?aid={{$article.aid}}';">编辑文章</a>
+            {{/if}}
+        </div>
+        <div class="input-group">
+            <span class="input-group-btn">
+                <button class="btn btn-default " type="button">本文链接：</button>
+            </span>
+            <input type="text" class="form-control"  value="{{$article._art_url}}">
+        </div>
+    </div>
+    <hr style="margin-top: 100px;"/>
+    <div class="col-lg-12" style="margin-left: -15px;text-align: center">
+        <h1 style="padding-bottom: 20px;">{{$article.title}}</h1>
+
+        <div class="col-lg-12" style="padding-bottom: 10px; color: #0000cc; font-size:16px; float: right">
+            <span style="display: block;padding-left: 750px; float: left">{{$article.ctime}}</span>
+            <span style="display: block;padding-left: 15px; float: left"> 丨 </span>
+            <span style="display: block;padding-left: 15px; float: left">{{$policy_type[$article.article_type]}}</span>
+        </div>
+
+        <div class="col-lg-12" style="padding-bottom: 40px;color: #0000cc; font-size:16px; float: right">
+            <span style="display: block;padding-right: 50px; float: right">城市 : {{$article.city_ids}}</span>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            {{if !empty($article.pic_url)}}<img src="{{$article.pic_url}}"/>{{/if}}
+        </div>
+        <div style="text-align: left">
+            {{$article.content}}
+        </div>
+    </div>
+</div>

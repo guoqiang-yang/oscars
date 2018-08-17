@@ -1,0 +1,178 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <ul style="margin-bottom: 20px;" class="nav nav-tabs">
+        <li role="presentation" {{if $cate == 0}}class="active"{{/if}}><a href="/finance/should_remind_customers.php?cate=0"><h4>应催账客户列表</h4></a></li>
+        <li role="presentation" {{if $cate == 1}}class="active"{{/if}}><a href="/finance/should_remind_customers.php?cate=1"><h4>待催账客户列表</h4></a></li>
+        <li role="presentation" {{if $cate == 2}}class="active"{{/if}}><a href="/finance/should_remind_customers.php?cate=2"><h4>账户有欠款没催账日期的</h4></a></li>
+    </ul>
+
+    <form class="form-inline" role="form" action="/finance/should_remind_customers.php">
+        <input type="hidden" name="cate" value="{{$cate}}" />
+        <div class="placeholder">
+            <div class="form-group">
+                <label>客户专员：</label>
+                <select class="form-control" name="sales_suid" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.sales_suid)}}selected="selected"{{/if}}>请选择</option>
+                    <option value="1" {{if $search_conf.sales_suid == 1}}selected="selected"{{/if}}>无专员</option>
+                    {{foreach $salesman_list as $man}}
+                        <option value="{{$man.suid}}" {{if $search_conf.sales_suid==$man.suid}}selected="selected"{{/if}}>{{$man.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>最后催账：</label>
+                <select class="form-control" name="last_remind_suid" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.last_remind_suid)}}selected="selected"{{/if}}>请选择</option>
+                    {{foreach $admin_list as $admin}}
+                    <option value="{{$admin.suid}}" {{if $search_conf.last_remind_suid==$admin.suid}}selected="selected"{{/if}}>{{$admin.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>手机：</label>
+                <input style="width: 150px;" type="text" class="form-control" name="mobile" value="{{$search_conf.mobile}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>名称：</label>
+                <input style="width: 150px;" type="text" class="form-control" name="name" value="{{$search_conf.name}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>用户ID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="cid" value="{{$search_conf.cid}}">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+    </form>
+    <hr>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>客户信息</th>
+                <th style="min-width: 100px;">
+                    上次催账人
+                </th>
+                <th style="min-width: 100px;">
+                    上次催账日期
+                </th>
+                <th style="min-width: 110px;">
+                    应催账日期
+                    <a href="/finance/should_remind_customers.php?order=date_asc&cate={{$cate}}"> ↑ </a>
+                    <a href="/finance/should_remind_customers.php?order=date_desc&cate={{$cate}}"> ↓ </a>
+                </th>
+                <th style="min-width: 100px;">
+                    欠款总数
+                    <a href="/finance/should_remind_customers.php?order=amount_asc&cate={{$cate}}"> ↑ </a>
+                    <a href="/finance/should_remind_customers.php?order=amount_desc&cate={{$cate}}"> ↓ </a>
+                </th>
+                <th style="min-width: 100px;">
+                    催账次数
+                    <a href="/finance/should_remind_customers.php?order=count_asc&cate={{$cate}}"> ↑ </a>
+                    <a href="/finance/should_remind_customers.php?order=count_desc&cate={{$cate}}"> ↓ </a>
+                </th>
+                <th style="width:14%;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{foreach $customers as $customer}}
+            <tr data-cid="{{$customer.cid}}">
+                <td>
+                    {{$customer.cid}}
+                </td>
+                <td>
+                    客户：{{$customer.name}}<span style="color:gray;">{{$customer.phone}}</span>
+                    <br/>
+                    销售：{{if $customer._suser.name}}{{$customer._suser.name}}{{else}}-{{/if}}
+                         {{if $customer.sales_suid2}}，{{foreach $salesman_list as $sales}}{{if $sales.suid == $customer.sales_suid2}}{{$sales.name}}{{/if}}{{/foreach}}{{/if}}
+                    <br/>
+                    账期：{{if $customer.payment_days > 0}}{{$customer.payment_days}}天{{else}}无{{/if}}
+                    <br />
+                    最后备注({{$customer.latest_tracking_user}})：{{$customer.latest_tracking}}
+                </td>
+                <td>
+                    {{$customer.last_remind_suer}}
+                </td>
+                <td>
+                    {{$customer.last_remind_date}}
+                </td>
+                <td>
+                    {{$customer.payment_due_date}}
+                </td>
+                <td>
+                    ￥{{$customer.account_balance/100}}元
+                </td>
+                <td>
+                    {{$customer.remind_count}}次
+                </td>
+                <td>
+                    <a style="margin-right: 20px;" href="/order/order_list.php?cid={{$customer.cid}}">查看订单</a>
+                    <a href="#" data-cid="{{$customer.cid}}" class="remind_confirm" data-toggle="modal" data-target="#dlgAddProduct">催款确认</a>
+                    <br />
+                    <a href="#" style="margin-right: 20px;"  data-cid="{{$customer.cid}}" class="note-history" data-toggle="modal" data-target="#note-history">备注记录</a>
+                    <a href="/finance/customer_bill_list.php?cid={{$customer.cid}}">应收明细</a>
+                </td>
+            </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <!-- 催账确认 -->
+    <div class="modal fade" id="dlgAddProduct" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.info.oid}}">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        确认催账信息
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div style="overflow: auto;" class="form-group">
+                        <label class="col-sm-2 control-label">下次催款日期：</label>
+                        <div class="col-sm-8">
+                            <input type="date" min="{{$today}}" class="form-control" id="payment_due_date" style="display:inline-block;width:200px;">
+                            <br />
+                            <span style="color: red;">看不见这个框或者不能选择时间，请更换浏览器，建议使用chrome或者firefox</span>
+                        </div>
+                    </div>
+                    <div style="overflow: auto;" class="form-group">
+                        <label class="col-sm-2 control-label">备注：</label>
+                        <div class="col-sm-8">
+                            <textarea class="form-control" rows="5" id="note"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button style="margin-right: 20px;" type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="_j_btn_confirm_remind">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 备注历史 -->
+    <div class="modal fade" id="note-history" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel2">
+                        历史备注（显示最近的20条）
+                    </h4>
+                </div>
+                <div id="note-history-container" class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+</div>

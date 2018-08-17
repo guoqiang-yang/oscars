@@ -1,0 +1,314 @@
+<input type="hidden" id="need_double_print" value="{{$need_double_print}}"/>
+<input type="hidden" id="no_privilege_print" value="{{$no_privilege_print}}"/>
+
+<style>
+    h1 {font-family : STKaiti;}
+    table {font-size : 12px;border-spacing : 0;border-collapse : collapse;}
+    table td {padding : 2px 5px;}
+    table.border td {border : 1px solid #333333;}
+</style>
+<style type="text/css" media=print>
+    .noprint {display : none}
+</style>
+{{if $order.paid==1 || ($customer.account_amount>=$order.total_order_price && $customer.account_amount>=50000) }}
+{{$_isPaid = 1}}
+{{/if}}
+
+<div data-amount="{{$customer.account_amount/100}}">
+    <!--begin-->
+    <div style="text-align: center;">
+        {{if $is_first_order}}
+        <h2 style="border: 2px solid #222222;padding: 3px 8px 0;display: inline-block;margin-right: 20px;font-size: 35px;">首单</h2>
+        {{elseif $_isPaid}}
+        <h2 style="border: 2px solid #222222;padding: 3px 8px 0;display: inline-block;margin-right: 20px;font-size: 35px;">VIP</h2>
+        {{/if}}
+        <h2 style="text-align: center;display: inline-block;">{{if $order.source_oid > 0}} 好材建材补货单【原单:{{$order.source_oid}}】 {{else}} 好材装修建材配送单 {{/if}} </h2>
+        {{if !$_isPaid && 3==$order.payment_type}}
+        <h2 style="border: 2px solid #222222;padding: 3px 8px 0;display: inline-block;margin-left: 20px;font-size: 32px;">POS机刷卡</h2>
+        {{elseif $order_type == 'trash_clean'}}
+        <h2 style="border: 2px solid #222222;padding: 3px 8px 0;display: inline-block;margin-left: 20px;font-size: 32px;">垃圾清运</h2>
+        {{/if}}
+    </div>
+    <table width="84%" style="float: left;">
+        <tbody>
+        <tr>
+            <td width="40%">送货日期：{{$order._delivery_date}}</td>
+            <td width="40%">单据编号：HC-{{$smarty.now|date_format:'%Y-%m-%d'}}-{{$order.oid}}</td>
+        </tr>
+        <tr>
+            <td width="40%">客户单位：{{$customer.name}}</td>
+            <td width="40%">发货仓库：{{$order._warehouse_name}}</td>
+        </tr>
+        <tr>
+            <td width="40%">收 货 人：{{$order.contact_name}}</td>
+            <td width="40%">收货电话：{{$order.contact_phone}}{{if $order.contact_phone2}} , {{$order.contact_phone2}}{{/if}}</td>
+        </tr>
+        <tr>
+            <td colspan="2">送货地址：{{$order.print_address}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <div style="float: left; width: 16%; text-align: center;">
+        <img style="width: 200px; height: 50px;" src="/common/barcode.php?text={{$order.oid}}#&size=50" />
+        <div>{{$order.oid}}</div>
+    </div>
+    <table class="border" width="100%">
+        <thead>
+        <tr>
+            <td>行号</td>
+            <td>商品全称</td>
+            <td>单位</td>
+            <td>数量</td>
+            {{if !$hidden_money}}
+            <td>单价</td>
+            <td>金额</td>
+            {{/if}}
+            <td width="15%">备注</td>
+        </tr>
+        </thead>
+        <tbody>
+        {{$row_index = 0}}
+        {{foreach $order_products as $product}}
+        {{if $product['managing_mode'] == 1 && $product['num'] > 0}}
+        {{if $product.sku.type == 3}}
+        {{$row_num = count($product.sku._rel_sku)}}
+        {{$row_num = $row_num+1}}
+        {{else}}
+        {{$row_num = 1}}
+        {{/if}}
+        <tr>
+            {{$row_index = $row_index + 1}}
+            <td rowspan="{{$row_num}}">{{$row_index}}</td>
+            <td>{{$product.sku.title}}</td>
+            <td>{{if $product.sku.unit}}{{$product.sku.unit}}{{else}}个{{/if}}</td>
+            <td>{{$product.num}}</td>
+            {{if !$hidden_money}}
+            <td>
+                ￥{{$product.ori_price / 100}}
+            </td>
+            <td>￥{{$product.ori_price * $product.num / 100}}</td>
+            {{/if}}
+            <td>{{if $product.vnum}}k#{{$product.vnum}}　{{/if}}{{$product.note}}</td>
+        </tr>
+        {{if $product.sku.type == 3}}
+        {{foreach $product.sku._rel_sku as $_product}}
+        <tr>
+            <td>&emsp;&emsp;--{{$_product.title}}</td>
+            <td>{{$_product.unit}}</td>
+            <td>{{$product.num * $_product.num}}</td>
+            {{if !$hidden_money}}
+            <td>
+            </td>
+            <td></td>
+            {{/if}}
+            <td></td>
+        </tr>
+        {{/foreach}}
+        {{/if}}
+        {{$lastCate1 = $product.sku.cate1}} {{/if}}
+
+        {{/foreach}}
+        {{if count($order_products) > $row_index + 1}}
+        <tr>
+            <td colspan="7"></td>
+        </tr>
+        {{/if}}
+        {{foreach $order_products as $_product}}
+        {{if $_product['managing_mode'] == 2 && $product['num'] > 0}}
+        {{if $_product.sku.type == 3}}
+        {{$row_num = count($product.sku._rel_sku)}}
+        {{$row_num = $row_num+1}}
+        {{else}}
+        {{$row_num = 1}}
+        {{/if}}
+        <tr>
+            {{$row_index = $row_index + 1}}
+            <td rowspan="{{$row_num}}">{{$row_index}}</td>
+            <td>{{$_product.sku.title}}</td>
+            <td>{{if $_product.sku.unit}}{{$_product.sku.unit}}{{else}}个{{/if}}</td>
+            <td>{{$_product.num}}</td>
+            {{if !$hidden_money}}
+            <td>
+                ￥{{$_product.ori_price / 100}}
+            </td>
+            <td>￥{{$_product.ori_price * $_product.num / 100}}</td>
+            {{/if}}
+            <td>{{if $_product.vnum}}k#{{$_product.vnum}}　{{/if}}{{$_product.note}}</td>
+        </tr>
+        {{if $_product.sku.type == 3}}
+        {{foreach $_product.sku._rel_sku as $_product2}}
+        <tr>
+            <td>&emsp;&emsp;--{{$_product2.title}}</td>
+            <td>{{$_product2.unit}}</td>
+            <td>{{$_product.num * $_product2.num}}</td>
+            {{if !$hidden_money}}
+            <td>
+            </td>
+            <td></td>
+            {{/if}}
+            <td></td>
+        </tr>
+        {{/foreach}}
+        {{/if}}
+        {{$lastCate1 = $_product.sku.cate1}} {{/if}}
+        {{/foreach}}
+        {{foreach $activity_products as $product}}
+        <tr>
+            {{$row_index = $row_index + 1}}
+            <td>{{$row_index}}</td>
+            <td>{{$product.title}}</td>
+            <td>{{if $product.unit}}{{$product.unit}}{{else}}个{{/if}}</td>
+            <td>{{$product.num}}</td>
+            {{if !$hidden_money}}
+            <td>
+                ￥{{$product.ori_price / 100}}
+            </td>
+            <td>￥{{$product.ori_price * $product.num / 100}}</td>
+            {{/if}}
+            <td>{{if $product.type == 18}}赠品{{elseif $product.type == 19}}特价商品{{/if}}</td>
+        </tr>
+        {{/foreach}}
+        {{if !$hidden_money}}
+        <tr>
+            <td colspan="7"></td>
+        </tr>
+        {{$lottery_index=1}}
+        {{if $order.freight > 0}}
+        <tr>
+            <td>{{$lottery_index++}}</td>
+            <td colspan="4">运费</td>
+            <td>￥{{$order.freight/100}}</td>
+            <td></td>
+        </tr>
+        {{/if}}
+        <tr>
+            <td>{{$lottery_index++}}</td>
+            <td colspan="4">搬运费</td>
+            <td>
+                {{if $order.customer_carriage > 0}} ￥{{$order.customer_carriage / 100}} {{else}} ￥0 {{/if}}
+            </td>
+            <td>
+                {{if $order.service == 0}} 不上楼 {{else if $order.service == 1}} 电梯上楼 {{else}} 楼梯上楼（{{$order.floor_num}}层） {{/if}}
+            </td>
+        </tr>
+        {{if ($order.privilege > 0) && !$hidden_privilege}}
+        <tr>
+            <td>{{$lottery_index++}}</td>
+            <td colspan="4">原价合计</td>
+            <td>￥{{($order.price + $order.freight + $product_privilege + $order.customer_carriage)/100}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>{{$lottery_index++}}</td>
+            <td colspan="4">优惠</td>
+            <td>- ￥{{$order.privilege/100}}</td>
+            <td>{{*$order.privilege_note*}}</td>
+        </tr>
+        {{/if}}
+        {{if $product_privilege > 0 && !$hidden_privilege}}
+        <tr>
+            <td>{{$lottery_index++}}</td>
+            <td colspan="4">工装优惠</td>
+            <td>- ￥{{$product_privilege/100}}</td>
+            <td></td>
+        </tr>
+        {{/if}}
+        {{if $order.refund > 0}}
+        <tr>
+            <td>{{$lottery_index++}}</td>
+            <td colspan="4">退款</td>
+            <td>- ￥{{$order.refund/100}}</td>
+            <td></td>
+        </tr>
+        {{/if}}
+        <tr>
+            <td>应收款合计</td>
+            <td colspan="4">金额大写　　{{$chineseTotal}}　　 {{if $order.paid==1}}(已付款) {{elseif $customer.payment_days}} （统一结算，司机无需收钱） {{else}} （付款方式: <span style="font-size:16px;font-weight: bold;">{{if $payment_types[$order.payment_type]}}{{$payment_types[$order.payment_type]}}{{else}}现金{{/if}}</span>） {{/if}}
+            </td>
+            <td colspan="2">
+                ￥{{$order.total_order_price/100}} 　　
+                <span style="font-size:16px;font-weight: bold;">
+                    {{if $order.paid==1}}(已付款)
+                    {{elseif $customer.payment_days }}(统一结算，司机无需收钱)
+                    {{else}}
+                    {{if $order.customer_carriage <=0 && $order._carriage_fee >0}}(不含搬运费){{/if}}
+                    {{/if}}
+                </span>
+            </td>
+        </tr>
+        {{/if}}
+        {{if $order.customer_note || $has_weixing_product}}
+        <tr>
+            <td>备注</td>
+            <td colspan="6">
+                <span style="margin-left:10px; font-size: 14px;">{{$order.customer_note}}</span> {{if $has_weixing_product}} <span style="margin-left:10px; font-size: 14px;"><b>（送伟星打压卡）</b></span> {{/if}}
+            </td>
+        </tr>
+        {{/if}}
+        </tbody>
+    </table>
+    <table width="100%">
+        <tbody>
+        <tr>
+            <td>订购热线：400-058-5788</td>
+
+            <td>售后电话：{{if $order.city_id==101}}010-53350903{{else}}400-058-5788{{/if}}</td>
+            <td rowspan="6">
+                {{if $order.paid !=1}}
+                <div align="center" style="float: left; width: 45%;">
+                    <img src="{{$pay_img_src}}" style="height:100px; margin:5px 10px 10px 10px;">
+                    <p style="font-size:12px;">扫码直接付款</p>
+                </div>
+                {{/if}}
+                <div align="center" style="float: left; {{if $order.paid !=1}}width: 45%;{{/if}}">
+                    <img src="http://haocaisong.oss-cn-hangzhou.aliyuncs.com/static/app_qrcode.png" style="height:100px;margin:5px 10px 10px 10px;">
+                    <p style="font-size:12px;">扫描下载好材APP</p>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            {{if $saler}}
+            <td >销售专员：{{$saler.name}} {{$saler.mobile}}</td>
+            {{else}}
+            <td >销售电话：15201683357</td>
+            {{/if}}
+            <td  colspan="1">司　　机：{{$order.driver_names}}</td>
+        </tr>
+        {{if $has_nizi}}
+        <tr>
+            <td style="font-size: 18px;">
+                耐水腻子与普通腻子使用方法不同，请严格按照说明操作使用！
+            </td>
+        </tr>
+        {{/if}}
+        <tr>
+            <td style="font-size:16px; font-weight: bold">
+                司机签字：　　　　　
+            </td>
+            <td style="font-size:16px; font-weight: bold">
+                客户签字：
+            </td>
+        </tr>
+        
+        </tbody>
+    </table>
+    <div style="font-size: 12px;">
+        <p>尊敬的客户：</p>
+        <p style="text-indent: 28px;">我公司严禁销售人员以各种原因从客户处收款。如果有客户转款给销售人员，因此而产生的纠纷，由客户自行承担。客户如预付/支付货款给好材公司，请</p>
+        <p style="text-indent: 28px;">1、公司账户：北京好材时代信息技术有限公司  694858567  民生银行北京和平里支行</p>
+        <p style="text-indent: 28px;">2、拨打4000585788免费电话，联系财务咨询付款、对账及税务相关事宜</p>
+        <p style="text-indent: 28px;">3、扫码支付上面二维码</p>
+    </div>
+    <div class="noprint">
+        <div style="margin-top:30px;">
+            {{if !empty($errmsg)}}
+            <div style="color: red; font-size: 20px;">{{$errmsg}}</div>
+            {{else}}
+            <input data-oid="{{$order.oid}}" type="button" id="print-order" value="打印" style="font-size: 25px;padding: 5px 15px;">
+            {{/if}}
+        </div>
+    </div>
+
+</div>
+
+

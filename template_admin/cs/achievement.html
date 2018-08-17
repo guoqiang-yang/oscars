@@ -1,0 +1,174 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">客服绩效</h1>
+
+	<form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right: 20px;">
+				<label>出库日期：</label>
+				<input type="date" max="{{$max_date}}" min="{{$min_date}}" class="form-control" name="from_date" value="{{if $search_conf.from_date}}{{$search_conf.from_date}}{{/if}}" style="width: 160px; display: inline-block;"> &nbsp;&nbsp;—&nbsp;&nbsp;
+				<input type="date" max="{{$max_date}}" min="{{$min_date}}" class="form-control" name="end_date" value="{{if $search_conf.end_date}}{{$search_conf.end_date}}{{/if}}" style="width: 160px; display: inline-block;">
+			</div>
+			<div class="form-group">
+				<label>城市：</label>
+				<select class="form-control" name="city_id">
+					<option value="0" {{if $search_conf.city_id == 0}} selected="selected"{{/if}}>全部</option>
+					{{foreach $city_list as $city_id => $city}}
+					<option value="{{$city_id}}" {{if $search_conf.city_id == $city_id}} selected="selected"{{/if}}>{{$city}}</option>
+					{{/foreach}}
+				</select>
+				<button style="margin-left: 50px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+			</div>
+		</div>
+	</form>
+	<ul id="myTab" class="nav nav-tabs">
+		<li class="active">
+			<a href="#service" data-toggle="tab">按客服显示</a>
+		</li>
+		<li>
+			<a href="#salers" data-toggle="tab">按销售显示</a>
+		</li>
+	</ul>
+	<div id="myTabContent" class="tab-content">
+		<div class="tab-pane fade in active" id="service">
+			<table class="table table-bordered">
+				<tr>
+					<th style="text-align: center;">suid</th>
+					<th style="text-align: center;">名称</th>
+					<th style="text-align: center;"><a href="?from_ctime={{$search_conf.from_ctime}}&end_ctime={{$search_conf.end_ctime}}&city_id={{$search_conf.city_id}}&order=num">单数</a></th>
+					<th style="text-align: center;"><a href="?from_ctime={{$search_conf.from_ctime}}&end_ctime={{$search_conf.end_ctime}}&city_id={{$search_conf.city_id}}&order=amount">订单金额</a></th>
+					<th style="text-align: center;">销售及订单信息</th>
+					<!-- <th><a href="?date={{$search_conf.ctime}}&order=product_num">商品数</a></th> -->
+				</tr>
+				{{$totalPrice = 0}}
+				{{$totalOrder = 0}}
+				{{foreach $list as $suid => $info}}
+				<tr>
+					<td style="vertical-align:middle; text-align:center;">{{$suid}}</td>
+					<td style="vertical-align:middle; text-align:center;">{{$info.info.name}}</td>
+					<td style="vertical-align:middle; text-align:center;">
+					{{$totalOrder = $totalOrder + $info.lu_info.num + $info.sure_info.num}}
+					{{$totalPrice = $totalPrice + $info.lu_amount + $info.sure_amount}}
+					<span>总：{{$info.lu_info.num + $info.sure_info.num}}</span><br>
+					<span>录：{{$info.lu_info.num}}</span><br>
+					<span>SCS：{{$info.sure_info.num}}</span>
+					</td>
+					<td style="vertical-align:middle; text-align:center;">
+						<span>总：{{$info.lu_amount/100 + $info.sure_amount/100}}元</span><br>
+						<span>录：{{$info.lu_amount/100}}</span><br>
+						<span>SCS：{{$info.sure_amount/100}}</span>
+					</td>
+					<td>
+						<div class="panel-group" id="accordion">
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h4 class="panel-title">
+										<a data-toggle="collapse" data-parent="#accordion"
+										   href="#collapse{{$suid}}">
+											点击查看 <span style="color: red;">{{$info.info.name}}</span> 的销售及订单信息
+										</a>
+									</h4>
+								</div>
+								<div id="collapse{{$suid}}" class="panel-collapse collapse">
+									<div class="panel-body">
+										<table class="table" style="border:1px;">
+											<thead>
+											<th style="width: 5%;">销售姓名</th>
+											<th style="width: 5%;">订单数</th>
+											<th style="width: 8%;">订单金额</th>
+											</thead>
+											<tbody>
+											{{foreach $info.saler_order_info as $saler_suid => $saleInfo}}
+											<tr>
+												<td>{{$staff_list[$saler_suid]['name']}}</td>
+												<td>{{$saleInfo.order_num}} </td>
+												<td>￥{{$saleInfo.amount/100}}</td>
+											</tr>
+											{{/foreach}}
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				{{/foreach}}
+				<tr>
+					<td style="vertical-align:middle; text-align:center;">--</td>
+					<td style="vertical-align:middle; text-align:center;">--</td>
+					<td style="vertical-align:middle; text-align:center;">{{$totalOrder}}单</td>
+					<td style="vertical-align:middle; text-align:center;">{{$totalPrice/100}}元</td>
+					<td style="vertical-align:middle; text-align:center;">--</td>
+				</tr>
+			</table>
+		</div>
+		<div class="tab-pane fade" id="salers">
+			<table class="table table-bordered">
+				<thead>
+					<th style="text-align: center;">suid</th>
+					<th style="text-align: center;">名称</th>
+					<th style="text-align: center;"><a href="?from_ctime={{$search_conf.from_ctime}}&end_ctime={{$search_conf.end_ctime}}&city_id={{$search_conf.city_id}}&order=num">单数</a></th>
+					<th style="text-align: center;"><a href="?from_ctime={{$search_conf.from_ctime}}&end_ctime={{$search_conf.end_ctime}}&city_id={{$search_conf.city_id}}&order=amount">订单金额</a></th>
+					<th style="text-align: center;">客服及订单信息</th>
+				</thead>
+				<tbody>
+				{{$totalSalerPrice = 0}}
+				{{$totalSalerOrder = 0}}
+				{{foreach $salerLat as $suid => $info}}
+				<tr>
+					{{$totalSalerPrice = $totalSalerPrice+$info.amount}}
+					{{$totalSalerOrder = $totalSalerOrder+$info.total}}
+					<td style="vertical-align:middle; text-align:center;">{{$suid}}</td>
+					<td style="vertical-align:middle; text-align:center;">{{$info.info.name}}</td>
+					<td style="vertical-align:middle; text-align:center;">{{$info.total}}</td>
+					<td style="vertical-align:middle; text-align:center;">{{$info.amount / 100}}元</td>
+					<td>
+						<div class="panel-group" id="saler_accordion">
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<h4 class="panel-title">
+										<a data-toggle="collapse" data-parent="#saler_accordion"
+										   href="#saler_collapse{{$suid}}">
+											点击查看 <span style="color: red;">{{$info.info.name}}</span> 的客服人员及订单信息
+										</a>
+									</h4>
+								</div>
+								<div id="saler_collapse{{$suid}}" class="panel-collapse collapse">
+									<div class="panel-body">
+										<table class="table" style="border:1px;">
+											<thead>
+											<th style="width: 5%;">客服姓名</th>
+											<th style="width: 5%;">订单数</th>
+											<th style="width: 8%;">订单金额</th>
+											</thead>
+											<tbody>
+											{{foreach $info.service_staff_info as $sureSuid => $serviceInfo}}
+											<tr>
+												<td>{{$staff_list[$sureSuid]['name']}}</td>
+												<td>{{$serviceInfo.order_num}} </td>
+												<td>￥{{$serviceInfo.amount/100}}</td>
+											</tr>
+											{{/foreach}}
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				{{/foreach}}
+				<tr>
+					<td style="vertical-align:middle; text-align:center;">--</td>
+					<td style="vertical-align:middle; text-align:center;">--</td>
+					<td style="vertical-align:middle; text-align:center;">{{$totalSalerOrder}}单</td>
+					<td style="vertical-align:middle; text-align:center;">{{$totalSalerPrice / 100}}元</td>
+					<td style="vertical-align:middle; text-align:center;">--</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+</div>

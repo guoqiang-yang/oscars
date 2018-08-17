@@ -1,0 +1,108 @@
+<style>
+  h1 {font-family: STKaiti;}
+  table {margin:auto; font-size:12px; border-spacing: 0;border-collapse: collapse; }
+  table td {padding:5px 0 2px 20px;}
+  table .border {border-bottom: dashed 1px #666666; padding-left: 0; }
+</style>
+<style type="text/css" media=print>
+  .noprint{display : none }
+</style>
+{{*<script type="text/javascript" src="/js/apps/print.js"></script>*}}
+
+<div class="">
+    <!--begin-->
+    <table width="50%" style="text-align: center; font-size: 1.5em; font-weight: bold;font-family: STKaiti;">
+        <tr style="border-bottom: solid 2px #000000;"><td><h1>支出凭单</h1></td></tr>
+        <tr><td>{{$today_date}}<br/></td></tr>
+    </table>
+
+    <table width="90%">
+        <tr><td><span style="color: red;"></span></td><td style="text-align: right;">单据号：{{$statement_info.id}}</td></tr>
+    </table>
+    <div style="border: solid 1px #000000; width: 90%; margin: auto; padding: 20px 20px 20px; ">
+        <table width="100%">
+            <tr>
+                <td style="width: 13%;">供应商ID：</td>
+                <td style="width: 5%;" class="border">{{$supplier_info.sid}}</td>
+                <td style="width: 15%;">供应商名称：</td>
+                <td style="width: 23%;" class="border">{{$supplier_info.name}}</td>
+                <td style="width: 13%;">款项类别：</td>
+                <td style="width: 10%;" class="border"></td>
+                <td style="width: 13%;">账单日期：</td>
+                <td style="width: 12%;" class="border"></td>
+                <td></td>
+            </tr>
+        </table>
+        <table width="100%">
+            <tr>
+                <td style="width: 12%;">收款人：</td>
+                <td style="width: 10%;" class="border"></td>
+                <td style="width: 9%;">卡号：</td>
+                <td style="width: 20%;" class="border"></td>
+                <td style="width: 12%;">开户行：</td>
+                <td style="width: 15%;" class="border"></td>
+                <td style="width: 12%;">发票号：</td>
+                <td style="width: 10%;" class="border"></td>
+                <td></td>
+            </tr>
+        </table>
+        <table width="100%">
+            <tr>
+                <td style="width: 13%;">发票信息：</td>
+                <td style="width: 26%;" class="border"></td>
+                <td style="width: 10%;">金额：</td>
+                <td style="width: 30%;" class="border">{{$statement_info._amount}}</td>
+                <td style="width: 6%;">¥：</td>
+                <td style="width: 13%;" class="border">{{$statement_info.amount}}</td>
+                <td></td>
+            </tr>
+        </table>
+        <table width="100%">
+            <tr>
+                <td style="width: 12%;">采购员：</td>
+                <td style="width: 12%;" class="border"></td>
+                <td style="width: 9%;">城市：</td>
+                <td style="width: 12%;" class="border"></td>
+                <td style="width: 9%;">备注：</td>
+                <td style="width: 46%;" class="border"></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+
+    <table width="90%" style="margin: 20px auto;">
+        <tr>
+            <td style="width: 10%;">CEO：</td>
+            <td style="width: 16%;" class="border"></td>
+            <td style="width: 13%;">财务主管：</td>
+            <td style="width: 14%;" class="border"></td>
+            <td style="width: 9%;">记账：</td>
+            <td style="width: 14%;" class="border"></td>
+            <td style="width: 9%;">出纳：</td>
+            <td style="width: 14%;" class="border"></td>
+            <td></td>
+        </tr>
+    </table>
+    <table width="90%" style="margin: 20px auto;">
+        <tr>
+            <td style="width: 13%;">采购主管：</td>
+            <td style="width: 20%;" class="border"></td>
+            <td style="width: 10%;">采购员：</td>
+            <td style="width: 20%;" class="border"></td>
+            <td style="width: 13%;">采购助理：</td>
+            <td style="width: 20%;" class="border"></td>
+            <td></td>
+        </tr>
+    </table>
+  <!--end-->
+  <div class="noprint">
+    <div style="margin-top:30px; text-align: center;">
+      {{*<input type="button" value="打印" onclick="javascript:printOrder();" >*}}
+      <input type="button" value="打印" onclick="javascript:window.print();" style="font-size: 25px;padding: 5px 15px;">
+    </div>
+  </div>
+
+
+</div>
+
+

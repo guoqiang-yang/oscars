@@ -1,0 +1,141 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">拍照订单管理</h1>
+    <form class="form-inline" role="form" action="/order/quick_order_list.php" method="post">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px;">
+                <label>订单id：</label>
+                <input type="text" class="form-control" style="width:200px;" name="oid" value="{{if !empty($searchConf.oid)}}{{$searchConf.oid}}{{/if}}" />
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>注册用户：</label>
+                <input type="text" class="form-control" style="width:200px;" name="contact_name" value="{{$searchConf.contact_name}}" style="width: 120px;" />
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>注册手机号：</label>
+                <input type="text" class="form-control" style="width:200px;" name="contact_phone" value="{{$searchConf.contact_phone}}" style="width: 120px;" />
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>状态：</label>
+                <select class="form-control" name="status" style="width:100px;">
+                    <option value="0" >请选择</option>
+                    <option value="1" {{if $searchConf.status == 1}} selected="selected" {{/if}}>待确认</option>
+                    <option value="2" {{if $searchConf.status== 2}} selected="selected" {{/if}}>已确认</option>
+                </select>
+            </div>
+
+        </div>
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="control-label">下单时间：</label>
+                <input type="datetime-local" class="form-control" name="start_time" value="{{$searchConf.from_date}}" style="width:200px;">
+
+                    ~
+                <input type="datetime-local" class="form-control" name="end_time" value="{{$searchConf.end_date}}" style="width:200px;">
+
+            </div>
+            <div class="form-group" style="margin-right: 20px;margin-left: 20px;">
+                <label>来源：</label>
+                <select class="form-control" name="platform" style="width:100px;">
+                    <option value="0" >请选择</option>
+                    {{foreach $platform as $id => $text}}
+                    <option value="{{$id}}" {{if $searchConf.platform == $id}} selected="selected" {{/if}}>{{$text}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>客服：</label>
+                <select class="form-control" name="ensure_id" style="width:100px;">
+                    <option value="0" >请选择</option>
+                    {{foreach $cs as $id => $text}}
+                    <option value="{{$text.suid}}" {{if $searchConf.ensure_id == $text.suid}} selected="selected" {{/if}}>{{$text.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>销售：</label>
+                <select class="form-control" name="sale_id" style="width:100px;">
+                    <option value="0" >请选择</option>
+                    {{foreach $sales as $id => $text}}
+                    <option value="{{$text.suid}}" {{if $searchConf.sale_id == $text.suid}} selected="selected" {{/if}}>{{$text.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" >
+                <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px; width: 70px;">查询</button>
+            </div>
+        </div>
+    </form>
+    <table class="table table-bordered " style="background: white; text-align: center;">
+        <thead style="background-color: #898989;color: white;font-size: 16px;">
+        <tr style="text-align: center">
+            <th style="text-align: center">订单ID</th>
+            <th style="text-align: center">图片</th>
+            <th style="text-align: center">注册用户</th>
+            <th style="text-align: center">注册手机</th>
+            <th style="text-align: center">下单时间</th>
+            <th style="text-align: center">状态</th>
+            <th style="text-align: center">录入/确认/销售</th>
+            <th style="text-align: center">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $id => $item}}
+        <tr>
+            <td style="vertical-align: middle;">{{$item.oid}}</td>
+            <td style="vertical-align: middle;"><img src="{{if empty($item.pic_url)}}/i/nopic100.jpg {{else}} {{$item.pic_url}} {{/if}}" data-toggle="modal" data-target="#bigImg" style="width: 80px" class="content"/></td>
+            <td style="vertical-align: middle;">{{$item.contact_name}}</td>
+            <td style="vertical-align: middle;"><a href="/order/customer_list_cs.php?mobile={{$item.contact_phone}}">{{$item.contact_phone}}</a></td>
+            <td style="vertical-align: middle;">{{$item.ctime}}</td>
+            <td style="vertical-align: middle;">
+                {{if $item.ensure_status == 0}}
+                <span style="color: #ff0000;">待确认</span>
+                {{else if $item.ensure_status == 1}}
+                <span>已确认</span>
+                {{/if}}
+            </td>
+            <td style="vertical-align: middle;">
+                {{$item._platform}}
+                /
+                {{if !empty($item.ensure_id) && !empty($item._ensure)}}
+                    {{$item._ensure}}
+                {{else if !empty($item.ensure_id) && empty($item._ensure)}}
+                    管理员
+                {{else}}
+                    --
+                {{/if}}
+                /
+                {{if !empty($item.sale_id)}}
+                {{$item._sale}}
+                {{else}}
+                    --
+                {{/if}}
+            </td>
+            <td style="vertical-align: middle;">
+                <a href="javascript:;"  data-toggle="modal" data-target="#contentDetail" class="ensure" data_id="{{$id}}" data_ensure="{{$item.ensure_status}}" {{if $item.ensure_status != 0}}style="color:gray;"{{/if}}>确认</a><br/>
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+    <div class="modal fade _j_dialog" id="bigImg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document" style="width:570px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <img style="width:500px;margin-left: 20px;margin-bottom: 10px;" id="img" step="1"/>
+                <div class="modal-footer" style="margin-right: 450px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+

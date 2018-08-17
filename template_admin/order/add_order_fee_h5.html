@@ -1,0 +1,83 @@
+<style>
+    .table tbody tr td {border: none;}
+	.nav-sidebar {display: none;}
+</style>
+<input type="hidden" id="oid" value="{{$oid}}" />
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <table class="table">
+        <tr>
+            <td>
+                客户运费：
+            </td>
+            <td>
+                <input {{if $order.delivery_type==2}}readonly="true"{{/if}} style="display: inline-block;width: 60%;" id="freight" type="text" class="form-control" value="{{$order.freight / 100}}" />&nbsp;&nbsp;&nbsp;&nbsp;元
+            </td>
+        </tr>
+        <tr>
+            <td>
+                是否上楼：
+            </td>
+            <td>
+                <select {{if $order.delivery_type==2}}readonly="true"{{/if}} style="width: 60%;" id="service" class="form-control" name="service">
+                    <option value="0" {{if $order.service == 0 && $order.delivery_type !== 2}}selected="selected"{{/if}}>不上楼</option>
+                    <option value="1" {{if $order.service == 1 && $order.delivery_type !== 2}}selected="selected"{{/if}}>电梯上楼</option>
+                    <option value="2" {{if $order.service == 2 && $order.delivery_type !== 2}}selected="selected"{{/if}}>楼梯上楼</option>
+                </select>
+            </td>
+        </tr>
+        <tr id="floor_num_info">
+            <td>
+                楼层数：
+            </td>
+            <td>
+                <input {{if $order.delivery_type==2}}readonly="true"{{/if}} style="display: inline-block;width: 60%;" type="text" id="floor_num" class="form-control"value="{{if $order.service == 0 || $order.delivery_type == 2}}0{{else}}{{$order.floor_num}}{{/if}}" />&nbsp;&nbsp;&nbsp;&nbsp;层
+            </td>
+        </tr>
+        <tr>
+            <td>
+                搬运费：
+            </td>
+            <td>
+                <input {{if $order.delivery_type==2}}readonly="true"{{/if}} style="display: inline-block;width: 60%;" id="customer_carriage" type="text" class="form-control" value="0" />&nbsp;&nbsp;&nbsp;&nbsp;元
+            </td>
+        </tr>
+        <tr>
+            <td>
+                付款方式：
+            </td>
+            <td>
+                <select id="payment_type" class="form-control" name="payment_type" autocomplete="off" style="display: inline-block;width: 60%;" >
+                    {{foreach $payment_types as $type_id => $type_name}}
+					<option value="{{$type_id}}" {{if $order.payment_type== $type_id}}selected="selected" {{/if}}>{{$type_name}}</option>
+					{{/foreach}}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                打印价格：
+            </td>
+            <td>
+                <label class="radio-inline"><input type="radio" name="is_print_price"  value="1" {{if $order.nopprice==1}}checked="checked"{{/if}}>不打印</label>
+                <label class="radio-inline"><input type="radio" name="is_print_price"  value="0" {{if $order.nopprice!=1}}checked="checked"{{/if}}>打印</label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                内部备注：
+            </td>
+            <td>
+                <textarea id="note" class="form-control">
+                    {{$order.note}}
+                </textarea>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+            	<a href="javascript:history.go(-1)" style="width: 45%; float:left;" class="btn btn-warning">上一步</a>
+                <a id="confirm_step_3" href="javascript:void(0);" style="width: 45%; float:right;" class="btn btn-danger">下一步</a>
+            </td>
+        </tr>
+    </table>
+</div>

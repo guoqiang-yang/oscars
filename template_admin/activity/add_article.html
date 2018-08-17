@@ -1,0 +1,71 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        添加
+    </h1>
+    <form class="form-horizontal" role="form" method="post" action="/activity/ajax/save_article.php">
+        <input type="hidden" id="aid" value="{{$article.aid}}">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动城市：</label>
+            <div class="col-sm-5">
+                <div class="checkbox" id="box">
+                    <label style="margin-right:10px;" class="col-sm-2">
+                        <input type="checkbox" value="1" name="city_all" {{if $article.city_ids ==1}}checked{{/if}} onclick="checkAll(this)" all="none">全选
+                    </label>
+                    {{foreach $city as $id => $name}}
+                    <label style="margin-right:10px;" class="col-sm-1.5">
+                        <input type="checkbox" value="{{$id}}" {{if in_array($id,explode(',',$article.city_ids))}}checked{{/if}} {{if $article.city_ids ==1}}checked{{/if}} name="city_ids" onclick="checkAllCity(this)">{{$name}}
+                    </label>
+                    {{/foreach}}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">文章类型：</label>
+            <div class="col-sm-2" style="padding: 0;margin-left: 15px;">
+                <select class="form-control"  style="float: left" id="article_type">
+                    <option value="0">请选择</option>
+                    {{foreach $policy_type as $id => $item}}
+                    <option value="{{$id}}}" {{if $article.article_type ==$id}}selected="selected"{{/if}} >{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">文章标题：</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="title" placeholder="请输入文章标题" value="{{$article.title}}" name="title">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">文章图片：</label>
+            <div class="col-sm-8">
+                <div style="display:inline-block;" class="_j_logo_wrap" data-x="{{$picture._picinfo.srcinfo.x}}" data-y="{{$picture._picinfo.srcinfo.y}}" data-w="{{$picture._picinfo.srcinfo.w}}" data-h="{{$sku._picinfo.srcinfo.h}}" data-url="{{if $sku._picinfo._srcpic}}{{$sku._picinfo._srcpic.middle}}{{else}}{{if $sku._pic.middle}}{{$sku._pic.middle}}{{/if}}{{/if}}">
+                    <img id="_j_upload_view_img" src="{{if !empty($article.pic_url)}}{{$article.pic_url}}{{else}}/i/nopic100.jpg{{/if}}" width="150">
+                </div>
+                <button style="display:inline-block; margin-left:10px;" type="button" class="btn btn-default" id="_j_btn_select_pic" data-path="activity">
+                    从电脑选择图片
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">文章正文：</label>
+            <div class="col-sm-8">
+                <!-- 加载编辑器的容器 -->
+                <script id="editor" name="content" type="text/plain">
+                    {{$article.content}}
+                </script>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-primary" id="btn_save_article">保存</button>
+                <a type="button" style="margin-left:20px;" class="btn btn-default" onClick="javascript:window.location.href='/activity/article_list.php';">取消</a>
+            </div>
+        </div>
+    </form>
+</div>
+

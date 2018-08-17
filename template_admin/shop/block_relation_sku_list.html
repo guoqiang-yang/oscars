@@ -1,0 +1,20 @@
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <td>sid</td>
+            <td>名称</td>
+            <td>数量</td>
+            <td>操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        {{foreach $rel_skus as $one}}
+        <tr>
+            <td>{{$one.sid}}</td>
+            <td>{{$one.title}}</td>
+            <td>{{$one.num}}</td>
+            <td><a class="delSku4SkuRelation" data-sid="{{$one.sid}}">删除</a></td>
+        </tr>
+        {{/foreach}}
+    </tbody>
+</table>

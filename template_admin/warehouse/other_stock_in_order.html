@@ -1,0 +1,102 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		其他入库单列表
+	</h1>
+
+	<form class="form-inline" role="form" action="/warehouse/other_stock_in_order.php">
+		<div class="placeholder">
+			{{if count($_allowed_warehouses) > 1}}
+			<div class="form-group" style="margin-right:20px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+					<option value="0">全部</option>
+					{{foreach $_allowed_warehouses as $_wid=>$_wname}}
+					<option value="{{$_wid}}" {{if $search_conf.wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			{{/if}}
+			<div class="form-group" style="margin-right:20px;">
+				<label>类型：</label>
+				<select class="form-control" name="type">
+					<option value="">全部</option>
+					{{foreach $type_list as $_tid => $_tname}}
+					<option value="{{$_tid}}" {{if $_tid== $search_conf.type}} selected="selected" {{/if}}>{{$_tname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>状态：</label>
+				<select class="form-control" name="step">
+					<option value="">全部</option>
+					{{foreach $step_list as $_id => $_name}}
+					<option value="{{$_id}}" {{if $_id== $search_conf.step}} selected="selected" {{/if}}>{{$_name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-right: 20px;">查询</button>
+			{{if !empty($_permissions['/warehouse/ajax/save_other_stock_in_order']) && !empty($_allowed_warehouses)}}
+			<a href="/warehouse/add_other_stock_in_order.php" type="button" class="btn btn-primary" target="_blank">创建单据</a>
+			{{/if}}
+		</div>
+	</form>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>id</th>
+			<th>类型</th>
+			<th>仓库</th>
+			<th>操作人</th>
+			<th>总金额</th>
+			<th>申请时间</th>
+			<th>操作时间</th>
+			<th>状态</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $order_list as $_order}}
+		<tr data-sid="{{$_order.oid}}">
+			<td>{{$_order.oid}}</td>
+			<td>{{$type_list[$_order.type]}}</td>
+			<td>{{$_all_warehouses[$_order.wid]}}</td>
+			<td>
+                创建：{{$staff_list[$_order.suid]}}<br>
+                审核：{{if !empty($_order.check_suid)}}{{{{$staff_list[$_order.check_suid]}}}}{{else}}--{{/if}}<br>
+                {{if $_order.type == 1}}上架{{/if}}：{{if !empty($_order.stock_suid)}}{{{{$staff_list[$_order.stock_suid]}}}}{{else}}--{{/if}}<br>
+			</td>
+			<td>{{$_order.cost/100}}元</td>
+			<td>{{$_order.ctime}}</td>
+			<td>{{$_order.mtime}}</td>
+			<td>{{$step_list[$_order.step]}}</td>
+			<td>
+				{{if $_order.step != 5 && $_order.step != 3}}
+                {{if !empty($_permissions['/warehouse/ajax/save_other_stock_in_order'])}}
+                <a href="/warehouse/add_other_stock_in_order.php?oid={{$_order.oid}}" target="_blank" style="margin-right: 20px">编辑</a>
+                {{/if}}
+                {{/if}}
+				<a href="/warehouse/other_stock_in_order_detail.php?oid={{$_order.oid}}" target="_blank" style="margin-right: 20px">详情</a>
+				<a href="/warehouse/other_stock_out_order_print.php?oid={{$_order.oid}}" target="_blank" style="margin-right: 20px">打印</a>
+                {{if $_order.step == 1 || $_order.step == 2 || $_order.step == 4}}
+				{{if !empty($_permissions['hc_del_other_stock_in_order'])}}
+				<a href="javascript: void(0)" class="change_other_stock_out_order" data-oid="{{$_order.oid}}" data-exec-type="del" style="margin-right: 20px">删除</a>
+				{{/if}}
+                {{/if}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>

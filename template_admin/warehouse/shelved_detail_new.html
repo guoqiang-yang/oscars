@@ -1,0 +1,166 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">{{$objinfos.info.bill_name}} - 上架</h1>
+
+    <form class="form-horizontal" role="form">
+        <input id="stockShiftId" type="hidden" name="objid" value="{{$objid}}">
+        {{if $type == 1}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">采购单ID：</label>
+            <div class="col-sm-8">
+                <a class="text-value" href="/warehouse/edit_in_order.php?oid={{$objinfos.info.oid}}" target="_blank">{{$objinfos.info.oid}}</a>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">入库单ID：</label>
+            <div class="col-sm-8">
+                <a class="text-value" href="/warehouse/edit_stock_in.php?id={{$objinfos.info.id}}" target="_blank">{{$objinfos.info.id}}</a>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">仓库ID：</label>
+            <div class="col-sm-8">
+                <span class="text-value" style="color:red; font-weight:bold;">{{$warehouses[$objinfos.info.wid]}}</span>
+            </div>
+        </div>
+        {{/if}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">上架清单：</label>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-1 control-label"></label>
+            <div class="col-sm-10">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th style="width:5%;">sid</th>
+                        <th>名称</th>
+                        <th style="width:14%">数量(应/未/损/亏)</th>
+                        <th style="width:16%;">货位号</th>
+                        <th style="width:16%;">已用货位</th>
+                        <th>勾选上架</th>
+                        {{*<th>操作</th>*}}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{foreach $objinfos.products as $p}}
+                    <tr class="_j_product" data-sid="{{$p.sid}}">
+                        <td>{{$p.sid}}</td>
+                        <td class="title">{{$skuinfos[$p.sid]['title']}}</td>
+                        <td>
+                            （<span>{{$p.num}}</span><span style="margin: 0px 5px 0px 5px">/</span>
+                            <span style="color:red;">{{if empty($p.location)}}{{$p.num-$p.abnormal_num}}{{else}}0{{/if}}</span><span style="margin: 0px 5px 0px 5px">/</span>
+                            <span>{{$objinfos.shelved_res[$p.sid]['damaged']['num']}}</span><span style="margin: 0px 5px 0px 5px">/</span>
+                            <span>{{$objinfos.shelved_res[$p.sid]['loss']['num']}}</span><span style="margin: 0px 5px 0px 5px">/</span>）
+                        </td>
+                        <td>
+                            {{if !empty($p.location)}}
+                            <span>{{$p.location}}</span><span style="margin: 0px 5px 0px 5px">:</span>
+                            <span>{{$p.num-$p.abnormal_num}}</span>
+                            {{else}}
+                            <input type="text" class="form-control" name="location" value="{{if isset($objinfos.alocation[$p.sid])}}{{$objinfos.alocation[$p.sid][0]}}{{/if}}">
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{if isset($objinfos.alocation[$p.sid])}}
+                                {{foreach $objinfos.alocation[$p.sid] as $_loc}}
+                                <span style="color:gray;">{{$_loc}}</span><br>
+                                {{/foreach}}
+                                
+                                {{if empty($p.location)}}
+                                <span style="color:blue;">请确认上货架位</span>
+                                {{/if}}
+                            {{else}}
+                            <span style="color:red;">暂无，请分配新货位</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{if !empty($p.location)}}
+                            <span style="color:red;">已上架</span>
+                            {{else}}
+                            <div class="checkbox" style="font-size: 16px;">
+                                <label><input type="checkbox" name="wait_shelved" checked="checked">上架</label>
+                            </div>
+                            {{/if}}
+                        </td>
+                        {{*<td>
+                            {{if $type == 2 && empty($p.location)}}
+                            <a  class="text-value deal_abnormal_num" href="javascript:;" data-toggle="modal" data-target="#_j_stock_shift_abnormal" data-diffnum="{{$p.num-$p.abnormal_num}}">差异处理</a>
+                            {{else}}
+                            <span  class="text-value">--</span>
+                            {{/if}}
+                        </td>*}}
+                    </tr>
+                    {{/foreach}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                {{if $objinfos.chk_val == 0}}
+                <button type="button" class="btn btn-primary" id="_j_confirm_obj_shelved" data-oid="{{$objinfos.info.oid}}" data-wid="{{$objinfos.info.wid}}" data-objid="{{$objid}}" data-type="{{$type}}" style="margin-right:20px;">确认上架</button>
+                {{else}}
+                <span style="font-size:40px; color:red;">{{$objinfos.chk_msg}}</span>
+                {{/if}}
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade _j_dialog" id="_j_stock_shift_abnormal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">调拨单-异常处理</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">名称：</label>
+
+						<div class="col-sm-8">
+							<span class="text-value chk_sku_title"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">移架类型：</label>
+
+						<div class="col-sm-7">
+
+							<select name="shift_type" id="change_shift_type" class="form-control" style="width:40%">]
+                                <option value="0">请选择</option>
+								{{foreach $abnormal_types as $_type => $_conf}}
+								<option value="{{$_type}}">{{$_conf['name']}}</option>
+								{{/foreach}}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">数量：</label>
+
+						<div class="col-sm-7">
+							<input class="form-control" type="text" name="num" style="width:40%;"> 
+                            （可处理数量：<span id="can_deal_num" style="color:red;font-weight:bold;"></span>）
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+
+						<div class="col-sm-8">
+							<textarea class="form-control" name="note" row="2" style="width:290px;"></textarea> <span style="color:red;">(最多30个字)</span>
+						</div>
+					</div>
+				</form>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="_j_stock_shift_abnormal_submit">保存</button>
+			</div>
+		</div>
+	</div>
+</div>
+

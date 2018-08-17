@@ -1,0 +1,24 @@
+<table class="table" id="sell_bill_info">
+    <tr>
+        <td>结算总额：</td><td><span style="color: red;" id="sell_bill_amount">{{$bill_info.bill_amount/100}}</span><input type="hidden" name="bid" value="{{$bill_info.bid}}" /></td>
+    </tr>
+    <tr>
+        <td>结算规则：</td><td>订单总金额 <span style="color: red;">{{$bill_info.order_amount/100}}</span> - 货款总金额 <span style="color: red;">{{$bill_info.product_amount/100}}</span> * <span style="color: red;">{{$bill_info.ratio}}%</span> - 退款总金额 <span style="color: red;">{{$bill_info.refund_amount/100}}</span> * <span style="color: red;">(100-{{$bill_info.ratio}})%</span> </td>
+    </tr>
+    <tr>
+        <td>*实付金额：</td><td><input name="real_amount" class="form-control" /></td>
+    </tr>
+    <tr>
+        <td>*支付方式：</td>
+        <td>
+            <select name="payment_type" class="form-control">
+                {{foreach $payment_list as $id =>$name}}
+                <option  value="{{$id}}">{{$name}}</option>
+                {{/foreach}}
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>备注：</td><td><textarea name="note" class="form-control"></textarea></td>
+    </tr>
+</table>

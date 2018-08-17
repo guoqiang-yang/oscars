@@ -1,0 +1,35 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">车型列表</h1>
+
+    <hr>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>车型</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{foreach $model_list as $model}}
+                <tr data-cid="{{$model.cid}}">
+                    <td>
+                        {{$model.name}}
+                    </td>
+                    <td>
+                        <a href="/role/add_car_model.php?mid={{$model.mid}}">编辑</a>　
+                        <a data-id="{{$model.mid}}" class="delete_model" href="javascript:;">删除</a>　
+                    </td>
+                </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+                <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

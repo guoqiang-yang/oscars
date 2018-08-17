@@ -1,0 +1,166 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        活动图片管理
+    </h1>
+    {{if !empty($_permissions["/activity/add_picture"])}}
+    <a href="/activity/add_picture.php" class="btn btn-primary">添加活动图片</a>
+    {{/if}}
+    <hr>
+
+    <form id="search_form" class="form-inline" role="form" action="/activity/picture_list.php">
+
+        <div class="placeholder">
+
+            <div class="form-group" style="margin-right:30px;">
+                <label>显示平台：</label>
+
+                <select class="form-control" name="platform" >
+                    <option value="0">全部</option>
+                    {{foreach $platform_list as $id => $item}}
+                    <option value="{{$id}}" {{if $search_conf.platform==$id}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-right:30px;">
+                <label>图片类型：</label>
+
+                <select class="form-control" name="type" >
+                    <option value="0">全部</option>
+                    {{foreach $type_list as $id => $item}}
+                    <option value="{{$id}}" {{if $search_conf.type==$id}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-right:30px;">
+                <label>城市：</label>
+
+                <select class="form-control" name="city_id" >
+                    <option value="0">全部</option>
+                    {{foreach $city_list as $id => $item}}
+                    <option value="{{$id}}" {{if $search_conf.city_id==$id}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-right:30px;">
+                <label>状态：</label>
+
+                <select class="form-control" name="status" data-init="{{$picture.status}}">
+                    <option value="">全部</option>
+                    <option {{if $search_conf.status ==='0'}} selected="selected" {{/if}} value="0">在线</option>
+                    <option {{if $search_conf.status == 4}} selected="selected" {{/if}} value="4">已下线或已过期</option>
+                    <option {{if $search_conf.status == 5}} selected="selected" {{/if}} value="5">待上线</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+
+        </div>
+
+    </form>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>序号</th>
+            <th>图片</th>
+            <th>活动名称</th>
+            <th>城市</th>
+            <th style="max-width: 200px;">显示平台</th>
+            <th>图片类型</th>
+            <th>在线时间</th>
+            <th>最后修改</th>
+            <th>状态</th>
+            <th>顺序</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $item}}
+        <tr data-id="{{$item.id}}" class="_j_pic">
+            <td>
+                {{$item.id}}
+            </td>
+            <td>
+                <a href="{{$item.url}}"><img src={{$item.pic_url}} alt=""></a>
+            </td>
+            <td>
+                {{$item.name}}
+            </td>
+            <td>
+                {{$item['city_id']}}
+            </td>
+            <td style="max-width: 200px;">
+                {{$item['platform']}}
+            </td>
+            <td>
+                {{$type_list[$item['type']]}}
+            </td>
+            <td>
+                {{$item.start_time}}
+                <br/>
+                至 {{$item.end_time}}
+            </td>
+            <td>
+                {{$item.suid}}-{{$staff_list[$item['suid']]}}
+                <br/>
+                {{$item.mtime}}
+            </td>
+            <td>
+                {{if $item['status'] === '0'}}
+                    {{if $item['start_time'] <= date('Y-m-d H:i:s') && $item['end_time'] > date('Y-m-d H:i:s')}}在线
+                    {{/if}}
+                    {{if $item['start_time'] > date('Y-m-d H:i:s')}}待上线
+                    {{/if}}
+                    {{if $item['end_time'] < date('Y-m-d H:i:s')}}已过期
+                    {{/if}}
+                {{else if $item['status'] == 4}}
+                    {{if $item['start_time'] <= date('Y-m-d H:i:s') && $item['end_time'] > date('Y-m-d H:i:s')}}已下线
+                    {{/if}}
+                    {{if $item['end_time'] < date('Y-m-d H:i:s')}}已过期
+                    {{/if}}
+                {{/if}}
+            </td>
+            <td>
+                <form action="/activity/edit_sortby.php">
+                    <input style="width: 50px; text-align: center;" type="text" name="sortby" value="{{$item.display_order}}"/>
+                    <input type="hidden" name="id" value="{{$item.id}}"/> <br/>
+                    {{if !empty($_permissions["/activity/add_picture"])}}
+                    <input style="width: 50px; margin-top: 5px;" type="submit" name="submit" value="更改"/>
+                    {{/if}}
+                </form>
+            </td>
+            <td>
+                {{if !empty($_permissions["/activity/add_picture"])}}
+                    {{if $item['status'] == 4 }}
+                    <div>
+                        <a href="javascript:void(0);" class="_j_online_picture">{{if $item['end_time'] >= date('Y-m-d H:i:s')}}上线{{/if}}</a>
+                    </div>
+                    {{else}}
+                    <div>
+                        <a href="javascript:void(0);" class="_j_offline_picture">{{if $item['end_time'] >= date('Y-m-d H:i:s')}}下线{{/if}}</a>
+                    </div>
+                    {{/if}}
+                    <div>
+                        <a href="/activity/edit_picture.php?id={{$item.id}}">编辑</a><br />
+                        <a class="delete_btn" data-id="{{$item.id}}" href="javascript:;">删除</a>
+                    </div>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+        </ul>
+    </nav>
+</div>

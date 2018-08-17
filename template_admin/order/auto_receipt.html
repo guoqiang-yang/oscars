@@ -1,0 +1,89 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        自动回单
+        <span style="color: #ff0000; font-size: 18px; margin-left: 30px;">*注：最多一次处理10单左右</span>
+    </h1>
+
+    <form class="form-inline" role="form" action="/finance/auto_receipt.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>订单ID：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="oid" value="{{$search_oid}}" autofocus>
+            </div>
+            <input type="hidden" name="type" value="order_show">
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:20px;">查询</button>
+            <div class="form-group" style="margin-left:20px;">
+                共计：<span id="total"></span>条
+            </div>
+        </div>
+    </form>
+
+    <hr>
+
+    <table class="table" style="text-align: center">
+        <thead>
+            <tr>
+                <th style="width:8%; text-align: center">
+                    <input type="checkbox" value="{{$order.oid}}" id="select_all_orders">&nbsp;
+                    订单ID
+                </th>
+                <th style="width:8%; text-align: center">客户信息</th>
+                <th style="width:10%; text-align: center">配送地址</th>
+                <th style="width:15%; text-align: center">订单信息</th>
+                <th style="width:8%; text-align: center">订单状态</th>
+                <th style="width:8%; text-align: center">支付状态</th>
+                <th style="width:12%; text-align: center">配送日期</th>
+                <th style="width:15%; text-align: center">备注</th>
+                <th style="width:15%; text-align: center">操作</th>
+            </tr>
+        </thead>
+        <tbody id="order_list_area">
+        {{if !empty($order)}}
+            <tr class="order_info_list" data-oid="{{$order.oid}}">
+                <td>
+                    {{if $order.step == 5}}
+                    <input type="checkbox" name="oid" data-oid="{{$order.oid}}">&nbsp;
+                    {{/if}}
+                    <a href="/order/order_detail.php?oid={{$order.oid}}" target="_blank">{{$order.oid}}</a>
+                </td>
+                <td>
+                    {{$order.contact_name}}<br/>
+                    {{$order.contact_phone}}
+                </td>
+                <td>{{$order.address}}</td>
+                <td>
+                    {{$warehouse_list[$order.wid]}}<br/>
+                    商品总价：{{$order.price/100}}<br/>
+                    {{if $order.status}}
+                    &nbsp;<span style="color: #ff0000;">已删除</span>
+                    {{/if}}
+                </td>
+                <td>{{$step_list[$order.step]}}</td>
+                <td>{{$pay_status[$order.paid]}}</td>
+                <td>{{$order._delivery_date}}</td>
+                <td>{{$order.note}}</td>
+                <td>
+                    {{if $order.step == 7}}
+                    <span>已回单</span>
+                    {{/if}}
+                    &nbsp;
+                    {{if $order.paid != 1}}
+                    {{if !empty($_permissions['/finance/ajax/save_money_in'])}}
+                    <a href="javascript: void(0);" class="payment_order_show" data-oid="{{$order.oid}}" data-type="payment_modal_show" data-toggle="modal" data-target="#editFinanceModal">收款</a>
+                    {{/if}}
+                    {{/if}}
+                    &nbsp;
+                    <a href="javascript: void(0);" class="cancel_order_show">撤销</a>
+                </td>
+            </tr>
+        {{/if}}
+        </tbody>
+    </table>
+    <div id="payment_modal"></div>
+    <div id="bluk_receipt">
+        {{if !empty($order)}}
+        <a href="javascript:void(0);" class="btn btn-primary bluk_auto_receipt" style="float:right;margin-left:20px;">批量回单</a>
+        {{/if}}
+    </div>
+</div>

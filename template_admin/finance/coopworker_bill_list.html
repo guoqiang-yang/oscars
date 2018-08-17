@@ -1,0 +1,113 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">第三方合作工人【支付】清单</h1>
+	
+	<form class="form-inline" role="form" action="/finance/coopworker_bill_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>工人ID：</label>
+				<input class="form-control" type="text" name="cuid" value="{{if $search_conf.cuid}}{{$search_conf.cuid}}{{/if}}" style="margin-right: 20px;" placeholder="请输入工人id">
+			</div>
+      <div class="form-group" style="margin-right:20px;">
+				<label>工人身份：</label>
+				<select class="form-control" name="user_type">
+				  <option value="0" {{if empty($search_conf.user_type)}}selected="selected"{{/if}}>请选择</option>
+				  {{foreach $coopworder_types as $_key=>$_type}}
+				  <option value="{{$_key}}" {{if $search_conf.user_type==$_key}}selected="selected"{{/if}}>{{$_type}}</option>
+				  {{/foreach}}
+				</select>
+      </div>
+      <div class="form-group" style="margin-right:20px;">
+				<label>工人信息：</label>
+				<input class="form-control" type="text" name="cinfo" value="{{if $search_conf.cinfo}}{{$search_conf.cinfo}}{{/if}}" style="margin-right: 20px;" placeholder="工人姓名或手机号">
+			</div>
+    </div>
+        <div class="placeholder">
+			<div class="form-group" style="margin-right: 20px;">
+				<label>日期 (YYYY-MM-DD)：</label>
+				<input type="text" class="form-control" name="btime" value="{{if $search_conf.btime}}{{$search_conf.btime}}{{/if}}" style="width: 100px;">
+				<span> - </span>
+				<input type="text" class="form-control" name="etime" value="{{if $search_conf.etime}}{{$search_conf.etime}}{{/if}}" style="width: 100px;">
+			</div>
+            <div class="form-group" style="margin-right:50px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+				  <option value="0" {{if empty($search.wid)}}selected="selected"{{/if}}>全部</option>
+				  {{foreach $warehouse_list as $_wid=>$_wid_name}}
+				  <option value="{{$_wid}}" {{if $search.wid==$_wid}}selected="selected"{{/if}}>{{$_wid_name}}</option>
+				  {{/foreach}}
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+	
+	<hr>
+	
+	{{if !empty($bill_list)}}
+	<table class="table">
+		<thead>
+		<tr>
+		  <th>id</th>
+		  <th>仓库ID</th>
+		  <th>订单ID</th>
+      <th>工人信息</th>
+      <td>费用类型</td>
+		  <th>支付</th>
+		  <th>收款方式</th>
+		  <th>日期</th>
+		  <th>备注</th>
+		  <th>执行人</th>
+      <th>编辑</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $bill_list as $one}}
+		<tr data-oid="{{$one.objid}}">
+			<td>{{$one.id}}</td>
+			<td>{{$warehouse_list[$one.wid]}}</td>
+			<td>
+			{{if !empty($one.oid)}}
+			<a href="/order/order_detail.php?oid={{$one.oid}}" target="_blank">{{$one.oid}}</a>
+			{{else}}
+      <span> -- </span>
+			{{/if}}
+			</td>
+			<td>
+        {{if !empty($one.worker)}}
+        <span>{{$one.worker.name}}</span>
+        <span style="color:grey;">({{$one.worker.mobile}})</span>
+        {{else}}
+        <span> -- </span>
+        {{/if}}
+      </td>
+      <td>{{$fee_types[$one.type]}}</td>
+			<td><span style="color:red;">￥{{$one.price/100}}</span></td>
+			<td class="payment_name">{{$payment_type_list[$one.payment_type]}}</td>
+			<td>{{$one.ctime}}</td>
+			<td>{{$one.note}}</td>
+			<td data-suid="{{$one.suinfo.suid}}">{{$one.suinfo.name}}</td>
+      <td>
+        <span>--</span>
+      </td>
+		</tr>
+		{{/foreach}}
+		</tbody>	
+	</table>
+	<nav>
+		<ul class="pagination" style="margin:0;">
+		  {{$pageHtml nofilter}}
+		  <li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+		</ul>
+
+    {{if $_isFinance || $_isAdmin}}
+	  {{*<a href="javascript:void(0);" class="btn btn-primary" data-toggle="modal" data-target="#adjustFinanceModal" style="margin-right:20px;float:left;">调账</a>*}}
+    {{/if}}
+	</nav>
+	{{else}}
+	<span>无账务清单！！</span>
+	{{/if}}
+
+</div>
+
+{{include file="finance/block_money_in.html" cid=$cid}}

@@ -1,0 +1,33 @@
+<style>
+    .table tbody tr td {border: none;}
+	.nav-sidebar {display: none;}
+</style>
+<input type="hidden" id="oid" value="{{$oid}}" />
+<input type="hidden" id="cid" value="{{$cid}}" />
+<input type="hidden" id="uid" value="{{$uid}}" />
+
+<input type="hidden" id="contact_phone" value="{{$contact_phone}}" />
+<input type="hidden" id="contact_name" value="{{$contact_name}}" />
+<input type="hidden" id="select_city" value="{{$select_city}}" />
+<input type="hidden" id="select_district" value="{{$select_district}}" />
+<input type="hidden" id="select_area" value="{{$select_area}}" />
+<input type="hidden" id="platform" value="{{$platform}}" />
+<input type="hidden" id="version" value="{{$version}}" />
+<input type="hidden" id="from" value="{{$from}}" />
+<input type="hidden" id="delivery_type" value="{{$delivery_type}}" />
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" style="margin-top: 10%;">
+    <table class="table" style="margin:0;">
+        <tr>
+            <td>
+                <input type="text" class="form-control" id="community_name" value="" placeholder="请输入地址" />
+                <section class="select_area address_results">
+					<ul id="suggest_4_address" class="address_list" style="display:none;"></ul>
+				</section>
+            </td>
+        </tr>
+    </table>
+    <div id="allmap" style="height:300px;"></div>
+    <section id="map_4_address" class="select_area">
+		<ul id="map_search_result" class="address_list address_results"></ul>
+	</section>
+</div>

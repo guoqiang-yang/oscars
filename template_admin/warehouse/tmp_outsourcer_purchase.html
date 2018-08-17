@@ -1,0 +1,102 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">待采购商品列表</h1>
+    
+    <form class="form-inline" role="form">
+        <div class="placeholder">
+            
+            <div class="form-group" style="margin-right:20px;">
+              <label>仓库：</label>
+              <select class="form-control" name="wid" id="tmp_outsourcer_wid">
+                <option value="0" {{if $search.wid==0}} selected="selected"{{/if}}>请选择</option>
+                {{foreach $_allowed_warehouses as $_wid=>$_wname}}
+                <option value="{{$_wid}}" {{if $search.wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+                {{/foreach}}
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-right:20px;">
+                <label>供应商：</label>
+                <select class="form-control" name="outsourcer_id" id="tmp_outsourcer_id">
+                    <option value="0">请选择</option>
+                    {{foreach $supplier_infos as $sid=>$supplier}}
+                    <option value="{{$sid}}" data-wid="{{$supplier.wid}}" {{if $search.outsourcer_id == $sid}} selected="selected"{{/if}}>{{$supplier.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>配送日期：</label>
+                <input type="date" class="form-control" name="bdate" value="{{$search.bdate}}" style="margin-right: 20px;">
+                --
+                <input type="date" class="form-control" name="edate" value="{{$search.edate}}" style="margin-right: 20px;">
+            </div>
+            <input type="hidden" name="cate" value="0">
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:20px;">查 询</button>
+            
+            {{if !empty($_permissions['/warehouse/ajax/create_tmp_outsourcer_inorder'])}}
+            <button type="button" class="btn btn-primary" id="create_tmp_outsourcer_purchase" style="float:right;margin-left:20px;{{if empty($search.outsourcer_id)}}display: none;{{/if}}">生成采购单</button>
+            {{/if}}
+        </div>
+    </form>
+   
+  <hr>
+  
+  {{if !empty($product_list)}}
+  <table class="table temp_product_list">
+    <thead>
+    <tr>
+        <th><label><input type="checkbox" id="tmp_purchase_select_all">全选</label></th>
+        <th>商品名称</th>
+        <th>商品ID/SKUID</th>
+        <th>订单数量</th>
+        <th>退货数量</th>
+        <th>成本</th>
+        <th>金额</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+        {{foreach $product_list as $p}}
+        <tr class="product" data-pid="{{$p.pid}}" data-sid="{{$p.sid}}" data-num="{{$p.wait_inorder_num-$p.refund_num}}" data-cost="{{floor($p.amount/($p.wait_inorder_num-$p.refund_num))}}" data-amount="{{$p.amount}}">
+            <td>
+                <label><input type="checkbox" name="wait_inorder"></label>
+            </td>
+            <td>{{$sku_infos[$p.sid]['title']}}</td>
+            <td>
+                {{$p.pid}} / {{$p.sid}}<br>
+                <span style="color:gray;">{{$cate1_list[$sku_infos[$p.sid]['cate1']]['name']}} - {{$cate2_list[$sku_infos[$p.sid]['cate1']][$sku_infos[$p.sid]['cate2']]['name']}}</span>
+            </td>
+            <td>{{$p.wait_inorder_num}} {{$sku_infos[$p.sid]['unit']|default:'个'}}</td>
+            <td>{{$p.refund_num}} {{$sku_infos[$p.sid]['unit']|default:'个'}}</td>
+            <td>{{floor($p.amount/($p.wait_inorder_num-$p.refund_num))/100}} 元/{{$sku_infos[$p.sid]['unit']|default:'个'}}</td>
+            <td>{{$p.amount/100}} 元</td>
+            <td><a href="javascript:;" class="_j_purchase_2_history_orders" data-toggle="modal" style="margin-left:10px;" data-sid="{{$p.sid}}">采购明细</a></td>
+        </tr>
+        {{/foreach}}
+        
+    </tbody>
+  </table>
+  
+  {{else}}
+  <span style="font-size: 25px; color:red;"> 无临采商品 </span>
+  {{/if}}
+    
+</div>
+<div class="modal fade" id="showSkuHistory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">
+                    采购明细
+                </h4>
+            </div>
+            <div id="showSkuHistoryList" style="padding: 20px 50px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>

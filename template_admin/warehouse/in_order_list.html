@@ -1,0 +1,227 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">采购订单列表</h1>
+
+	<form class="form-inline" role="form" action="/warehouse/in_order_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:50px;">
+				<label>采购单ID：</label>
+				<input type="text" class="form-control" name="oid" value="{{$searchConf.oid}}" style="width:80px;">
+			</div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>供应商ID：</label>
+				<input type="text" class="form-control" name="sid" value="{{$searchConf.sid}}" style="width:80px;">
+			</div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>采购人：</label>
+				<select class="form-control" name="buyer_uid">
+					<option value="0" {{if $searchConf.buyer_uid==0}} selected="selected" {{/if}}>全部</option>
+					{{foreach $buyerList as $oner}}
+					<option value="{{$oner.suid}}" {{if $searchConf.buyer_uid==$oner.suid}}selected="selected" {{/if}}>{{$oner.name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>采购类型：</label>
+				<select class="form-control" name="in_order_type">
+					<option value="0" {{if $searchConf.in_order_type==0}} selected="selected" {{/if}}>全部</option>
+					{{foreach $in_order_types as $type_id => $type_name}}
+					<option value="{{$type_id}}" {{if $searchConf.in_order_type==$type_id}}selected="selected" {{/if}}>{{$type_name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+            <div class="form-group" style="margin-right:50px;">
+                <label>经营模式：</label>
+                <select class="form-control" name="managing_mode">
+                    <option value="127" {{if $searchConf.managing_mode==127}} selected="selected" {{/if}}>全部</option>
+                    {{foreach $managing_modes as $_mode => $_mname}}
+                    <option value="{{$_mode}}" {{if $searchConf.managing_mode==$_mode}}selected="selected" {{/if}}>{{$_mname}}采购</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>是否超时：</label>
+                <select class="form-control" name="is_timeout">
+                    <option value="127" {{if $searchConf.is_timeout==127}} selected="selected" {{/if}}>全部</option>
+                    <option value="0" {{if $searchConf.is_timeout==0}} selected="selected" {{/if}}>否</option>
+                    <option value="1" {{if $searchConf.is_timeout==1}} selected="selected" {{/if}}>是</option>
+                </select>
+            </div>
+		</div>
+
+		<div class="placeholder">
+			<div class="form-group">
+				<label>付款方式：</label>
+				<select class="form-control" name="payment_type" style="margin-right:50px;">
+					<option value="0" {{if empty($searchConf.payment_type)}} selected="selected" {{/if}}>全部</option>
+					{{foreach $payment_types as $type=>$desc}}
+					<option value="{{$type}}" {{if $type==$searchConf.payment_type}} selected="selected" {{/if}}>{{$desc}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+
+            {{if count($_warehouseList)>1}}
+			<div class="form-group" style="margin-right:50px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+                    {{if !$_user.wid}}
+					<option value="0" {{if !$searchConf.wid}} selected="selected" {{/if}}>全部</option>
+                    {{/if}}
+                    
+					{{foreach $_allowed_warehouses as $_wid=>$_wname}}
+					<option value="{{$_wid}}" {{if $searchConf.wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			{{/if}}
+            <div class="form-group" style="margin-right:50px;">
+				<label>SKU_ID：</label>
+				<input type="text" class="form-control" name="sku_id" value="{{$searchConf.sku_id}}" style="width:80px;">
+			</div>
+            <input type="hidden" name="step" value="{{$searchConf.step}}">
+            <input type="hidden" name="status" value="{{$searchConf.status}}">
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+
+    <div class="container-fluid">
+        <ul class="nav nav-pills" id="in_order_status_tabs">
+            <li role="presentation"  data-step="127" data-status="127" {{if 127 == $searchConf.step && 127 == $searchConf.status}}class="active"{{/if}}>
+                <a href="javascript:void(0)" style="padding-right: 30px;padding-left: 30px;">
+                    全部
+                </a>
+            </li>
+			<li role="presentation" data-step="1" data-status="0" {{if 1 == $searchConf.step && 0 == $searchConf.status}}class="active"{{/if}}>
+				<a href="javascript:void(0)" style="padding-right: 30px;padding-left: 30px;">
+					已创建
+				</a>
+			</li>
+			<li role="presentation" data-status="5" {{if 5 == $searchConf.status}}class="active"{{/if}}>
+				<a href="javascript:void(0)" style="padding-right: 30px;padding-left: 30px;">
+					待审核
+				</a>
+			</li>
+			<li role="presentation" data-status="6" {{if 6 == $searchConf.status}}class="active"{{/if}}>
+				<a href="javascript:void(0)" style="padding-right: 30px;padding-left: 30px;">
+					已驳回
+				</a>
+			</li>
+			<li role="presentation" data-step="2" {{if 2 == $searchConf.step}}class="active"{{/if}}>
+				<a href="javascript:void(0)" style="padding-right: 30px;padding-left: 30px;">
+					待收货
+				</a>
+			</li>
+			<li role="presentation" data-step="3" {{if 3 == $searchConf.step}}class="active"{{/if}}>
+				<a href="javascript:void(0)" style="padding-right: 30px;padding-left: 30px;">
+					部分收货
+				</a>
+			</li>
+			<li role="presentation" data-step="4" {{if 4 == $searchConf.step}}class="active"{{/if}}>
+				<a href="javascript:void(0)" style="padding-right: 30px;padding-left: 30px;">
+					完全收货
+				</a>
+			</li>
+        </ul>
+    </div>
+
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+            <th>类型</th>
+			<th>id</th>
+			<th>供应商/联系人</th>
+			<th>采购单详情</th>
+			<th>状态</th>
+			<th>采购员</th>
+			<th>送货时效</th>
+			<th width="8%">操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $orders as $order}}
+		<tr data-oid="{{$order.oid}}" data-wid="{{$order.wid}}">
+            <td>{{$in_order_types[$order.in_order_type]}}</td>
+			<td>
+                {{$order.oid}}<br>
+                {{if !empty($_permissions['/warehouse/in_order_list'])}}
+                <a class="quick_show_inorder_products">快速查看</a>
+                {{/if}}
+            </td>
+			<td>
+				<a href="/warehouse/in_order_list.php?sid={{$order.sid}}">供应商：{{$order._supplier.name}}</a><br/>
+				联系人: {{$order._supplier.contact_name}}
+			</td>
+			<td>
+				所属仓库: {{$_all_warehouses[$order.wid]}}<br/>
+				商品总额: {{$order.price/100}}元<br/>
+				商品数量: {{$order.product_num}}<br/>
+				下单时间: {{$order.ctime}}<br>
+				支付方式: {{$payment_types[$order.payment_type]}}<br/>
+				{{$managing_modes[$order.managing_mode]}}采购<br/>
+				{{if $order.source==2}}<span style="color:red; font-weight:bold;">临采单</span>
+				{{elseif $order.source==3}}<span style="color:blue; font-weight:bold;">综合采购单</span>
+				{{elseif $order.source==4}}<span style="color: red; font-weight: bold;">外包临采单</span>
+				{{/if}}
+			</td>
+			<td>
+				<a style="{{if $order.step<3}}color:red;{{elseif $order.step==4}}color:green;{{/if}}" href="/warehouse/detail_in_order.php?oid={{$order.oid}}">{{$order._step}}</a>
+				{{if $order.step<3 && $order.hadStocked}}<br><span>(部分入库)</span>{{/if}}
+				{{if $order.step==4 && !empty($order.rece_suid)}}
+                <br>
+                <span>修改人：{{$staff_list[$order.rece_suid]}}</span>
+                <br>
+                <span>修改时间：{{$order.rece_time|date_format:'%m-%d %H:%M'}}</span>
+                {{/if}}
+			</td>
+			<td>{{if !empty($order.buyer_name)}}{{$order.buyer_name}}{{else}} -- {{/if}}</td>
+            <td>
+                <p>周期：{{$order._supplier.delivery_hours}}小时</p>
+                <p>约定：{{$order.delivery_date|date_format:'%m.%d %H:%M'}}</p>
+				{{if $order.step == 4 && strtotime($order.rece_time) > 0 && empty($order.rece_suid)}}
+                <p>实际：{{$order.rece_time|date_format:'%m.%d %H:%M'}}</p>
+                <p>时效：{{((strtotime($order.rece_time) - strtotime($order.delivery_date))/3600)|string_format:"%.1f"}}小时</p>
+                <p>超时：{{if $order.is_timeout}}是{{else}}否{{/if}}</p>
+				{{/if}}
+				{{if $order.payment_days_date != '0000-00-00 00:00:00'}}
+				<p>账期日期：{{$order.payment_days_date}}</p>
+				{{/if}}
+            </td>
+			<td>
+				{{if !empty($_permissions['/warehouse/edit_in_order'])}}
+                <a href="/warehouse/edit_in_order.php?oid={{$order.oid}}">编辑</a><br>
+                {{/if}}
+				{{if (($order.step==1&&$order.status==0)||$order.status==6||$order.step==2) && !$order.hadStocked && !empty($_permissions['/warehouse/ajax/delete_order'])}}
+                <a class="_j_in_order_del" href="javascript:;" data-oid="{{$order.oid}}">删除</a><br>
+                {{/if}}
+				{{if !empty($_permissions['/warehouse/detail_in_order'])}} 
+                <a href="/warehouse/detail_in_order.php?oid={{$order.oid}}">查看</a><br>
+                {{/if}}
+                {{if !empty($_permissions['/warehouse/in_order_print'])}}
+                <a target="_blank" href="/warehouse/in_order_print.php?oid={{$order.oid}}">打印</a><br>
+                {{/if}}
+                {{if !empty($_permissions['/warehouse/in_order_contract'])}}
+                <a href="/warehouse/in_order_contract.php?oid={{$order.oid}}">下载送货单</a>
+                {{/if}}
+				{{if $order.step == 3 && $order.in_order_type != 2 && $order.payment_type != 3 && !empty($_permissions['/warehouse/ajax/complete_receiver'])}}
+				<br/><a href="javascript:void(0)" class="complete_receive" data-wid="{{$order.wid}}" data-oid="{{$order.oid}}" data-next-step="4">完全收货</a>
+				{{/if}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+            {{if $sum>0}}
+			<li><a style="color:#555;">金额：{{$sum / 100}} 元</a></li>
+            {{/if}}
+		</ul>
+	</nav>
+
+</div>

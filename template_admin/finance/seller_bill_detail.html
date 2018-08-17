@@ -1,0 +1,154 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">商家结算明细</h1>
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">结算ID：</label>
+            <div class="col-sm-10">{{$bill_info.bid}}</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">经销商：</label>
+            <div class="col-sm-10">{{$warehouse[$bill_info.wid]}}</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">结算日期：</label>
+            <div class="col-sm-10">{{$bill_info.balance_date_start}}／{{$bill_info.balance_date_end}}</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">订单金额：</label>
+            <div class="col-sm-10">{{$bill_info.order_amount/100}}</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">货款金额：</label>
+            <div class="col-sm-10">{{$bill_info.product_amount/100}}</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">退款金额：</label>
+            <div class="col-sm-10">{{$bill_info.refund_amount/100}}</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">扣点：</label>
+            <div class="col-sm-10">{{$bill_info.ratio}}%</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">结算金额：</label>
+            <div class="col-sm-10">{{$bill_info.bill_amount/100}}</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">实付金额：</label>
+            <div class="col-sm-10">{{$bill_info.real_amount/100}}</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">结算人：</label>
+            <div class="col-sm-10">{{$bill_info._suid_name}}</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">结算状态：</label>
+            <div class="col-sm-10">{{if $bill_info.step == 1}}未结算{{else}}已结算（{{$payment_list[$bill_info.payment_type]}}）{{/if}}</div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">备注：</label>
+            <div class="col-sm-10">{{$bill_info.note}}</div>
+        </div>
+    </div>
+    <nav class="nav navbar-default" role="navigation" style="border-bottom: 2px solid #00a2d4; border-top: 2px solid #00a2d4; margin: 50px auto;">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li {{if empty($type)}}class="active"{{/if}}>
+                        <a href="/finance/seller_bill_detail.php?bid={{$bill_info.bid}}" style="padding-right: 30px;padding-left: 30px;">
+                            订单
+                        </a>
+                    </li>
+                    <li {{if $type == 'refund'}}class="active"{{/if}}>
+                        <a href="/finance/seller_bill_detail.php?bid={{$bill_info.bid}}&type=refund" style="padding-right: 30px;padding-left: 30px;">
+                            退单
+                        </a>
+                    </li>
+                    <li {{if $type == 'no'}}class="active"{{/if}}>
+                        <a href="/finance/seller_bill_detail.php?bid={{$bill_info.bid}}&type=no" style="padding-right: 30px;padding-left: 30px;">
+                            本期未结算
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {{if empty($type)}}
+    <table class="table table-striped">
+        <tr>
+            <th>订单ID</th>
+            <th>回单时间</th>
+            <th>付款时间</th>
+            <th>订单金额</th>
+        </tr>
+        {{foreach $order_list as $item}}
+        <tr>
+            <td><a href="/order/order_detail.php?oid={{$item.objid}}" target="_blank">{{$item.objid}}</a></td>
+            <td>{{$item.delivery_time}}</td>
+            <td>{{$item.pay_time}}</td>
+            <td>{{$item.bill_amount/100}}</td>
+        </tr>
+        {{/foreach}}
+    </table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+    {{elseif $type == 'refund'}}
+    <table class="table table-striped">
+        <tr>
+            <th>退款单ID</th>
+            <th>提交财务时间</th>
+            <th>付款时间</th>
+            <th>退款金额</th>
+        </tr>
+        {{foreach $order_list as $item}}
+        <tr>
+            <td><a href="/order/edit_refund_new.php?rid={{$item.objid}}" target="_blank">{{$item.objid}}</a></td>
+            <td>{{$item.delivery_time}}</td>
+            <td>{{$item.pay_time}}</td>
+            <td>{{$item.bill_amount/100}}</td>
+        </tr>
+        {{/foreach}}
+    </table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+    {{elseif $type == 'no'}}
+    <table class="table table-striped">
+        <tr>
+            <th>订单ID</th>
+            <th>出库时间</th>
+            <th>订单金额</th>
+            <th>结算状态</th>
+        </tr>
+        {{foreach $order_list as $item}}
+        <tr>
+            <td><a href="/order/order_detail.php?oid={{$item.oid}}" target="_blank">{{$item.oid}}</a></td>
+            <td>{{$item.ship_time}}</td>
+            <td>{{$item.bill_amount/100}}</td>
+            <td>{{if $item.bid == 0}}未结算{{else}}已结算(结算ID：{{$item.bid}}){{/if}}</td>
+        </tr>
+        {{/foreach}}
+    </table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+    {{/if}}
+
+</div>

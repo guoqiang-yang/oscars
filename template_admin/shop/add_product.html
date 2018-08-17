@@ -1,0 +1,329 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if empty($product.product.pid)}}添加商品{{else}}编辑商品{{/if}}</h1>
+	<form class="form-horizontal" role="form">
+		<input type="hidden" name="sid" value="{{$product.sku.sid}}"/>
+
+    {{if $product.sku.sid}}
+    <div class="form-group">
+      <label class="col-sm-2 control-label">SkuID：</label>
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="sid" value="{{$product.sku.sid}}" readonly="true">
+      </div>
+    </div>
+    {{/if}}
+		{{if $product.product.pid}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label">商品ID：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="pid" value="{{$product.product.pid}}" readonly="true">
+				</div>
+			</div>
+		{{/if}}
+        {{if !empty($product.product.activity_price)}}
+        <div class="form-group" style="color:red;">
+			<label class="col-sm-2 control-label">活动价格：</label>
+			<div class="col-sm-2">
+                <span class="text-value">{{$product.product.activity_price/100}} 元 / {{$product.sku.unit|default:'个'}}</span>
+            </div>
+			<label class="col-sm-1 control-label">查看</label>
+			<div class="col-sm-5 text-value">
+                <a href="/activity/floor_activity_list.php?type={{$product.sku.cate1}}&city={{$product.product.city_id}}" target="_blank" style="margin-right: 10px;">查看楼层活动</a>
+                <a href="/activity/flash_activity_list.php" target="_blank">抢购活动</a>
+			</div>
+		</div>
+        {{/if}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">价格：</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control" name="price" value="{{$product.product.price / 100}}" {{if empty($_permissions['edit_shop_product_price'])}}readonly="true"{{/if}}>
+			</div>
+			<label class="col-sm-1 control-label">元 /</label>
+			<div class="col-sm-1">
+				<input readonly="true" type="text" class="form-control" name="unit" placeholder="单位" value="{{$product.sku.unit}}">
+			</div>
+			<label class="col-sm-2 control-label">比如：卷，袋，根</label>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">工装价：</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control" name="work_price" value="{{$product.product.work_price / 100}}" {{if empty($_permissions['edit_shop_product_price'])}}readonly="true"{{/if}}>
+			</div>
+			<label class="col-sm-1 control-label">元 /</label>
+			<div class="col-sm-1">
+				<input readonly="true" type="text" class="form-control" name="unit" placeholder="单位" value="{{$product.sku.unit}}">
+			</div>
+			<label class="col-sm-2 control-label">比如：卷，袋，根</label>
+		</div>
+		<div class="form-group" style="color: #28C748;">
+			<label class="col-sm-2 control-label">原价：</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control" name="ori_price" value="{{$product.product.ori_price / 100}}" {{if empty($_permissions['edit_shop_product_price'])}}readonly="true"{{/if}}>
+			</div>
+			<label class="col-sm-1 control-label">元 /</label>
+			<div class="col-sm-1">
+				<input readonly="true" type="text" class="form-control" name="unit" placeholder="单位" value="{{$product.sku.unit}}">
+			</div>
+			<label class="col-sm-2 control-label">比如：卷，袋，根</label>
+		</div>
+        <div class="order-bottom" style="background: #F2F2F2;padding:5px 0;margin: 5px 0 10px 0;">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">上楼费：</label>
+                <div class="col-sm-5">
+                    <span class="text-value">区分【收取客户】，【支付工人】</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">收客户 [楼梯]：</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" name="carrier_fee" value="{{$product.product.carrier_fee / 100}}" {{if !$_isAdmin && !$_isOP && !$_uid==1149}}readonly="readonly"{{/if}}>
+                </div>
+                <label class="col-sm-1 control-label">元/{{if !empty($product.sku.unit)}}{{$product.sku.unit}}{{else}}个{{/if}}/层</label>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">收客户 [电梯]：</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" name="carrier_fee_ele" value="{{$product.product.carrier_fee_ele / 100}}" {{if !$_isAdmin && !$_isOP && !$_uid==1149}}readonly="readonly"{{/if}}>
+                </div>
+                <label class="col-sm-1 control-label">元/{{if !empty($product.sku.unit)}}{{$product.sku.unit}}{{else}}个{{/if}}</label>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">付工人 [楼梯]：</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" name="worker_ca_fee" value="{{$product.product.worker_ca_fee / 100}}" {{if !$_isAdmin && !$_isOP && !$_uid==1149}}readonly="readonly"{{/if}}>
+                </div>
+                <label class="col-sm-1 control-label">元/{{if !empty($product.sku.unit)}}{{$product.sku.unit}}{{else}}个{{/if}}/层</label>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">付工人 [电梯]：</label>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" name="worker_ca_fee_ele" value="{{$product.product.worker_ca_fee_ele / 100}}" {{if !$_isAdmin && !$_isOP && !$_uid==1149}}readonly="readonly"{{/if}}>
+                </div>
+                <label class="col-sm-1 control-label">元/{{if !empty($product.sku.unit)}}{{$product.sku.unit}}{{else}}个{{/if}}</label>
+                <label class="col-sm-5 text-value" style="color:red;">（材料加工后支付费用：板材截断上楼费，不截断上楼同【收客户】）</label>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">城市：</label>
+			<div class="col-sm-4">
+				<select {{if !empty($product.product.pid)}}disabled="disabled"{{/if}} class="form-control" name="city_id">
+					<option value="0" >选择城市</option>
+					{{foreach $city_list as $city_id => $city}}
+						<option {{if $product.product.city_id == $city_id || $cur_city_id == $city_id}}selected="selected"{{/if}} value="{{$city_id}}">{{$city}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">是否上架：</label>
+			<div class="col-sm-4">
+				<label class="radio-inline"><input type="radio" name="online" value="0" {{if 0== $product.product.status}}checked="checked" {{/if}}{{if $product.product.pid}}disabled{{/if}}> 是 </label>
+				<label class="radio-inline"> <input type="radio" name="online" value="4" {{if 4== $product.product.status}}checked="checked" {{/if}}{{if $product.product.pid}}disabled{{/if}}> 否 </label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">活动类型：</label>
+			<div class="col-sm-4">
+				<label class="radio-inline"><input type="radio" name="sales_type" value="0" {{if 0 == $product.product.sales_type}}checked="checked" {{/if}}> 无 </label>
+				<label class="radio-inline"> <input type="radio" name="sales_type" value="1" {{if 1 == $product.product.sales_type}}checked="checked" {{/if}}> 特价 </label>
+				<label class="radio-inline"> <input type="radio" name="sales_type" value="2" {{if 2 == $product.product.sales_type}}checked="checked" {{/if}}> 热卖 </label>
+			</div>
+		</div>
+        <div class="form-group">
+			<label class="col-sm-2 control-label">采购类型：</label>
+			<div class="col-sm-4">
+                {{foreach $buy_types_desc as $_type=>$desc}}
+				<label class="radio-inline"> 
+                    <input type="radio" name="buy_type" value="{{$_type}}" {{if $_type==$product.product.buy_type||($_type==1&&!isset($product.product.buy_type))}}checked="checked" {{/if}}> {{$desc}}
+                </label>
+				{{/foreach}}
+			</div>
+            {{if !empty($_permissions['/shop/ajax/purchase_type'])}}
+                <button type="button" style="margin-left: 20px" class="btn btn-primary" data-toggle="modal" data-target="#modifyPurchaseType">编辑</button>
+            {{/if}}
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">推荐商品：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="recommend_pids" value="{{$product.product.recommend_pids}}" {{if !$_isAdmin && !$_isOP && !$_uid==1149}}readonly="readonly"{{/if}}>
+            </div>
+            <label class="col-sm-4 control-label">输入关联商品的pid，多个pid用","(半角逗号)分隔</label>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">经营模式：</label>
+			<div class="col-sm-4">
+				{{foreach $managing_modes as $_mode=>$_mname}}
+				<label class="radio-inline">
+					<input type="radio" name="managing_mode" value="{{$_mode}}" {{if !empty($product.product.pid)}}disabled="true"{{/if}} {{if $_mode==$product.product.managing_mode||($_mode == 1 && !isset($product.product.managing_mode))}}checked="checked" {{/if}}> {{$_mname}}
+				</label>
+				{{/foreach}}
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">商品名称：</label>
+			<div class="col-sm-4">
+				<input readonly="true" type="text" class="form-control" name="title" value="{{$product.sku.title}}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">成本</label>
+			<div class="col-sm-4">
+				<input type="text" {{if !$can_edit_cost}}disabled="disabled" {{/if}} class="form-control" name="cost" value="{{$product.product.cost/100}}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">其他名称：</label>
+			<div class="col-sm-9">
+				<input type="text" class="form-control" name="alias" {{if !empty($product.product.alias)}} value="{{$product.product.alias}}"{{else}} value="{{$product.sku.alias}}" {{/if}} style="width:300px;display:inline-block;"> 　例如：木龙骨，又叫“木方”
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">类别：</label>
+			<div class="col-sm-2">
+				<select disabled="disabled" class="form-control" name="cate1" data-init="{{$product.sku.cate1}}">
+					{{foreach $cate1_list as $id => $item}}
+						<option {{if $product.sku.cate1== $id}}selected="selected" {{/if}} value="{{$id}}">{{$item.name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<div class="col-sm-2">
+				<select disabled="disabled" class="form-control" name="cate2" data-init="{{$product.sku.cate2}}">
+					{{foreach $cate2_list as $id => $item}}
+						<option {{if $product.sku.cate2== $id}}selected="selected" {{/if}} value="{{$id}}">{{$item.name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">品牌：</label>
+			<div class="col-sm-3">
+				<select disabled="disabled" class="form-control" name="bid" data-init="{{$product.sku.bid}}">
+					<option>--选择品牌--</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">型号：</label>
+			<div data-init="{{$product.sku.mids}}" id="model-container" class="col-sm-6"></div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">规格&包装：</label>
+			<div class="col-sm-4">
+				<input readonly="true" type="text" class="form-control" name="package" value="{{$product.sku.package}}">
+			</div>
+			<label class="col-sm-2 control-label">比如：DN20, 3米/根 100米/卷</label>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">包装含量：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="picking_note" {{if !empty($product.product.picking_note)}} value="{{$product.product.picking_note}}" {{elseif !empty($product.sku.picking_note)}} value="{{$product.sku.picking_note}}" {{else}} disabled{{/if}}>
+			</div>
+			{{if !empty($_permissions['/shop/ajax/save_pick_note']) || !empty($_permissions['/shop/ajax/save_product'])}}
+			<button type="button" style="margin-left: 20px" class="btn btn-primary" data-toggle="modal" data-target="#editPickNote">编辑包装含量</button>
+			{{/if}}
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">长度：</label>
+            <div class="col-sm-4">
+                <input readonly="true" type="text" class="form-control" name="length" value="{{$product.sku.length / 100}}">
+            </div>
+            <label class="col-sm-2 control-label">长度，单位（米）</label>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">宽度：</label>
+            <div class="col-sm-4">
+                <input readonly="true" type="text" class="form-control" name="width" value="{{$product.sku.width / 100}}">
+            </div>
+            <label class="col-sm-2 control-label">宽度，单位（米）</label>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">高度：</label>
+            <div class="col-sm-4">
+                <input readonly="true" type="text" class="form-control" name="height" value="{{$product.sku.height / 100}}">
+            </div>
+            <label class="col-sm-2 control-label">高度，单位（米）</label>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">重量：</label>
+            <div class="col-sm-4">
+                <input readonly="true" type="text" class="form-control" name="weight" value="{{$product.sku.weight / 1000}}">
+            </div>
+            <label class="col-sm-2 control-label">重量，单位（千克）</label>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">图片：</label>
+			<div class="col-sm-10" style="background-color: #d9d9d9; padding: 5px 0;">
+				<div id="img_list" class="" style="position: relative;">
+					{{foreach $product.sku._pics as $pic}}
+					<div class="img_item" style="margin: 10px; float: left; width: 200px; height: 200px;" data-pic="{{$pic.pic_tag}}">
+						<img class="img_img" data-pic="{{$pic.pic_tag}}" src="{{$pic.normal}}" />
+					</div>
+					{{/foreach}}
+				</div>
+				<input type="hidden" name="pic_ids" value="{{$sku.pic_ids}}">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+                {{if !empty($_permissions['/shop/ajax/save_product'])}}
+				<button type="button" class="btn btn-primary" id="btn_save_product">保存</button>
+                {{/if}}
+                {{if !empty($_permissions['/warehouse/stock_history'])}}
+                <a style="margin-left: 20px;" type="button" class="btn btn-default" href="/warehouse/stock_history.php?sid={{$product.sku.sid}}" target="_blank">销售明细</a>
+                {{/if}}
+                {{if !empty($_permissions['/shop/edit_sku'])}}
+                <a style="margin-left: 20px;" type="button" class="btn btn-default" href="/shop/edit_sku.php?sid={{$product.sku.sid}}" target="_blank">编辑sku</a>
+				{{/if}}
+				<a style="margin-left: 20px;" type="button" class="btn btn-default" href="{{$product.sku._pic.src}}" target="_blank">打开图片</a>
+			</div>
+		</div>
+	</form>
+</div>
+<div class="modal fade" id="modifyPurchaseType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                  采购类型
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                {{foreach $buy_types_desc as $_type=>$desc}}
+                <label class="radio-inline">
+                    <input type="radio" name="buy_type" value="{{$_type}}" {{if $_type==$product.product.buy_type||($_type==1&&!isset($product.product.buy_type))}}checked="checked" {{/if}}> {{$desc}}
+                </label>
+                {{/foreach}}
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-default save_purchase_type">提交更改</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editPickNote" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h3 class="modal-title" id="">
+					编辑包装含量
+				</h3>
+			</div>
+			<div class="modal-body">
+				<input type="text" name="pick_note" value="" style="width: 200px; font-size: 20px;">&nbsp;&nbsp;<span style="font-size: 20px;">输入格式如：20根/包</span><br><span style="color: red;font-size: 20px;">原包装含量：{{$product.product.picking_note}}</span><br><span style="color: red;font-size: 20px;">sku包装含量：{{$product.sku.picking_note}}</span>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				<button type="button" data-pid="{{$product.product.pid}}" class="btn btn-default _j_save_picking_note">提交更改</button>
+			</div>
+		</div>
+	</div>
+</div>

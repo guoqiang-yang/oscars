@@ -1,0 +1,120 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if empty($info.id)}}添加{{else}}编辑{{/if}}百科</h1>
+
+	<form class="form-horizontal" role="form">
+		{{if $info.id}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">url：</label>
+            <div class="col-sm-10">
+                <a href="http://{{$TOC_H5_MAIN_HOST}}/wiki/detail.php?id={{$info.id}}" target="_blank">
+                    http://{{$TOC_H5_MAIN_HOST}}/wiki/detail.php?id={{$info.id}}
+                </a>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">id：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="id" value="{{$info.id}}" readonly="true">
+			</div>
+		</div>
+		{{/if}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">标题：</label>
+			<div class="col-sm-4">
+				<input maxlength="15" type="text" class="form-control" name="title" value="{{$info.title}}">
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">副标题：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="sub_title" value="{{$info.sub_title}}">
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">封面：</label>
+			<div class="col-sm-4">
+                <button style="margin-bottom: 20px;" type="button" class="btn btn-default" id="_j_btn_select_pic" data-path="cpoint/product">从电脑选择图片</button><br />
+                <div id="img_list" class="gridly" style="position: relative;">
+                    {{if !empty($info.cover)}}
+                    <div class="img_item brick" style="" data-pic="{{$info.cover}}">
+                        <img style="width: 100%;" class="img_img" data-pic="{{$info.cover}}" src="{{$info._cover}}" />
+                    </div>
+                    {{/if}}
+                </div>
+                <div style="clear: both;"></div>
+                <input type="hidden" name="cover" value="{{$info.cover}}">
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">状态：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="status">
+                    <option {{if $info.status == 0}} selected="selected" {{/if}} value="0">上线</option>
+                    <option {{if $info.status == 4}} selected="selected" {{/if}} value="4">下线</option>
+                    <option {{if $info.status == 1}} selected="selected" {{/if}} value="1">删除</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">设计：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="design">
+                    <option value="0">请选择</option>
+                    {{foreach $design as $id => $item}}
+                    <option {{if $info.design == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">装修：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="fit_step">
+                    <option value="0">请选择</option>
+                    {{foreach $fit_step as $id => $item}}
+                    <option {{if $info.fit_step == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">主材：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="main_material">
+                    <option value="0">请选择</option>
+                    {{foreach $main_material as $id => $item}}
+                    <option {{if $info.main_material == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">辅材：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="other_material">
+                    <option value="0">请选择</option>
+                    {{foreach $other_material as $id => $item}}
+                    <option {{if $info.other_material == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">正文：</label>
+            <div class="col-sm-8">
+                <!-- 加载编辑器的容器 -->
+                <script id="editor" name="description" type="text/plain">
+                    {{$description}}
+                </script>
+            </div>
+		</div>
+
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="button" class="btn btn-primary" id="btn_save_wiki">保存</button>
+			</div>
+		</div>
+	</form>
+
+</div>

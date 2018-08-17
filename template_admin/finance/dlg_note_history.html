@@ -1,0 +1,26 @@
+<table class="table">
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>内容</th>
+        <th>操作者</th>
+        <th>添加时间</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $list as $tracking}}
+    <tr data-cid="{{$tracking.tid}}">
+        <td>
+            {{$tracking.tid}}
+        </td>
+        <td style="max-width: 500px;">
+            {{$tracking.content}}
+        </td>
+        <td>
+            {{$tracking.edit_suer}}
+        </td>
+        <td>{{$tracking.ctime}}</td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>

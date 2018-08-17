@@ -1,0 +1,131 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+        客户欠款统计
+	</h1>
+
+	<form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>查看方式：</label>
+				<select class="form-control" name="view_mode">
+					<option value="month" {{if $view_mode == "month"}}selected="selected"{{/if}}>按月查看</option>
+					<option value="date" {{if $view_mode == "date"}}selected="selected"{{/if}}>按天查看</option>
+				</select>
+			</div>
+			<div class="form-group _j_date_selecter" style="margin-right: 20px;{{if $view_mode == 'month'}}display: none;{{/if}}">
+				<label>时间：</label>
+				<input type="date" class="form-control" name="start_date" value="{{$start_date}}" style="display: inline-block;width: 160px;">
+				To
+				<input type="date" class="form-control" name="end_date" value="{{$end_date}}" style="display: inline-block;width: 160px;">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+
+	{{if count($data_list) > 0}}
+	<table class="table table-bordered" id="receivable_table">
+		<thead>
+		<tr>
+			<th>时间</th>
+			<th>总金额</th>
+			<th>有账期</th>
+			<th>无账期</th>
+			<th>无账期已回单</th>
+			<th>无账期未回单</th>
+		</tr>
+		</thead>
+		<tbody>
+        <tr>
+            <td><button type="button" class="btn btn-primary">总计</button></td>
+            <td>{{$sum_data.total_amount}}</td>
+            <td>{{$sum_data.account_amount}}</td>
+            <td>{{$sum_data.no_amount}}</td>
+            <td>{{$sum_data.no_amount_receipt}}</td>
+            <td>{{$sum_data.no_amount_noreceipt}}</td>
+        </tr>
+		{{foreach $data_list as $item}}
+		<tr>
+			<td><button type="button" class="btn btn-primary">{{if $view_mode == 'month'}}{{$item.record_month}}{{else}}{{$item.record_date}}{{/if}}</button></td>
+			<td>{{$item.total_amount}}</td>
+			<td>{{$item.account_amount}}</td>
+			<td>{{$item.no_amount}}</td>
+			<td>{{$item.no_amount_receipt}}</td>
+            <td>{{$item.no_amount_noreceipt}}</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+	{{else}}
+	暂无记录
+	{{/if}}
+
+	{{if $view_mode == "date"}}
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+		</ul>
+	</nav>
+	{{/if}}
+</div>
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="myModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">标题</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="button" data-dismiss="modal" class="btn btn-default">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+	$(function () {
+	    var view_mode = '{{$view_mode}}';
+
+        $('#receivable_table').on("click", "button", function () {
+            $('#myModal .modal-header .modal-title').empty().text($(this).text());
+            $('#myModal').modal();
+            $('#myModal .modal-body').empty().html('<p>正在加载数据。。。</p>');
+            var b_obj = $(this).parent().nextAll();
+            $.ajax({
+                url: '/statistics/ajax/get_salers_amount.php',
+                type: 'POST',
+                data: 'view_mode='+view_mode+'&time_str='+$(this).text()+'&start_date='+$('input[name=start_date]').val()+'&end_date='+$('input[name=end_date]').val(),
+                dataType: 'json',
+                success: function(ret){
+                    if (ret.errno == 1){
+                        var obj_list = ret.list;
+                        var html_content = '<table class="table table-bordered">';
+                        html_content += '<thead><tr><th>销售员</th><th>总金额</th><th>有账期</th><th>无账期</th><th>无账期已回单</th><th>无账期未回单</th></tr></thead><tbody>';
+                        html_content += '<tr><td>总计</td>';
+                        $.each(b_obj,function () {
+                            var tmp_price = this.innerHTML;
+                            html_content += '<td>'+tmp_price+'</td>';
+                        });
+                        html_content += '</tr>';
+                        $.each(obj_list,function(){
+                            html_content += '<tr><td>'+this.name+'</td><td>'+this.total_amount+'</td><td>'+this.account_amount+'</td><td>'+this.no_amount+'</td><td>'+this.no_amount_receipt+'</td><td>'+this.no_amount_noreceipt+'</td></tr>';
+                        });
+                        html_content += '</tbody></table>';
+                        $('#myModal .modal-body').empty().html(html_content);
+                    }
+                }
+            });
+        });
+
+        $('select[name="view_mode"]').change(function(){
+			if ('month' == $(this).val()) {
+				$('._j_date_selecter').hide();
+			}else{
+				$('._j_date_selecter').show();
+			}
+		});
+	})
+</script>

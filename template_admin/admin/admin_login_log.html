@@ -1,0 +1,71 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">登录日志</h1>
+
+    <form class="form-inline" role="form" action="">
+        <div class="placeholder">
+            <div class="form-group">
+                <label>操作者：</label>
+                <select class="form-control" name="suid" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.admin_id)}}selected="selected" {{/if}}>请选择</option>
+                    {{foreach $admin_list as $man}}
+                    <option value="{{$man.suid}}" {{if $search_conf.suid==$man.suid}}selected="selected"{{/if}}>{{$man.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>suid</th>
+            <th>姓名</th>
+            <th>ip</th>
+            <th>agent</th>
+            <th>来源</th>
+            <th>登录时间</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $action}}
+        <tr>
+            <td>
+                {{$action.id}}
+            </td>
+            <td>
+                {{$action.suid}}
+            </td>
+            <td>
+                {{$action._suer.name}}
+            </td>
+            <td class="login_ip" data-ip="{{$action.id}}_{{$action.ip}}">
+                {{$action.ip}}<br> <span id="{{$action.id}}" style="font-size: 10px;color: red;"></span>
+            </td>
+            <td>
+                {{$action.agent}}
+            </td>
+            <td>
+                {{$action.source}}
+            </td>
+            <td>
+                {{$action.mtime}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

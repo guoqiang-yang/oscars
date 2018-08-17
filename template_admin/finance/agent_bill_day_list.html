@@ -1,0 +1,63 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">经销商日结款列表</h1>
+
+    <form class="form-inline" role="form" action="/finance/agent_bill_day_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>ID：</label>
+                <input type="text" class="form-control" name="bid" value="{{$search_conf.bid}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>结算日期：</label>
+                <input type="date" class="form-control" name="day" value="{{$search_conf.day}}" style="width:180px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>经销商ID：</label>
+                <input type="text" class="form-control" name="aid" value="{{$search_conf.aid}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>经销商名：</label>
+                <input type="text" class="form-control" name="title" value="{{$search_conf.title}}" style="width:120px;">
+            </div>
+            <button style="margin-left: 50px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width:10%;">ID</th>
+            <th style="width:10%;">结算日期</th>
+            <th style="width:15%;">经销商</th>
+            <th style="width:10%;">订单总金额</th>
+            <th style="width:10%;">退款总金额</th>
+            <th style="width:10%;">结算金额</th>
+            <th style="width:8%;">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $day_list as $item}}
+        <tr>
+            <td>{{$item.bid}}</td>
+            <td>{{$item.day}}</td>
+            <td>
+                {{$item.aid}}<br>
+                {{$item.agent_name}}
+            </td>
+            <td>{{$item.order_price/100}}</td>
+            <td>{{$item.refund_price/100}}</td>
+            <td>{{$item.price/100}}</td>
+            <td><a href="/finance/agent_bill_day_detail.php?bid={{$item.bid}}" target="_blank">查看</a></td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

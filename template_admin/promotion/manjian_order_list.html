@@ -1,0 +1,207 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		订单列表
+	</h1>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>id</th>
+			<th>应付金额</th>
+			<th style="width:10%;">运/搬/优</th>
+			<th style="width:9%;">客户/联系人</th>
+			<th style="width:16%;">工地地址/备注</th>
+			<th style="width:10%;">仓库</th>
+			<th style="width:10%;">下单时间</th>
+			<th style="width:8%;">送货时间</th>
+			<th style="width: 8%;">状态</th>
+			<th style="width:9%;">录入/确认/销售</th>
+			<th style="width:9%;">操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $order}}
+			<tr data-oid="{{$order.oid}}" {{if $order.has_print<= 0}}style="background: #FAEBD7;{{if $order.source_oid<>0}}color:red;{{/if}}"{{/if}}>
+				<td>
+					<p><a href="/order/order_detail.php?oid={{$order.oid}}">{{$order.oid}}</a></p>
+                    {{if in_array($order._suser.suid, $saler_suid_list)}}
+                    <p style="color: #FF0000;">销售</p>
+                    {{/if}}
+					{{if $order.source == $source_after_sale}}
+					<p style="color: #FF0000;">售后</p>
+					{{/if}}
+				</td>
+				<td>
+					￥{{($order.price+$order.freight+$order.customer_carriage-$order.privilege)/100}}
+				</td>
+				<td>
+					{{if empty($order.freight)}}-{{else}}￥{{$order.freight/100}}{{/if}}/
+					{{if empty($order.customer_carriage)}}-{{else}}￥{{$order.customer_carriage/100}}{{/if}}/
+					{{if empty($order.privilege)}}-{{else}}￥{{$order.privilege/100}}{{/if}} <br/>
+					{{if !empty($coopworker_of_order[$order.oid])}}
+						{{foreach $coopworker_of_order[$order.oid] as $_cone}}
+							<span style="color:gray;">{{if $_cone.type==1}}[司]{{else}}[搬]{{/if}}{{$_cone.info.name}}:</span>
+							<span style="color:gray;">￥{{$_cone.price/100}} {{if $_cone.paid==1}}[Y]{{else}}[N]{{/if}}</span> <br>
+						{{/foreach}}
+					{{else}}
+						{{if $order.driver_money}}
+							<span style="color:gray;">司机:￥{{$order.driver_money/100}}</span> {{if $order.driver_money_paid==1}}【Y】{{else}}【N】{{/if}} <br>
+						{{/if}}
+						{{if $order.carrier_money}}
+							<span style="color:gray;">搬运:￥{{$order.carrier_money/100}}</span> {{if $order.carrier_money_paid==1}}【Y】{{else}}【N】{{/if}}
+						{{/if}}
+					{{/if}}
+				</td>
+				<td>
+					<a href="/crm2/customer_list.php?cid={{$order.cid}}">{{$order.contact_name}}</a>
+					<br/>
+					<span style="color:gray;">{{$order.contact_name}}</span>&nbsp;
+					{{if $_isCS || $_isAdmin}}
+						<a href="/order/customer_list_cs.php?cid={{$order.cid}}&oid={{$order.oid}}" style="color:gray;">(信息)</a>
+					{{/if}}
+					{{if $order._customer.payment_days > 0}}
+						<br/>
+						<span style="color:red;">[账期：{{$order._customer.payment_days}}天]</span>
+					{{/if}}
+				</td>
+				<td>
+					{{if $order.delivery_type == 2}}
+						<span style="color:#00CC33;">客户自提</span>
+					{{else}}
+						<a href="http://map.baidu.com/?s=con%26wd%3D{{$order._district}}{{$order.address}}" target="_blank">{{$order._district}} {{$order.address}}</a><br/>
+					{{/if}}
+					{{if $order.note}}
+						<span style="color:gray;">备注：{{$order.note}}</span>
+					{{/if}}
+					{{if $order.source_oid<>0}}
+						<br/>
+						<span {{if $order.has_print<=0 }}class="redline"{{/if}}>【<a href="/order/order_detail.php?oid={{$order.source_oid}}">{{$order.source_oid}} 的补单</a>】</span>
+					{{/if}}
+				</td>
+				<td>{{$order._warehouse_name}}</td>
+				<td>{{$order.ctime}}</td>
+				<td>{{$order._delivery_date}}</td>
+				<td>
+					{{if ($order.step==4 && $_isWarehouse) || ($order.step==3 && $_isLM)}}
+						<span style="color:red;">
+					{{/if}}
+					{{$order._step}}
+					{{if ($order.step==4 && $_isWarehouse) || ($order.step==3 && $_isLM)}}
+						</span>
+					{{/if}}
+					{{if 1||($_isFinance || $_isAdmin || $_isCS || $_isSales)}}
+						{{if $order.paid==1}}
+							<br/><span style="color:#00CC33;">(已收款)</span>
+						{{elseif $order.paid==2}}
+							<br/><span style="color:red;">(部分收款)</span>
+						{{elseif $order.step>5}}
+						<br/><span style="color:red;">(欠款)</span>
+						{{/if}}
+					{{/if}}
+                    {{if $order.is_guaranteed==1}}
+                        <br><span style="color:blue">[已担保]</span>
+                    {{/if}}
+					{{if isset($admin_task_list[$order.oid])}}
+						<br> <span style="color:red;">任务：</span>
+						<a href="/user/admin_task_list.php?exec_status=0&objtype=1&objid={{$order.oid}}" target="_blank">
+							{{foreach $admin_task_list[$order.oid] as $_task}}
+								{{$_task._short_desc}};
+							{{/foreach}}
+						</a>
+					{{/if}}
+				</td>
+				<td>
+					{{if $order.source > 0}}
+						<span style="color:red;">({{$order_source[$order.source]}})</span>
+					{{elseif $order._suser}}
+						{{if ($order._suser.suid== 1099||$order._suser.suid== 1098) && $order.step==1}}
+							<div style="color:red;">
+								{{$order._suser.name}}
+							</div>
+						{{else}}
+							<div style="color:gray;">
+								{{$order._suser.name}}
+							</div>
+						{{/if}}
+					{{/if}}
+					<div>
+						{{if $order._sure_suid.name}}
+							{{$order._sure_suid.name}}
+						{{else}}
+							-
+						{{/if}}
+					</div>
+					<div style="color:gray;">
+						{{if $order._saler_suid.name}}
+							[{{$order._saler_suid.name}}]
+						{{else}}
+							[无销售]
+						{{/if}}
+					</div>
+				</td>
+				<td>
+					<a style="margin-right: 10px;" href="/order/order_detail.php?oid={{$order.oid}}">查看</a>
+					{{if $order.step >= 2 && !$_isSales && $order.has_print <= 0}}
+						<a href="/order/order_print.php?oid={{$order.oid}}" target="_blank">打印</a>
+					{{/if}}
+					{{if !$order.has_finish && ($_isCS || $_isAdmin || ($_isSales && $order.step < 2) || array_key_exists($_uid, $after_sale_place_order))}}
+                        <br/>
+						<a style="margin-right: 10px;" href="/order/edit_order.php?oid={{$order.oid}}">编辑</a>
+					{{/if}}
+					{{if $_isCS || $_isAdmin}}
+						<br/>
+						{{if $order.status==0}}
+							{{if $order.step<2 && $order.paid==0}}
+								<a href="#" class="_j_delete_order">删除</a>
+							{{/if}}
+						{{else}}
+							<a href="#" class="_j_reset_order">恢复</a>
+						{{/if}}
+					{{/if}}
+					{{if $_isAdmin || $_isLM}}
+						{{if $order.status==0}}
+							{{if $order.step >= 2 && $order.step <= 4}}
+							<a href="#" class="_j_cancel_order">取消</a>
+							{{/if}}
+						{{/if}}
+					{{/if}}
+					{{if $_isLM || $_isCS || $_uid==1004}}
+						{{if $order.has_print<=0}}
+							<br/>
+							<span style="color:red;">
+								{{if $order.has_print==0}}
+									(未打印)
+								{{elseif $order.has_print==-1}}
+									【重打印】
+								{{/if}}
+							</span>
+						{{/if}}
+					{{/if}}
+					<br />
+					<a href="/order/order_action_log.php?admin_id=0&oid={{$order.oid}}&action_type=0" >操作日志</a>
+
+				</td>
+			</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li>
+				<a style="color:#555;">共{{$total|string_format:"%d"}}个
+					{{if $supplement > 0}}
+					（其中补单{{$supplement|string_format:"%d"}}个）
+					{{/if}}
+				</a>
+			</li>
+			{{if !$_hide_useless}}
+			<li><a style="color:#555;">货款总计：{{$price_total / 100}} 元</a></li>
+			<li><a style="color:#555;">应收总计：{{$sum / 100}} 元</a></li>
+			{{/if}}
+		</ul>
+	</nav>
+
+</div>

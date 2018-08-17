@@ -1,0 +1,56 @@
+
+<div class="form-group" style="margin-bottom: 100px;">
+    <div class="col-sm-12" style="font-size:14px;">
+        <span class="text-value">skuid：{{$sid}}</span>
+        <span class="text-value">名称：{{$title}}</span>
+    </div>
+    {{if !empty($loc_stocks)}}
+    {{foreach $loc_stocks as $loc_info}}
+    <div class="col-sm-8" style="font-size:14px; color:red;">
+        <span class="text-value">货位：{{$loc_info.location}}</span>
+        <span class="text-value">库存：{{$loc_info.num}}</span>
+        <span class="text-value">占用：{{$loc_info.occupied}}</span>
+    </div>
+    {{/foreach}}
+    {{else}}
+    <div class="col-sm-8" style="font-size:20px; color:red;">
+        <span class="text-value">无货位库存信息</span>
+    </div>
+    {{/if}}
+    
+</div>
+
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>单号</th>
+        <th>单据类型</th>
+        <th>总数量</th>
+        <th>空采数量</th>
+        <th>占用</th>
+        <th>配送时间</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $products as $p}}
+    <tr class="_j_product" {{if $p.oid==$oid}} style="background-color:yellow;"{{/if}}>
+        <td><a href="{{$p.url}}" target="_blank">{{$p.obj_id}}</a></td>
+        <td>{{$p.type}}</td>
+        <td>{{$p.num}}</td>
+        <td>{{$p.vnum}}</td>
+        <td>
+            {{if !empty($p._location)}}
+            {{foreach $p._location as $_loc_one}}
+            <span>{{$_loc_one.loc}}：{{$_loc_one.num}}</span>
+            <br>
+            {{/foreach}}
+            {{else}}
+            <span style="color:red;">无</span>
+            {{/if}}
+        </td>
+        <td>{{$p._delivery_time}}</td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>

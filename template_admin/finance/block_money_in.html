@@ -1,0 +1,342 @@
+<div class="modal fade _j_dialog" id="editFinanceModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">收款</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label" style="color:red;">支付金额：</label>
+						<div class="col-sm-7">
+                            <input type="text" class="form-control" name="price" placeholder="金额" value="{{if $order}}{{($order.total_order_price-$order.real_amount)/100}}{{else}}0{{/if}}" style="display:inline-block;width:100px;">元<span style="color:red;">（不含余额）</span>
+						</div>
+					</div>
+					<div class="form-group" {{if $customer.account_amount<=0}} style="display: none;"{{/if}} >
+						<label class="col-sm-3 control-label">使用余额：</label>
+						<div class="col-sm-7">
+							<input id="_j_use_balance_paid" type="checkbox" name="use_balance" data-balance="{{$customer.account_amount}}" data-willpay="{{$order.total_order_price-$order.real_amount}}"> 账户余额：{{$customer.account_amount/100}}元
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">抹零金额：</label>
+						<div class="col-sm-7">
+							<input class="form-control" type="text" name="moling" style="display:inline-block;width:100px;"> 元（上限：10元）
+						</div>
+					</div>
+					{{if $customer.payment_days!=0}}
+					<div class="form-group" style="display:none;">
+						<label class="col-sm-3 control-label">返点金额：</label>
+						<div class="col-sm-7">
+							<input class="form-control" type="text" name="discount" style="display:inline-block;width:100px;"> 元
+						</div>
+					</div>
+					{{/if}}
+					<div class="form-group">
+						<label class="col-sm-3 control-label">付款方式：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+								{{foreach $payment_types_finance as $type_id => $type_name}}
+                                {{if $type_id != 20}} {{*信用支付*}}
+								<option value="{{$type_id}}" {{if $order.payment_type== $type_id}}selected="selected" {{/if}}>{{$type_name}}</option>
+                                {{/if}}
+								{{/foreach}}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+
+						<div class="col-sm-7">
+							<textarea class="form-control" rows="2" name="note">{{if $order}}订单收款 (单号:{{$order.oid nofilter}}){{/if}}</textarea>
+						</div>
+					</div>
+                    <div class="form-group" style="display:none;">
+						<label class="col-sm-3 control-label" style="color:blue;">服务费：</label>
+						<div class="col-sm-7">
+							<input class="form-control" type="text" name="service_fee" value="0" disabled="true" style="display:inline-block;width:100px;"> 元 (下线)
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label" style="color:red;">坏账金额：</label>
+						<div class="col-sm-7">
+							<input class="form-control" type="text" name="bad_debt" style="display:inline-block;width:100px;"> 元
+						</div>
+					</div>
+					<br>
+					<div class="form-group" style="color:red;">
+						<label class="col-sm-3 control-label">明细：</label>
+
+						<div class="col-sm-7">
+							<span style="font-size: 16px;">应收：{{$order.total_order_price/100}}元</span> <br>
+							<span style="font-size: 16px;">已收：{{$order.real_amount/100}}元</span> <br>
+							<span style="font-size: 16px;">欠款：{{($order.total_order_price-$order.real_amount)/100}}元</span> <br>
+							<span style="font-size: 16px; color:blue;">余额：{{$customer.account_amount/100}}元</span>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary _j_save_money_in" data-wid="{{$order.wid}}" data-cid="{{$order.cid}}" data-uid="{{$order.uid}}" data-type="2" data-objid="{{$order.oid}}">确认收款</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="adjustFinanceModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">调账</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">类型：</label>
+						<div class="col-sm-7">
+							<input style="margin-right: 5%" type="radio" value="1" name="adtype"> <span style="margin-right: 10%">应收增加</span> <input style="margin-right: 5%" class="" type="radio" value="2" name="adtype"> <span style="margin-right: 10%">应收减少</span> <br> <input style="margin-right: 5%" type="radio" value="10" name="adtype"> <span style="margin-right: 10%">财务退款</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">金额：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="price" placeholder="金额" value="" style="display:inline-block;width:100px;">元
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">付款方式：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+								<option value="0">请选择</option>
+								{{foreach $payment_types as $type_id => $type_name}}
+									<option value="{{$type_id}}" {{if $order.payment_type== $type_id}}selected="selected" {{/if}}>{{$type_name}}</option>
+								{{/foreach}}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+						<div class="col-sm-7">
+							<textarea class="form-control" rows="2" name="note"></textarea>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary _j_adjust_money_in" data-cid="{{$cid}}" data-type="3">确认调账</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="financeModifyOrderModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">运营优惠调整</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">优惠：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="privilege" value="{{$order.privilege/100}}" style="display:inline-block;width:100px;"> <span> （原优惠：{{$order.privilege/100}}元）</span>
+						</div>
+					</div>
+                    <div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+						<div class="col-sm-7">
+                            <textarea class="form-control" name="note" style="" rows="2"></textarea>
+						</div>
+					</div>
+					{{*未收款，不显示该部分*}}
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="_j_order_finance_modify" data-oid="{{$order.oid}}" data-price="{{$order.price/100}}" data-type="3">确认修改</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="operatorModifyOrderModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">运营修改</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">客户运费：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="freight" value="{{$order.freight/100}}" style="display:inline-block;width:100px;"> <span> （原运费：{{$order.freight/100}}元）</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">客户搬运费：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="customer_carriage" value="{{$order.customer_carriage/100}}" style="display:inline-block;width:100px;"> <span> （原搬运费：{{$order.customer_carriage/100}}元）</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+						<div class="col-sm-7">
+							<textarea class="form-control" name="note" style="" rows="2"></textarea>
+						</div>
+					</div>
+					{{*未收款，不显示该部分*}}
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="_j_order_operator_modify" data-oid="{{$order.oid}}" data-price="{{$order.price/100}}" data-type="3">确认修改</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="modifySingleMoneyInModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">财务修改</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">收款情况：</label>
+						<div class="col-sm-7">
+							<span id="_j_money_in_detail" style="line-height:30px; font-size:16px;"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">财务收款：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="price" value="" style="display:inline-block;width:100px;" disabled="true"> 元
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">收款方式：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+								<option value="0">无</option>
+								{{foreach $payment_types as $type_id => $type_name}}
+									<option value="{{$type_id}}">{{$type_name}}</option>
+								{{/foreach}}
+							</select>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="_j_confirm_single_money_in">确认修改</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="showPaidCoopworker" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">支付运费/搬运费</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+                    <div class="form-group">
+						<label class="col-sm-3 control-label">工人：</label>
+						<div class="col-sm-7 text-value">
+                            <span class="cinfo"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">金额：</label>
+						<div class="col-sm-7 text-value">
+                            <span class="price"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">付款方式：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+								<option value="0">请选择</option>
+								{{foreach $coopworker_payment_types as $type_id => $type_name}}
+									<option value="{{$type_id}}" {{if 2== $type_id}}selected="selected" {{/if}}>{{$type_name}}</option>
+								{{/foreach}}
+							</select>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="_j_paid_for_coopworker" data-oid="{{$order.oid}}">确认支付</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="dlgTransferAmountInOrder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">转余额-订单</h4>
+			</div>
+			<div class="modal-body">
+				
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="confirmTransferAmount" data-oid="{{$order.oid}}">确认转移</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="dlgSalePreferentialAmountInOrder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">销售优惠调整</h4>
+			</div>
+			<div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">发放人：</label>
+                        <div class="col-sm-7">
+                            <select class="form-control" name="send_suid" style="display:inline-block;width:150px;">
+                                <option value="0">请选择</option>
+                                {{foreach $sales_privilege as $item}}
+                                <option value="{{$item.suid}}" {{if $order.preferential_info.send_suid == $item.suid}}selected="selected" {{/if}}>{{$item['name']}}</option>
+                                {{/foreach}}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">优惠金额：</label>
+                        <div class="col-sm-7 text-value">
+                            <input type="text" class="form-control" name="price" value="{{$order.sale_privilege/100}}" style="display:inline-block;width:100px;"> 元
+                        </div>
+                    </div>
+                </form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="_j_confirm_sale_preferential_amount" data-oid="{{$order.oid}}">确认修改</button>
+			</div>
+		</div>
+	</div>
+</div>

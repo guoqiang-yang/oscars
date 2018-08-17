@@ -1,0 +1,26 @@
+实现思路：
+
+在Data_Sms::sendNew()的方法里，可以决定采用哪一个邮件引擎发送邮件：
+    //阿里云邮件引擎
+    //$engine = Sms_Factory::getSmsEngine('aliyun', $mobile, $key, $para);
+    //第一信息邮件引擎
+    //$engine = Sms_Factory::getSmsEngine('yixinxi', $mobile, $key, $para);
+
+在Sms_Factory中，根据getSmsEngine的第一个参数来决定实例化哪一个邮件引擎类：
+    case 'aliyun':
+        return new Sms_Aliyun($mobile, $key, $para);
+        break;
+    case 'yixinxi':
+        return new Sms_Yixinxi($mobile, $key, $para);
+        break;
+    default:
+        throw new Exception('无效的邮件引擎！');
+
+Data_Sms里的核心方法是sendNew，之前的send都已经被sendNew代替了，send方法可以删除了。
+另外因为目前验证码使用的是阿里云邮件引擎，而通知使用的是第一信息的邮件引擎，所以还有一个
+sendVerifyCode方法。如果之后通知和验证码都是用阿里云引擎，sendVerifyCode方法也可以被
+sendNew方法代替了。
+
+新增邮件引擎：
+    在include/sms里新增Sms_XXX实现引擎，然后在Sms_Factory的getSmsEngine方法中新增
+    case分支，根据第一个参数初始化引擎即可。

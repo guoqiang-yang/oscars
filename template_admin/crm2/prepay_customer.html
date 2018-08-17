@@ -1,0 +1,81 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">
+    预存客户列表
+    {{if !empty($_permissions["/crm2/download_prepay_customer"])}}
+    <a href="/crm2/download_prepay_customer.php" class="btn btn-success" style="margin-left:50px;">下载</a>
+    {{/if}}
+  </h1>
+  
+  <table class="table">
+    <thead>
+    <tr>
+      <th style="width:8%;">CId</th>
+      <th style="width:16%;">客户信息</th>
+      <th style="width:8%">销售专员</th>
+      <th style="width:6%;">预存次数</th>
+      <th style="width:8%;">总预存金额</th>
+      <th style="width:8%;">剩余金额</th>
+      <th style="width:8%;">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $customer_list as $customer}}
+    <tr data-cid="{{$customer.cid}}">
+      <td>
+        {{$customer.cid}}<br>{{$sysLevels[$customer._customer.level_for_sys]}}
+      </td>
+      <td>
+        <a href="/crm2/customer_detail.php?cid={{$customer.cid}}">
+          {{if $customer._customer.identity==1}}
+            {{if $customer._customer.name == $customer._customer.all_user_names}}
+            {{$customer._customer.all_user_names}}
+            {{else}}
+            {{$customer._customer.name}}
+            {{if $customer._customer.all_user_names<>'HC_工长'}}-{{$customer._customer.all_user_names}}{{/if}}
+            {{/if}}
+          {{else}}
+          {{$customer._customer.name}}
+          {{/if}}</a>
+        <br/>
+        <span style="color:gray;">{{$customer._customer.all_user_mobiles|truncate:23:"...":true}}</span>
+        
+      </td>
+      
+      <td>{{if isset($customer._saler.name)}}{{$customer._saler.name}}{{else}}无{{/if}}</td>
+      
+      <td>
+        {{$customer.times}}次
+      </td>
+      
+      <td>
+        {{$customer.sum_prices/100}}元
+      </td>
+      
+      <td>
+        {{$customer._customer.account_amount/100}}元
+      </td>
+      <td>
+          {{if !empty($_permissions["/finance/customer_amount_list"])}}
+            <a href="/finance/customer_amount_list.php?cid={{$customer.cid}}&type=1" target="_blank">预存明细</a>
+          {{/if}}
+      </td>
+      
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+      <li><a style="color:#555;">总客户数：{{$stat.total_customers}}</a></li>
+      <li><a style="color:#555;">总金额：{{$stat.total_price/100}}</a></li>
+      <li><a style="color:#555;">剩余金额：{{$stat.available_balance/100}}</a></li>
+    </ul>
+  </nav>
+
+</div>
+
+{{include file="crm2/block/coupon_dialog.html"}}

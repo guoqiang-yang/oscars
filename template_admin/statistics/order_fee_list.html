@@ -1,0 +1,117 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		订单费用
+	</h1>
+
+	<form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>查看方式：</label>
+				<select class="form-control" name="view_mode">
+					<option value="month" {{if $view_mode == "month"}}selected="selected"{{/if}}>按月查看</option>
+					<option value="date" {{if $view_mode == "date"}}selected="selected"{{/if}}>按天查看</option>
+				</select>
+			</div>
+			<div class="form-group _j_date_selecter" style="margin-right: 20px;{{if $view_mode == 'month'}}display: none;{{/if}}">
+				<label>时间：</label>
+				<input type="date" class="form-control" name="from_date" value="{{$from_date}}" style="display: inline-block;width: 160px;">
+				To
+				<input max="{{$yesterday}}" type="date" class="form-control" name="end_date" value="{{$end_date}}" style="display: inline-block;width: 160px;">
+			</div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>城市：</label>
+                <select class="form-control" name="city" id="select_city">
+                    <option value="0" {{if $city_id== 0}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $city_list as $cityId => $cityName}}
+                    <option value="{{$cityId}}" {{if $city_id== $cityId}}selected="selected" {{/if}}>{{$cityName}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>库房：</label>
+                <select class="form-control" name="wid" id="select_warehouse" data-id="{{$cur_wid}}" style="margin-right:20px;">
+                    <option data-city="0" value="0">全部</option>
+                    {{foreach $warehouse_list as $wid => $warehouse}}
+                    <option {{if $wid == $cur_wid}}selected="selected"{{/if}} {{if $city_id>0 && $city_id != $warehouse.city}}style="display: none;"{{/if}} data-city="{{$warehouse.city}}" value="{{$wid}}">{{$warehouse.wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+			<div class="form-group" style="float:right;">
+				<button type="submit" name="action" value="download" class="btn btn-success">导出当前数据</button>
+			</div>
+		</div>
+	</form>
+
+	{{if count($data_list) > 0}}
+	<table class="table table-bordered">
+		<thead>
+		<tr>
+			<th>{{if $view_mode == "month"}}月{{else}}天{{/if}}</th>
+			<th>货款</th>
+			<th>收入运费</th>
+			<th>收入搬运费</th>
+			<th>支出运费</th>
+			<th>支出搬运费</th>
+            <th>物流费率</th>
+			<th>优惠</th>
+			<th>退款</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $data_list as $item}}
+		<tr>
+			<td>{{if $view_mode == "month"}}{{$item.month}}{{else}}{{$item.day}}{{/if}}</td>
+			<td>￥{{($item.price/100)|number_format}}</td>
+			<td>￥{{($item.customer_freight/100)|number_format}}</td>
+			<td>￥{{($item.customer_carriage/100)|number_format}}</td>
+			<td>￥{{($item.freight/100)|number_format}}</td>
+			<td>￥{{($item.carriage/100)|number_format}}</td>
+            <td>{{(($item.freight + $item.carriage) * 100 / $item.price)|string_format:"%.2f"}}%</td>
+			<td>￥{{($item.privilege/100)|number_format}}</td>
+			<td>￥{{($item.refund/100)|number_format}}</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+	{{else}}
+	暂无记录
+	{{/if}}
+
+	{{if $view_mode == "date"}}
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+		</ul>
+	</nav>
+	{{/if}}
+</div>
+
+<script>
+	$(function () {
+
+		$('select[name="view_mode"]').change(function(){
+			if ('month' == $(this).val()) {
+				$('._j_date_selecter').hide();
+			}else{
+				$('._j_date_selecter').show();
+			}
+		});
+
+        $('#select_city').on('change', _changeCity);
+        function _changeCity()
+        {
+            var city = parseInt($('#select_city').val());
+            $('#select_warehouse').val(0);
+            $('#select_warehouse option').each(function() {
+                if (city == 0 || parseInt($(this).data('city')) == city) {
+                    $(this).css('display', '');
+                } else {
+                    $(this).css('display', 'none');
+                }
+            });
+        }
+	})
+</script>

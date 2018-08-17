@@ -1,0 +1,252 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        添加活动
+    </h1>
+    <form class="form-horizontal" role="form">
+        <input type="hidden" id="pid" value="{{$product.product.pid}}">
+        <input type="hidden" id="sid" value="{{$sale.sid}}">
+        <input type="hidden" id="fid" value="{{if !empty($fid)}}{{$fid}}{{else}}{{$sale.fid}}{{/if}}">
+        <input type="hidden" id="s_type" value="{{if !empty($s_type)}}{{$s_type}}{{else}}{{$sale.type}}{{/if}}">
+        <input type="hidden" id="s_position" value="{{if !empty($position)}}{{$position}}{{else}}{{$sale.position}}{{/if}}">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动位置：</label>
+            <div class="col-sm-2" style="padding: 0;margin-left: 15px;">
+                <select class="form-control"   style="float: left" id="type">
+                    <option value="0">请选择活动位置</option>
+                    {{foreach $picture as $id => $item}}
+                    <option value="{{$id}}" {{if $id == $sale.type or $id == $s_type}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group" id="type_container">
+            <label class="col-sm-2 control-label">活动落地页类型：</label>
+            <div class="col-sm-2" style="padding: 0;margin-left: 15px;">
+                <select class="form-control"   style="float: left" id="position">
+                    <option value="0">请选择落地页类型</option>
+                    {{foreach $type as $id => $item}}
+                    <option value="{{$id}}" {{if $id == $sale.position or $id == $position}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div id="out">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">活动名称：</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" id="name" placeholder="请输入本次活动的名称供用户查看" value="{{$sale.name}}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">活动描述：</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" id="detail" placeholder="可不填" value="{{$sale.detail}}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">活动类型：</label>
+                <div class="col-sm-8">
+
+                    <label class="radio-inline">
+                        <input type="radio" name="activity_type" class="activity_type" style="margin-right: 5px" value="1" {{if $sale.activity_type == 1}} checked="checked"{{/if}} {{if !$sale.activity_type}} checked="checked"{{/if}}>
+                        <label>文章类</label>
+                    </label>
+                    <labe class="radio-inline">
+                        <input type="radio" name="activity_type" class="activity_type" style="margin-right: 5px" value="2" {{if $sale.activity_type == 2}} checked="checked" {{/if}}>
+                        <label>落地页类</label>
+                    </labe>
+                </div>
+            </div>
+
+            <div class="form-group url article_link" {{if $sale.activity_type == 2}} hidden {{/if}}>
+                <label class="col-sm-2 control-label">链接地址：</label>
+                <div class="col-sm-5">
+                    <input type="text" class="form-control" id="url" name="url" value="{{$sale.url}}"  placeholder="例 http://sa.haocai001.cn/activity/add_picture.php">
+                </div>
+            </div>
+
+            <div class="form-group commodity_sid"  {{if $sale.activity_type == 1}} hidden {{/if}} {{if !$sale.activity_type}} hidden{{/if}}>
+                <label class="col-sm-2 control-label">请输入商品SID：</label>
+                <div class="col-sm-5">
+                    <input type="text" name="commodity_sid" class="form-control" value="{{$sale.commodity_sid}}"  placeholder="最多只能填写50个商品SID">
+                </div>
+            </div>
+            <div class="form-group" id="least_price">
+                <label class="col-sm-2 control-label">活动商品最低价：</label>
+                <div class="col-sm-1" style="padding: 0;margin-left: 15px;">
+                    <select class="form-control"   style="float: left" name="least_price">
+                        {{foreach $price as $id => $item}}
+                        <option value="{{$id}}" {{if $id == $sale.sale_price[0]}}selected="selected"{{/if}}>{{$item}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <div class="col-sm-1" style="padding: 0">
+                    <select class="form-control" name="least_price" data-init="{{$picture.type}}" style="float: right">
+                        {{foreach $price as $id => $item}}
+                        <option value="{{$id}}" {{if $id == $sale.sale_price[1]}}selected="selected"{{/if}}>{{$item}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <div class="col-sm-1" style="padding: 0">
+                    <select class="form-control" name="least_price" data-init="{{$picture.type}}" style="float: right">
+                        {{foreach $price as $id => $item}}
+                        <option value="{{$id}}" {{if $id == $sale.sale_price[2]}}selected="selected"{{/if}}>{{$item}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <div style="float: left;margin: 10px;">
+                    .
+                </div>
+                <div class="col-sm-1" style="padding: 0">
+                    <select class="form-control" name="least_price" data-init="{{$picture.type}}" style="float: right">
+                        {{foreach $price as $id => $item}}
+                        <option value="{{$id}}" {{if $id == $sale.sale_price[3]}}selected="selected"{{/if}}>{{$item}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <div class="col-sm-1" style="padding: 0">
+                    <select class="form-control" name="least_price" data-init="{{$picture.type}}" style="float: right">
+                        {{foreach $price as $id => $item}}
+                        <option value="{{$id}}" {{if $id == $sale.sale_price[4]}}selected="selected"{{/if}}>{{$item}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+            </div>
+        </div>
+        {{if empty($pid)}}
+        <div id="in">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">搜索添加商品：</label>
+                <div class="col-lg-6">
+                    <div class="input-group">
+                            <input type="text" class="form-control" placeholder="请输入添加的商品名称" value="{{$keyword}}" id="search_product">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" id="search" url="/activity/add_floor_sale.php">Go!</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{else}}
+        <div id="in">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">商品信息：</label>
+                <div class="col-sm-8">
+                    <div style="display:inline-block;float:left" data-x="{{$picture._picinfo.srcinfo.x}}" data-y="{{$picture._picinfo.srcinfo.y}}" data-w="{{$picture._picinfo.srcinfo.w}}" data-h="{{$sku._picinfo.srcinfo.h}}" data-url="{{if $sku._picinfo._srcpic}}{{$sku._picinfo._srcpic.middle}}{{else}}{{if $sku._pic.middle}}{{$sku._pic.middle}}{{/if}}{{/if}}">
+                        <img src="{{if empty($sale.pic_url)}}{{if empty($product.sku._pic)}}/i/nopic100.jpg{{else}} {{$product.sku._pic.small}} {{/if}}{{else}}{{$sale.pic_url}}{{/if}}" id="pic_url">
+                    </div>
+                    <div style="margin-left: 10px;margin-top: 10px;float: left;">
+                        <p >名称：<span id="pro_name">{{$product.sku.title}}</span></p>
+                        <p>规格：{{$product.sku.package}}</p>
+                        <p>价格：<em style="color: red;font-size: 18px;">&yen;{{ltrim($product.product.price,'0')/100}}元/{{if $product.sku.unit}}{{$product.sku.unit}}{{else}}个{{/if}}</em></p>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">商品活动价：</label>
+                <div class="col-sm-1" style="padding: 0;margin-left: 15px;">
+                    <select class="form-control"   style="float: left" name="price">
+                        {{foreach $price as $id => $item}}
+                        <option value="{{$id}}" {{if $id == $sale.sale_price[0]}}selected="selected"{{/if}}>{{$item}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <div class="col-sm-1" style="padding: 0">
+                    <select class="form-control" name="price" data-init="{{$picture.type}}" style="float: right">
+                        {{foreach $price as $id => $item}}
+                        <option value="{{$id}}" {{if $id == $sale.sale_price[1]}}selected="selected"{{/if}}>{{$item}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <div class="col-sm-1" style="padding: 0">
+                    <select class="form-control" name="price" data-init="{{$picture.type}}" style="float: right">
+                        {{foreach $price as $id => $item}}
+                        <option value="{{$id}}" {{if $id == $sale.sale_price[2]}}selected="selected"{{/if}}>{{$item}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <div style="float: left;margin: 10px;">
+                    .
+                </div>
+                <div class="col-sm-1" style="padding: 0">
+                    <select class="form-control" name="price" data-init="{{$picture.type}}" style="float: right">
+                        {{foreach $price as $id => $item}}
+                        <option value="{{$id}}" {{if $id == $sale.sale_price[3]}}selected="selected"{{/if}}>{{$item}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <div class="col-sm-1" style="padding: 0">
+                    <select class="form-control" name="price" data-init="{{$picture.type}}" style="float: right">
+                        {{foreach $price as $id => $item}}
+                        <option value="{{$id}}" {{if $id == $sale.sale_price[4]}}selected="selected"{{/if}}>{{$item}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">商品库存：</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" id="sale_num" placeholder="请输入参加本次活动的商品总数" value="{{$sale.sale_num}}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">每名用户限购数量：</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" id="limit_num" placeholder="输入0表示每名用户不限购" value="{{$sale.limit_count}}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">选择活动标识：</label>
+                <div class="col-sm-4">
+                    <div class="radio" style="margin-top: -8px;">
+                        {{foreach $mark as $id => $item}}
+                        <label class="checkbox-inline">
+                            <input type="radio" name="mark" value="{{$id}}" {{if $id== $sale.mark}}checked="checked"{{/if}}>{{$item}}
+                        </label>
+                        {{/foreach}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+        <div id="common">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">显示顺序：</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" id="sort" value="{{$sale.sort}}" placeholder="请输入数字">
+                </div>
+                <label class="col-sm-3 control-label" style="margin-left: -40px"><span style="color: red;">*数字越小位置越靠前，0为最小</span></label>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">活动时间：</label>
+                <div class="col-sm-3">
+                    <input type="datetime-local" class="form-control" id="start_time" value="{{$sale.start_time}}">
+                </div>
+                <div style="float: left;margin: 5px;">
+                    ~
+                </div>
+                <div class="col-sm-3">
+                    <input type="datetime-local" class="form-control" id="end_time" value="{{$sale.end_time}}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">选择图片：</label>
+                <div class="col-sm-8">
+                    <div style="display:inline-block;" class="_j_logo_wrap" data-x="{{$picture._picinfo.srcinfo.x}}" data-y="{{$picture._picinfo.srcinfo.y}}" data-w="{{$picture._picinfo.srcinfo.w}}" data-h="{{$sku._picinfo.srcinfo.h}}" data-url="{{if $sku._picinfo._srcpic}}{{$sku._picinfo._srcpic.middle}}{{else}}{{if $sku._pic.middle}}{{$sku._pic.middle}}{{/if}}{{/if}}">
+                        <img id="_j_upload_view_img" src="{{if $sale.position==1}}{{$sale.pic_url}}{{else}}/i/nopic100.jpg{{/if}}" width="150">
+                    </div>
+                    <button style="display:inline-block; margin-left:10px;" type="button" class="btn btn-default" id="_j_btn_select_pic" data-path="activity">
+                        从电脑选择图片
+                    </button>
+                    <span style="color: red;margin-left: 20px" id="notice">如不选择默认使用原图片</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="button" class="btn btn-primary" id="btn_save_floor_sale">保存</button>
+                    <a type="button" style="margin-left:20px;" class="btn btn-default" onClick="javascript:window.location.href='/activity/floor_sale_list.php?fid={{if !empty($fid)}}{{$fid}}{{else}}{{$sale.fid}}{{/if}}';">取消</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

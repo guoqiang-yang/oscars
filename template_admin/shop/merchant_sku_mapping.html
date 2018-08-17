@@ -1,0 +1,91 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		第三方-好材-sku映射
+		<a style="margin-left: 50px;" class="btn btn-primary" href="/shop/edit_sku_mapping.php">添加映射</a>
+	</h1>
+
+	<form class="form-inline" role="form" action="/shop/merchant_sku_mapping.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>第三方sid：</label>
+				<input style="width: 150px;" type="text" class="form-control" name="msid" value="{{$search_conf.msid}}">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>好材sid：</label>
+				<input style="width: 150px;" type="text" class="form-control" name="sid" value="{{$search_conf.sid}}">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>商户：</label>
+				<select class="form-control" name="car_model">
+					<option value="0" {{if empty($search_conf.mid)}}selected="selected" {{/if}}>请选择</option>
+					{{foreach $merchant_list as $mid => $merchant}}
+					<option value="{{$mid}}" {{if $search_conf.mid== $mid}}selected="selected" {{/if}}>{{$merchant}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+
+			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+		</div>
+	</form>
+
+	<hr>
+
+	{{if count($list) > 0}}
+		<table class="table">
+			<thead>
+			<tr>
+				<th>id</th>
+				<th>商户id</th>
+				<th>商户名</th>
+				<th>第三方sid</th>
+				<th>好材sid</th>
+				<th>第三方对外售价</th>
+				<th>好材对第三方售价</th>
+				<th>操作</th>
+			</tr>
+			</thead>
+			<tbody>
+			{{foreach $list as $item}}
+				<tr>
+					<td>
+						{{$item.id}}
+					</td>
+					<td>
+						{{$item.mid}}
+					</td>
+					<td>
+						{{$item.merchant}}
+					</td>
+					<td>
+						{{$item.msid}}
+					</td>
+					<td>
+						{{$item.sid}}
+					</td>
+					<td>
+						{{$item.mprice / 100}} 元
+					</td>
+					<td>
+						{{$item.price / 100}} 元
+					</td>
+					<td>
+						<a style="margin-right: 10px;" href="/shop/edit_sku_mapping.php?id={{$item.id}}">编辑</a>
+						<a class="delete_sku_mapping" data-id="{{$item.id}}" href="#">删除</a>
+					</td>
+				</tr>
+			{{/foreach}}
+			</tbody>
+		</table>
+	{{else}}
+		暂无数据
+	{{/if}}
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>

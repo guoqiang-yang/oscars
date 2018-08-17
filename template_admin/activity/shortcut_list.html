@@ -1,0 +1,126 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        活动图片管理
+    </h1>
+
+    <a href="/activity/add_shortcut.php" class="btn btn-primary">添加快捷入口</a>
+    <form id="search_form" class="form-inline" role="form" action="/activity/shortcut_list.php"  style="float: right">
+
+
+        <div class="placeholder">
+
+            <div class="form-group" style="margin-right:30px;">
+                <label>入口名称：</label>
+                <input type="text" class="form-control" name="name" value="{{$searchConf.name}}" >
+            </div>
+
+            <div class="form-group" style="margin-right:30px;">
+                <label>所在城市：</label>
+
+                <select class="form-control" name="city" style="width: 100px;">
+                    <option value="0">全部</option>
+                    {{foreach $city as $id => $item}}
+                    <option value="{{$id}}" {{if $searchConf.city==$id}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-right:30px;">
+                <label>状态：</label>
+
+                <select class="form-control" name="online" style="width: 100px;">
+                    <option value="0">全部</option>
+                    <option value="1" {{if $searchConf._online==1}}selected="selected"{{/if}}>在线</option>
+                    <option value="2" {{if $searchConf._online==2}}selected="selected"{{/if}}>已下线</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+
+        </div>
+
+    </form>
+
+    <table class="table table-bordered" style="background: white; text-align: center;">
+        <thead style="background-color: #898989;color: white;font-size: 16px;">
+        <tr>
+            <th style="text-align: center;">序号</th>
+            <th style="text-align: center;">图片</th>
+            <th style="text-align: center;">入口名称</th>
+            <th style="text-align: center;">所在城市</th>
+            <th style="text-align: center;">在线时间</th>
+            <th style="text-align: center;"状态</th>
+            <th style="text-align: center;">排序</th>
+            <th style="text-align: center;">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $item}}
+        <tr data-id="{{$item.id}}" class="_j_pic">
+            <td style="vertical-align: middle;">
+                {{$item.sid}}
+            </td>
+            <td style="vertical-align: middle;">
+                <img src={{$item.imgurl}} style="width: 80px"></a>
+            </td>
+            <td style="vertical-align: middle;">
+                {{$item.name}}
+            </td>
+            <td style="vertical-align: middle;">
+                {{$item['_city']}}
+            </td>
+            <td style="vertical-align: middle;">
+                {{$item['start_time']}}~{{$item['end_time']}}
+            </td>
+
+            <td style="vertical-align: middle;">
+                {{if $item.online == 0}}
+                    {{if $date >= $item['start_time'] && $date <= $item['end_time']}}
+                        在线
+                    {{else if $date < $item['start_time'] }}
+                        待上线
+                    {{else if $date > $item['end_time']}}
+                        已结束
+                    {{/if}}
+                {{else}}
+                    已下线
+                {{/if}}
+                <!--<form action="/activity/edit_sortby.php">
+                    <input style="width: 50px; text-align: center;" type="text" name="sortby" value="{{$item.display_order}}"/>
+                    <input type="hidden" name="id" value="{{$item.id}}"/> <br/>
+                    <input style="width: 50px; margin-top: 5px;" type="submit" name="submit" value="更改"/>
+                </form>-->
+            </td>
+            <td style="vertical-align: middle;">
+                <input style="width: 50px; text-align: center;" type="text" id="data-{{$item.sid}}" value="{{$item.sort}}"/><br/>
+                <button style="width: 50px; margin-top: 5px;" class="shortcut_sort" data-id="{{$item.sid}}">更改</button>
+            </td>
+            <td style="vertical-align: middle;">
+                {{if $item['online'] == 1 }}
+                <div>
+                    <a href="javascript:void(0);" class="shortcut_action" data-id="{{$item.sid}}" data-method="up">{{if $item['end_time'] >= date('Y-m-d H:i:s')}}上线{{/if}}</a>
+                </div>
+                {{else if $item['online'] == 0}}
+                <div>
+                    <a href="javascript:void(0);" class="shortcut_action" data-id="{{$item.sid}}"  data-method="down">{{if $item['end_time'] >= date('Y-m-d H:i:s')}}下线{{/if}}</a>
+                </div>
+                {{/if}}
+                <div>
+                    <a href="/activity/add_shortcut.php?sid={{$item.sid}}">编辑</a>
+                </div>
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+        </ul>
+    </nav>
+</div>

@@ -1,0 +1,125 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">客户拜访列表</h1>
+
+    <form class="form-inline" role="form" action="/crm2/customer_visit_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px;">
+                <label>拜访时间：</label>
+                <input type="datetime-local" class="form-control" name="from_day" placeholder="YYYY-MM-DD HH:ii:ss" value="{{if $search_conf.from_day}}{{$search_conf.from_day|date_format:'%Y-%m-%dT%H:%M:%S'}}{{/if}}" style="width: 230px;"> —
+                <input type="datetime-local" class="form-control" name="end_day" placeholder="YYYY-MM-DD HH:ii:ss" value="{{if $search_conf.end_day}}{{$search_conf.end_day|date_format:'%Y-%m-%dT%H:%M:%S'}}{{/if}}" style="width: 230px;">
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>城市：</label>
+                <select class="form-control" name="city_id">
+                    <option value="0" {{if $search_conf.city_id==0}} selected="selected" {{/if}}>所有</option>
+                    {{foreach $city_list as $key => $city}}
+                    <option value="{{$key}}" {{if $search_conf.city_id == $key}} selected="selected" {{/if}}>{{$city}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            {{if count($team_member)>1}}
+            <div class="form-group">
+                <label>组员：</label>
+                <select class="form-control" name="group_leader" style="margin-right:20px;">
+                    <option value="0" {{if $search_conf.group_leader == 0}} selected="selected" {{/if}}>所有</option>
+                    {{foreach $team_member as $member}}
+                    <option value="{{$member.suid}}" {{if $search_conf.group_leader == $member.suid}} selected="selected" {{/if}}>{{$member.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            {{/if}}
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px;">
+                <label>CID：</label>
+                <input type="text" class="form-control" name="cid" value="{{$search_conf.cid}}">
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>拜访类型：</label>
+                <select class="form-control" name="visit_type">
+                    <option value="0" {{if $search_conf.visit_type==0}} selected="selected" {{/if}}>所有</option>
+                    {{foreach $visit_types as $key => $type}}
+                    <option value="{{$key}}" {{if $search_conf.visit_type == $key}} selected="selected" {{/if}}>{{$type}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button style="margin-left: 50px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+
+    <nav class="nav navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav"  id="customer_visit_navbar" data-type="{{$visit_type}}">
+                    <li>
+                        <a href="{{$page_url}}" style="padding-right: 30px;padding-left: 30px;">
+                            全部
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&type=1" style="padding-right: 30px;padding-left: 30px;">
+                            拜访完成
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&type=2" style="padding-right: 30px;padding-left: 30px;">
+                            记录中
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width:65px;">CID</th>
+            <th>客户信息</th>
+            <th style="width:80px;">销售</th>
+            <th style="width: 150px;">拜访时间</th>
+            <th style="width: 80px;">拜访类型</th>
+            <th style="width: 80px;">城市</th>
+            <th style="width:80px;">状态</th>
+            <th style="width:120px;">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $visit_list as $visit}}
+        <tr>
+            <td>{{$visit.cid}}</td>
+            <td>{{$visit.customer_info.all_user_names}}<br>{{$visit.customer_info.all_user_mobiles}}</td>
+            <td>{{$visit.sale_name}}</td>
+            <td>{{$visit.visit_time}}</td>
+            <td>{{$visit_types[$visit.visit_type]}}</td>
+            <td>{{$city_list[$visit.city_id]}}</td>
+            <td>{{if !$visit.can_edit}}拜访完成{{else}}记录中{{/if}}</td>
+            <td>
+                <a href="/crm2/show_customer_visit.php?id={{$visit.id}}" target="_blank">查看</a>
+                {{if $visit.can_edit && !empty($_permissions['/crm2/edit_customer_visit'])}}
+                <br><a href="/crm2/edit_customer_visit.php?id={{$visit.id}}">编辑</a><br/>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>
+<!-- Modal -->
+{{include file="crm2/block/sale_schedule_dialog.html"}}

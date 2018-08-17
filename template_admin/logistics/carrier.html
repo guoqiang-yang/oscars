@@ -1,0 +1,92 @@
+ <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">搬运工列表</h1>
+
+    <form class="form-inline" role="form" action="/logistics/carrier.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>id：</label>
+                <input style="width: 150px;" type="text" class="form-control" name="id" value="{{$search_conf.cid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>手机：</label>
+                <input style="width: 150px;" type="text" class="form-control" name="mobile" value="{{$search_conf.mobile}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>姓名：</label>
+                <input style="width:100px;" type="text" class="form-control" name="name" value="{{$search_conf.name}}">
+            </div>
+            <div class="form-group">
+                <label>所属库房：</label>
+                <select class="form-control" name="wid">
+                    <option value="0" {{if empty($search_conf.wid)}}selected="selected"{{/if}}>请选择</option>
+                    {{foreach $warehouse as $wid => $name}}
+                    <option value="{{$wid}}" {{if $search_conf.wid==$wid}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+    </form>
+
+    <hr>
+    {{if !empty($_permissions['/logistics/add_carrier'])}}
+    <a href="/logistics/add_carrier.php" class="btn btn-primary">新增</a>
+    {{/if}}
+    <hr>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>姓名</th>
+                <th>电话</th>
+                <th>所属库房</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{foreach $carrier_list as $carrier}}
+                <tr data-cid="{{$carrier.cid}}">
+                    <td>
+                      {{$carrier.cid}}
+                    </td>
+                    <td>
+                        {{$carrier.name}}
+                    </td>
+                    <td>
+                        {{$carrier.mobile}}
+                    </td>
+                    <td>
+                        {{$carrier.warehouse}}
+                    </td>
+                    <td>
+                      {{if $carrier.status==1}}删除{{elseif $carrier.status==5}}未审核{{else}}正常{{/if}}
+                    </td>
+                    <td>
+                        {{if !empty($_permissions['/logistics/add_carrier'])}}
+                        <a href="/logistics/add_carrier.php?cid={{$carrier.cid}}">编辑</a>　
+                        {{/if}}
+                        {{if !empty($_permissions['/logistics/ajax/delete_carrier'])}}
+                        <a data-id="{{$carrier.cid}}" class="delete_carrier" href="javascript:;">删除</a><br />
+                        {{/if}}
+                        {{if !empty($_permissions['/order/carrier_order_list'])}}
+                        <a href="/logistics/carrier_order_list.php?cuid={{$carrier.cid}}&type=2">查看订单</a>　
+                        {{/if}}
+                        {{if !empty($_permissions['/finance/coopworker_bill_list'])}}
+                        <a href="/finance/coopworker_bill_list.php?cuid={{$carrier.cid}}&type=2">查看应付</a>
+                        {{/if}}
+                    </td>
+                </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+                <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

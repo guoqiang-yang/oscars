@@ -1,0 +1,164 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">订单列表</h1>
+
+  <form class="form-inline" role="form" action="/logistics/need_send_order_list.php">
+    <div class="placeholder">
+      <div class="form-group" style="margin-right:20px;">
+        <label>送货日期：</label>
+        <select class="form-control" name="delivery_date">
+          <option value="" {{if empty($searchConf.delivery_date)}}selected="selected"{{/if}}>所有</option>
+          <option value="{{$smarty.now|date_format:"%Y-%m-%d"}}" {{if $searchConf.delivery_date == "{{$smarty.now|date_format:'%Y-%m-%d'}}"}}selected="selected"{{/if}}>今天</option>
+          <option value="{{($smarty.now+86400)|date_format:"%Y-%m-%d"}}" {{if $searchConf.delivery_date == "{{($smarty.now+86400)|date_format:'%Y-%m-%d'}}"}}selected="selected"{{/if}}>明天</option>
+          <option value="{{($smarty.now-86400)|date_format:"%Y-%m-%d"}}" {{if $searchConf.delivery_date == "{{($smarty.now-86400)|date_format:'%Y-%m-%d'}}"}}selected="selected"{{/if}}>昨天</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-right:20px;">
+        <label>订单号：</label>
+        <input style="width: 120px;" type="text" class="form-control" name="oid" value="{{$searchConf.oid}}">
+      </div>
+      <div id="h5-deliver-date" class="form-group" style="margin-right: 20px;">
+        <label>送货时间：</label>
+        <input type="date" class="form-control" name="from_date" value="{{if $searchConf.from_date}}{{$searchConf.from_date}}{{/if}}" style="width: 160px;">
+        —
+        <input type="date" class="form-control" name="end_date" value="{{if $searchConf.end_date}}{{$searchConf.end_date}}{{/if}}" style="width: 160px;">
+      </div>
+    </div>
+    <div class="placeholder">
+      <div class="form-group" style="margin-right:20px;">
+        <label>客户ID：</label>
+        <input style="width: 120px;" type="text" class="form-control" name="cid" value="{{$searchConf.cid}}">
+      </div>
+      {{if !$_user.wid}}
+      <div class="form-group" style="margin-right:20px;">
+        <label>仓库：</label>
+        <select class="form-control" name="wid">
+          <option value="0" {{if !$searchConf.wid}} selected="selected"{{/if}}>全部</option>
+          {{foreach $_warehouseList as $_wid=>$_wname}}
+          <option value="{{$_wid}}" {{if $searchConf.wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+      {{/if}}
+      <div class="form-group">
+        <label>工地：</label>
+        <input type="text" class="form-control" name="construction" value="{{$searchConf.construction}}" style="margin-right: 20px; width: 240px;">
+      </div>
+      <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+    </div>
+  </form>
+
+  <hr>
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>id</th>
+      <th>金额</th>
+      <th style="width:10%;">运/搬/优</th>
+      <th style="width:9%;">客户/联系人</th>
+      <th style="width:16%;">工地地址/备注</th>
+			<th style="width:10%;">仓库</th>
+      <th style="width:10%;">下单时间</th>
+      <th style="width:8%;">送货时间</th>
+      <th style="width: 8%;">状态</th>
+      <th style="width:8%;">录单人</th>
+      <th style="width:9%;">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $orders as $order}}
+    <tr data-oid="{{$order.oid}}" {{if $order.has_print == 0}}style="background: #FAEBD7;"{{/if}}>
+      <td><a href="/order/order_detail.php?oid={{$order.oid}}">{{$order.oid}}<a/></td>
+      <td>￥{{($order.price+$order.freight+$order.customer_carriage-$order.privilege)/100}}</td>
+      <td>
+        {{if empty($order.freight)}}-{{else}}￥{{$order.freight/100}}{{/if}}/
+        {{if empty($order.customer_carriage)}}-{{else}}￥{{$order.customer_carriage/100}}{{/if}}/
+        {{if empty($order.privilege)}}-{{else}}￥{{$order.privilege/100}}{{/if}}
+        <br/>
+        {{if !empty($coopworker_of_order[$order.oid])}}
+          {{foreach $coopworker_of_order[$order.oid] as $_cone}}
+          <span style="color:gray;">{{if $_cone.type==1}}[司]{{else}}[搬]{{/if}}{{$_cone.info.name}}:</span>
+          <span style="color:gray;">￥{{$_cone.price/100}} {{if $_cone.paid==1}}[Y]{{else}}[N]{{/if}}</span>
+          <br>
+          {{/foreach}}
+        {{else}}
+          {{if $order.driver_money}}
+          <span style="color:gray;">司机:￥{{$order.driver_money/100}}</span>
+          {{if $order.driver_money_paid==1}}【Y】{{else}}【N】{{/if}}
+          <br>
+          {{/if}}
+          {{if $order.carrier_money}}
+          <span style="color:gray;">搬运:￥{{$order.carrier_money/100}}</span>
+          {{if $order.carrier_money_paid==1}}【Y】{{else}}【N】{{/if}}
+          {{/if}}
+        {{/if}}
+      </td>
+      <td>
+        <a href="/order/order_list.php?cid={{$order.cid}}">{{$order._customer.contact_name}}</a>
+        <br/>
+        <span style="color:gray;">{{$order._customer.name}}</span>&nbsp;
+        {{if $_isCS || $_isAdmin}}<a href="/order/customer_list_cs.php?cid={{$order.cid}}&oid={{$order.oid}}" style="color:gray;">(信息)</a>{{/if}}
+      </td>
+      <td>
+        <a href="http://map.baidu.com/?s=con%26wd%3D{{$order.address}}" target="_blank">{{$order.address}}</a><br/>
+        {{if $order.note}}<span style="color:gray;">备注：{{$order.note}}</span>{{/if}}
+      </td>
+			<td>{{$order._warehouse_name}}</td>
+      <td>{{$order.ctime}}</td>
+      <td>{{$order._delivery_date}}</td>
+      <td>
+        {{if ($order.step==4 && $_isWarehouse) || ($order.step==3 && $_isLM)}}
+        <span style="color:red;">
+        {{/if}}
+        {{$order._step}}
+        {{if ($order.step==4 && $_isWarehouse) || ($order.step==3 && $_isLM)}}
+        </span>
+        {{/if}}
+        {{if ($_isFinance || $_isAdmin || $_isCS || $_isSales)}}
+          {{if $order.paid==1}}
+          <br/><span>(已收款)</span>
+          {{elseif $order.step>=7 && $order.paid==2}}
+          <br/><span style="color:red;">(部分收款)</span>
+          {{elseif $order.step>=7 && $order.paid==0}}
+          <br/><span style="color:red;">(未收款)</span>
+          {{/if}}
+        {{/if}}
+      </td>
+      <td>
+        {{if $order._suser}}
+        {{$order._suser.name}}
+        {{else}}
+        {{if $order.ctime>'2015-08-15 17:51:14'}}
+          {{if $_isAdmin || $_isCS}}<span style="color:red;">{{/if}}
+          (客户提交)
+          {{if $_isAdmin || $_isCS}}</span>{{/if}}
+        {{else}}-{{/if}}
+        {{/if}}
+      </td>
+      <td>
+        <a href="/order/order_detail.php?oid={{$order.oid}}">查看</a>　
+        {{if $order.step >= 2 && ($_isCS || $_isAdmin || $_isWarehouse)}}
+        <a href="/order/order_print.php?oid={{$order.oid}}" target="_blank">打印</a>
+        {{/if}}
+        <br/>
+        {{if $_isCS || $_isAdmin}}
+          <a href="/order/edit_order.php?oid={{$order.oid}}">编辑</a>　
+          {{if $order.step<5}}
+          <a href="#" class="_j_delete_order">删除</a>
+          {{/if}}
+        {{/if}}
+      </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

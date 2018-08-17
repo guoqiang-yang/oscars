@@ -1,0 +1,47 @@
+<table class="table">
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>名称</th>
+        <th>类别</th>
+        <th>单价</th>
+        <th>入库数量</th>
+        <th>已退数量</th>
+        <th>数量/(可退数量)</th>
+        <th style="color:red;">货位</th>
+        <th>货位库存</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $products as $productItem}}
+    <tr class="_j_product" data-sid="{{$productItem.sid}}">
+        <td>{{$productItem.sid}}</td>
+        <td>{{$productItem.sku.title}}</td>
+        <td>
+            {{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}
+        </td>
+        <td>
+            <input type="text" class="form-control" name="price" value="{{$productItem.price / 100}}" style="width:60px;">
+        </td>
+        <td>
+            <span class="snum text-value">{{$productItem.num}}</span>
+        </td>
+        <td>
+            <span class="rnum text-value" style="color:red;">{{$productItem.had_refund}}</span>
+        </td>
+        <td>
+            <input type="text" class="form-control" name="num" value="" style="width:80px;display: inline;">/<span style="color:blue;">({{$productItem.num - $productItem.had_refund}})</span>
+        </td>
+        <td>
+            <input type="text" class="form-control" name="location" value="{{$productItem.location}}" style="width:120px;">
+        </td>
+        <td>
+            <span class="loc_num text-value" style="color:blue;">{{$productItem.loc_num|default:0}}</span>
+            {{if $productItem.loc_num!=$productItem.real_loc_num}}
+            <span style="color:red;">(实际:{{$productItem.real_loc_num}})</span>
+            {{/if}}
+        </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>

@@ -1,0 +1,63 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">商品加工单列表</h1>
+
+  <form class="form-inline" role="form" action="/shop/processed_list.php">
+    <div class="placeholder">
+      {{if count($all_warehouses)>1}}
+        <div class="form-group" style="margin-right:50px;">
+            <label>仓库：</label>
+            <select class="form-control" name="wid">
+                <option value="0" {{if !$search.wid}} selected="selected"{{/if}}>全部</option>
+                {{foreach $all_warehouses as $_wid=>$_wname}}
+                <option value="{{$_wid}}" {{if $search.wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+                {{/foreach}}
+            </select>
+        </div>
+      {{/if}}
+      <div class="form-group" style="margin-right:50px;">
+            <label>类型：</label>
+            <select class="form-control" name="type">
+                <option value="0" {{if !$search.type}} selected="selected"{{/if}}>全部</option>
+                {{foreach $all_types as $_type=>$_tname}}
+                <option value="{{$_type}}" {{if $search.type==$_type}} selected="selected"{{/if}}>{{$_tname}}</option>
+                {{/foreach}}
+            </select>
+        </div>
+      <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+    </div>
+  </form>
+
+  <hr>
+
+  <table class="table">
+    <thead>
+        <tr>
+          <th>单号</th>
+          <th>仓库</th>
+          <th>类型</th>
+          <th width="6%">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{foreach $list as $oner}}
+        <tr>
+            <td>{{$oner.id}}</td>
+            <td>{{$all_warehouses[$oner.wid]}}</td>
+            <td>{{$all_types[$oner.type]}}</td>
+            <td>
+                <a href="/shop/processed_order_detail.php?id={{$oner.id}}">详情</a>
+            </td>
+        </tr>
+        {{/foreach}}
+    </tbody>
+  </table>
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

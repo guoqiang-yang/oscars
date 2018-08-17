@@ -1,0 +1,109 @@
+<div class="modal fade _j_dialog" id="add_new_community" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:1000px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">添加新小区</h4>
+            </div>
+            <div class="modal-body row">
+                <div style="width:50%; margin:15px 0px 0px 20px;">
+                    <div class="form-group" style="width:90%">
+                        <label class="col-sm-3 control-label">城市：</label>
+                        <div  class="col-sm-8">
+                            <select  id="community_city" class="form-control" name="cm_city">
+                                <option value="0">选择城市</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="width:90%">
+                        <label class="col-sm-3 control-label">城区：</label>
+                        <div class="col-sm-8">
+                            <select id="community_district" class="form-control" name="cm_district">
+                                <option value="0">选择城区</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="width:90%">
+                        <label class="col-sm-3 control-label">环线：</label>
+                        <div class="col-sm-8">
+                            <select id="community_area" class="form-control" name="cm_ring_road">
+                                <option value="0">选择范围</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="width:90%">
+                        <label class="col-sm-3 control-label">小区名称：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" name="cm_name">
+                        </div>
+                    </div>
+                  <div class="form-group" style="width:90%">
+                    <label class="col-sm-3 control-label">小区别名：</label>
+                    <div class="col-sm-8">
+                      <input class="form-control" name="cm_alias">
+                    </div>
+                  </div>
+                    <div class="form-group" style="width:90%">
+                        <label class="col-sm-3 control-label">详细地址：</label>
+                        <div class="col-sm-8">
+                            <textarea class="form-control" name="cm_address" rows="2"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="width:90%;margin-top:20px;">
+                        <label class="col-sm-3 control-label">坐标：</label>
+                        <div class="col-sm-8">
+                            经 <input class="form-control" name="cm_lng" value="" style="width:40%;margin-right:10px; display:inline-block;" placeholder="经度" disabled="true">
+                            纬 <input class="form-control" name="cm_lat" value="" style="width:40%; display:inline-block;" placeholder="纬度" disabled="true">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group cm_status" style="width:90%;display: none;">
+                        <label class="col-sm-3 control-label">审核：</label>
+                        <div class="col-sm-8">
+                            <label class="radio-inline">
+                                <input type="radio" name="cm_status" id="inlineRadio1" value="0" onclick="$('._merge_to_cmid_div').hide();"> 通过
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="cm_status" id="inlineRadio2" value="1" onclick="$('._merge_to_cmid_div').show();"> 删除
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group _merge_to_cmid_div" style="display: none;">
+                      <label class="col-sm-3 control-label">合并到小区：</label>
+                      <div class="col-sm-8">
+                        <input class="form-control" name="cm_merge_to_cmid" style="width:90px;display:inline-block;">
+                        <span style="color:gray;margin-left: 10px;">(请填写小区ID)</span>
+                      </div>
+                    </div>
+                    <div class="form-group" style="width:90%;margin-top:20px;">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-8">
+                            <span style="color:red; font-weight: bold;">1. 输入小区的名称查找</span><br>
+                            <span style="color:red; font-weight: bold;">2. 在地图上选点 并 填写地址信息</span><br>
+                            <span style="color:red; font-weight: bold;">3. 保存小区</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="width:90%;margin-top:20px;">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-8">
+                            <a id="search_community_inmap" class="btn btn-default" style="margin-right: 20px;">查询地址</a>
+                            <a id="add_community_inmap" class="btn btn-primary" style="margin-right: 20px;" data-cmid="0">保存小区</a>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div style="float:right; margin: -560px 50px 0px 0px;">
+                    <div class="form-group" style="width:45%;">
+                        <div id="allmap" style="width:470px;height:480px;"></div>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>

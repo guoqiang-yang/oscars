@@ -1,0 +1,57 @@
+<div class="modal fade" tabindex="-1" role="dialog" id="add_product_modal_common" data-objtype="" data-objid="">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">添加商品
+                    <div style="float:right;font-size:16px;margin-right:15px;">
+                        <div class="form-inline _j_form">
+                            <div class="form-group" style="margin-right:10px;">
+                                <input type="text" class="form-control" name="keyword" value="{{$keyword}}">
+                            </div>
+                            <button type="button" class="btn btn-primary search_product_common">搜索</button>
+                        </div>
+                    </div>
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">暂无SKU，请输入检索关键词，搜索！！</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">完成</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{*
+添加商品模块
+1、添加js文件
+
+$this->addFootJs(array('js/apps/show_product_common.js'));
+2、添加模板文件
+
+(1)、弹框模板
+需要弹框的模板页，添加下面的代码，params是一个数组，这个数组的每个元素都是添加商品时需要传到后端的数据
+
+{{include "common/block_add_product_for_stock.html"}}
+<script>
+    $('document').ready(function(){
+        var params = ['sid', 'num', 'price'];
+        add_product_dlg.init(params);
+    });
+</script>
+(2)、button添加id、data-objtype、data-objid
+
+<button type="button" class="btn btn-default" id="show_product_common" data-objid="{{$shift_info.ssid}}" data-objtype="1" style="margin-left:16px;">添加商品</button>
+(3)、/template_admin/common/block_product_list_for_stock.html 添加商品列表的模板
+每个商品所在的里面必须有一个sid的隐藏域，用来存sid
+
+<tr class="_j_product_item">
+    <input type="hidden" name="sid" value="{{$product.sku.sid}}">
+    ...
+</tr>
+3、ajax
+(1)、/common/ajax/get_product_list_for_stock.php 添加查询商品的方法
+(2)、/common/ajax/add_product_for_stock.php 添加 添加商品的权限和添加商品的方法
+*}}

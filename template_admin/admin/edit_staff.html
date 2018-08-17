@@ -1,0 +1,130 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if $staff.suid}}编辑{{else}}添加{{/if}}员工</h1>
+
+	<form class="form-horizontal" role="form" action="/admin/edit_staff.php">
+		<input type="hidden" name="submit" value="1" />
+		{{if $staff.suid}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">ID：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="suid" value="{{$staff.suid}}" readonly="true">
+			</div>
+		</div>
+		{{/if}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">姓名：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="name" value="{{$staff.name}}" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">手机号：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="mobile" value="{{$staff.mobile}}" />
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">城市：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="city_id" id="staff_city_id">
+                    <option value="0" {{if empty($staff.city_id)}}selected="true"{{/if}}>-</option>
+                    {{foreach $cities as $city_id => $city}}
+                    <option value="{{$city_id}}" {{if $staff.city_id == $city_id}}selected="true"{{/if}}>{{$city}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">部门：</label>
+			<div class="col-sm-4">
+				<select class="form-control" name="department">
+					<option value="0" {{if empty($staff.department)}}selected="true"{{/if}}>请选择</option>
+					{{foreach $departments as $did => $dname}}
+					<option value="{{$did}}" {{if $staff.department == $did}}selected="true"{{/if}}>{{$dname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">角色：</label>
+			<div class="col-sm-4">
+				<select class="form-control" name="role" id="staff_role_select">
+					<option value="0" {{if empty($staff.role)}}selected="true"{{/if}}>-</option>
+					{{foreach $role_list as $rid => $role}}
+					<option value="{{$rid}}" {{if $staff.role == $rid}}selected="true"{{/if}}>{{$role}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group" {{if $staff.role != '3'}} style="display:none"{{/if}} >
+			<label class="col-sm-2 control-label">组长：</label>
+			<div class="col-sm-4">
+				<select class="form-control" name="leader_suid" data-suid="{{$staff.leader_suid}}" id="staff_leader_suid">
+					<option value="0">-</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">仓库：</label>
+			<div class="col-sm-4">
+				<select class="form-control" name="wid">
+					<option value="0" {{if empty($staff.wid)}}selected="true"{{/if}}>-</option>
+					{{foreach $wareHouses as $wid => $wareHouse}}
+					<option value="{{$wid}}" {{if $staff.wid == $wid}}selected="true"{{/if}}>{{$wareHouse}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">销售职能：</label>
+			<div class="col-sm-4">
+				<select class="form-control" name="kind">
+					<option value="0" {{if empty($staff.kind)}}selected="true"{{/if}}>-</option>
+					{{foreach $kind_list as $kid => $kind}}
+					<option value="{{$kid}}" {{if $staff.kind == $kid}}selected="true"{{/if}}>{{$kind}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">钉钉UserId：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="ding_id" value="{{$staff.ding_id}}" />
+			</div>
+		</div>
+        <div class="bg-warning" style="padding: 10px 0;">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">坐席工号：</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" name="ce_agent_num" value="{{$staff.ce_agent_num}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">坐席密码：</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" name="ce_agent_pass" value="{{$staff.ce_agent_pass}}" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">坐席分机：</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" name="ce_agent_phone" value="{{$staff.ce_agent_phone}}" />
+                </div>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">状态：</label>
+			<div class="col-sm-4">
+				<input type="radio" {{if $staff.status == 0}}checked="checked"{{/if}} class="radio-inline" name="status" value="0" /> 正常
+				<input type="radio" {{if $staff.status == 1}}checked="checked"{{/if}} class="radio-inline" name="status" value="1" /> 删除
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="submit" class="btn btn-primary" id="save" style="margin-right:20px;">保存</button>
+			</div>
+		</div>
+	</form>
+</div>

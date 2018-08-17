@@ -1,0 +1,362 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if $info.id}}编辑{{else}}添加{{/if}}活动</h1>
+
+	<form class="form-horizontal" id="activity_manjian" role="form">
+		<input type="hidden" id="referer" value="{{$referer}}"/>
+
+		{{if $info.id}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>活动ID：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="id" id="id" value="{{$info.id}}" readonly>
+            </div>
+        </div>
+
+		{{/if}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>活动名称：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="title" id="title" value="{{$info.title}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>活动类型：</label>
+            <div class="col-sm-4">
+                <select name="activity_type" class="form-control" id="activity_type"{{$is_readonly}}>
+                    {{foreach $type_list as $key=>$item}}
+                    {{if !in_array($key, array(7,8))}}
+                    <option value="{{$key}}" {{if $info.activity_type == $key}} selected{{/if}}>{{$item}}</option>
+                    {{/if}}
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group" id="is_bear_activitiy">
+            <label class="col-sm-2 control-label">是否共享：</label>
+            <div class="col-sm-9" style="padding-left: 35px;">
+                {{foreach $type_list as $key=>$item}}
+                {{if $key <> 2}}
+                <label class="checkbox inline" style="display: inline-block; min-width: 80px;">
+                    <input type="checkbox" name="type_ids[]" value="{{$key}}" {{if in_array($key,$info.type_ids)}}checked{{/if}} {{$is_disabled}}> {{$item}}
+                </label>
+                {{/if}}
+                {{/foreach}}
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>活动承担方：</label>
+            <div class="col-sm-4">
+                <label class="radio radio-inline">
+                    <input type="radio" name="activity_bear" value="1" {{if empty($info) || $info.activity_bear == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    好材
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="activity_bear" value="2" {{if $info.activity_bear == 2}}checked="checked"{{/if}} {{$is_disabled}}>
+                    合作商
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>起止时间：</label>
+            <div class="col-sm-4">
+                [始]<input type="datetime-local" class="form-control" name="stime" id="stime" value="{{$info.stime}}" style="display: inline-block; width: 250px;" {{$is_readonly}}><br>
+                [终]<input type="datetime-local" class="form-control" name="etime" id="etime" value="{{$info.etime}}" style="display: inline-block; width: 250px;" {{$is_readonly}}>
+                <p>时间格式（2016-11-01 12:00）</p>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label"><i style="color: red;">*</i>额度配置：</label>
+			<div class="col-sm-9">
+                <div id="conf">
+                {{if empty($info)}}
+                    <label class="inline">
+                        满&emsp;<input type="number" name="conf_man[]" value="" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;"/>，
+                        立减&emsp;<input type="number" name="conf_jian[]" value="" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;">
+                        &emsp;<a href="javascript:;" onclick="addConfHtml();" class="btn-link" title="点击新增" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">+</a>
+                    </label><br/>
+                {{else}}
+                    {{if $info.activity_type == 2}}
+                    {{foreach $info.conf as $key => $item}}
+                    <label class="inline">
+                        满&emsp;<input type="number" name="conf_man[]" value="{{$item['amount']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;" {{$is_readonly}}/>，
+                        送优惠券&emsp;<input type="number" name="conf_coupon[]" value="{{$item['coupon_id']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;" {{$is_readonly}}>，
+                        数量 <input type="number" name="conf_num[]" value="{{$item['num']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;" {{$is_readonly}}>
+                        <!--{{if $key>0}}-->
+                        <!--&emsp;<a href="javascript:;" onclick="delConfHtml($(this));" class="btn-link" title="点击删除" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">Ｘ</a>-->
+                        <!--{{else}}-->
+                        <!--&emsp;<a href="javascript:;" onclick="addConfHtml();" class="btn-link" title="点击新增" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">+</a>-->
+                        <!--{{/if}}-->
+                    </label><br/>
+                    {{/foreach}}
+                    {{elseif $info.activity_type == 3}}
+                    {{foreach $info.conf as $key => $item}}
+                    <label class="inline">
+                        满&emsp;<input type="number" name="conf_man[]" value="{{$item['amount']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;" {{$is_readonly}}/>，
+                        立减&emsp;<input type="number" name="conf_jian[]" value="{{$item['privilege']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;" {{$is_readonly}}>，
+                        送优惠券&emsp;<input type="number" name="conf_coupon[]" value="{{$item['coupon_id']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;" {{$is_readonly}}>
+                        <!--{{if $key>0}}-->
+                        <!--&emsp;<a href="javascript:;" onclick="delConfHtml($(this));" class="btn-link" title="点击删除" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">Ｘ</a>-->
+                        <!--{{else}}-->
+                        <!--&emsp;<a href="javascript:;" onclick="addConfHtml();" class="btn-link" title="点击新增" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">+</a>-->
+                        <!--{{/if}}-->
+                    </label><br/>
+                    {{/foreach}}
+                    {{elseif $info.activity_type == 4}}
+                    <label class="inline">
+                        <input type="radio" name="m_type" value="1" {{if $info.m_type == 1}}checked{{/if}} {{$is_disabled}}/> 平台折扣，订单满<input type="amount" class="form-control" style="padding: 6px 5px; display: inline-block; width: 70px;" name="conf_amount" value="{{$info.conf.amount}}" {{$is_readonly}}>元打<input type="number" class="form-control" style="padding: 6px 5px; display: inline-block; width: 70px;" name="conf_man" value="{{$info.conf.rate}}" {{$is_readonly}}>折&emsp;
+                    </label>
+                    {{elseif $info.activity_type == 5}}
+                    {{foreach $info.conf as $key => $item}}
+                    <label class="inline">
+                        满&emsp;<input type="number" name="conf_man[]" value="{{$item['amount']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;" {{$is_readonly}}/>，
+                        赠送(sid)&emsp;<input type="text" name="conf_sid[]" value="{{$item['sid']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 120px;" {{$is_readonly}}>，
+                        数量(num)&emsp;<input type="text" name="conf_num[]" value="{{$item['num']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 120px;" {{$is_readonly}}>
+                        <!--{{if $key>0}}-->
+                        <!--&emsp;<a href="javascript:;" onclick="delConfHtml($(this));" class="btn-link" title="点击删除" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">Ｘ</a>-->
+                        <!--{{else}}-->
+                        <!--&emsp;<a href="javascript:;" onclick="addConfHtml();" class="btn-link" title="点击新增" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">+</a>-->
+                        <!--{{/if}}-->
+                    </label><br/>
+                    {{/foreach}}
+                    {{elseif $info.activity_type == 6}}
+                    {{foreach $info.conf as $key => $item}}
+                    <label class="inline">
+                        满&emsp;<input type="number" name="conf_man[]" value="{{$item['amount']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;" {{$is_readonly}}/>，
+                        特价(sid)&emsp;<input type="text" name="conf_sid[]" value="{{$item['sid']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 120px;" {{$is_readonly}}>，
+                        价格&emsp;<input type="text" name="conf_price[]" value="{{$item['price']}}" class="form-control" style="padding: 6px 0; display: inline-block; width: 120px;" {{$is_readonly}}>，
+                        数量(num)&emsp;<input type="text" name="conf_num[]" value="{{$item['num']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 120px;" {{$is_readonly}}>
+                        <!--{{if $key>0}}-->
+                        <!--&emsp;<a href="javascript:;" onclick="delConfHtml($(this));" class="btn-link" title="点击删除" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">Ｘ</a>-->
+                        <!--{{else}}-->
+                        <!--&emsp;<a href="javascript:;" onclick="addConfHtml();" class="btn-link" title="点击新增" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">+</a>-->
+                        <!--{{/if}}-->
+                    </label><br/>
+                    {{/foreach}}
+                    {{else}}
+                    {{foreach $info.conf as $key => $item}}
+                    <label class="inline">
+                        满&emsp;<input type="number" name="conf_man[]" value="{{$item['amount']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;" {{$is_readonly}}/>，
+                        立减&emsp;<input type="number" name="conf_jian[]" value="{{$item['privilege']}}" class="form-control" style="padding:6px 0;display: inline-block; width: 70px;" {{$is_readonly}}>
+                        <!--{{if $key>0}}-->
+                        <!--&emsp;<a href="javascript:;" onclick="delConfHtml($(this));" class="btn-link" title="点击删除" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">Ｘ</a>-->
+                        <!--{{else}}-->
+                        <!--&emsp;<a href="javascript:;" onclick="addConfHtml();" class="btn-link" title="点击新增" style="width: 20px; padding: 5px; cursor: pointer; font-size: 20px;">+</a>-->
+                        <!--{{/if}}-->
+                    </label><br/>
+                    {{/foreach}}
+                    {{/if}}
+                {{/if}}
+                </div>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label"><i style="color: red;">*</i>活动城市：</label>
+			<div class="col-sm-4" style="padding-left: 35px;">
+                {{foreach $city_list as $key=>$city}}
+                <label class="checkbox inline" style="display: inline-block; min-width: 80px;">
+                    <input type="checkbox" name="city_ids[]" value="{{$key}}" {{if in_array($key,$info.city_ids)}}checked{{/if}} {{$is_disabled}}> {{$city}}
+                </label>
+                {{/foreach}}
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">参与用户：</label>
+            <div class="col-sm-4">
+                <select name="user_type" id="user_type" class="form-control" {{$is_disabled}}>
+                    <option value="0" {{if $info.user_type == 0}} selected{{/if}}>全部</option>
+                    <option value="1" {{if $info.user_type == 1}} selected{{/if}}>部分</option>
+                </select>
+                <div id="user_type_show" {{if $info.user_type == 1}} style="padding-left: 35px;" {{else}} style="display: none; padding-left: 35px;" {{/if}}>
+                    {{foreach $user_list as $key=>$user}}
+                    <label class="checkbox inline" style="display: inline-block; min-width: 80px;">
+                        <input type="checkbox" name="user_type_extand[]" value="{{$key}}" {{if in_array($key,$info.user_type_extand)}}checked{{/if}} {{$is_disabled}}> {{$user}}
+                    </label>
+                    {{/foreach}}
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">用户参与次数：</label>
+            <div class="col-sm-4">
+                <input type="number" class="form-control" name="user_count" value="{{$info.user_count}}" {{$is_readonly}}/>
+                <p>每个用户可以参与本活动的最大次数，为0表示不限制。</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">用户白名单：</label>
+            <div class="col-sm-4">
+                <textarea name="user_whitelist" class="form-control" rows="5" style="width: 354px;">{{$info.user_whitelist}}</textarea>
+               <p>需填入用户ID（cid），多个用户以英文逗号隔开，为空表示不限制。该字段表示，填入其中的用户均可以参加该活动（即使被其它条件限制为不可参加的用户）</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">用户黑名单：</label>
+            <div class="col-sm-4">
+                <textarea name="user_blacklist" class="form-control" rows="5" style="width: 354px;">{{$info.user_blacklist}}</textarea>
+                <p>需填入用户ID（cid），多个用户以英文逗号隔开，为空表示不限制。该字段表示，填入其中的用户均不可以参加该活动（即使符合其它条件限制为可参加的用户）</p>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label"><i style="color: red;">*</i>是否包含砂石/砖/水泥：</label>
+			<div class="col-sm-4">
+                <label class="radio radio-inline">
+                    <input type="radio" name="goods_is_sand" value="1" {{if $info.goods_is_sand == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    包含
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="goods_is_sand" value="0" {{if empty($info) || $info.goods_is_sand == 0}}checked="checked"{{/if}} {{$is_disabled}}>
+                    不包含
+                </label>
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>是否包含美巢产品：</label>
+            <div class="col-sm-4">
+                <label class="radio radio-inline">
+                    <input type="radio" name="goods_is_meichao" value="1" {{if $info.goods_is_meichao == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    包含
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="goods_is_meichao" value="0" {{if empty($info) || $info.goods_is_meichao == 0}}checked="checked"{{/if}} {{$is_disabled}}>
+                    不包含
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>是否包含特价商品：</label>
+            <div class="col-sm-4">
+                <label class="radio radio-inline">
+                    <input type="radio" name="goods_is_special" value="1" {{if $info.goods_is_special == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    包含
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="goods_is_special" value="0" {{if empty($info) || $info.goods_is_special == 0}}checked="checked"{{/if}} {{$is_disabled}}>
+                    不包含
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>是否包含热卖商品：</label>
+            <div class="col-sm-4">
+                <label class="radio radio-inline">
+                    <input type="radio" name="goods_is_hot" value="1" {{if $info.goods_is_hot == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    包含
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="goods_is_hot" value="0" {{if empty($info) || $info.goods_is_hot == 0}}checked="checked"{{/if}} {{$is_disabled}}>
+                    不包含
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>商品分类：</label>
+            <div class="col-sm-4">
+                <select name="goods_type" id="goods_type" class="form-control" {{$is_readonly}}>
+                    <option value="0" {{if $info.goods_type == 0}} selected{{/if}}>不限</option>
+                    <option value="1" {{if $info.goods_type == 1}} selected{{/if}}>部分</option>
+                    <option value="2" {{if $info.goods_type == 2}} selected{{/if}}>全不</option>
+                </select>
+                <div id="goods_type_show" {{if $info.goods_type == 1}} style="margin-left: 35px;" {{else}} style="display: none; margin-left: 35px;" {{/if}}>
+                {{foreach $cate_list as $cate_id=>$item}}
+                <label class="checkbox inline" style="display: inline-block; min-width: 80px;">
+                    <input type="checkbox" name="goods_cate_ids[]" value="{{$cate_id}}" {{if in_array($cate_id,$info.goods_cate_ids)}}checked{{/if}} {{$is_disabled}}> {{$item.name}}
+                </label>
+                {{/foreach}}
+            </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">品牌：</label>
+            <div class="col-sm-4">
+                <input type="text" name="goods_brand_ids" class="form-control" value="{{$info.goods_brand_ids}}" {{$is_readonly}}>
+                <p>需填入品牌ID（bid），多个品牌以英文逗号隔开，为空表示不限制。</p>
+            </div>
+        </div>
+         <div class="form-group">
+            <label class="col-sm-2 control-label">商品白名单：</label>
+            <div class="col-sm-4">
+                <textarea name="goods_whitelist" class="form-control" rows="5" style="width: 354px;">{{$info.goods_whitelist}}</textarea>
+                <p>需填入商品ID（pid），多个商品以英文逗号隔开，为空表示不限制。该字段表示，填入其中的商品均可以参加该活动（即使被其它条件限制为不参加活动的商品）</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">商品黑名单：</label>
+            <div class="col-sm-4">
+                <textarea name="goods_blacklist" class="form-control" rows="5" style="width: 354px;">{{$info.goods_blacklist}}</textarea>
+                <p>需填入商品ID（pid），多个商品以英文逗号隔开，为空表示不限制。该字段表示，填入其中的商品均不可以参加该活动（即使符合其它条件限制为可参加活动的商品）</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>下单方式：</label>
+            <div class="col-sm-4" style="padding-left: 35px;">
+                <label class="radio radio-inline">
+                    <input type="radio" name="order_mode" value="1" {{if $info.order_mode == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    仅自助下单
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="order_mode" value="0" {{if empty($info) || $info.order_mode == 0}}checked="checked"{{/if}} {{$is_disabled}}>
+                    不限
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>付款方式：</label>
+            <div class="col-sm-4">
+                <label class="radio radio-inline">
+                    <input type="radio" name="pay_mode" value="1" {{if $info.pay_mode == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    仅在线
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="pay_mode" value="0" {{if empty($info) || $info.pay_mode == 0}}checked="checked"{{/if}} {{$is_disabled}}>
+                    不限
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">配送时间：</label>
+            <div class="col-sm-6">
+                <select name="delivery_time_type" id="delivery_time_type" class="form-control" style="width: 354px;margin-bottom: 10px;" {{$is_disabled}}>
+                    <option value="0" {{if $info.delivery_time_type == 0}} selected{{/if}}>无要求</option>
+                    <option value="1" {{if $info.delivery_time_type == 1}} selected{{/if}}>有要求</option>
+                </select>
+                <div id="delivery_time_type_show" {{if $info.delivery_time_type == 0}} style="display: none;"{{/if}}>
+                    <table>
+                        <tr>
+                            <td>下单后第</td>
+                            <td><input type="number" id="delivery_after_day" name="delivery_after_day" value="{{$info.delivery_after_day}}" class="form-control form-inline" style="width: 100px;" {{$is_readonly}}></td>
+                            <td>天起，</td>
+                            <td>
+                                <input type="time" id="delivery_stime" name="delivery_stime" class="form-control form-inline" value="{{$info.delivery_stime}}" {{$is_readonly}}>
+                            </td>
+                            <td>~</td>
+                            <td>
+                                <input type="time" id="delivery_etime" name="delivery_etime" class="form-control form-inline" value="{{$info.delivery_etime}}" {{$is_readonly}}>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动说明：</label>
+            <div class="col-sm-8">
+                <textarea name="activity_content" class="form-control" rows="10" style="width: 500px;">{{$info.activity_content}}</textarea>
+            </div>
+        </div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+                {{if $info.id && $info.m_status>1}}
+                {{if $info.m_status==2}}
+                <button type="button" class="btn btn-danger" data-status="offline">下线</button>&emsp;
+                {{else}}
+                <button type="button" class="btn btn-danger" data-status="online">上线</button>&emsp;
+                {{/if}}
+                {{/if}}
+				<button type="button" class="btn btn-primary" id="save_manjian" style="margin-right:20px;">保存</button>
+			</div>
+		</div>
+
+	</form>
+
+</div>

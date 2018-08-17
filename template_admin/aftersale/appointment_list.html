@@ -1,0 +1,140 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">
+        预约管理
+    </h1>
+	<form class="form-inline" role="form" action="">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>案例id：</label>
+				<input style="max-width:80px;" type="text" class="form-control" name="case_id" value="{{$search_conf.id}}">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>工长id：</label>
+				<input style="max-width:80px;" type="text" class="form-control" name="fid" value="{{$search_conf.fid}}">
+			</div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>销售：</label>
+                <select class="form-control" name="saler_suid" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.saler_suid)}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $salers as $saler}}
+                    <option value="{{$saler.suid}}" {{if $search_conf.saler_suid==$saler.suid}}selected="selected"{{/if}}>{{$saler.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>类型：</label>
+                <select class="form-control" name="house_style" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.house_style)}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $house_style as $id => $name}}
+                    <option value="{{$id}}" {{if $search_conf.house_style==$id}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>户型：</label>
+                <select class="form-control" name="house_type" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.house_type)}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $house_type as $id => $name}}
+                    <option value="{{$id}}" {{if $search_conf.house_type==$id}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>面积：</label>
+                <select class="form-control" name="house_area" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.house_area)}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $house_area as $id => $name}}
+                    <option value="{{$id}}" {{if $search_conf.house_area==$id}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+		</div>
+	</form>
+    <div style="border-bottom: 1px inset #DDDDDD; clear: both; position: relative; height:25px;margin-bottom: 20px;">
+        <a href="{{$search_url}}&step=0"><span {{if $search_conf.step == 0}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>全部</span></a>
+        <a href="{{$search_url}}&step=1"><span {{if $search_conf.step == 1}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>待审核</span></a>
+        <a href="{{$search_url}}&step=33"><span {{if $search_conf.step == 33}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>待处理</span></a>
+        <a href="{{$search_url}}&step=99"><span {{if $search_conf.step == 99}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>处理完成</span></a>
+    </div>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>ID</th>
+			<th>预约人</th>
+			<th>案例</th>
+			<th>所在区域</th>
+			<th>类型</th>
+			<th>户型</th>
+			<th>面积</th>
+			<th>装修预算</th>
+			<th>装修时间</th>
+            <th>销售</th>
+			<th>状态</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+		<tr>
+			<td>
+				{{$item.id}}
+			</td>
+            <td>
+                {{$item.name}}<br />
+                {{$item.mobile}}
+            </td>
+			<td>
+                {{if $item.case_id > 0}}
+				{{$item.case_id}}<br />
+                {{else}}
+                无
+                {{/if}}
+			</td>
+			<td>
+				{{$item._area}}
+			</td>
+            <td>
+                {{$item._house_style}}
+            </td>
+			<td>
+                {{$item._house_type}}
+			</td>
+			<td>
+				{{$item._house_area}}
+			</td>
+			<td>
+                {{$item._budget}}
+			</td>
+            <td>
+                {{$item.fit_time}}
+            </td>
+            <td>
+                {{$item.saler.name}}
+            </td>
+            <td>
+                {{$item._step}}
+            </td>
+			<td>
+                {{if $item.step<99}}
+				<a href="/aftersale/edit_appointment.php?id={{$item.id}}">编辑</a>
+                {{else}}
+                <a href="/aftersale/edit_appointment.php?id={{$item.id}}">查看</a>
+                {{/if}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>

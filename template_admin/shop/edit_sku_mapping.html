@@ -1,0 +1,61 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">编辑sku映射</h1>
+
+	<form class="form-horizontal" role="form">
+		{{if $mapping.id}}
+		<div class="form-group">
+			<label class="col-sm-3 control-label">id：</label>
+
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="id" value="{{$mapping.id}}" readonly="true">
+			</div>
+		</div>
+		{{/if}}
+		<div class="form-group">
+			<label class="col-sm-3 control-label">商户：</label>
+			<div class="col-sm-4">
+				<select  class="form-control" id="mid">
+				<option {{if $mapping.mid == 0}}selected="selected"{{/if}} value="0" >无</option>
+				{{foreach $merchant_list as $mid => $merchant}}
+				<option {{if $mapping.mid == $mid}}selected="selected"{{/if}} value="{{$mid}}">{{$merchant}}</option>
+				{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">第三方sku id：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="msid" value="{{$mapping.msid}}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">好材sku id：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="sid" value="{{$mapping.sid}}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">第三方对外售价（元）：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="mprice" value="{{$mapping.mprice / 100}}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">好材对第三方售价（元）：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="price" value="{{$mapping.price / 100}}">
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-sm-3 control-label"> </label>
+
+			<div class="col-sm-4">
+				<button type="button" class="btn btn-primary" id="save_sku_mapping">保存</button>
+			</div>
+		</div>
+
+	</form>
+
+</div>

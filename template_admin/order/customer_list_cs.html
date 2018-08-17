@@ -1,0 +1,224 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">客户列表</h1>
+
+	<form class="form-inline" role="form" action="/order/customer_list_cs.php">
+		<div class="placeholder">
+			{{*<div class="form-group" style="margin-right:30px;">
+				<label>客户Cid ：</label>
+				<input style="width:105px;" type="text" class="form-control" name="cid" value="{{$search_conf.cid}}">
+			</div>*}}
+			<div class="form-group" style="margin-right:30px;">
+				<label>手机：</label>
+				<input type="text" class="form-control" name="mobile" value="{{$search_conf.mobile}}">
+			</div>
+			<div class="form-group" style="margin-right:30px;">
+				<label>名称：</label>
+				<input type="text" class="form-control" name="name" value="{{$search_conf.name}}">
+			</div>
+            {{if count($memberList) > 1}}
+            <div class="form-group" style="margin-right:30px;">
+                <label>销售：</label>
+                <select class="form-control" name="sales_suid" >
+                    <option value="0">全部</option>
+                    {{foreach $memberList as $value}}
+                    <option value="{{$value}}" {{if $salesSuid==$value}}selected="selected"{{/if}}>{{$sale_list[$value]}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            {{/if}}
+			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+		</div>
+	</form>
+
+	<hr>
+	{{if $total > 0}}
+	<table class="table">
+		<thead>
+		<tr>
+			<th style="width:10%;">Uid/Cid</th>
+			<th style="width:12%;">用户信息</th>
+			<th style="width:11%;">客户信息</th>
+            <th style="width:8%;">销售</th>
+            <th style="width:14%;">欠款/账期</th>
+			<th style="width:14%;">最后下单</th>
+			<th style="width:14%;">总消费/除沙石类</th>
+			<th style="width:8%;">优惠券</th>
+			<th style="width:20%;">操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $user_list as $uinfo}}
+		<tr>
+			<td>
+				<span>Uid: {{$uinfo.uid}}</span> <br/>
+				<span>Cid: {{$uinfo.cid}}</span>
+				{{if $uinfo._customer.status<>0}}
+				<br/> <span style="color:red;">({{$status_list[$customer.status]}})</span>
+				{{/if}}
+			</td>
+			<td>
+				<span>{{$uinfo.name}}</span> <br/>
+				{{*<span>{{$uinfo.mobile}}</span>*}}
+			</td>
+			<td>
+				<span>{{$uinfo._customer.name}}</span>
+				{{if $uinfo._customer.has_duty == 1}}
+				<br/> <span style="color:red;">[含税账户]</span>
+				{{/if}}
+			</td>
+            <td>
+                {{$sale_list[$uinfo['_customer']['sales_suid']]}}
+            </td>
+			<td>
+				欠：
+				{{if $uinfo._customer.account_balance > 0}}
+				<span style="color:red;">{{$uinfo._customer.account_balance / 100}}元</span><br/>
+				{{else}} 无<br/>
+				{{/if}}
+				账：
+				{{if $uinfo._customer.payment_days > 0}}
+				{{$uinfo._customer.payment_days}} 天
+				{{else}}
+				无
+				{{/if}}
+			</td>
+			<td>
+                <span>{{$uinfo._customer.order_num}}单</span> /
+                <span>
+                {{if empty($uinfo._customer.last_order_date) || '0000-00-00'==$uinfo._customer.last_order_date}}
+                -
+                {{else}}
+                {{$uinfo._customer.last_order_date}}
+                {{/if}}
+                </span>
+				<br>
+			</td>
+			<td><span>￥{{$uinfo._customer.total_amount/100}}元</span>/
+				<span>￥{{$uinfo._customer.order_amount/100}}元</span>
+			</td>
+			<td>
+				<a href="/crm2/coupon_list.php?cid={{$uinfo._customer.cid}}">
+					{{if $uinfo._coupon.500}}{{$uinfo._coupon.500}}#500<br/>{{/if}}
+					{{if $uinfo._coupon.300}}{{$uinfo._coupon.300}}#300<br/>{{/if}}
+					{{if $uinfo._coupon.200}}{{$uinfo._coupon.200}}#200<br/>{{/if}}
+					{{if $uinfo._coupon.100}}{{$uinfo._coupon.100}}#100<br/>{{/if}}
+					{{if $uinfo._coupon.60}}{{$uinfo._coupon.60}}#60<br/>{{/if}}
+					{{if $uinfo._coupon.50}}{{$uinfo._coupon.50}}#50<br/>{{/if}}
+					{{if $uinfo._coupon.30}}{{$uinfo._coupon.30}}#30<br/>{{/if}}
+					{{if $uinfo._coupon.20}}{{$uinfo._coupon.20}}#20<br/>{{/if}}
+					{{if $uinfo._coupon.10}}{{$uinfo._coupon.10}}#10<br/>{{/if}}
+				</a>
+			</td>
+			<td>
+                {{if !empty($_permissions['/crm2/customer_detail'])}}
+				<a href="/crm2/customer_detail.php?cid={{$uinfo._customer.cid}}" style="margin-right: 10px;">详情</a>
+                {{/if}}
+				{{if !empty($_permissions['/crm2/edit_customer'])}}
+                <a href="/crm2/edit_customer.php?cid={{$uinfo._customer.cid}}" style="margin-right: 10px;">编辑</a><br>
+				{{/if}}
+				{{if !empty($_permissions["/crm2/edit_invoice"])}}
+				<a href="/crm2/edit_invoice.php?cid={{$uinfo._customer.cid}}" target="_blank">申请发票</a><br />
+				{{/if}}
+				{{if !empty($_permissions['/order/order_list'])}}
+                    {{if $_isSales}}
+                    <a href="/order/customer_order_list.php?cid={{$uinfo._customer.cid}}">查看订单</a><br>
+                    {{else}}
+                    <a href="/order/order_list.php?cid={{$uinfo._customer.cid}}">查看订单</a><br>
+                    {{/if}}
+				{{/if}}
+				{{if !empty($_permissions['/order/add_order2'])}}
+                <a href="/order/add_order2.php?cid={{$uinfo._customer.cid}}&uid={{$uinfo.uid}}" style="margin-right: 10px; color: purple;">一步下单</a><br>
+				{{/if}}
+                {{if !empty($_permissions['/order/add_order_logistics_h5'])}}
+                <a href="/order/add_order_logistics_h5.php?cid={{$uinfo._customer.cid}}&uid={{$uinfo.uid}}" style="margin-right: 10px; color: purple;">手机下单</a><br>
+                {{/if}}
+				{{if !empty($_permissions['/crm2/ajax/reset_pass'])}}
+                <a href="#" class="_j_reset_pass" data-uid="{{$uinfo.uid}}">重置密码</a><br>
+				{{/if}}
+				{{if !empty($_permissions['/crm2/coupon_list'])}}
+				<a href="/order/coupon_list.php?cid={{$uinfo._customer.cid}}" style="margin-right: 10px;">优惠券</a><br>
+				{{/if}}
+				{{if !empty($_permissions['/crm2/ajax/save_customer_high'])}}
+				<a href="javascript:;" class="_j_customer_high" data-cid="{{$uinfo._customer.cid}}" data-level="{{$uinfo._customer.level_for_sys}}"
+				   data-ratio="{{$uinfo._customer.discount_ratio}}" data-days="{{$uinfo._customer.payment_days}}" data-status="{{$uinfo._customer.status}}"
+				   data-duty="{{$uinfo._customer.has_duty}}" data-customer="{{$uinfo._customer.level_for_saler}}" data-contractb="{{$uinfo._customer.contract_btime}}"
+				   data-contracte="{{$uinfo._customer.contract_etime}}" data-amount="{{$uinfo._customer.payment_amount/100}}">高级修改</a>
+				{{/if}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+    {{elseif !empty($other_customer)}}
+    <div>
+        <h3 style="color:red;">所查询客户属于其他销售！请联系对应销售或客服下单！</h3>
+        <br>
+    </div>
+    <table class="table">
+    <thead>
+    <tr>
+        <th style="width:10%;">Uid/Cid</th>
+        <th style="width:12%;">用户信息</th>
+        <th style="width:11%;">客户信息</th>
+        <th style="width:8%;">销售</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $other_customer.data as $oner}}
+    <tr>
+        <td>{{$oner.uid}}/{{$oner.cid}}</td>
+        <td>{{$oner.name}}</td>
+        <td>{{$oner._customer.name}}</td>
+        <td>{{$oner._sales}}（{{$crm_sale_status[$oner._customer.sale_status]}}）</td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+    </table>
+	{{else}}
+    {{if !empty($errmsg)}}<span style="color:red;font-size:18px;">{{$errmsg}}</span>{{else}}<span>请输入查询条件，搜素客户！</span>{{/if}}
+	{{if !empty($search_conf.mobile) && empty($errmsg)}}
+	你可以： <a class="btn btn-primary" href="javascript:;" id="auto_save_customer" style="margin-right: 30px;">创建客户快速下单</a>
+	<a class="btn btn-primary" href="/crm2/new_customer.php?mobile={{$search_conf.mobile}}">添加客户</a>
+    <div style="margin-top: 30px;">
+        <span style="color:red;font-size:40px;">当前城市：{{$current_city['city_name']}}</span>
+    </div>
+    
+    <div>
+        <span style="color:blue;font-size:15px;">如需修改客户所在城市，请先切换城市，然后在操作！</span>
+    </div>
+    
+	{{/if}}
+	{{/if}}
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>
+
+<div class="modal fade _j_dialog" id="change_current_city" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:600px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">修改城市</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="">
+                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="" class="btn btn-primary" data-oid="{{$order.oid}}">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{include file="crm2/block/coupon_dialog.html"}}
+{{include file='crm2/block/customer_high.html'}}

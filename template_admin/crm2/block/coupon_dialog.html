@@ -1,0 +1,49 @@
+{{*优惠券申请*}}
+<div class="modal fade _j_dialog" id="applyCouponForCustomer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">申请优惠券</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">用户：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="cinfo" id="_j_appled_cinfo" value="" disabled="true">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">类型：</label>
+						<div class="col-sm-7">
+							<!--input style="margin-right: 10px;" type="radio" class="radio-inline" name="cate" value="3">10元券-->
+							<input style="margin-right: 10px;" type="radio" class="radio-inline" name="cate" value="1">50元券
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">数量：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="num">
+								{{for $i=1; $i<=10; $i++}}
+									<option>{{$i}}</option>
+								{{/for}}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">原因：</label>
+						<div class="col-sm-7">
+							<textarea class="form-control" rows="2" name="note"></textarea>
+						</div>
+					</div>
+                    <p style="color:red; text-align: center;">10元券暂时下线，有疑问找产品or技术咨询！！</p>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="_js_apply_coupon">申请</button>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,55 @@
+<style>
+    .pages {font-size: 15px; font-weight: 600;}
+    .items {font-size: 17px; font-weight: 800;}
+</style>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">城市信息</h1>
+    <div id="city_list">
+        <div style="float: left; width: 15%">
+            <label class="checkbox-inline items">城市</label>
+        </div>
+        <div style="float: left; width: 10%;">
+            <label class="checkbox-inline pages">
+                <input id="check_all_cities" type="checkbox"> 全部
+            </label>
+        </div>
+
+        <div style="float: left; width: 75%;">
+            {{foreach $cities as $_city => $_cname}}
+            <label style="padding: 0; margin-left: 20px; margin-right: 20px;" class="checkbox-inline">
+                <input class="city_item" type="checkbox" name="city" value="{{$_city}}" {{if array_key_exists($_city, $staff.city_wid_map)}}checked{{/if}}> {{$cities[$_city]}}
+            </label>
+            {{/foreach}}
+        </div>
+        <div style="clear: both;"></div>
+        <div style="float: left; width: 10%;">
+        </div>
+    </div>
+    <div id="edit_warehouse_list" style="margin-top: 20px;">
+        {{foreach $all_city_wids as $city => $wids}}
+        <div class="city_wid_items" data-city="{{$city}}" {{if !array_key_exists($city, $staff.city_wid_map)}}style="display: none;"{{/if}}>
+            <div style="float: left; width: 15%;">
+                <label class="checkbox-inline items">{{$cities[$city]}}</label>
+            </div>
+            <div style="float: left; width: 10%;">
+                <label class="checkbox-inline pages">
+                    <input class="check_all_wid_of_city" type="checkbox" data-city="{{$city}}"> 全部
+                </label>
+            </div>
+            <div style="float: left; width: 75%;" class="wid_list_of_city">
+                {{foreach $wids as $wid}}
+                <label style="padding: 0; margin-left: 20px; margin-right: 20px;" class="checkbox-inline">
+                    <input class="wid_item" name="warehouse" data-city="{{$city}}" type="checkbox" value="{{$wid}}"{{if array_key_exists($city, $staff.city_wid_map) && in_array($wid, $staff.city_wid_map[$city])}}checked{{/if}}> {{$wid_list[$wid]}}
+                </label>
+                {{/foreach}}
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+        {{/foreach}}
+    </div>
+    
+
+    <div style="text-align: center; position: fixed; bottom: 10px; width: 80%;background-color: #eee;left: 17%;">
+        <button id="save_city_warehouse" type="button" class="btn-lg btn-primary" data-suid="{{$staff.suid}}">保    存</button>
+    </div>
+</div>

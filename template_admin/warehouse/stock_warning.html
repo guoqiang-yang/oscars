@@ -1,0 +1,31 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <ul style="margin-bottom: 20px;" class="nav nav-tabs">
+        <li role="presentation" {{if $cate == 0}}class="active"{{/if}}><a href="/warehouse/stock_warning.php?cate=0"><h4>库存预警</h4></a></li>
+        <li role="presentation" {{if $cate == 1}}class="active"{{/if}}><a href="/warehouse/stock_warning.php?cate=1"><h4>库存不一致</h4></a></li>
+    </ul>
+    
+    {{if $cate == 0}}
+        {{include file="warehouse/stock_warning_alert.html"}}
+    {{elseif $cate == 1}}
+        {{include file="warehouse/stock_warning_diff.html"}}
+    {{else}}
+    <div>
+        <span>页面不存在！</span>
+    </div>
+    {{/if}}
+    
+</div>
+<div class="modal fade" id="supplier_list_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">供应商列表</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+        </div>
+    </div>
+</div>

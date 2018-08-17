@@ -1,0 +1,31 @@
+#
+# ./KProxy conf.kproxy
+#
+
+KProxy.Endpoints = @tcp::9999
+
+KProxy.ListFile = list.kproxy
+
+KProxy.Service.LogLevel = 1
+KProxy.Service.UltraSlow = 66666
+KProxy.Service.Slow = 1000
+KProxy.Service.RefreshTime = 3600
+
+# DONT set this value above 0 in production environment
+KProxy.Service.Delay = 0
+
+KProxy.Cache.NumberMax = 64ki
+KProxy.Cache.ExpireMax = 86400
+
+kxi.timeout.message = 660000
+kxi.timeout.close = 5000
+kxi.timeout.connect = 30000
+
+kxi.PThreadPool.Server.Size = 4
+kxi.PThreadPool.Server.SizeMax = 4
+kxi.PThreadPool.Server.StackSize = 256ki
+
+kxi.PThreadPool.Client.Size = 4
+kxi.PThreadPool.Client.SizeMax = 4
+kxi.PThreadPool.Client.StackSize = 256ki
+

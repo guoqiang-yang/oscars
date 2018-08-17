@@ -1,0 +1,64 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">新建订单</h1>
+
+  <form class="form-horizontal" role="form">
+    <input type="hidden" class="form-control" name="oid" value="{{$order.oid}}">
+
+    <div class="form-group">
+      <div class="col-sm-10">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>id</th>
+            <th>名称</th>
+            <th>类别</th>
+            <th>单价</th>
+            <th>数量</th>
+            <th>总价</th>
+          </tr>
+          </thead>
+          <tbody>
+          {{foreach $order_products as $productItem}}
+          <tr data-pid="{{$productItem.pid}}">
+            <td>{{$productItem.product.pid}}</td>
+            <td>{{$productItem.sku.title}}</td>
+            <td>{{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}</td>
+            <td>￥{{$productItem.product.price/100}}</td>
+            <td>{{$productItem.num}}</td>
+            <td>{{$productItem.num * $productItem.product.price/100}}</td>
+            <td><a href="javascript:void(0);" class="_j_del_order_product">删除</a></td>
+          </tr>
+          {{/foreach}}
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-10">
+        <a class="btn btn-primary" href="/order/edit_order.php?oid={{$order.oid}}&new=1" style="margin-right:10px;">确定</a>
+        <button id="add_product" type="button" class="btn btn-default" data-toggle="modal" data-target="#dlgAddProduct">添加商品</button>
+      </div>
+    </div>
+
+  </form>
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="dlgAddProduct" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div id="product_list_container">
+          {{include "order/dlg_product_list.html"}}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" id="_j_btn_save_products" data-oid="{{$order.oid}}">确认选择</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

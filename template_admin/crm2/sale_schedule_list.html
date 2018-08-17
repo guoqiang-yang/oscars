@@ -1,0 +1,102 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">销售日程列表</h1>
+
+    <form class="form-inline" role="form" action="/crm2/sale_schedule_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px;">
+                <label>规划时间：</label>
+                <input type="datetime-local" class="form-control" name="from_day" placeholder="YYYY-MM-DD HH:ii:ss" value="{{if $search_conf.from_day}}{{$search_conf.from_day|date_format:'%Y-%m-%dT%H:%M:%S'}}{{/if}}" style="width: 230px;"> —
+                <input type="datetime-local" class="form-control" name="end_day" placeholder="YYYY-MM-DD HH:ii:ss" value="{{if $search_conf.end_day}}{{$search_conf.end_day|date_format:'%Y-%m-%dT%H:%M:%S'}}{{/if}}" style="width: 230px;">
+            </div>
+            {{if count($team_member)>1}}
+            <div class="form-group">
+                <label>组员：</label>
+                <select class="form-control" name="group_leader" style="margin-right:20px;">
+                    <option value="0" {{if $search_conf.group_leader==0}} selected="selected" {{/if}}>所有</option>
+                    {{foreach $team_member as $member}}
+                    <option value="{{$member.suid}}" {{if $search_conf.group_leader==$member.suid}}selected="selected" {{/if}}>{{$member.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            {{/if}}
+            <button style="margin-left: 50px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+
+    <nav class="nav navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav"  id="sale_schedule_navbar" data-type="{{$search_conf.type}}">
+                    <li>
+                        <a href="{{$page_url}}" style="padding-right: 30px;padding-left: 30px;">
+                            全部
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&type=1" style="padding-right: 30px;padding-left: 30px;">
+                            未开始
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&type=2" style="padding-right: 30px;padding-left: 30px;">
+                            已开始
+                        </a>
+                    </li>
+                </ul>
+                {{if !empty($_permissions['/crm2/ajax/save_sale_schedule'])}}
+                <a class="btn btn-primary" href="javascript:;" style="float: right; margin-top: 8px;" data-toggle="modal" data-target="#addSaleScheduleModal">创建日程</a>
+                {{/if}}
+            </div>
+        </div>
+    </nav>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width:65px;">ID</th>
+            <th style="width:80px;">销售</th>
+            <th style="width:150px;">开始时间</th>
+            <th>内容</th>
+            <th style="width:80px;">状态</th>
+            <th style="width:120px;">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $schedule_list as $schedule}}
+        <tr>
+            <td>{{$schedule.id}}</td>
+            <td>{{$schedule.sale_name}}</td>
+            <td>{{$schedule.schedule_time}}</td>
+            <td>{{$schedule.content}}</td>
+            <td>{{if $schedule.schedule_time <= $now_time}}已开始{{else}}未开始{{/if}}</td>
+            <td>
+                {{if $schedule.vid == 0 && $schedule.cid > 0 && $schedule.schedule_time > $now_time && !empty($_permissions['/crm2/edit_customer_visit'])}}
+                <a href="/crm2/edit_customer_visit.php?cid={{$schedule.cid}}&schedule_id={{$schedule.id}}" target="_blank">创建拜访</a><br/>
+                {{/if}}
+                {{if $schedule.vid > 0 && !empty($_permissions['/crm2/show_customer_visit'])}}
+                <a href="/crm2/show_customer_visit.php?id={{$schedule.vid}}" target="_blank">查看拜访</a><br/>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>
+<!-- Modal -->
+{{include file="crm2/block/sale_schedule_dialog.html"}}

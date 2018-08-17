@@ -1,0 +1,20 @@
+<table class="table" id="bill_in_list">
+    <tr>
+        <th><input type="checkbox" id="checkAll" />全选</th>
+        <th>ID</th>
+        <th>单据类型</th>
+        <th>采购金额</th>
+    </tr>
+    {{if !empty($bill_ids)}}
+    {{foreach $bill_ids as $item}}
+    <tr>
+        <td><input type="checkbox" class="select" name="account_bill" value="{{$item.id}}" data-type="{{$item.type}}" /></td>
+        <td>{{$item.id}}</td>
+        <td>{{if $item.type == 1}}采购单{{else}}结算单{{/if}}</td>
+        <td>¥{{$item.amount}}</td>
+    </tr>
+    {{/foreach}}
+    {{else}}
+    <tr><td colspan="4">暂无符合条件的开票单据</td></tr>
+    {{/if}}
+</table>

@@ -1,0 +1,73 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">经销商返点列表</h1>
+
+    <form class="form-inline" role="form" action="/finance/agent_bill_cashback_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>返点ID：</label>
+                <input type="text" class="form-control" name="id" value="{{$search_conf.id}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>返点日期：</label>
+                <input type="date" class="form-control" name="day" value="{{$search_conf.day}}" style="width:180px;">
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>返点类型：</label>
+                <select class="form-control" name="type">
+                    <option value="0">所有</option>
+                    {{foreach $type_list as $key => $value}}
+                    <option value="{{$key}}" {{if $search_conf.type == $key}}selected="true"{{/if}}>{{$value}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>经销商ID：</label>
+                <input type="text" class="form-control" name="aid" value="{{$search_conf.aid}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>经销商名：</label>
+                <input type="text" class="form-control" name="title" value="{{$search_conf.title}}" style="width:120px;">
+            </div>
+            <button style="margin-left: 50px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width:10%;">返点ID</th>
+            <th style="width:10%;">返点日期</th>
+            <th style="width: 10%;">返点类型</th>
+            <th style="width:15%;">经销商</th>
+            <th>返点周期</th>
+            <th style="width:10%;">返点金额</th>
+            <th style="width:10%;">状态</th>
+            <th style="width:8%;">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $cashback_list as $item}}
+        <tr>
+            <td>{{$item.id}}</td>
+            <td>{{$item.ctime}}</td>
+            <td>{{$type_list[$item.type]}}</td>
+            <td>
+                {{$item.aid}}<br>
+                {{$item.agent_name}}
+            </td>
+            <td>{{$item.begin_day}} ~ {{$item.end_day}}</td>
+            <td>{{$item.price/100}}</td>
+            <td>{{if $item.step == 0}}待付款{{else}}已付款{{/if}}</td>
+            <td><a href="/finance/agent_bill_cashback_detail.php?id={{$item.id}}" target="_blank">查看</a></td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

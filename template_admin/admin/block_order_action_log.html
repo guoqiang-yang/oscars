@@ -1,0 +1,36 @@
+<table class="table">
+	<thead>
+	<tr>
+		<th>id</th>
+		<th>订单</th>
+		<th>操作者</th>
+		<th>操作类型</th>
+		<th>描述</th>
+		<th>操作时间</th>
+	</tr>
+	</thead>
+	<tbody>
+	{{foreach $list as $action}}
+	<tr>
+		<td>
+			{{$action.lid}}
+		</td>
+		<td>
+			{{$action.oid}}
+		</td>
+		<td>
+			{{$action.admin_name}}
+		</td>
+		<td>
+			{{$action.action}}
+		</td>
+		<td>
+			{{$action.desc|truncate:110:'...'}}
+		</td>
+		<td>
+			{{$action.mtime}}
+		</td>
+	</tr>
+	{{/foreach}}
+	</tbody>
+</table>

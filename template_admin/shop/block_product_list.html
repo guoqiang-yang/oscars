@@ -1,0 +1,105 @@
+{{if count($products) > 0}}
+<table class="table">
+    <thead>
+    <tr>
+        <th>pid</th>
+        <th>sid</th>
+        <th>图片</th>
+        <th>商品信息</th>
+        <th>费用</th>
+        <th>属性</th>
+        <th>状态</th>
+        <th>排序</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $products as $product}}
+    <tr data-pid="{{$product.product.pid}}" class="_j_product">
+        <td>{{$product.product.pid}}</td>
+        <td>{{$product.product.sid}}</td>
+        <td><img width="120" src="{{if $product.sku._pic}}{{$product.sku._pic.small}}{{else}}/i/nopic100.jpg{{/if}}"></td>
+        <td>
+            【名称】{{$product.sku.title}}<br/>
+            {{if !empty($product.sku.alias)}}<span style="color:gray;">【俗称】{{$product.sku.alias}}</span><br />{{/if}}
+            {{if !empty($product.sku.unit)}}<span style="color:#2222F1;">【单位】{{$product.sku.unit}}</span><br />{{/if}}
+            {{if !empty($product.sku.package)}}<span style="color:#0B8E1B;">【规格】{{$product.sku.package}}</span><br />{{/if}}
+            {{if !empty($product.sku.bid)}}<span style="color:#912A08;">【品牌】{{foreach $brands as $brand}}{{if $brand.bid == $product.sku.bid}}{{$brand.name}}{{/if}}{{/foreach}}</span><br />{{/if}}
+            {{if !empty($product.sku.mids)}}<span style="color:#DACC07;">【型号】{{$product.sku._mids}}</span><br />{{/if}}
+            <span style="color:#EB2705;">【城市】{{$city_list[$product.product.city_id]}}</span><br />
+            {{if $product.sku.length > 0 || $product.sku.width > 0 || $product.sku.height > 0}}
+            <span style="color:#A718C3;">【尺寸】{{$product.sku.length / 100}}米 * {{$product.sku.width / 100}}米 * {{$product.sku.height / 100}}米</span><br/>
+            {{/if}}
+            {{if $product.sku.weight > 0}}
+            <span style="color:#A0AF2C;">【重量】{{$product.sku.weight / 1000}} 千克</span><br/>
+            {{/if}}
+            <span>【频次】{{$product.product.frequency}}</span>
+        </td>
+        <td>
+            {{if $product.product.sale_price > 0}}
+            <del style="color: #DADB80">【原价】￥{{$product.product.price / 100}}元</del><br />
+            <span style="color: #ff0033;">【活动价】￥{{$product.product.sale_price / 100}}元</span><br />
+            {{else if $product.product.ori_price > 0}}
+            <del style="color: #DADB80">【原价】￥{{$product.product.ori_price / 100}}元</del><br />
+            <span style="color: #ff0033;">【现价】￥{{$product.product.price / 100}}元</span><br />
+            {{else}}
+            【价格】￥{{$product.product.price / 100}}元<br />
+            {{/if}}
+            【工装价】￥{{$product.product.work_price / 100}}元<br/>
+            {{if !empty($_permissions["show_product_cost"])}}<span style="color:#2222F1;">【成本】￥{{$product.product.cost / 100}}元</span><br />{{/if}}
+            <span style="color:#0B8E1B;">【电梯】￥{{$product.product.carrier_fee_ele / 100}}元</span><br />
+            <span style="color:#912A08;">【楼梯】￥{{$product.product.carrier_fee / 100}}元</span>
+        </td>
+        <td>
+            <span style="{{if $product.product.sales_type!=0}}color:red;{{/if}}">销售类型：{{$sales_types[$product.product.sales_type]}}</span><br>
+            <span style="{{if $product.product.buy_type==2}}color:red;{{/if}}">采购类型：{{$buy_types[$product.product.buy_type]}}</span><br/>
+            <span>经营模式：{{$managing_modes[$product.product.managing_mode]}}</span>
+        </td>
+        <td>
+            {{if $product.product.status == 4}}
+            <span style="color:#238659;">【下架】</span>
+            {{else if $product.product.status == 0}}
+            【上架】
+            {{else}}
+            <span style="color:red;">【已删除】</span>
+            {{/if}}
+            <br/>
+        </td>
+        <td>
+            <form action="/shop/edit_sortby.php">
+                <input style="width: 50px; text-align: center;" type="text" name="sortby" value="{{$product.product.sortby}}"/>
+                <input type="hidden" name="sid" value="{{$product.product.pid}}"/> <br/>
+                {{if !empty($_permissions["/shop/edit_sortby"])}}
+                <input style="width: 50px; margin-top: 5px;" type="submit" name="submit" value="更改"/>
+                {{/if}}
+            </form>
+        </td>
+        <td>
+            {{if !empty($_permissions["/shop/edit_product"])}}
+            <a href="/shop/edit_product.php?pid={{$product.product.pid}}">编辑</a><br/>
+            {{/if}}
+            {{if !empty($_permissions["/shop/ajax/offline_product"])}}
+                {{if $product.product.status > 0}}
+                <a href="javascript:void(0);" class="_j_online_product">上架</a><br/>
+                {{else}}
+                <a href="javascript:void(0);" class="_j_offline_product">下架</a><br/>
+                {{/if}}
+            {{/if}}
+            {{if $product.product.status > 0 && !empty($_permissions["/shop/ajax/delete_product"])}}
+            <a data-pid="{{$product.product.pid}}" href="javascript:void(0);" class="_j_del_product">删除</a><br/>
+            {{/if}}
+            {{if !empty($_permissions["/warehouse/stock_history"])}}
+            <a href="/warehouse/stock_history.php?type=-1&wid={{$wid}}&sid={{$product.sku.sid}}">库存</a><br>
+            {{/if}}
+            {{if !empty($_permissions["/shop/processing_products"]) && !empty($product.sku.rel_sku)}}
+            <a href="/shop/processing_products.php?sid={{$product.sku.sid}}">加工</a><br>
+            <a href="/shop/processed_list.php?sid={{$product.sku.sid}}">加工单列表</a>
+            {{/if}}
+        </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>
+{{else}}
+没有找到商品
+{{/if}}

@@ -1,0 +1,105 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">待采购商品列表</h1>
+    
+    <form class="form-inline" role="form">
+        <div class="placeholder">
+            
+            <div class="form-group" style="margin-right:20px;">
+              <label>仓库：</label>
+              <select class="form-control" name="wid">
+                {{foreach $_allowed_warehouses as $_wid=>$_wname}}
+                <option value="{{$_wid}}" {{if $search.wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+                {{/foreach}}
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>配送日期：</label>
+              <input type="date" class="form-control" name="delivery_date" value="{{$search.delivery_date}}" style="margin-right: 20px;">
+            </div>
+            <div class="form-group">
+              <label>订单ID：</label>
+              <input type="text" class="form-control" name="oid" value="{{$search.oid}}" style="margin-right: 20px; width: 100px;">
+            </div>
+            <div class="form-group">
+              <label>商品ID：</label>
+              <input type="text" class="form-control" name="pid" value="{{$search.pid}}" style="margin-right: 20px; width: 100px;">
+            </div>
+            <input type="hidden" name="cate" value="0">
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查 询</button>
+            
+            {{if !empty($_permissions['/warehouse/ajax/create_tmp_2_inorder'])}}
+            <button type="submit" class="btn btn-primary" id="show_create_tmp_purchase" style="float:right;margin-left:40px;">生成采购单</button>
+            {{/if}}
+        </div>
+    </form>
+   
+  <hr>
+  
+  {{if !empty($product_list)}}
+  <table class="table temp_product_list">
+    <thead>
+    <tr>
+        <th><label><input type="checkbox" id="tmp_purchase_select_all">全选</label></th>
+        <th>商品名称</th>
+        <th>配送时间</th>
+        <th>商品ID/SKUID</th>
+        <th>采购类型</th>
+        <th>经营模式</th>
+        <th>虚采数量</th>
+        <th>订单ID</th>
+    </tr>
+    </thead>
+    <tbody>
+        {{foreach $product_list as $products}}
+        {{foreach $products as $p}}
+        <tr class="product" data-oid="{{$p.oid}}" data-pid="{{$p.pid}}" data-sid="{{$p.sid}}" data-vnum="{{$p.wait_inorder_num}}">
+            <td>
+                <label><input type="checkbox" name="wait_inorder"></label>
+            </td>
+            <td>{{$sku_infos[$p.sid]['title']}}</td>
+            <td>{{$p.delivery_desc}}</td>
+            <td>
+                {{$p.pid}} / {{$p.sid}}<br>
+                <span style="color:gray;">{{$cate1_list[$sku_infos[$p.sid]['cate1']]['name']}} - {{$cate2_list[$sku_infos[$p.sid]['cate1']][$sku_infos[$p.sid]['cate2']]['name']}}</span>
+            </td>
+            <td><span style="color:green;">{{$buytype_descs[$product_infos[$p.pid]['buy_type']]}}</span></td>
+            <td>{{$managing_modes[$product_infos[$p.pid]['managing_mode']]}}</td>
+            <td>{{$p.wait_inorder_num}} {{$sku_infos[$p.sid]['unit']|default:'个'}}<br>
+                <span style="color:gray;">成本：￥{{$p.cost/100}}</span>
+            </td>
+            <td>
+                <a href="/order/order_detail.php?oid={{$p.oid}}" target="_blank">{{$p.oid}}</a><br>
+                【{{$p.step_desc}}】
+            </td>
+        </tr>
+        {{/foreach}}
+        {{/foreach}}
+        
+    </tbody>
+  </table>
+  
+  {{else}}
+  <span style="font-size: 25px; color:red;"> 无临采商品 </span>
+  {{/if}}
+    
+</div>
+
+<div class="modal fade _j_dialog" id="show_create_tmp_purchase_dlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">临采商品确认</h4>
+            </div>
+            <div class="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="create_tmp_purchase" class="btn btn-primary" data-oid="{{$order.oid}}">创建采购单</button>
+            </div>
+        </div>
+    </div>
+</div>

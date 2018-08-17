@@ -1,0 +1,28 @@
+
+<form class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label"></label>
+        <div class="col-sm-10">
+            {{foreach $details as $desc=>$price}}
+            <p>{{$desc}}：{{$price/10/10}}元</p>
+            {{/foreach}}
+            <br>
+            
+            {{if !empty($res_msg)}}
+            <p style="color:red; font-size:20px;">{{$res_msg}}</p>
+            {{else}}
+            <span style="font-size: 16px; color:blue;" id="trans_price" data-price="{{$can_trans_fee/100}}">可转余额：{{$can_trans_fee/100}}元</span>
+            {{/if}}
+            
+            {{if !empty($notice)}}
+            <p style="color:red;font-size:16px;margin-top:5px;">{{$notice}}</p>
+            {{/if}}
+        </div>
+    </div>
+    <div class="form-group trans_note">
+        <label class="col-sm-2 control-label"></label>
+        <div class="col-sm-6">
+            <textarea class="form-control" rows="2" placeholder="请备注原因"></textarea>
+        </div>
+    </div>
+</form>

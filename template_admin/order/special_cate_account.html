@@ -1,0 +1,94 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">沙石砖结账</h1>
+
+  <form class="form-inline" role="form" action="/finance/special_cate_account.php">
+    <div class="placeholder">
+		<div class="form-group" style="margin-right:20px;">
+		  <label>日期：</label>
+		  <input value="{{$bdate}}" name="bdate" type="text">
+		  <span> -- </span>
+		  <input value="{{$edate}}" name="edate" type="text">
+		  <span style="color:#C5BDBD;">日期格式(YYYY-MM-DD)</span>
+		</div>
+	</div>
+	<div class="placeholder">
+
+		<div class="form-group" style="margin-right: 20px;">
+			<label>商品类型：</label>
+			<select class="form-control" name="product_search_cate" style="margin-right: 50px;">
+				<option value="1"  selected="selected">沙子-水泥-砖</option>
+			</select>
+		</div>
+		<div class="form-group" style="margin-right:50px;">
+			<label>仓库：</label>
+			{{if $_user.wid}}
+			<select class="form-control" name="wid" disabled="true">
+				<option value="{{$_user.wid}}" selected="selected">{{$_warehouseList[$_user.wid]}}</option>
+			</select>
+			{{else}}
+			<select class="form-control" name="wid">
+				<option value="0" {{if !$searchConf.wid}} selected="selected"{{/if}}>全部</option>
+				{{foreach $_warehouseList as $_wid=>$_wname}}
+				<option value="{{$_wid}}" {{if $wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+				{{/foreach}}
+			</select>
+			{{/if}}
+		</div>
+		<div class="form-group">
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>			
+		</div>
+	</div>
+  </form>
+
+  <hr>
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>订单id</th>
+      <th>退单id</th>
+			<th>仓库</th>
+      <th style="width:10%;">订单商品数量</th>
+      <th>订单商品价钱</th>
+      <th>退单商品数量</th>
+      <th>退单商品价钱</th>
+    </tr>
+    </thead>
+
+    {{if !empty($pdatas)}}
+    <tbody>
+    {{foreach $pdatas as $info}}
+    <tr>
+      <td><a href="/order/order_detail.php?oid={{$info.oid}}" target="_blank">{{$info.oid}}</a></td>
+      <td>
+        {{if !empty($info.rid)}}<a href="/order/edit_refund.php?rid={{$info.rid}}">{{$info.rid}}</a>{{else}} -- {{/if}}
+      </td>
+	  <td>{{$_warehouseList[$info.wid]}}</td>
+      <td>{{if empty($info.rid)}}{{$info['sum(num)']}}{{else}} -- {{/if}}</td>
+      <td>{{if empty($info.rid)}}￥{{$info['sum(cost*num)']/100}}{{else}} -- {{/if}}</td>
+      <td>{{if !empty($info.rid)}}{{$info['sum(num)']}}{{else}} -- {{/if}}</td>
+      <td>{{if !empty($info.rid)}}￥{{$info['sum(cost*num)']/100}}{{else}} -- {{/if}}</td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  {{else}}
+  </table>
+  <div>
+    <span style="color:red;">’{{$bdate}}’ -- ’{{$edate}}‘</span> 没有对应商品!!
+  </div>
+  {{/if}}
+  
+  <div>
+	  <h>总计金额：{{$totalPrice}}</h>
+  </div>
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

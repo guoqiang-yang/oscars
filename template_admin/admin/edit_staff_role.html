@@ -1,0 +1,91 @@
+<style>
+    .list_items {padding: 6px 0; border-bottom: 1px solid #ddd;}
+    .list_items:last-child {border: none;}
+    .pages {font-size: 16px; font-weight: 600;}
+    .items {font-size: 18px; font-weight: 800;}
+</style>
+<input type="hidden" id="suid" value="{{$staff.suid}}" />
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">编辑权限</h1>
+
+    <!--<form id="search_form" class="form-inline" role="form" action="/admin/edit_staff_role.php">-->
+        <!--<div class="placeholder">-->
+            <!--<div class="form-group" style="margin-right:30px;">-->
+                <!--<label>部门：</label>-->
+                <!--<select id="select_department" class="form-control" name="department" >-->
+                    <!--<option value="0" {{if $department_id==0}} selected="selected"{{/if}}>全部</option>-->
+                    <!--{{foreach $departments as $did => $dname}}-->
+                    <!--<option value="{{$did}}" {{if $department_id==$did}}selected="selected"{{/if}}>{{$dname}}</option>-->
+                    <!--{{/foreach}}-->
+                <!--</select>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</form>-->
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>id</th>
+                <th>姓名</th>
+                <th>手机号</th>
+            </tr>
+        </thead>
+        <tbody style="color:blue;font-weight:bold;">
+            <tr>
+                <td>{{$staff.suid}}</td>
+                <td>{{$staff.name}}</td>
+                <td>{{$staff.mobile}}</td>
+            </tr>
+        <tbody>
+    </table>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>模块</th>
+            <th>权限列表</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $roles['self'] as $department_id => $role}}
+        <tr class="department_list success" data-did="{{$department_id}}">
+            <td style="vertical-align: middle; min-width: 150px;">
+                <label class="checkbox-inline items">
+                    <input class="department_item" type="checkbox" value="{{$department_id}}"> {{$role.department_name}}
+                </label>
+            </td>
+            <td>
+                {{foreach $role.role_list as $r}}
+                <label class="checkbox-inline pages">
+                    <input {{if $r.has_role}}checked="checked"{{/if}}  class="role_item" data-department="{{$department_id}}" type="checkbox" value="{{$r.role_id}}"> {{$r.role_name}}
+                </label>
+                {{/foreach}}
+            </td>
+        </tr>
+        {{/foreach}}
+        
+        <tr class="danger"><td></td><td></td></tr>
+        
+        {{foreach $roles['other'] as $department_id => $role}}
+        <tr class="department_list warning" data-did="{{$department_id}}">
+            <td style="vertical-align: middle; min-width: 150px;">
+                <label class="checkbox-inline">
+                    <input class="department_item" type="checkbox" value="{{$department_id}}"> {{$role.department_name}}
+                </label>
+            </td>
+            <td>
+                {{foreach $role.role_list as $r}}
+                <label class="checkbox-inline">
+                    <input {{if $r.has_role}}checked="checked"{{/if}}  class="role_item" data-department="{{$department_id}}" type="checkbox" value="{{$r.role_id}}"> {{$r.role_name}}
+                </label>
+                {{/foreach}}
+            </td>
+        </tr>
+        {{/foreach}}
+        <tbody>
+    </table>
+
+    <div style="text-align: center;">
+        <button id="save_roles" type="button" class="btn-lg btn-primary">保    存</button>
+    </div>
+</div>

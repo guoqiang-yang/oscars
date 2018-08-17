@@ -1,0 +1,61 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">返点详情（ID：{{$bill_info.id}}）</h1>
+	<table class="table">
+		<tr>
+			<td style="width: 300px;text-align: right;">经销商：</td>
+            <td>{{$bill_info.agent_name}}({{$bill_info.aid}})</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">返点日期：</td>
+            <td>{{$bill_info.ctime}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">返点类型：</td>
+            <td>{{$type_list[$bill_info.type]}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">返点周期：</td>
+            <td>
+                {{$bill_info.begin_day}} ~ {{$bill_info.end_day}}
+            </td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">返点金额：</td>
+            <td><span style="color: red;"> ¥ {{$bill_info.price/100}}</span>&emsp;({{$bill_info._rule_desc}})</td>
+		</tr>
+        <tr>
+            <td style="width: 300px; text-align: right;">返点状态：</td>
+            <td>{{if $bill_info.step == 0}}未付款{{else}}已付款{{/if}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">日结单：</td>
+            <td>
+                <table class="table table-striped">
+                    <tr>
+                        <th>ID</th>
+                        <th>结算日期</th>
+                        <th>订单总金额</th>
+                        <th>退单总金额</th>
+                        <th>结算金额</th>
+                        <th>操作</th>
+                    </tr>
+                    {{foreach $bill_info.bill_list as $item}}
+                    <tr>
+                        <td>{{$item.bid}}</td>
+                        <td>{{$item.day}}</td>
+                        <td>{{$item.order_price/100}}</td>
+                        <td>{{$item.refund_price/100}}</td>
+                        <td>{{$item.price/100}}</td>
+                        <td><a href="/finance/agent_bill_day_detail.php?bid={{$item.bid}}" target="_blank">查看</a></td>
+                    </tr>
+                    {{/foreach}}
+                </table>
+            </td>
+        </tr>
+        {{if $bill_info.step == 0 && !empty($_permissions['/finance/ajax/agent_bill_cashback_pay'])}}
+        <tr>
+            <td colspan="2"><button type="button" id="agent_bill_cashback_pay" data-id="{{$bill_info.id}}" class="btn btn-primary">付款</button></td>
+        </tr>
+        {{/if}}
+	</table>
+</div>

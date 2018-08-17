@@ -1,0 +1,158 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">处理贷款申请</h1>
+	<form enctype="multipart/form-data" class="form-horizontal" role="form" method="post">
+		<input type="hidden" class="form-control" id="id" value="{{$info.id}}">
+		<div class="form-group">
+            <label class="col-sm-2 control-label">客户信息</label>
+            <div class="col-sm-10">
+                <span class="text-value"><a href="/crm2/customer_detail.php?cid={{$info.cid}}">{{$info._customer.name}}（cid：{{$info.cid}}）</a></span>
+            </div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">类型：</label>
+            <div class="col-sm-10">
+                <span class="text-value">{{$info._type}}</span>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">提交信息：</label>
+            <div class="col-sm-10">
+                {{if $info.type == 1}}
+                <span class="text-value">手机号：{{$info.mobile}}</span><br />
+                <span class="text-value">姓名：{{$info.real_name}}</span><br />
+                <span class="text-value">身份证号：{{$info.id_card_no}}</span><br />
+                <span class="text-value">银行卡号：{{$info.bank_card}}</span>
+                {{else}}
+                <span class="text-value">公司名：{{$info.company}}</span><br />
+                <span class="text-value">法人姓名：{{$info.legal_person_name}}</span><br />
+                <span class="text-value">手机号：{{$info.mobile}}</span><br />
+                <span class="text-value">身份证号：{{$info.id_card_no}}</span><br />
+                <span class="text-value">统一社会信用代码：{{$info.social_code}}</span>
+                {{/if}}
+            </div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">申请时间：</label>
+            <div class="col-sm-10">
+                <span class="text-value">{{$info.ctime}}</span>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">状态：</label>
+			<div class="col-sm-10">
+                <span class="text-value">{{$info._step}}</span>
+			</div>
+		</div>
+        <!--好材审核未通过-->
+        {{if $info.step == -11}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">处理结果：</label>
+            <div class="col-sm-10">
+                <span class="text-value">处理时间：{{$info.hc_deal_time}}</span><br />
+                <span class="text-value">处理人：{{$info._suser.name}}</span>
+            </div>
+        </div>
+        <!--第三方审核未通过-->
+        {{else if $info.step == -1}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">处理结果：</label>
+            <div class="col-sm-10">
+                <span class="text-value">处理时间：{{$info.tp_deal_time}}</span><br />
+                <span class="text-value">处理人：{{$info._suser.name}}</span>
+            </div>
+        </div>
+        <!--提交，待第三方审核-->
+        {{else if $info.step == 1}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">第三方授信金额：</label>
+            <div class="col-sm-10">
+                <input style="display: inline; width: 200px;" type="text" id="tp_total_amount" class="form-control" name="tp_total_amount" value="{{$info.tp_total_amount}}" />  元
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">第三方授信期限：</label>
+            <div class="col-sm-10">
+                <input style="display: inline; width: 200px;" type="text" id="tp_due_date" class="form-control" name="tp_due_date" value="{{$info.tp_due_date}}">  天
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <a href="javascript:void(0);" id="tp_pass" class="btn btn-success btn-lg" style="margin-right:20px;">保存第三方授信结果</a>
+                <a href="javascript:void(0);" id="tp_refuse" class="btn btn-warning btn-lg">第三方授信未通过</a>
+            </div>
+        </div>
+        <!--第三方授信通过，待好材审核-->
+        {{else if $info.step == 11}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">第三方授信结果：</label>
+            <div class="col-sm-10">
+                <span class="text-value">授信金额：{{$info.tp_total_amount}} 元</span><br />
+                <span class="text-value">授信期限：{{$info.tp_due_date}} 天</span><br />
+                <span class="text-value">授信时间：{{$info.tp_deal_time}}</span>
+            </div>
+            <input type="hidden" id="tp_total_amount_val" value="{{$info.tp_total_amount}}" />
+            <input type="hidden" id="tp_due_date_val" value="{{$info.tp_due_date}}" />
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">好材授信金额：</label>
+            <div class="col-sm-10">
+                <input max="{{$info.tp_total_amount}}" style="display: inline; width: 200px;" type="text" id="hc_total_amount" class="form-control" name="hc_total_amount" value="{{$info.hc_total_amount}}" />  元
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">好材授信期限：</label>
+            <div class="col-sm-10">
+                <input max="{{$info.tp_due_date}}" style="display: inline; width: 200px;" type="text" id="hc_due_date" class="form-control" name="hc_due_date" value="{{$info.hc_due_date}}">  天
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <a href="javascript:void(0);" id="hc_pass" class="btn btn-success btn-lg" style="margin-right:20px;">保存好材审核结果</a>
+                <a href="javascript:void(0);" id="hc_refuse" class="btn btn-warning btn-lg">好材审核未通过</a>
+            </div>
+        </div>
+        <!--好材审核通过，待授信-->
+        {{else if $info.step == 22}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">第三方授信结果：</label>
+            <div class="col-sm-10">
+                <span class="text-value">授信金额：{{$info.tp_total_amount}} 元</span><br />
+                <span class="text-value">授信期限：{{$info.tp_due_date}} 天</span><br />
+                <span class="text-value">授信时间：{{$info.tp_deal_time}}</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">好材审核结果：</label>
+            <div class="col-sm-10">
+                <span class="text-value">授信金额：{{$info.hc_total_amount}} 元</span><br />
+                <span class="text-value">授信期限：{{$info.hc_due_date}} 天</span><br />
+                <span class="text-value">审核时间：{{$info.hc_deal_time}}</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <a href="javascript:void(0);" id="hc_credit" class="btn btn-success btn-lg">确认授信</a>
+            </div>
+        </div>
+        {{else if $info.step == 33}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">第三方授信结果：</label>
+            <div class="col-sm-10">
+                <span class="text-value">授信金额：{{$info.tp_total_amount}} 元</span><br />
+                <span class="text-value">授信期限：{{$info.tp_due_date}} 天</span><br />
+                <span class="text-value">授信时间：{{$info.tp_deal_time}}</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">好材审核结果：</label>
+            <div class="col-sm-10">
+                <span class="text-value">授信金额：{{$info.hc_total_amount}} 元</span><br />
+                <span class="text-value">授信期限：{{$info.hc_due_date}} 天</span><br />
+                <span class="text-value">审核时间：{{$info.hc_deal_time}}</span><br />
+                <span class="text-value">授信时间：{{$info.hc_crdit_time}}</span>
+            </div>
+        </div>
+        {{/if}}
+
+	</form>
+</div>

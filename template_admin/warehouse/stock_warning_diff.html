@@ -1,0 +1,50 @@
+<form class="form-inline" role="form">
+    <div class="placeholder">
+        <div class="form-group" style="margin-right:20px;">
+          <label>仓库：</label>
+          <select class="form-control" name="wid">
+            {{foreach $_allowed_warehouses as $_wid=>$_wname}}
+            <option value="{{$_wid}}" {{if $search.wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+            {{/foreach}}
+          </select>
+        </div>
+        
+        <input type="hidden" name="cate" value="1">
+        <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查 询</button>
+    </div>
+</form>
+
+<hr>
+
+<table class="table">
+    <thead>
+    <tr>
+      <th>商品编号</th>
+      <th>商品信息</th>
+      <th>单位</th>
+      <th>大库库存</th>
+      <th>【实际】货位库存</th>
+      <th>未上架数量</th>
+      <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $diff_list as $p}}
+    <tr class="_j_product">
+      <td>{{$p.sid}}</td>
+      <td>
+        {{$p.title}}<br/>
+        <span style="color:gray;">{{$p.alias}}</span>
+      </td>
+      <td>{{$p.unit|default:0}}</td>
+      <td>{{$p.num}}</td>
+      <td>{{$p.loc_num}}</td>
+      <td><a href="/warehouse/location_list.php?wid={{$search.wid}}&un_shelved=1&sid={{$p.sid}}" target="_blank">{{$p.un_shelved_num}}</a></td>
+      <td>
+        <a href="/warehouse/location_list.php?sid={{$p.sid}}&wid={{$search.wid}}" target="_blank">货位库存</a><br>
+        <a href="/warehouse/stock_history.php?date=&wid={{$search.wid}}&type=-1&sid={{$p.sid}}" target="_blank">库存历史</a>
+      </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>

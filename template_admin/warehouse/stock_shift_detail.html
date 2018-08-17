@@ -1,0 +1,152 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">调拨单详情</h1>
+
+  <form class="form-horizontal" role="form" id="_j_stock_shift_form" data-ssid="{{$ssid}}">
+		<div class="form-group">
+      <label class="col-sm-2 control-label">移出仓库ID：</label>
+      <div class="col-sm-4">
+        <span class="text-value">{{$warehouses[$shift_info.src_wid]}}</span>
+      </div>
+    </div>
+		
+		<div class="form-group">
+      <label class="col-sm-2 control-label">移入仓库ID：</label>
+      <div class="col-sm-4">
+        <span class="text-value">{{$warehouses[$shift_info.des_wid]}}</span>
+      </div>
+    </div>
+		
+		<div class="form-group">
+      <label class="col-sm-2 control-label">状态：</label>
+
+      <div class="col-sm-3">
+				<span style="font-size:20px;color:red;">{{if $ssid}}{{if $shift_info.status == 5}}待处理{{else if $shift_info.status == 6}}已驳回{{else}}{{$step_descs[$shift_info.step]}}{{/if}}{{else}}未创建{{/if}}</span>
+      </div>	
+    </div>
+		
+		<div class="form-group">
+			<label class="col-sm-2 control-label">备注：</label>
+
+			<div class="col-sm-5">
+				<span class="text-value">{{$shift_info.note nofilter}}</span>
+			</div>
+		</div>
+      {{if count($shift_info.products) > 0}}
+      <div class="form-group">
+          <div class="col-sm-10 text-right" style="color: #FF0000">已添加：{{count($shift_info.products)}}</div>
+      </div>
+      {{/if}}
+		
+		
+    <div class="form-group">
+      <label class="col-sm-2 control-label">调拨商品清单：</label>
+
+      <div class="col-sm-10">
+        <form class="form-horizontal" role="form">
+					
+          <div class="form-group">
+            <div class="col-sm-10">
+              <table class="table">
+                <thead>
+                    <tr>
+                        <th>sku_id</th>
+                        <th>名称</th>
+                        <th>类别</th>
+                        <th>数量</th>
+                        <th>出库货位：数量</th>
+                        <th>入库货位</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{foreach $shift_info.products as $product}}
+                    <tr>
+                        <td>{{$product.sid}}</td>
+                        <td>{{$product.title}}</td>
+                        <td>{{$product.cate_desc}}</td>
+                        <td>{{$product.num}}</td>
+                        <td>
+                            {{if isset($product._from_location)}}
+                                {{foreach $product._from_location as $loc}}
+                                <span style="color:red;">{{$loc['loc']}}：{{$loc['num']}}</span><br>
+                                {{/foreach}}
+                            {{else}}
+                            --
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{if !empty($product.to_location)}}
+                                <span style="color:blue;">{{$product.to_location}}</span>
+                            {{else}}
+                            --
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{if !empty($_permissions['/warehouse/ajax/refresh_vnum_force']) && $shift_info.step == 1}}
+                            <a href="javascript:void(0)" class="refresh_stock_shift_vnum" data-ssid="{{$ssid}}" data-sid="{{$product.sid}}">强制刷新</a>
+                            {{else}}--{{/if}}
+                        </td>
+                    </tr>
+                    {{/foreach}}
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        {{if !empty($shift_info.products)}}
+          {{if $shift_info.status == 0}}
+            {{if $shift_info.step == 1}}
+            {{if !empty($_permissions['/warehouse/ajax/stock_shift_rebut'])}}
+            <button type="button" class="btn btn-danger" data-ssid="{{$ssid}}" data-toggle="modal" data-target="#stockShiftRebutModal" style="margin-right: 20px;">驳回</button>
+            {{/if}}
+            {{if !empty($_permissions['/warehouse/ajax/save_stock_shift'])}}
+            <button type="button" class="btn btn-primary" data-next_step="2" data-ssid="{{$ssid}}" data-wid_out="{{$shift_info.src_wid}}" id="_j_chg_step_stock_shift">已出库</button>
+            {{/if}}
+            {{elseif $shift_info.step==2 && !empty($_permissions['/warehouse/ajax/save_stock_shift'])}}
+            <button type="button" class="btn btn-primary" data-next_step="3" data-ssid="{{$ssid}}" data-wid_in="{{$shift_info.des_wid}}" id="_j_chg_step_stock_shift">已入库</button>
+            {{elseif $is_upgrade_wid && $shift_info.step<5 && !empty($_permissions['/warehouse/shelved_detail'])}}
+            <a class="btn btn-primary" href="/warehouse/shelved_detail.php?objid={{$shift_info.ssid}}&type=2" target="_blank">上 架</a>
+            {{/if}}
+          {{/if}}
+        {{/if}}
+      </div>
+    </div>
+		
+  </form>
+
+  <!-- Modal -->
+  <div class="modal fade" id="dlgShiftStock" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+				{{*include "warehouse/block_stock_shift.html"*}}
+      </div>
+    </div>
+  </div>
+
+    <div class="modal fade" id="stockShiftRebutModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog form-horizontal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">调拔单驳回</h4>
+                </div>
+                <div class="modal-body form-group" style="width: 100%;">
+                    <label class="col-sm-3 control-label">驳回原因：</label>
+                    <div class="col-sm-8"><textarea class="form-group" name="rebut_reason" rows="8" cols="50"></textarea></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="_j_chg_stock_shift_rebut" data-ssid="{{$ssid}}">提交</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+
+</div>
+<div id="show_hccommon_admin_log" data-objid="{{$ssid}}" data-objtype="14"></div>

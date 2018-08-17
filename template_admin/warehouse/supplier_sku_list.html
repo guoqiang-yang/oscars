@@ -1,0 +1,293 @@
+<style>
+  h1 {font-family: STKaiti;}
+  table {font-size:14px; border-spacing: 0;border-collapse: collapse; }
+  table td {padding:5px 10px;}
+  table.border td {border:1px solid #333;}
+  #purchasePriceInBatch .table tr:nth-child(2n){background:silver;}
+</style>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">供应商的商品列表</h1>
+
+    <table class="border" width="100%">
+      <tbody>
+        <tr>
+          <td width="33%">供应商ID：{{$supplier.sid}}</td>
+          <td width="33%">联系电话：{{$supplier.phone|truncate:11:"..."}}</td>
+          <td width="33%">货期：{{$supplier.delivery_hours}} 小时</td>
+        </tr>
+        <tr>
+          <td width="33%">名称：{{$supplier.name|truncate:20:"..."}}</td>
+          <td width="33%">地址：{{$supplier.address|truncate:20:"..."}}</td>
+          <td width="33%">账期：{{$supplier.payment_days}} 天</td>
+        </tr>
+        <tr>
+          <td width="33%">联系人：{{$supplier.contact_name|truncate:20:"..."}}</td>
+          <td colspan="2">订货要求：{{$supplier.book_note|default: '无'}}</td>
+
+        </tr>
+      </tbody>
+    </table>
+  
+    <hr>
+    <form class="form-inline" role="form" action="">
+         <div class="placeholder">
+            {{if !empty($_permissions['/warehouse/ajax/add_sku_4_supplier'])}}
+            <a id="add_supplier_sku"  class="btn btn-default" href="javascript:;" data-toggle="modal" data-target="#showSkuListForSupplier" style="margin-left:50px;">新增商品</a>
+            {{/if}}
+            {{if !empty($_permissions['/warehouse/ajax/create_inorder_4_supplier'])}}
+            <a class="btn btn-primary" href="javascript:;" data-toggle="modal" data-target="#createInorder4Supplier" style="margin-left:50px;">生成采购单</a>
+            {{/if}}
+             {{if !empty($_permissions['/warehouse/ajax/refund_stockin'])}}
+             <a class="btn btn-primary" href="javascript:;" data-toggle="modal" data-target="#createRefund4SupplierModal" style="margin-left:50px;">生成退货单</a>
+             {{/if}}
+             {{if !empty($_permissions['/warehouse/ajax/save_supplier_purchase_price'])}}
+             <a href="" data-toggle="modal" data-target="#purchasePriceInBatch" class="btn btn-primary" style="margin-left:50px;">批量维护采购价</a>
+             {{/if}}
+        </div>
+    </form>
+    
+    <hr>
+    <div id="supplier_skus_area" data-supplierid="{{$supplier.sid}}">
+        <table class="table">
+          <thead>
+          <tr>
+              <th></th>
+              <th>SKU ID</th>
+              <th style="width:12%;">商品名称</th>
+              <th>单位</th>
+              <th>采购价</th>
+              <th>缺货量</th>
+              <th>建议订货量</th>
+              <th>实际订货量</th>
+              <th>
+                  可用库存<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="可用库存=库存-占用"></span>/平均销量/在途/前八周销量/周转天数
+
+              </th>
+              <th style="width:10%;">操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          {{$product_counts = 1}}
+          {{foreach $products as $pinfo}}
+          <tr class="dialog" data-skuid="{{$pinfo.sku_id}}" data-supplierid="{{$supplier.sid}}" data-weight="{{$pinfo.sku_info.weight/1000}}">
+              <td>
+                  <div class="checkbox" style="font-size: 16px;">
+                      <label><input class="bluk_selected_inorder" type="checkbox" name="bluk_inorder" value="{{$order.id}}" {{if $pinfo.purchase_price==0}}disabled="false"{{/if}} {{if $sku_id==$pinfo.sku_id&&$pinfo.purchase_price>0}}checked="checked"{{/if}}></label>
+                  </div>
+              </td>
+              <td class="sku_id">{{$pinfo.sku_id}}</td>
+              <td class="title">
+                  {{$pinfo.sku_info.title}}<br>
+                  <span style="color:red;">包装含量：{{if !empty($pinfo._product.picking_note)}}{{$pinfo._product.picking_note}}{{else}}{{$pinfo.sku_info.picking_note}}{{/if}}</span>
+              </td>
+              <td>{{$pinfo.sku_info.unit|default:'个'}}</td>
+              <td><span class="purchase_price">{{$pinfo.purchase_price/100}}</span> 元</td>
+              <td>
+                  {{foreach $security_data[$pinfo.sku_id] as $wid => $item}}
+                  <span>{{$wid}}# {{$item.short_quantity}}</span><br>
+                  {{/foreach}}
+              </td>
+              <td class="order_num" data-ordernum="{{$data_for_inorder[$pinfo.sku_id]}}">
+                  {{foreach $security_data[$pinfo.sku_id] as $wid => $item}}
+                  <span>{{$wid}}# {{$item.order_num}}</span><br>
+                  {{/foreach}}
+              </td>
+              <td>
+                  <input class="form-control" name="real_num" style="width:80px;" value="">
+                  <span style="color:red;font-size:12px;">默认：建议订货量</span>
+              </td>
+              <td>
+                  {{foreach $security_data[$pinfo.sku_id] as $wid => $item}}
+                  <span>{{$wid}}# {{$item.num - $item.occupied - $item.damaged_num}} / {{$item.ave_sale_num}} / {{$item.wait_num}} / {{$item.recent_stat_sale}} / {{floor($item.turn_day)}}</span><br>
+                  {{/foreach}}
+              </td>
+              <td>
+                  <p><a href="/warehouse/in_order_list.php?sid={{$supplier.sid}}&sku_id={{$pinfo.sku_id}}" target="_blank">查看采购记录</a></p>
+                  {{if !empty($_permissions['/warehouse/ajax/save_supplier_purchase_price'])}}
+                  <p><a class="show_modify_supplier_purchase_price">维护采购价</a></p>
+                  {{/if}}
+                  {{if !empty($_permissions['/warehouse/ajax/del_supplier_sku'])}}
+                  <p><a class="delete_supplier_sku">删除</a></p>
+                  {{/if}}
+              </td>
+          </tr>
+          {{$product_counts = $product_counts+1}}
+          {{/foreach}}
+          </tbody>
+        </table>
+    </div>
+    <nav>
+		<ul class="pagination">
+			<li>
+				<a style="color:#555;">共{{count($products)}}个
+				</a>
+			</li>
+        </ul>
+    </nav>
+</div>
+<div class="modal fade _j_dialog" id="showSkuListForSupplier" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:1000px;">
+        <div class="modal-content">
+            <div class="modal-df-datas" data-supplier_id="{{$supplier.sid}}"></div>
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">
+                    <span style="font-size:25px;">sku列表</span>
+                    
+                    <div style="float:right;font-size:16px;margin-right:15px;">
+                        <div class="form-inline _j_form">
+                            <div class="form-group" style="margin-right:10px;">
+                                <input type="text" class="form-control" name="keyword" value="{{$keyword}}">
+                            </div>
+                            <button type="button" class="btn btn-primary searchSkuListForSupplier">搜索</button>
+                        </div>
+                    </div>
+                </h4>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label"></label>
+                <div id="showSkuListForSupplierArea" style="margin-left:30px;">
+                    <p style="font-size:25px;">暂无SKU，请输入检索关键词，搜索！！</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <a class="btn btn-primary" href="javascript:window.location.reload();">完成</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade _j_dialog" id="modifySupplierPurchasePrice" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">维护采购价</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">采购价：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="purchase_price" style="display:inline-block;width:100px;"> 元
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="modify_supplier_purchase_price">确认修改</button>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal fade _j_dialog" id="createInorder4Supplier" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">创建采购单，选仓库</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">请选择仓库：</label>
+                        <div class="col-sm-7">
+                            <select class="form-control" name="wid" style="width:80%;">
+                                <option value="0" selected="selected">请选择</option>
+                                {{foreach $warehouses as $_wid => $desc}}
+                                <option value="{{$_wid}}">{{$desc}}</option>
+                                {{/foreach}}
+                            </select>
+                        </div>
+					</div>
+				</form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="confirmCreateInorder4Supplier" class="btn btn-primary">创建采购单</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade _j_dialog" id="createRefund4SupplierModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:900px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">创建退货单，选仓库</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="select_warehouse_area">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">请选择仓库：</label>
+                        <div class="col-sm-7">
+                            <select class="form-control" name="wid" style="width:80%;">
+                                <option value="0" selected="selected">请选择</option>
+                                {{foreach $warehouses as $_wid => $desc}}
+                                <option value="{{$_wid}}">{{$desc}}</option>
+                                {{/foreach}}
+                            </select>
+                        </div>
+                    </div>
+                </form>
+                <div class="create_supplier_refund_area"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="createRefund4Supplier" data-step="show_products" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade _j_dialog" id="purchasePriceInBatch" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:700px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">批量维护采购价</h4>
+            </div>
+            <div class="modal-body" style="width: 550px; margin: 0 auto">
+                <form class="form-horizontal">
+                    <input type="hidden" value="{{$supplier.sid}}" name="supplier_id">
+                    <table class="table" style="font-size: 14px;">
+                        <thead>
+                        <th>sku_id</th>
+                        <th>名称</th>
+                        <th>原采购价</th>
+                        <th>维护采购价</th>
+                        </thead>
+                        <tbody>
+                        {{foreach $products as $product}}
+                            <tr style="">
+                                <td style="height: 20px; padding: 2px;">{{$product.sku_id}}</td>
+                                <td style="height: 20px; padding: 2px;">{{$product.sku_info.title}}</td>
+                                <td style="height: 20px; padding: 2px;">￥{{$product.purchase_price/100}}</td>
+                                <td style="height: 20px; padding: 2px;"><input type="text" class="form-control purchase_price" data-id="{{$product.sku_id}}" name="purchase_price" style="display:inline-block;width:80px;height: 20px;" value="{{$product.purchase_price/100}}"> 元</td>
+                            </tr>
+                        {{/foreach}}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="_j_confirm_save_price">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="position: fixed; width: 500px; height: 50px; background-color: #999999; top: 60px; right: 10px; color: red; font-size: 26px; padding: 5px 10px;">
+    <div id="stat_4_purchase">
+        总重量：<span class="weight" style="margin-right:10px;">0KG</span>
+        总金额：<span class="price">0元</span>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>

@@ -1,0 +1,9 @@
+公众平台账号：chengdouhaocai@haocaisong.cn
+公众平台密码：sa.haocaisong.cn
+APPID：wxbbb97999b565968a
+AppSecret：e5a328b88594f4382918c70e773f64d1
+token：RiSoeuPS12smlIO0Ps89Ms08PMswI6mD
+AESKey：6xkTE56BIEgYJi5HU9k6GMOI656vOTWCxhnvxcvpSO6
+支付平台商户号：1500966131
+操作密码：chengdu_hc_1
+支付秘钥：2rdHleiuo98ns8s0leYqm5Und9ea0keu

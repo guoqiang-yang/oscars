@@ -1,0 +1,113 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+  <h1 class="page-header">销售客户转接</h1>
+  <form id="search_form" class="form-inline" role="form" action="/crm2/sales_customer_flow.php">
+    <div class="placeholder">
+      <div class="form-group" style="margin-right:30px;">
+        <label>销售专员：</label>
+        <select class="form-control" name="sales_suid" style="width:105px;">
+          <option value="0" {{if empty($search_conf.sales_suid)}} selected="selected"{{/if}}>请选择</option>
+          {{foreach $salesman_list as $man}}
+          <option value="{{$man.suid}}" {{if $search_conf.sales_suid==$man.suid}}selected="selected"{{/if}}>{{$man.name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+    </div>
+    </form>
+    <form method="post" id="sales_flow" action="/crm2/sales_customer_flow_update.php" class="form-inline">
+    	<div class="placeholder saler_groups">
+             <div class="form-group" style="margin-right:15px;">
+                 <label>转给销售：</label>
+             </div>
+             <input type="hidden" name="sales_suid" value="{{$search_conf.sales_suid}}" />
+            <div class="form-group" style="margin-right:15px;">
+                <div class="checkbox" style="font-size: 16px;">
+                    <label>
+                      <input id="selectAllSaler" type="checkbox" /> 全选
+                    </label>
+                </div>
+            </div>
+            {{foreach $salesman_list as $man}}
+            <div class="form-group" style="margin-right:15px;">
+                <div class="checkbox" style="font-size: 16px;">
+                    <label>
+                      	{{if $search_conf.sales_suid<>$man.suid}}
+		        			<input class="saler_leader" type="checkbox" name="sales_flow_suid[]" value="{{$man.suid}}" />{{$man.name}}
+		        		{{/if}}
+                    </label>
+                </div>
+            </div>
+            {{/foreach}}
+            <button type="submit" class="btn btn-success" id="btn_search" style="margin-left:40px;">查询预览</button>
+        </div>
+    </form>
+</div>
+<!-- 预览数据 -->
+<div id="customer_list"></div>
+<script>  
+    (function(){
+    	/* 全选/反选 */
+        $('#selectAllSaler').on('click', function(){
+            if ($(this).is(':checked')) {
+                $('.saler_groups').find('input[name="sales_flow_suid[]"]').each(function(){
+                    this.checked = true;
+                });
+            } else {
+                $('.saler_groups').find('input[name="sales_flow_suid[]"]').each(function(){
+                	this.checked = false;
+                });
+            }
+        });
+    	var allSellected = false;
+    	$(".saler_leader").on('click', function (){
+    		$('.saler_groups').find('input[name="sales_flow_suid[]"]').each(function(){
+                if (this.checked == false) {
+                	allSellected = false;
+                }
+            });
+    		if (allSellected == false) {
+    			$('#selectAllSaler').each(function(){
+    			    this.checked = false;
+    			});
+    		} else {
+	    		$('#selectAllSaler').each(function(){
+				    this.checked = true;
+				});
+    		}
+    		allSellected = true;
+    	});
+    	/* 提交转移客户 */
+    	$("#sales_flow").submit(function (){
+    		var sales_suid = Number($("select[name='sales_suid']").val());
+    		/* 选择需要转出销售人员提示 */
+    		if (sales_suid <= 0) {
+    			alert("请选择要转出客户的销售");
+    			return false;
+    		}
+    		/* 选择转给销售提示 */
+    		var sales_flow_num = 0;
+    		/* 选中销售 */
+    		var selected_flow_arr = Array();
+    		$.each($('#sales_flow input:checkbox:checked'),function(){
+    			sales_flow_num = $('#sales_flow input[type=checkbox]:checked').length;
+    			selected_flow_arr.push(Number($(this).val()));
+	        });
+    		if (sales_flow_num <= 0) {
+    			alert("请选择要转给的销售");
+    			return false;
+    		}
+    		/* 判断转入销售是否有自己 */
+    		if (selected_flow_arr.indexOf(sales_suid) > -1) {
+    			alert("不可转给自己");
+    			return false;
+    		}
+    		/* 要转出销售input隐藏输入框赋值 */
+    		$("#sales_flow input[name='sales_suid']").val(sales_suid);
+    		/* 预览数据 */
+    		K.post("/crm2/ajax/sales_customer_flow_update.php", {sales_suid : sales_suid, sales_flow_suid : selected_flow_arr} , function (res) {
+				$("#customer_list").html(res);
+			});
+    		/* 取消form表示提交 */
+    		return false;
+    	});
+    })();
+</script>

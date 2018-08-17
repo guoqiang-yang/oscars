@@ -1,0 +1,182 @@
+{{if $optype == 'query_modify_order'}}
+<tr data-oid="{{$add_order_info.oid}}">
+    <td>{{$add_order_info.oid}}</td>
+    <td>{{$add_order_info._community_name}}</td>
+    <td>{{$add_order_info._delivery_date}}</td>
+    <td>
+        {{if $add_order_info.step>=5}}
+        <span style="color:red;">已出库</span>
+        {{elseif $add_order_info.line_id!=0}}
+        <span style="color:red;">已排线</span>
+        {{else}}
+        <a href="javascript:;" class="add_modify_order">添加</a>
+        {{/if}}
+    </td>
+</tr>
+{{else}}
+
+<form class="form-horizontal" data-lineid="{{$lineid}}">
+    {{if $optype == 'modify_order'}}
+    <div class="form-group" style="margin-top:15px;">
+        <label class="col-sm-2 control-label">订单：</label>
+        <div class="col-sm-10">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>订单ID</th>
+                    <th width="35%">配送地址</th>
+                    <th width="35%">配送时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {{foreach $order_infos as $oinfo}}
+                    <tr data-oid="{{$oinfo.oid}}">
+                        <td>{{$oinfo.oid}}</td>
+                        <td>{{$oinfo._address[0]}}</td>
+                        <td>{{$oinfo.delivery_date}}</td>
+                        <td>
+                            {{if $oinfo.step<5}}
+                            <a href="javascript:;" class="del_modify_order">移除</a>
+                            {{else}}
+                            --
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/foreach}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">添加：</label>
+        <div class="col-sm-3">
+            <input name="add_oid" class="form-control">
+        </div>
+        <a href="javascript:;" class="btn btn-primary query_modify_order">查询</a>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label"></label>
+        <div class="col-sm-10">
+            <table class="table"><tbody class="show_query_modify_order"></tbody></table>
+        </div>
+    </div>
+    {{elseif $optype == 'chg_carmodel'}}
+    <div class="form-group" style="margin-top:15px;">
+        <label class="col-sm-2 control-label">订单：</label>
+        <div class="col-sm-10">
+            <table class="table">
+                <thead>
+                <tr >
+                    <th>车型</th>
+                    <th width="40%">司机</th>
+                    <th width="15%">状态</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {{foreach $car_models as $model}}
+                    <tr>
+                        <td>{{$model.desc}}</td>
+                        <td>
+                            {{if !empty($model.driver)}}
+                            <span>{{$model.driver.name}}（ID：{{$model.driver.did}}）</span><br>
+                            <span>{{$model.driver.mobile}}</span>
+                            {{else}}
+                            <span>--</span>
+                            {{/if}}
+                        </td>
+                        <td>{{$model.step_desc}}</td>
+                        <td>
+                            <a href="javascript:;" class="del_chg_carmodel" data-car_model="{{$model.car_model}}" data-did="{{$model.driver.did|default:0}}" data-step="{{$model.step}}">移除</a>
+                        </td>
+                    </tr>
+                    {{/foreach}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">加车：</label>
+        <div>
+            <a href="javascript:;" class="text-value show_add_car_model">[+] 添加车型</a>
+            <div class="form-group copy_car_model" style="display:none;">
+                <label class="col-sm-2 control-label"></label>
+                <div class="col-sm-3">
+                    <select class="form-control" name="add_car_model" style="">
+                        {{foreach $all_car_models as $_model=>$_model_desc}}
+                        <option value="{{$_model}}">{{$_model_desc}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <input type="hidden" name="add_price" class="form-control col-sm-2" style="width: 15%;" value=0>
+                <a href="javascript:;" class="text-value add_chg_carmodel">添加</a>
+            </div>
+        </div>
+    </div>
+    
+    {{elseif $optype == 'reject'}}
+    <div class="form-group" style="margin-top:15px;">
+        <label class="col-sm-2 control-label">司机：</label>
+        <div class="col-sm-10">
+            {{if !empty($drivers.can_reject)}}
+            {{foreach $drivers.can_reject as $canDriver}}
+            <div class="checkbox" style="font-size: 16px; margin-left:20px; color:red;">
+                <label>
+                    <input type="checkbox" name="chg_driver" date-did="{{$canDriver.did}}" date-car_model="{{$canDriver.car_model}}">
+                    <span style="margin-right:5px;">{{$canDriver.name}}</span>
+                    <span style="margin-right:5px;">{{$canDriver.mobile}}</span>
+                    <span>{{$canDriver.car_desc}}</span>
+                </label>
+            </div>
+            {{/foreach}}
+            {{else}}
+            <span class="text-value" style="color:red; font-size:18px;">无可拒单的司机！（已分配，未接单司机，可拒单）</span>
+            {{/if}}
+            
+            {{foreach $drivers.no_reject as $noDriver}}
+            <div class="checkbox" style="font-size: 16px; margin-left:20px; color:gray;">
+                <label>
+                    <input type="checkbox" name="chg_driver" date-did="{{$canDriver.did}}" date-car_model="{{$noDriver.car_model}}" disabled="true">
+                    <span style="margin-right:5px;">{{$noDriver.name}}</span>
+                    <span style="margin-right:5px;">{{$noDriver.mobile}}</span>
+                    <span style="margin-right:5px;">{{$noDriver.car_desc}}</span>
+                    <span>【已接单】</span>
+                </label>
+            </div>
+            {{/foreach}}
+        </div>
+    </div>
+    {{elseif $optype == 'arrive'}}
+    <div class="form-group" style="margin-top:15px;margin-left: 50px;">
+        <div class="col-sm-10">
+            {{foreach $coop_orders as $order}}
+            <div class="checkbox" style="font-size: 16px; margin-left:20px;margin-bottom: 20px;">
+                <label>
+                    <input type="checkbox" name="chg_driver" value="{{$order['oid']}}-{{$order['did']}}" date-car_model="{{$canDriver.car_model}}"
+                           {{if $order['arrival_time'] > 0}}disabled="disabled"{{/if}} >
+                    <b><span style="margin-right:5px;">订单id:{{$order['oid']}},司机:{{$order['driver_name']}}({{$order['did']}})</span>{{if $order['arrival_time'] > 0}}<span style="color:red;">(已送达)</span>{{/if}}</b><br/>
+                    <span style="margin-right:5px;font-size: 12px;">地址:{{$order['address']}}</span>
+                </label>
+            </div>
+            {{/foreach}}
+            <input id="line_id" value="{{$line_id}}" type="hidden">
+        </div>
+    </div>
+    <div class="form-group" style="margin-top:15px;">
+        <label class="col-sm-2 control-label">备注：</label>
+        <div class="col-sm-5">
+            <textarea class="form-control" rows="2" id="remark" maxlength="200"></textarea>
+        </div>
+    </div>
+    {{/if}}
+    {{if $optype=='cancel'||$optype=='reject'}}
+    <div class="form-group" style="margin-top:15px;">
+        <label class="col-sm-2 control-label">原因：</label>
+        <div class="col-sm-5">
+            <textarea class="form-control" rows="2" name="reason"></textarea>
+        </div>
+    </div>
+    {{/if}}
+</form>
+{{/if}}

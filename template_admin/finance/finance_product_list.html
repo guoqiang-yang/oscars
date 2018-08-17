@@ -1,0 +1,230 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">财务商品列表</h1>
+
+    <form class="form-inline" role="form" action="/finance/finance_product_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>财务商品ID：</label>
+                <input type="text" class="form-control" name="pid" value="{{$search_conf.pid}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>商品名：</label>
+                <input type="text" class="form-control" name="title" value="{{$search_conf.title}}" style="width:80px;">
+            </div>
+            <div class="form-group">
+                <label>分类：</label>
+                <select class="form-control" name="cate1" style="margin-right:20px;">
+                    <option value="0" {{if $search_conf.cate1==0}} selected="selected" {{/if}}>全部</option>
+                    {{foreach $cate1_list as $key=>$cate}}
+                    <option value="{{$key}}" {{if $search_conf.cate1==$key}}selected="selected" {{/if}}>{{$cate.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>城市：</label>
+                <select class="form-control" name="city_id" style="margin-right:20px;">
+                    <option value="0" {{if $search_conf.city_id==0}} selected="selected" {{/if}}>全部</option>
+                    {{foreach $city_list as $key=>$city}}
+                    <option value="{{$key}}" {{if $search_conf.city_id==$key}}selected="selected" {{/if}}>{{$city}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button style="margin-left: 50px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+
+    <nav class="nav navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav"  id="navbar" data-status="{{$status}}">
+                    <li>
+                        <a href="{{$page_url}}&status=all" style="padding-right: 30px;padding-left: 30px;">
+                            全部
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}" style="padding-right: 30px;padding-left: 30px;">
+                            正常
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&status=del" style="padding-right: 30px;padding-left: 30px;">
+                            删除
+                        </a>
+                    </li>
+                </ul>
+                {{if !empty($_permissions['/finance/ajax/save_product'])}}
+                <a class="btn btn-primary" href="javascript:;" style="float: right; margin-top: 8px;" data-toggle="modal" data-target="#addProductModal">添加商品</a>
+                {{/if}}
+            </div>
+        </div>
+    </nav>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width:10%;">财务商品ID</th>
+            <th style="width:20%;">商品名</th>
+            <th style="width:8%;">规格</th>
+            <th style="width:8%;">单位</th>
+            <th style="width:10%;">分类</th>
+            <th style="width:8%;">进货单价</th>
+            <th style="width:8%;">库存</th>
+            <th>占用</th>
+            <th style="width:8%;">城市</th>
+            <th style="width:8%;">状态</th>
+            <th style="width:8%">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $products_list as $product}}
+        <tr>
+            <td>{{$product.pid}}</td>
+            <td>{{$product.title}}</td>
+            <td>{{$product.spec}}</td>
+            <td>{{$product.unit}}</td>
+            <td>{{$cate1_list[$product.cate1]['name']}}</td>
+            <td>{{$product.cost/100}}</td>
+            <td>{{$product.num}}</td>
+            <td>{{$product.occupy}}</td>
+            <td>{{$city_list[$product.city_id]}}</td>
+            <td>{{$status_list[$product.status]}}</td>
+            <td>
+                {{if !empty($_permissions['/finance/ajax/save_product'])}}
+                <a href="javascript:;" class="edit_product" data-pid="{{$product.pid}}" data-title="{{$product.title}}" data-spec="{{$product.spec}}" data-unit="{{$product.unit}}" data-cate1="{{$product.cate1}}" data-city="{{$product.city_id}}">编辑</a><br/>
+                {{/if}}
+                {{if $product.status == 0 && !empty($_permissions['/finance/ajax/change_product'])}}
+                <a href="javascript:;" class="delete_product" data-pid="{{$product.pid}}" >删除</a><br/>
+                {{/if}}
+                {{if $product.status == 1 && !empty($_permissions['/finance/ajax/change_product'])}}
+                <a href="javascript:;" class="restore_product" data-pid="{{$product.pid}}" >还原</a><br/>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>
+<!-- Modal -->
+<div class="modal fade _j_dialog" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">添加商品</h4>
+            </div>
+            <div class="modal-body">
+                <table width="90%">
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">商品名：</td>
+                        <td><input type="text" class="form-control" name="title" id="add_title"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">规格型号：</td>
+                        <td><input type="text" class="form-control" name="spec" id="add_spec"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">单位：</td>
+                        <td><input type="text" class="form-control" name="unit" id="add_unit"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">分类：</td>
+                        <td>
+                            <select name="cate1" id="add_cate1" class="form-control">
+                                <option value="">请选择</option>
+                                {{foreach $cate1_list as $key=>$cate}}
+                                <option value="{{$key}}">{{$cate.name}}</option>
+                                {{/foreach}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">城市：</td>
+                        <td>
+                            <select name="city_id" id="add_city" class="form-control">
+                                <option value="">请选择</option>
+                                {{foreach $city_list as $key=>$city}}
+                                <option value="{{$key}}">{{$city}}</option>
+                                {{/foreach}}
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_add_product">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade _j_dialog" id="editProductModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">编辑商品</h4>
+            </div>
+            <div class="modal-body">
+                <table width="90%">
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">商品名：</td>
+                        <td><input type="text" class="form-control" name="title" id="edit_title"><input type="hidden" name="pid" id="edit_pid" value=""></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">规格型号：</td>
+                        <td><input type="text" class="form-control" name="spec" id="edit_spec"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">单位：</td>
+                        <td><input type="text" class="form-control" name="unit" id="edit_unit"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">分类：</td>
+                        <td>
+                            <select name="cate1" id="edit_cate1" class="form-control">
+                                <option value="">请选择</option>
+                                {{foreach $cate1_list as $key=>$cate}}
+                                <option value="{{$key}}">{{$cate.name}}</option>
+                                {{/foreach}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">城市：</td>
+                        <td>
+                            <select name="city_id" id="edit_city" class="form-control">
+                                <option value="">请选择</option>
+                                {{foreach $city_list as $key=>$city}}
+                                <option value="{{$key}}">{{$city}}</option>
+                                {{/foreach}}
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_edit_product">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

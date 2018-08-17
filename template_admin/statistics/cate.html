@@ -1,0 +1,28 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">订单统计</h1>
+    <div id="profit" style="display: none;">
+        {{$profit}}
+    </div>
+    <div id="price" style="display: none;">
+        {{$price}}
+    </div>
+    <div>
+        <select style="position: relative; display: inline-block; width: 150px; height: 25px; background-color: #4C4346; font: 14px/20px Microsoft YaHei;color: #fff; margin: 10px 0;" id="sel_days" name="sel_days" >
+            <option {{if $day == 7}}selected="selected"{{/if}} value="7">7天</option>
+            <option {{if $day == 30}}selected="selected"{{/if}} value="30">30天</option>
+            <option {{if $day == 90}}selected="selected"{{/if}} value="90">90天</option>
+            <option {{if $day == 365}}selected="selected"{{/if}} value="365">1年</option>
+        </select>
+        <select style="position: relative; display: inline-block; width: 150px; height: 25px; background-color: #4C4346; font: 14px/20px Microsoft YaHei;color: #fff; margin: 10px 5px;" id="city_id" name="city_id" >
+            <option {{if empty($city_id)}}selected="selected"{{/if}} value="all">全部</option>
+            {{foreach $city_list as $id => $city}}
+            <option {{if $id == $city_id}}selected="selected"{{/if}} value="{{$id}}">{{$city}}</option>
+            {{/foreach}}
+        </select>
+  </div>
+  <div id="product_price">
+  </div>
+
+  <div id="product_profit" style="margin-top: 50px;">
+  </div>
+</div>

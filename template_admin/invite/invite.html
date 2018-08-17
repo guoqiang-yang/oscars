@@ -1,0 +1,73 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">邀请列表</h1>
+
+	<form class="form-inline" role="form" action="/invite/invite.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>邀请人id：</label> <input style="width: 150px;" type="text" class="form-control" name="id" value="{{$search_conf.did}}">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>被邀请人id：</label> <input style="width: 150px;" type="text" class="form-control" name="mobile" value="{{$search_conf.mobile}}">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>被邀请人手机号：</label> <input style="width:100px;" type="text" class="form-control" name="name" value="{{$search_conf.name}}">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+		</div>
+	</form>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>id</th>
+			<th>邀请人</th>
+			<th>被邀请人</th>
+			<th>加入日期</th>
+			<th>是否购买</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+			<tr>
+				<td>
+					{{$item.id}}
+				</td>
+				<td>
+					<a target="_blank" href="/crm2/customer_detail.php?cid={{$item.cid}}">
+						{{$item._customer.name}}(cid: {{$item.cid}})
+					</a>
+				</td>
+				<td>
+					<a target="_blank" href="/crm2/customer_detail.php?cid={{$item.fcid}}">
+						{{$item.name}}(cid: {{$item.fcid}})
+					</a>
+					<br />
+					{{$item.mobile}}
+				</td>
+				<td>
+					{{$item.ctime}}
+				</td>
+				<td>
+					{{if $item.has_buy}}
+						<a target="_blank" href="/order/order_list.php?cid={{$item.fcid}}">
+						是
+						</a>
+					{{else}}
+						否
+					{{/if}}
+				</td>
+			</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>

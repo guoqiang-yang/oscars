@@ -1,0 +1,70 @@
+<form class="form-inline" role="form">
+    <div class="placeholder">
+        <div class="form-group" style="margin-right:20px;">
+          <label>仓库：</label>
+          <select class="form-control" name="wid" {{if $_user.wid}} disabled="true"{{/if}}>
+            {{foreach $warehose_list as $_wid=>$_wname}}
+            <option value="{{$_wid}}" {{if $search.wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+            {{/foreach}}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>配送日期：</label>
+          <input type="date" class="form-control" name="delivery_date" value="{{$search.delivery_date}}" style="margin-right: 20px;">
+        </div>
+        <div class="form-group">
+          <label>订单ID：</label>
+          <input type="text" class="form-control" name="oid" value="{{$search.oid}}" style="margin-right: 20px; width: 100px;">
+        </div>
+        <div class="form-group">
+          <label>商品ID：</label>
+          <input type="text" class="form-control" name="pid" value="{{$search.pid}}" style="margin-right: 20px; width: 100px;">
+        </div>
+        <input type="hidden" name="cate" value="2">
+        <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查 询</button>
+      </div>
+</form>
+    
+<hr>
+  
+{{if !empty($order_list)}}
+<table class="table temp_product_list">
+    <thead>
+    <tr>
+        <th>订单id</th>
+        <th style="width:12%;">配送时间</th>
+        <th>商品id / SKUID</th>
+        <th>产品名称</th>
+        <th>临采数量</th>
+    </tr>
+    </thead>
+    <tbody>
+        {{foreach $order_list as $order_info}}
+        {{foreach $order_info.product as $p}}
+        <tr class="product" data-oid="{{$order_info.oid}}" data-pid="{{$p.sid}}" data-buynum="{{$p.vnum-$p.tmp_bought_num}}">
+            <td>{{$order_info.oid}}</td>
+            <td>{{$order_info.delivery_desc}}</td>
+            <td>
+                {{$p.pid}} / {{$p.sid}}<br>
+                <span style="color:gray;">{{$cate1_list[$sku_infos[$p.sid]['cate1']]['name']}} - {{$cate2_list[$sku_infos[$p.sid]['cate1']][$sku_infos[$p.sid]['cate2']]['name']}}</span>
+            </td>
+            <td>
+                {{$sku_infos[$p.sid]['title']}}<br><br>
+                <span style="color:gray;">按此搜索条件，总空采数：{{$total_buy_num[$p.sid]}} {{$sku_infos[$p.sid]['unit']|default:'个'}}</span>
+            </td>
+            <td>
+                <span>虚采数量（{{$sku_infos[$p.sid]['unit']|default:'个'}}）：{{$p.vnum}}</span><br>
+                <span>已采数量（{{$sku_infos[$p.sid]['unit']|default:'个'}}）：{{$p.tmp_bought_num}}</span><br>
+                <span style="color:red;font-weight:bold;">预警数量（{{$sku_infos[$p.sid]['unit']|default:'个'}}）：{{$p.vnum-$p.tmp_bought_num}}</span>
+            </td>
+            
+        </tr>
+        {{/foreach}}
+        {{/foreach}}
+    </tbody>
+</table>
+  
+{{else}}
+<span style="font-size: 25px; color:red;"> 无临采【预警】商品 </span>
+{{/if}}
+    

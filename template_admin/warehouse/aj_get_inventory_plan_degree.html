@@ -1,0 +1,38 @@
+<div>
+    <div style="width: 20%; float: left;">计划号: {{$plan.pid}}</div>
+    <div style="width: 25%; float: left;">计划类型: {{$plan_types[$plan.plan_type]}}</div>
+    <div style="width: 30%; float: left;">创建时间: {{$plan.ctime|date_format:'%Y.%m.%d'}}</div>
+    <div style="width: 25%; float: left;">创建人:  {{$staff_list[$plan.suid]}}</div>
+</div>
+<div style="font-size: 14px; margin: 30px auto 10px auto">
+    <div style="width: 50%; float: left;">
+        <a class="change_times" href="javascript: void(0)" style="margin-right: 30px;" data-times="0">全部</a>
+        {{foreach $times as $_id => $_times}}
+        {{if $_id <= $plan.times}}
+        <a class="change_times" href="javascript: void(0)" style="margin-right: 30px;" data-times="{{$_id}}">{{$_times}}</a>
+        {{/if}}
+        {{/foreach}}
+    </div>
+    <div style="width: 50%; float: left; margin-right: 0px; color: #ff0000;">共计任务：<span class="total_task_num">{{$count['total']}}</span>个，参与人员：<span class="staff_num">{{$count['staff_num']}}</span>个
+    </div>
+</div>
+<table class="table">
+    <thead>
+    <tr>
+        <th width="25%" align="center">任务号</th>
+        <th width="25%" align="center">领取人</th>
+        <th width="25%" align="center">盘点次数</th>
+        <th width="25%" align="center">盘点状态</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $task_list as $task}}
+    <tr class="row_task" data-times="{{$task.times}}" data-suid="{{$task.alloc_suid}}">
+        <td>{{$task['tid']}}</td>
+        <td>{{if !empty($task['alloc_suid'])}}{{$staff_list[$task['alloc_suid']]}}{{else}}-{{/if}}</td>
+        <td>{{$times[$task['times']]}}</td>
+        <td>{{$step_list[$task['step']]}}</td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>

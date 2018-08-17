@@ -1,0 +1,58 @@
+#开放接口测试例子
+http://api.haocai001.cn/2/products/getAllTypes?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0
+http://api.haocai001.cn/2/products/getSubTypes?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&typeId=1&subTypeId=101
+http://api.haocai001.cn/2/products/getProductList?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&typeId=1&subTypeId=101
+http://api.haocai001.cn/2/products/searchProducts?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&typeId=1&subTypeId=101&keywords=伟星
+
+http://api.haocai001.cn/2/order/cancelOrder?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&phone=13601106692&orderId=9096
+http://api.haocai001.cn/2/order/myOrder?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&phone=13501295918
+http://api.haocai001.cn/2/order/orderDetail?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&phone=13681111070&orderId=9064
+http://api.haocai001.cn/2/order/checkoutOrder?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&phone=13681111070&products=[{"productId":11861,"count":2},{"productId":11863,"count":1}]
+http://api.haocai001.cn/2/order/createOrder?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&phone=13681111070&products=[{"productId":11861,"count":2},{"productId":11863,"count":1}]&deliverAddress=abcd&deliverTime=2015-10-24
+
+
+
+#测试环境-测试例子
+http://api.test.haocaisong.cn/2/products/getAllTypes?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0
+http://api.test.haocaisong.cn/2/products/getSubTypes?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&typeId=1&subTypeId=101
+http://api.test.haocaisong.cn/2/products/getProductList?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&typeId=1&subTypeId=101
+http://api.test.haocaisong.cn/2/products/searchProducts?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&typeId=1&subTypeId=101&keywords=伟星
+
+http://api.test.haocaisong.cn/2/order/cancelOrder?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&phone=13601106692&orderId=9096
+http://api.test.haocaisong.cn/2/order/myOrder?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&phone=13691568405
+http://api.test.haocaisong.cn/2/order/orderDetail?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&phone=13681111070&orderId=9064
+http://api.test.haocaisong.cn/2/order/checkoutOrder?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&phone=13681111070&products=[{"productId":11861,"count":2},{"productId":11863,"count":1}]
+http://api.test.haocaisong.cn/2/order/createOrder?appid=10001&appkey=e720d63eb2d0063eed5a7bfc230cc0d0&phone=13681111070&products=[{"productId":11861,"count":2},{"productId":11863,"count":1}]&deliverAddress=abcd&deliverTime=2015-10-24
+
+
+
+1 => '在线付款',
+2 => '现金',
+3 => 'POS机刷卡',
+4 => '银行转账',
+5 => '微信支付',
+
+
+
+# 暂时不支持
+城区-商圈
+
+
+# 改动
+1 createOrder和orderDetail接口的 payMethod，可不可以改为：
+	1-在线付款',2-'现金',3-'POS机刷卡',4-'银行转账',5-'微信支付',
+2 有些可能是笔误
+	1)大小写,比如  goods/getsubTypes 改为了 goods/getSubTypes 等
+	2)漏掉的goods, 比如：order/creatOrder和 order/checkoutOrder 中的输入参数 goodId改成了productId
+
+
+# 对了，给你几个电话，有一些测试数据在里面了，测试方便一些：
+18301681210
+13261631996
+13691568405
+
+
+# todo:
+如果没有电话，自动生成账号
+库存写成本
+缺少更新订单接口

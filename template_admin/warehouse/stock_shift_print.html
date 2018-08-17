@@ -1,0 +1,79 @@
+<style>
+  h1 {font-family: STKaiti;}
+  table {font-size:12px; border-spacing: 0;border-collapse: collapse; }
+  table td {padding:5px 10px;}
+  table.border td {border:1px solid #333;}
+</style>
+<style type="text/css" media=print>
+  .noprint{display : none }
+</style>
+{{*<script type="text/javascript" src="/js/apps/print.js"></script>*}}
+
+<div class="">
+  <!--begin-->
+
+  <h1 style="text-align: center;">调拔单明细</h1>
+    <table width="90%" style="margin: auto; font-size: 16px;">
+        <tbody>
+        <tr>
+            <th colspan="4">移库ID：{{$shift_info.ssid}}&emsp;({{$steps[$shift_info.step]}})</th>
+        </tr>
+        </tbody>
+    </table>
+    <hr style="margin: 10px 0;"/>
+    <table width="90%" style="margin: auto; font-size: 16px;">
+        <tbody>
+        <tr>
+            <th>移出库房：{{$warehouse_list[$shift_info.src_wid]}}</th>
+            <th>移入库房：{{$warehouse_list[$shift_info.des_wid]}}</th>
+            <th>创建人：{{$create_user.name}}</th>
+            <th>创建时间：{{$shift_info.create_time_desc}}</th>
+        </tr>
+        </tbody>
+    </table>
+    <hr style="margin: 10px 0;"/>
+    <table width="90%" style="margin: auto; font-size: 16px;">
+        <tbody>
+        <tr>
+            <th>
+                调拔商品清单：
+            </th>
+        </tr>
+        </tbody>
+    </table>
+  <table class="border" style="text-align: center;margin: auto;" width="90%">
+    <thead>
+    <tr>
+      <td>sku_id</td>
+      <td>名称</td>
+      <td>类别</td>
+      <td>单位</td>
+      <td>数量</td>
+      <td>出库货位</td>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $shift_info.products as $product}}
+    <tr>
+      <td>{{$product.sid}}</td>
+      <td>{{$product.title}}</td>
+      <td>{{$product.cate_desc}}</td>
+      <td>{{$product.unit}}</td>
+      <td>{{$product.num}}</td>
+      <td>{{$product.from_location}}</td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+  <!--end-->
+  <div class="noprint">
+    <div style="margin-top:30px; text-align: center;">
+      {{*<input type="button" value="打印" onclick="javascript:printOrder();" >*}}
+      <input type="button" value="打印" onclick="javascript:window.print();" style="font-size: 25px;padding: 5px 15px;">
+    </div>
+  </div>
+
+
+</div>
+
+

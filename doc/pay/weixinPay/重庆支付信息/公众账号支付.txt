@@ -1,0 +1,10 @@
+公众平台账号：love.jenny793@gmail.com
+公众平台密码：sa.haocaisong.cn
+APPID：wxedf9db666431e7fe
+AppSecret：4e19fed5437dc183767e1bdda02d7916
+token：DiSoeuPS12smlIO0Ps89Ms08PMrtI6mP
+AESKey：9xkTE56BIEgYJi5HU9k0GMOI656vOTWCxhnvxcvpSO9
+
+支付平台商户号：1500938841
+支付平台操作密码：chongqing_hc_1
+支付秘钥：1idHleiuo98ns8s0leYqm5Und9ea0Pew

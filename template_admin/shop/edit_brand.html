@@ -1,0 +1,25 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">品牌编辑</h1>
+
+  <form class="form-horizontal" role="form" data-bid="{{$brand.bid}}" data-cate1="{{$cate1}}" data-cate2="{{$cate2}}" data-cate3="{{$cate3}}">
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">名称：</label>
+
+      <div class="col-sm-6">
+        <input type="text" class="form-control" name="name" value="{{$brand.name}}">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label"> </label>
+
+      <div class="col-sm-10">
+        <button type="button" class="btn btn-primary" id="btn_save_brand">保存</button>
+      </div>
+    </div>
+
+  </form>
+
+</div>

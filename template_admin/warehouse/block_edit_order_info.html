@@ -1,0 +1,112 @@
+    <div class="form-group">
+        <label class="col-sm-2 control-label">采购类型：</label>
+
+        <div class="col-sm-2">
+            <select class="form-control" id="in_order_type" name="in_order_type" style="display:inline-block;" {{if $had_stockin||$order.info.source==2 || $order.info.source==4}} disabled="true"{{/if}}>
+            {{foreach $in_order_types as $type_id => $_tname}}
+            <option value="{{$type_id}}" {{if $order.info.in_order_type == $type_id}}selected="selected"{{/if}}>{{$_tname}}</option>
+            {{/foreach}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">供应商ID：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="sid" value="{{if $order.info.sid}}{{$order.info.sid}}{{else}}{{$supplier.sid}}{{/if}}" {{if $had_stockin || $order.info.source==4}} disabled="true"{{/if}}>
+      </div>
+      {{if !$had_stockin && $order.info.source!=4 && !empty($_permissions['/warehouse/ajax/dlg_supplier_list'])}}
+      <div class="col-sm-4">
+        <button type="button" class="btn btn-default" data-toggle="modal" id="_j_show_supplier_list">选择供应商</button>
+      </div>
+      {{/if}}
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">联系人：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="contact_name" value="{{if $order.info.contact_name}}{{$order.info.contact_name}}{{else}}{{$supplier.contact_name}}{{/if}}" {{if $had_stockin}} disabled="true"{{/if}}>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">联系电话：</label>
+
+      <div class="col-sm-8">
+        <input type="text" class="form-control" name="contact_phone" value="{{if $order.info.contact_phone}}{{$order.info.contact_phone}}{{else}}{{$supplier.phone}}{{/if}}" style="width:450px;display:inline-block;" {{if $had_stockin}} disabled="true"{{/if}}>  (如果有多个电话，以逗号分开）
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">送货日期：</label>
+
+      <div class="col-sm-2">
+        <input type="text" class="form-control" name="delivery_date" value="{{if $order.info.delivery_date}}{{$order.info.delivery_date}}{{else}}{{$smarty.now|date_format:"%Y-%m-%d 00:00:00"}}{{/if}}">
+      </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">账期日期：</label>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" name="payment_days_date" value="{{if $order.info.payment_days_date}}{{$order.info.payment_days_date}}{{else}}{{$smarty.now|date_format:"%Y-%m-%d 00:00:00"}}{{/if}}">
+        </div>
+    </div>
+
+    {{if $had_stockin}}<fieldset disabled>{{/if}}
+      <div class="form-group">
+        <label class="col-sm-2 control-label">付款方式：</label>
+
+        <div class="col-sm-4" >
+          <label class="radio-inline payment_type" data-payment-type="1" {{if $order.info.in_order_type == 2}}style="display:none"{{/if}}>
+            <input type="radio" name="payment_type" value="1" {{if 1 == $order.info.payment_type}}checked="checked"{{/if}}> 现金
+          </label>
+          <label class="radio-inline payment_type" data-payment-type="2" {{if $order.info.in_order_type == 2}}style="display:none"{{/if}}>
+            <input type="radio" name="payment_type" value="2" {{if 2 == $order.info.payment_type}}checked="checked"{{/if}}> 财务结
+          </label>
+          <label class="radio-inline payment_type" data-payment-type="3" {{if $order.info.in_order_type == 2}}style="display:none"{{/if}}>
+            <input type="radio" name="payment_type" value="3" {{if 3 == $order.info.payment_type}}checked="checked"{{/if}}> 现款后货
+            {{if 3==$order.info.payment_type && $order.info.paid==1}}<span style="margin-left: 10px; color:red;">【已支付】</span>{{/if}}
+          </label>
+          <label class="radio-inline payment_type" data-payment-type="4" {{if $order.info.in_order_type != 2}}style="display:none"{{/if}}>
+            <input type="radio" name="payment_type" id="need_no_pay" value="4" {{if 4 == $order.info.payment_type}}checked="checked"{{/if}}> 无需付款
+          </label>
+        </div>
+      </div>
+    {{if $had_stockin}}</fieldset>{{/if}}
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">订货要求：</label>
+
+      <div class="col-sm-8">
+          <span class="text-value" style="color:red;">{{$order.supplier.book_note|default: '无'}}</span>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label class="col-sm-2 control-label" style="color:red;">仓库：</label>
+
+      <div class="col-sm-2">
+        <select class="form-control" name="wid" style="display:inline-block;" {{if $had_stockin||$order.info.source==2 || $order.info.source==4}} disabled="true"{{/if}}>
+          <option value="0" selected="selected">请选择</option>
+          {{foreach $warehouse_list as $_wid => $_wname}}
+          <option value="{{$_wid}}" {{if $order.info.wid == $_wid}}selected="selected"{{/if}}>{{$_wname}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-md-2 control-label" style="padding-top: 0px;">采购人信息：</label>
+      <div class="col-md-4">
+        {{if !empty($buyer)}}
+        <span>{{$buyer.name}}（ID：{{$buyer.suid}}； 电话：{{$buyer.mobile}}）</span>
+        {{else}}
+        <span> -- </span>
+        {{/if}}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">备注信息：</label>
+
+      <div class="col-sm-8">
+        <textarea class="form-control" rows="3" name="note">{{$order.info.note nofilter}}</textarea>
+      </div>
+    </div>

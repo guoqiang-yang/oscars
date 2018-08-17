@@ -1,0 +1,152 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">客户账务清单</h1>
+	
+	<form class="form-inline" role="form" action="/finance/customer_bill_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:10px;">
+				<label>客户ID：</label>
+				<input class="form-control" type="text" name="cid" value="{{if $cid}}{{$cid}}{{/if}}" style="margin-right: 20px;" placeholder="请输入客户id">
+			</div>
+            <div class="form-group" style="margin-right:10px;">
+                <label>单据类型：</label>
+                <select class="form-control" name="type">
+                    <option value="127" {{if 127==$type}}selected="selected"{{/if}}>全部</option>
+                    {{foreach $st_desc as $_tpid => $_desc}}
+                    <option value="{{$_tpid}}" {{if $_tpid==$type}}selected="selected"{{/if}}>{{$_desc}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:10px;">
+                <label>支付类型：</label>
+                <select class="form-control" name="payment_type">
+                    <option value="0" {{if 0==$payment_type}}selected="selected"{{/if}}>全部</option>
+                    {{foreach $payment_types as $_tpid => $_desc}}
+                    <option value="{{$_tpid}}" {{if $_tpid==$payment_type}}selected="selected"{{/if}}>{{$_desc}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+                    <option value="0" {{if $wid==0}}selected="selected"{{/if}}>全部</option>
+					{{foreach $allowed_warehouses as $_wid => $wid_name}}
+					<option value="{{$_wid}}" {{if $wid== $_wid}}selected="selected" {{/if}}>{{$wid_name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+        </div>
+        <div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>日期 (YYYY-MM-DD)：</label>
+				<input type="text" class="form-control" name="from_date" value="{{if $from_date}}{{$from_date}}{{/if}}" style="width: 100px;">
+				<span> - </span>
+				<input type="text" class="form-control" name="end_date" value="{{if $end_date}}{{$end_date}}{{/if}}" style="width: 100px;">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+	
+	<hr>
+	
+	{{if !empty($bill_list)}}
+		<table class="table">
+			<thead>
+			<tr>
+				<th>id</th>
+				<th>仓库/城市</th>
+				<th>单据类型</th>
+				<th style="width:10%;">客户</th>
+				<th>应收减少</th>
+				<th>应收增加</th>
+				<th>应收余额</th>
+				<th>收款方式</th>
+				<th style="width:10%;">日期</th>
+				<th style="width:14%;">备注</th>
+				<th>执行人</th>
+				<th>编辑</th>
+			</tr>
+			</thead>
+			<tbody>
+			{{foreach $bill_list as $one}}
+				<tr data-oid="{{$one.objid}}">
+					<td>{{$one.id}}</td>
+					<td>{{$one.wid}} / {{$one.city_name}}</td>
+					<td>
+						{{if !empty($one.objUrl)}}
+						<a href="{{$one.objUrl}}" target="_blank">{{$st_desc[$one.type]}}</a>
+						{{else}}
+						{{$st_desc[$one.type]}}
+						{{/if}}
+						{{if $one.objid}}&nbsp;-&nbsp;{{$one.objid}}{{/if}}
+					</td>
+					<td>
+						<a href="?cid={{$one._customer.cid}}">{{$one._customer.name}}</a>&nbsp;
+						<a href="/crm2/customer_detail.php?cid={{$one._customer.cid}}" style="color:gray;" target="_blank">(客户信息)</a>
+					</td>
+					<td>{{if $one.price<=0}}￥{{$one.price/100}}{{/if}}</td>
+					<td>{{if $one.price>0}}￥{{$one.price/100}}{{/if}}</td>
+					<td><span style="color:red;">￥{{$one.amount/100}}</span></td>
+					<td class="payment_name">{{$one.payment_name}}</td>
+					<td>{{$one.ctime}}</td>
+					<td>{{$one.note}}</td>
+					<td data-suid="{{$one.suinfo.suid}}">{{$one.suinfo.name}}</td>
+					<td>
+                        {{*if !empty($_permissions["/finance/ajax/save_single_moneyIn_modify"])*}}
+						{{if $one.type==2||$one.type==4||$one.type==5}}
+							<a href="javascript:;" class="_j_modify_single_money_in" data-id="{{$one.id}}" data-price="{{$one.price}}" data-type="{{$one.type}}" data-paytype="{{$one.payment_type}}">修改</a>
+						{{else}}
+							<span>--</span>
+						{{/if}}
+					</td>
+				</tr>
+			{{/foreach}}
+			</tbody>
+		</table>
+		<nav>
+			<ul class="pagination" style="margin:0;">
+				{{$pageHtml nofilter}}
+				<li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+			</ul>
+
+            {{if 0&&!empty($_permissions["/finance/ajax/balance_to_amount"])}}
+                <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#balance2amount" style="margin-right:20px;float:left;">转入余额</a>
+			{{/if}}
+		</nav>
+	{{else}}
+		<span>无账务清单！！</span>
+	{{/if}}
+</div>
+
+{{include file="finance/block_money_in.html" cid=$cid}}
+
+<div class="modal fade _j_dialog" id="balance2amount" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">多余账款转入余额</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">转入金额：</label>
+						<div class="col-sm-6">
+							<input style="display: inline-block; width: 90%;" class="form-control" id="balance_to_amount" type="text" value="0"> 元
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-4 control-label">备注：</label>
+						<div class="col-sm-6">
+							<textarea class="form-control" rows="2" id="note"></textarea>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" data-cid="{{$cid}}" class="btn btn-primary" id="_j_confirm_balance_2_amount">转入余额</button>
+			</div>
+		</div>
+	</div>
+</div>

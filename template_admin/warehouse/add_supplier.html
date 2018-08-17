@@ -1,0 +1,211 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">{{if $supplier.sid}}编辑{{else}}添加{{/if}}供应商</h1>
+
+  <form class="form-horizontal" role="form">
+    <input type="hidden" class="form-control" name="sid" value="{{$supplier.sid}}">
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">供应商名称：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="name" value="{{$supplier.name}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">供应商别名：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="alias_name" value="{{$supplier.alias_name}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">联系人：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="contact_name" value="{{$supplier.contact_name nofilter}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">联系电话：</label>
+
+      <div class="col-sm-8">
+        <input type="text" class="form-control" name="phone" value="{{$supplier.phone}}" style="width:450px;display:inline-block;">  (如果有多个电话，以逗号分开）
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">地址：</label>
+
+      <div class="col-sm-8">
+        <input type="text" class="form-control" name="address" value="{{$supplier.address}}" style="width:450px;display:inline-block;">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">类型：</label>
+      <div class="col-sm-2">
+        <select class="form-control" name="type">
+          <option value="0" selected="selected">--</option>
+          {{foreach $supplier_types as $type_id=>$type_name}}
+          <option value="{{$type_id}}" {{if $type_id==$supplier.type}}selected="selected"{{/if}}>{{$type_name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">经营模式：</label>
+        <div class="col-sm-2">
+            {{foreach $managing_modes as $_mode=>$_mname}}
+            <label class="radio-inline">
+                <input type="radio" name="managing_mode" value="{{$_mode}}" {{if $_mode==$supplier.managing_mode||($_mode == 1 && !isset($supplier.managing_mode))}}checked="checked" {{/if}}> {{$_mname}}
+            </label>
+            {{/foreach}}
+        </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">经营城市：</label>
+
+      <div class="col-sm-8">
+        {{foreach $city_list as $cityId => $cityName}}
+        <input type="checkbox" name="city" value="{{$cityId}}" style="margin-left:10px;"  {{if in_array($cityId, $supplier_city_list)}} checked {{/if}}> {{$cityName}}
+        {{/foreach}}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">经营分类：</label>
+
+      <div class="col-sm-8">
+        {{foreach $cate1_list as $cate1=>$cate1_name}}
+        <input style="margin-left:10px;" type="checkbox" name="cate1" value="{{$cate1}}" {{if !empty($supplier._cate1[$cate1])}}checked="checked"{{/if}}> {{$cate1_name.name}}
+        {{/foreach}}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">经营范围：</label>
+
+      <div class="col-sm-8">
+        <textarea class="form-control" rows="3" name="products">{{$supplier.products nofilter}}</textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">备注信息：</label>
+
+      <div class="col-sm-8">
+        <textarea class="form-control" rows="6" name="note">{{$supplier.note nofilter}}</textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">送货周期：</label>
+
+      <div class="col-sm-2">
+        <input class="form-control" name="delivery_hours" style="width:50%; display:inline-block;" value="{{$supplier.delivery_hours}}"> 小时
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">订货要求：</label>
+
+      <div class="col-sm-8">
+        <textarea class="form-control" rows="4" name="book_note">{{$supplier.book_note nofilter}}</textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">账期：</label>
+
+        <div class="col-sm-2">
+            <input class="form-control" name="payment_days" style="width:50%; display:inline-block;" value="{{$supplier.payment_days}}" {{if !$can_edit_finance_data}} disabled="true" {{/if}}> 天
+        </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">普票税点：</label>
+
+      <div class="col-sm-2">
+          <input class="form-control" name="duty" style="width:50%; display:inline-block;" value="{{$supplier.duty}}" {{if !$can_edit_finance_data}} disabled="true" {{/if}}> %
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">专票税点：</label>
+
+      <div class="col-sm-2">
+          <input class="form-control" name="special_duty" style="width:50%; display:inline-block;" value="{{$supplier.special_duty}}" {{if !$can_edit_finance_data}} disabled="true" {{/if}}> %
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">发票：</label>
+
+      <div class="col-sm-4">
+          <select class="form-control" name="invoice" style="width:40%;" {{if !$can_edit_finance_data}} disabled="true" {{/if}}>
+              <option value="0" {{if $supplier.invoice==0}} selected="selected"{{/if}}>请选择</option>
+              <option value="1" {{if $supplier.invoice==1}} selected="selected"{{/if}}>不提供发票</option>
+              <option value="2" {{if $supplier.invoice==2}} selected="selected"{{/if}}>可提供发票</option>
+          </select>
+      </div>
+    </div>
+    <div class="pub_bank">
+      {{if !empty($supplier.public_bank)}}
+      {{foreach $supplier.public_bank as $key => $item}}
+      {{if !empty($item)}}
+      <div class="form-group">
+        <label class="col-sm-2 control-label">公户银行{{$key+1}}：</label>
+        <div class="col-sm-5">
+          <input class="form-control bank_flag" name="public_bank" style="margin-bottom:5px;" value="{{$item}}" num="{{$key-1}}" {{if !$can_edit_finance_data}} disabled="true" {{/if}} placeholder="请输入公户银行">
+        </div>{{if $key==0}}<button type="button" class="btn btn-primary add_more">+添加更多</button>{{else}}<button type="button" class="btn btn-primary del_bank">删除</button>{{/if}}
+      </div>
+      {{/if}}
+      {{/foreach}}
+      {{else}}
+        <div class="form-group">
+          <label class="col-sm-2 control-label">公户银行：</label>
+          <div class="col-sm-5">
+            <input class="form-control bank_flag" name="public_bank" style="margin-bottom:5px;" value="" {{if !$can_edit_finance_data}} disabled="true" {{/if}} placeholder="请输入公户银行">
+          </div><button type="button" class="btn btn-primary add_more">+添加更多</button>
+        </div>
+      {{/if}}
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">私户银行：</label>
+
+      <div class="col-sm-5">
+        <input class="form-control" name="bank_info" style="margin-bottom:5px;" value="{{$supplier.bank_info}}" {{if !$can_edit_finance_data}} disabled="true" {{/if}} placeholder="请输入私户银行信息">
+
+        <span style="color:gray; font-size:13px;">格式：收款人姓名-银行账号-开户行</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        {{if $supplier.status == 5 && !empty($_permissions['/warehouse/ajax/change_supplier_status'])}}
+        <button type="button" class="btn btn-primary" id="check_supplier" data-sid="{{$supplier.sid}}" data-status="0">审核</button>
+        <button type="button" class="btn btn-default" id="back_supplier_modal" style="margin-left: 30px;">驳回</button>
+        {{elseif !empty($_permissions['/warehouse/edit_supplier'])}}
+        <button type="button" class="btn btn-primary" id="btn_save" data-status="{{$supplier.status}}" data-refer="{{$smarty.server.HTTP_REFERER}}">{{if $supplier.status==6}}保存&&提审核{{else}}保存{{/if}}</button>
+        {{/if}}
+      </div>
+    </div>
+
+  </form>
+
+</div>
+
+<div class="modal fade _j_dialog" id="un_audit_reason" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">驳回原因</h4>
+      </div>
+      <div class="modal-body">
+        <textarea class="form-control" id="no_audit_reason_area" rows="4"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-default" id="back_supplier" data-sid="{{$supplier.sid}}" data-status="6" style="margin-left: 30px;">驳回</button>
+      </div>
+    </div>
+  </div>
+</div>

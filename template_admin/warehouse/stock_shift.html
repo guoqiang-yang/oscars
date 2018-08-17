@@ -1,0 +1,148 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">{{if $ssid}}编辑{{else}}创建{{/if}}调拨单</h1>
+
+  <form class="form-horizontal" role="form" id="_j_stock_shift_form" data-ssid="{{$ssid}}">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">移出仓库ID：</label>
+
+        <div class="col-sm-8">
+            <select class="form-control" name="out_wid" {{if $shift_info.step>0}} disabled=true{{/if}} style="width:40%;display:inline;margin-right:10px;">
+                <option value="0" {{if empty($shift_info.src_wid)}}selected="selected"{{/if}}>请选择（仓库移出）</option>
+                {{foreach $warehouses as $_wid=>$_wname}}
+                <option value="{{$_wid}}" {{if $shift_info.src_wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+                {{/foreach}}
+            </select>
+            <span style="color:red;">（【创建】后仓库不能修改！）</span>
+        </div>
+    </div>
+		<div class="form-group">
+            <label class="col-sm-2 control-label">移入仓库ID：</label>
+
+            <div class="col-sm-8">
+				<select class="form-control" name="in_wid" {{if $shift_info.step>=2}} disabled=true{{/if}} style="width:40%;display:inline;margin-right:10px;">
+					<option value="0" {{if empty($shift_info.des_wid)}} selected="selected"{{/if}}>请选择（仓库移入）</option>
+					{{foreach $warehouses as $_wid=>$_wname}}
+					<option value="{{$_wid}}" {{if $shift_info.des_wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+					{{/foreach}}
+				</select>
+                <span style="color:red;">（【入库】后仓库不能修改！）</span>
+            </div>	
+        </div>
+		
+		<div class="form-group">
+      <label class="col-sm-2 control-label">状态：</label>
+
+      <div class="col-sm-3">
+				<span style="font-size:20px;color:red;">{{if $ssid}}{{$step_descs[$shift_info.step]}}{{else}}未创建{{/if}}</span>
+      </div>	
+    </div>
+		
+		<div class="form-group">
+			<label class="col-sm-2 control-label">备注：</label>
+
+			<div class="col-sm-5">
+				<textarea class="form-control" rows="3" name="note">{{$shift_info.note}}</textarea>
+			</div>
+		</div>
+      {{if count($shift_info.products) > 0}}
+      <div class="form-group">
+          <div class="col-sm-10 text-right" style="color: #FF0000">已添加：{{count($shift_info.products)}}</div>
+      </div>
+      {{/if}}
+		
+		{{if $ssid}}
+        <div class="form-group">
+          <label class="col-sm-2 control-label">移库商品清单：</label>
+
+          <div class="col-sm-10">
+            <form class="form-horizontal" role="form">
+
+              <div class="form-group">
+                <div class="col-sm-10">
+                  <table class="table">
+                    <thead>
+                        <tr>
+                            <th>sku_id</th>
+                            <th>名称</th>
+                            <th>类别</th>
+                            <th>单位</th>
+                            <th>数量</th>
+                            <th>出库货位：数量</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{foreach $shift_info.products as $product}}
+                        <tr>
+                            <td>{{$product.sid}}</td>
+                            <td>{{$product.title}}</td>
+                            <td>{{$product.cate_desc}}</td>
+                            <td>{{$product.unit}}</td>
+                            <td>{{$product.num}}</td>
+                            <td>
+                                {{if isset($product._from_location)}}
+                                    {{foreach $product._from_location as $loc}}
+                                    <span style="color:red;">{{$loc['loc']}}：{{$loc['num']}}</span><br>
+                                    {{/foreach}}
+                                {{else}}
+                                --
+                                {{/if}}
+                            </td>
+                            <td>
+                            {{if $shift_info.step==1}}
+                                <a href="javascript:;" class="_j_del_stock_shift_product" data-ssid="{{$shift_info.ssid}}" data-sid="{{$product.sid}}">删除</a>
+                            {{else}} - {{/if}}
+                            </td>
+                        </tr>
+                        {{/foreach}}
+                    </tbody>
+                  </table>
+
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                {{if $shift_info.step==1 && !empty($_permissions['/warehouse/stock_shift'])}}
+                <button type="button" class="btn btn-primary" id="_j_save_stock_shift">保存</button>
+                {{*<button type="button" class="btn btn-default" id="show_product_common" data-objid="{{$shift_info.ssid}}" style="margin-left:16px;">添加商品</button>*}}
+                <button type="button" class="btn btn-default" id="show_product_common" data-objid="{{$shift_info.ssid}}" data-objtype="1" style="margin-left:16px;">添加商品</button>
+                {{/if}}
+                {{if !empty($shift_info.products)}}
+                {{if $shift_info.status <> 0}}
+                {{if !empty($_permissions['/warehouse/ajax/stock_shift_apply'])}}
+                <button type="button" class="btn btn-primary" data-ssid="{{$shift_info.ssid}}" id="_j_chg_stock_shift_apply" style="margin-left: 20px;">发起调拔申请</button>
+                {{/if}}
+                {{/if}}
+                {{/if}}
+            </div>
+        </div>
+		{{else}}
+		<div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <button type="button" class="btn btn-primary" id="_j_save_stock_shift">创建</button>
+            </div>
+        </div>
+		{{/if}}
+  </form>
+
+  <!-- Modal -->
+  <div class="modal fade" id="dlgShiftStock" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+				{{*include "warehouse/block_stock_shift.html"*}}
+      </div>
+    </div>
+  </div>
+
+</div>
+{{include "common/block_add_product_for_stock.html"}}
+<script>
+    $('document').ready(function(){
+        var params = ['sid', 'num'];
+        add_product_dlg.init(params);
+    });
+</script>

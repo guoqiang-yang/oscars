@@ -1,0 +1,17 @@
+<div style="float:left; margin-top:80px;">
+    <h3 class="page-header">已采购-未做临采单列表</h3>
+
+    {{if !empty($left_list) != 0}}
+    <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+        {{foreach $left_list as $delivery_data => $num}}
+        <div style="font-size:18px;">
+            <a href="/warehouse/tmp_purchase.php?wid={{$wid}}&delivery_date={{$delivery_data}}&cate=1" target="_blank">配送日期：{{$delivery_data}} 商品数：{{$num}}</a>
+        </div>
+        {{/foreach}}
+    </div>
+    {{else}}
+    <div style="text-align:center">
+        <span style=" margin-right: 10px; font-size: 20px; color:red;">无处理单据！</span>
+    </div>
+    {{/if}}
+</div>

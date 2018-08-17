@@ -1,0 +1,94 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        客户评价
+    </h1>
+
+    <ul style="margin-bottom: 20px;" class="nav nav-tabs">
+        <li role="presentation" {{if $level == 0}}class="active"{{/if}}><a href="?level=0">全部</a></li>
+        <li role="presentation" {{if $level == 1}}class="active"{{/if}}><a href="?level=1">好评</a></li>
+        <li role="presentation" {{if $level == 2}}class="active"{{/if}}><a href="?level=2">中评</a></li>
+        <li role="presentation" {{if $level == 3}}class="active"{{/if}}><a href="?level=3">差评</a></li>
+    </ul>
+
+    <form id="search_form" class="form-inline" role="form" action="">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:30px;">
+                <label>客户ID：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="cid" value="{{$search_conf.cid}}" />
+            </div>
+            <div class="form-group" style="margin-right:30px;">
+                <label>订单ID：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="oid" value="{{$search_conf.oid}}" />
+            </div>
+            <div class="form-group" style="margin-right:30px;">
+                <label>城市：</label>
+                <select class="form-control" name="city_id" >
+                    <option value="0">全部</option>
+                    {{foreach $city_list as $id => $item}}
+                    <option value="{{$id}}" {{if $search_conf.city_id==$id}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+    </form>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>订单ID</th>
+            <th>客户ID</th>
+            <th>用户名</th>
+            <th>城市</th>
+            <th>库房</th>
+            <th>订单应付金额</th>
+            <th>评价</th>
+            <th style="max-width: 330px;">标签</th>
+            <th style="max-width: 360px;">评价内容</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $item}}
+        <tr>
+            <td>
+                <a target="_blank" href="/order/order_detail.php?oid={{$item.oid}}">{{$item.oid}}</a>
+            </td>
+            <td>
+                <a target="_blank" href="/crm2/customer_detail.php?cid={{$item.cid}}">{{$item.cid}}</a>
+            </td>
+            <td>
+                {{$item.cname}}
+            </td>
+            <td>
+                {{$item.city}}
+            </td>
+            <td>
+                {{$item.wname}}
+            </td>
+            <td>
+                ￥{{$item.price}}
+            </td>
+            <td>
+                {{$item.level_desc}}
+            </td>
+            <td>
+                {{$item.tag_desc}}
+            </td>
+            <td>
+                {{$item.comment}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+        </ul>
+    </nav>
+</div>

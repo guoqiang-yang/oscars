@@ -1,0 +1,200 @@
+<div id="allTransScopes_json" style="display:none;">{{$trans_scopes}}</div>
+<div id="driverTransScopes_json" style="display:none">{{$driver_trans_scope}}</div>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">{{if $driver.did}}编辑{{else}}添加{{/if}}司机</h1>
+
+  <form class="form-horizontal" role="form">
+    <input type="hidden" class="form-control" id="did" value="{{$driver.did}}">
+	<input type="hidden" id="referer" value="{{$referer}}" />
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">姓名：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="name" value="{{$driver.name}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">手机：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="mobile" value="{{$driver.mobile}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">收款人：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="real_name" value="{{if $driver.real_name}}{{$driver.real_name}}{{/if}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">收款卡号：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="card_num" value="{{if $driver.card_num}}{{$driver.card_num}}{{/if}}">
+        <span style="color:red;">例：6217900100019196968(中间不能有空格)</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">开户行：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="bank_info" value="{{if $driver.bank_info}}{{$driver.bank_info}}{{/if}}">
+        <span style="color:red;">例：中国银行北京三元桥支行</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">车型：</label>
+      <div class="col-sm-2">
+        <select class="form-control" name="car_model" {{if empty($_permissions['hc_advanced_edit_driver']) && $driver.did}}disabled{{/if}}>
+          <option value="0">请选择</option>
+          {{foreach $model_list as $mid => $model}}
+            <option value="{{$mid}}" {{if $driver.car_model == $mid}}selected="true"{{/if}}>{{$model}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">来源：</label>
+      <div class="col-sm-2">
+        <select class="form-control" name="source">
+            <option value="0">请选择</option>
+            {{foreach $source_list as $sid => $source}}
+            <option value="{{$sid}}" {{if $driver.source == $sid}}selected="true"{{/if}}>{{$source}}</option>
+            {{/foreach}}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">所属库房：</label>
+      <div class="col-sm-2">
+        <select class="form-control" name="wid" {{if empty($_permissions['hc_advanced_edit_driver']) && $driver.did}}disabled{{/if}}>
+          <option value="0">请选择</option>
+          {{foreach $warehouse as $wid => $name}}
+          <option value="{{$wid}}" {{if $driver.wid == $wid}}selected="true"{{/if}}>{{$name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+    </div>
+    
+    <div class="form-group">
+        <label class="col-sm-2 control-label">城市：</label>
+        <div class="col-sm-2">
+            <select class="form-control" name="city_id" id="chg_driver_city">
+              {{foreach $all_cities as $cityid => $cityname}}
+              <option value="{{$cityid}}" {{if $city_id == $cityid}}selected="true"{{/if}}>{{$cityname}}</option>
+              {{/foreach}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">运输范围：</label>
+        <div class="col-sm-6" id="transScopeInCity">
+            {{if !empty($trans_scope_in_city)}}
+            {{foreach $trans_scope_in_city as $scope=>$desc}}
+            <label style="margin-right:10px;font-size:16px;">
+                <input type="checkbox" name="trans_scope" value="{{$scope}}" {{if in_array($scope, $driver._trans_scope)}} checked{{/if}}> {{$desc}}
+            </label>
+            {{if $desc@index eq 4}}<br>{{/if}}
+            {{/foreach}}
+            <p style="color:red;">默认司机除了以上几个区域之外都能去。以上区域勾选了才能去！</p>
+            {{else}}
+            <span class="text-value" style="color:red;">该城市暂无配送范围！</span>
+            {{/if}}
+        </div>
+    </div>
+        
+    <div class="form-group">
+      <label class="col-sm-2 control-label">状态：</label>
+      <div class="col-sm-2">
+        <select class="form-control" name="status">
+          <option value="0" {{if $driver.status == 0}}selected="true"{{/if}}>正常</option>
+          <option value="1" {{if $driver.status == 1}}selected="true"{{/if}}>删除</option>
+          <option value="5" {{if $driver.status == 5}}selected="true"{{/if}}>未审核</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">车牌尾号：</label>
+      <div class="col-sm-8">
+        <select style="display: inline-block;width: 20%;" class="form-control" name="car_code">
+          <option value="0">请选择</option>
+          {{foreach $car_code_list as $key => $val}}
+          <option value="{{$key}}" {{if $driver.car_code == $key}}selected="true"{{/if}}>{{$val}}</option>
+          {{/foreach}}
+        </select>
+        <span style="margin-left: 20px; color:red;">车牌尾号为字母的写0</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">车牌号：</label>
+      <div class="col-sm-1">
+        <select class="form-control" name="car_province">
+          <option value="0">请选择</option>
+          {{foreach $car_provinces as $province}}
+          <option value="{{$province}}" {{if $driver.car_province == $province}}selected="true"{{/if}}>{{$province}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+      <div class="col-sm-2">
+        <input type="text" class="form-control" name="car_number" value="{{$driver.car_number}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">是否愿意搬运：</label>
+      <div class="col-sm-2">
+        <select class="form-control" name="can_carry">
+          <option value="0">请选择</option>
+          {{foreach $can_carry_list as $key => $val}}
+          <option value="{{$key}}" {{if $driver.can_carry == $key}}selected="true"{{/if}}>{{$val}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">是否愿意押车：</label>
+      <div class="col-sm-2">
+          <select class="form-control" name="can_escort">
+              <option value="0" {{if $driver.can_escort == 0}}selected="true"{{/if}}>不押车</option>
+              <option value="1" {{if $driver.can_escort == 1}}selected="true"{{/if}}>可押车</option>
+          </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">是否愿意拉垃圾：</label>
+        <div class="col-sm-2">
+            <select class="form-control" name="can_trash">
+                <option value="0" {{if $driver.can_trash == 0}}selected="true"{{/if}}>不拉垃圾</option>
+                <option value="1" {{if $driver.can_trash == 1}}selected="true"{{/if}}>可拉垃圾</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">评分：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="score" value="{{$driver.score}}" {{if !$_isAdmin && !array_key_exists($_user['suid'], $driver_info_editor)}}readonly="true"{{/if}}>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">备注：</label>
+
+      <div class="col-sm-4">
+        <textarea class="form-control" rows="5" name="note">{{$driver.note}}</textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        {{if !empty($_permissions['/logistics/ajax/save_driver'])}}
+        <button type="button" class="btn btn-primary" id="add_driver" style="margin-right:20px;">保存</button>
+        {{/if}}
+      </div>
+    </div>
+
+  </form>
+
+</div>

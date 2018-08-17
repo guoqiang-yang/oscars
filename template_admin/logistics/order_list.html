@@ -1,0 +1,121 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">
+    {{$cinfo.name}}
+    {{if $type == 1}}
+      （司机）
+    {{else}}
+      （搬运工）
+    {{/if}}
+    的订单列表
+  </h1>
+
+  <form class="form-inline" role="form" action="/logistics/order_list.php">
+    <input type="hidden" name="cuid" value="{{$cuid}}" />
+    <div class="placeholder">
+      <div id="h5-deliver-date" class="form-group" style="margin-right: 20px;">
+        <label>送货时间：</label>
+        <input type="date" class="form-control" name="from_date" value="{{if $start_time}}{{$start_time}}{{/if}}" style="width: 160px;">
+        —
+        <input type="date" class="form-control" name="end_date" value="{{if $end_time}}{{$end_time}}{{/if}}" style="width: 160px;">
+      </div>
+      <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+    </div>
+  </form>
+
+  <hr>
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>id</th>
+      <th>金额</th>
+      <th style="width:10%;">运/搬/优</th>
+      <th style="width:9%;">客户/联系人</th>
+      <th style="width:16%;">工地地址/备注</th>
+			<th style="width:10%;">仓库</th>
+      <th style="width:10%;">下单时间</th>
+      <th style="width:8%;">送货时间</th>
+      <th style="width: 8%;">状态</th>
+      <th style="width:8%;">录单人</th>
+      <th style="width:9%;">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $orders as $order}}
+    <tr data-oid="{{$order.oid}}" {{if $order.has_print == 0}}style="background: #FAEBD7;"{{/if}}>
+      <td><a href="/order/order_detail.php?oid={{$order.oid}}">{{$order.oid}}<a/></td>
+      <td>￥{{($order.price+$order.freight+$order.customer_carriage-$order.privilege)/100}}</td>
+      <td>
+        {{if empty($order.freight)}}-{{else}}￥{{$order.freight/100}}{{/if}}/
+        {{if empty($order.customer_carriage)}}-{{else}}￥{{$order.customer_carriage/100}}{{/if}}/
+        {{if empty($order.privilege)}}-{{else}}￥{{$order.privilege/100}}{{/if}}
+      </td>
+      <td>
+        <a href="/order/order_list.php?cid={{$order.cid}}">{{$order._customer.name}}</a>
+        <br/>
+        <span style="color:gray;">联系人:{{$order._customer.contact_name}}</span>&nbsp;
+        {{if $_isCS || $_isAdmin}}<a href="/order/customer_list_cs.php?cid={{$order.cid}}&oid={{$order.oid}}" style="color:gray;">(信息)</a>{{/if}}
+      </td>
+      <td>
+        <a href="http://map.baidu.com/?s=con%26wd%3D{{$order.address}}" target="_blank">{{$order.address}}</a><br/>
+        {{if $order.note}}<span style="color:gray;">备注：{{$order.note}}</span>{{/if}}
+      </td>
+			<td>{{$order._warehouse_name}}</td>
+      <td>{{$order.ctime}}</td>
+      <td>{{$order._delivery_date}}</td>
+      <td>
+        {{if ($order.step==4 && $_isWarehouse) || ($order.step==3 && $_isLM)}}
+        <span style="color:red;">
+        {{/if}}
+        {{$order._step}}
+        {{if ($order.step==4 && $_isWarehouse) || ($order.step==3 && $_isLM)}}
+        </span>
+        {{/if}}
+        {{if ($_isFinance || $_isAdmin || $_isCS || $_isSales)}}
+          {{if $order.paid==1}}
+          <br/><span>(已收款)</span>
+          {{elseif $order.step>=7 && $order.paid==2}}
+          <br/><span style="color:red;">(部分收款)</span>
+          {{elseif $order.step>=7 && $order.paid==0}}
+          <br/><span style="color:red;">(未收款)</span>
+          {{/if}}
+        {{/if}}
+      </td>
+      <td>
+        {{if $order._suser}}
+        {{$order._suser.name}}
+        {{else}}
+        {{if $order.ctime>'2015-08-15 17:51:14'}}
+          {{if $_isAdmin || $_isCS}}<span style="color:red;">{{/if}}
+          (客户提交)
+          {{if $_isAdmin || $_isCS}}</span>{{/if}}
+        {{else}}-{{/if}}
+        {{/if}}
+      </td>
+      <td>
+        <a href="/order/order_detail.php?oid={{$order.oid}}">查看</a>　
+        {{if $order.step >= 2 && ($_isCS || $_isAdmin || $_isWarehouse)}}
+        <a href="/order/order_print.php?oid={{$order.oid}}" target="_blank">打印</a>
+        {{/if}}
+        <br/>
+        {{if $_isCS || $_isAdmin}}
+          <a href="/order/edit_order.php?oid={{$order.oid}}">编辑</a>　
+          {{if $order.step<5}}
+          <a href="#" class="_j_delete_order">删除</a>
+          {{/if}}
+        {{/if}}
+      </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

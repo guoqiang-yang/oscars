@@ -1,0 +1,258 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        <span style="color:red;">{{if $search_conf.wid!=0}}{{$warehouse_list[$search_conf.wid]}}{{else}}全部{{/if}}</span>库存查询
+        <div style="float:right;font-size:16px;">
+            <form class="form-inline" action="/warehouse/stock_search.php">
+                <div class="form-group" style="margin-right:10px;">
+                    <input type="text" class="form-control" name="keyword" value="">
+                </div>
+                <button type="submit" class="btn btn-primary">搜索</button>
+            </form>
+        </div>
+    </h1>
+
+    <form class="form-horizontal" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">大类：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        {{foreach $cate1_list as $id => $item}}
+                        <li {{if $search_conf.cate1== $id}}class="active" {{/if}}>
+                            <a href="?cate1={{$id}}">{{$item.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">小类：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        {{foreach $cate2_list as $id => $item}}
+                        <li {{if $search_conf.cate2== $id}}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$id}}">{{$item.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">品牌：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        <li {{if empty($search_conf.bid) }}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&mid={{$search_conf.mid}}">全部</a>
+                        </li>
+                        {{foreach $brands as $brand}}
+                        <li {{if $brand.bid== $search_conf.bid }}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&bid={{$brand.bid}}&mid={{$search_conf.mid}}&wid={{$search_conf.wid}}">{{$brand.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">型号：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        <li {{if empty($search_conf.mid) }}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&cate3={{$search_conf.cate3}}&bid={{$search_conf.bid}}">全部</a>
+                        </li>
+                        {{foreach $models as $model}}
+                        <li {{if $model.mid== $search_conf.mid }}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&cate3={{$search_conf.cate3}}&mid={{$model.mid}}&bid={{$search_conf.bid}}&wid={{$search_conf.wid}}">{{$model.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">仓库：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        <li {{if empty($search_conf.wid) }}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&cate3={{$search_conf.cate3}}&bid={{$search_conf.bid}}">全部</a>
+                        </li>
+                        {{foreach $_allowed_warehouses as $_wid=>$_wname}}
+                        <li {{if $_wid== $search_conf.wid }}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&cate3={{$search_conf.cate3}}&mid={{$search_conf.mid}}&bid={{$search_conf.bid}}&wid={{$_wid}}">{{$_wname}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <hr>
+
+    {{if count($list) > 0}}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>sku编号</th>
+            <th>图片</th>
+            <th>sku信息</th>
+            <th>经营者</th>
+            {{if !empty($_permissions['hc_show_purchase_cost_price'])}}
+            <th>成本</th>
+            <th>附加成本</th>
+            {{/if}}
+            <th>库存/占用/损亏</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $sku}}
+        <tr data-sid="{{$sku.sid}}">
+            <td>{{$sku.sid}}</td>
+            <td><img width="100" src="{{if $sku._pic}}{{$sku._pic.small}}{{else}}/i/nopic100.jpg{{/if}}"></td>
+            <td>
+                {{$sku.title}}<br/><br/>
+                {{if $sku.alias}}<span style="color:gray;">俗称：{{$sku.alias}}</span>{{/if}}
+            </td>
+            <td>
+            {{foreach $sku._stock as $_wid => $_stockData}}
+                {{if !empty($_stockData['outsourcer_id']) && $_wid == 8}}
+                    {{$_wid}}#：{{if !empty($_permissions['/warehouse/edit_supplier'])}}<a href="/warehouse/edit_supplier.php?sid={{$_stockData['outsourcer_id']}}" target="_blank">{{$_stockData['outsourcer_id']}}</a>{{else}}{{$_stockData['outsourcer_id']}}{{/if}}
+                {{else}}
+                    {{$_wid}}#：HC
+                {{/if}}
+                <br>
+            {{/foreach}}
+            </td>
+            {{if !empty($_permissions['hc_show_purchase_cost_price'])}}
+            <td>
+                {{foreach $sku._stock as $_wid => $_stockData}}
+                    {{$_wid}}#：
+                    {{if !empty($_stockData)}}
+                    <span>￥ {{$_stockData.cost/100}}</span>
+                        {{if $_wid == 8 && !empty($_stockData['outsourcer_id'])}}
+                        <span>&nbsp;&nbsp;
+                            {{if !empty($_permissions['/warehouse/save_stock_cost'])}}
+                            <a href="javascript:;" data-sid="{{$sku.sid}}" class="edit_sku_cost" data-wid="{{$_wid}}" data-supplier_id="{{$_stockData['outsourcer_id']}}" data-price="{{$_stockData.cost}}">修改成本</a>
+                            {{/if}}
+                        </span>
+                        {{/if}}
+                        <br>
+                    {{else}}
+                    <span style="color:red;">无</span><br>
+                    {{/if}}
+                {{/foreach}}
+            </td>
+            <td>
+                {{foreach $sku._stock as $_wid => $_stockData}}
+                <span>{{$_wid}}#：</span>
+                {{if !empty($_stockData)}}
+                    <span>￥ {{$_stockData.fring_cost/100}}</span>
+                    {{if !empty($_permissions['/warehouse/ajax/save_fring_cost'])}}
+                    <a href="javascript:;" data-sid="{{$sku.sid}}" data-wid="{{$_wid}}" data-price="{{$_stockData.fring_cost}}" data-toggle="modal" data-target="#editFringCost" style="margin-left:5px;">修改</a>
+                    <br>
+                    {{/if}}
+                {{else}}
+                    <span style="color:red;">无</span><br>
+                {{/if}}
+                {{/foreach}}
+            </td>
+            {{/if}}
+            <td class="_js_real_stock">
+                {{foreach $sku._stock as $_wid => $_stockData}}
+                    {{$_wid}}#：
+                    {{if !empty($_stockData)}}
+                    <span>{{$_stockData.num}} / {{$_stockData.occupied}} / {{$_stockData.damaged_num}}</span><br>
+                    {{else}}
+                    <span style="color:red;">无</span><br>
+                    {{/if}}
+                {{/foreach}}
+            </td>
+            <td>
+                {{if $sku.status > 0}}(下架){{else}}-{{/if}}
+            </td>
+            <td>
+                {{if !empty($_permissions['/shop/edit_sku'])}}
+                <a href="/shop/edit_sku.php?sid={{$sku.sid}}">sku信息</a><br/>
+                {{/if}}
+                {{if !empty($_permissions['/warehouse/stock_history'])}}
+                <a href="/warehouse/stock_history.php?wid={{$search_conf.wid}}&type=-1&sid={{$sku.sid}}" target="_blank">历史</a><br/>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    {{else}}没有找到sku{{/if}}
+
+    {{include "warehouse/block_stock_change.html"}}
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}} {{if $pageHtml}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+            {{/if}}
+        </ul>
+    </nav>
+
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" id="edit_cost">
+    <div class="modal-dialog" role="document" style="width: 680px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">修改-成本</h4>
+            </div>
+            <div class="modal-body">
+                <span style="margin-left: 200px;font-size: 25px;">成本：</span><input name="stock_cost" style="width:70px;font-size: 18px;">&nbsp;<span style="font-size: 25px;">元</span> &nbsp;<span style="font-size: 25px;color: red;"></span>
+
+                <input type="hidden" value="" name="stock_id">
+                <input type="hidden" value="" name="original_cost">
+                <input type="hidden" value="" name="supplier_id">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary save_stock_cost_price">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="editFringCost">
+    <div class="modal-dialog" role="document" style="width: 680px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">修改-附加成本</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">附加成本：</label>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="text" name="fring_cost" style="display:inline-block;width:100px;"> 元
+                            <span class="old_fring_cost" style="color: red; margin-left:5px;">xxx</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary saveFringCost" id="saveFringCost">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

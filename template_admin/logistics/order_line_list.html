@@ -1,0 +1,197 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">排线列表</h1>
+
+    <form class="form-inline" role="form" action="/logistics/order_line_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>线路ID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="id" value="{{$search_conf.id}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>订单ID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="oid" value="{{$search_conf.oid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>车型：</label>
+                <select class="form-control" name="car_model">
+                    <option value="0" {{if empty($search_conf.car_model)}}selected="selected"{{/if}}>请选择</option>
+                    {{foreach $car_models as $id => $desc}}
+                    <option value="{{$id}}" {{if $search_conf.car_model==$id}}selected="selected"{{/if}}>{{$desc}}</option>
+                    {{/foreach}}
+                </select>
+                <span> - </span>
+                <select class="form-control" name="car_model_type">
+                    <option value="127" {{if $search_conf.car_model_type==127}} selected="selected"{{/if}}>全 部</option>
+                    <option value="0"   {{if $search_conf.car_model_type==0}}   selected="selected"{{/if}}>未分配</option>
+                    <option value="1"   {{if $search_conf.car_model_type==1}}   selected="selected"{{/if}}>已分配</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>仓库：</label>
+                <select class="form-control" name="wid">
+                    <option value="0" {{if empty($search_conf.wid)}}selected="selected"{{/if}}>请选择</option>
+                    {{foreach $warehouses as $wid => $name}}
+                    <option value="{{$wid}}" {{if $search_conf.wid==$wid}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>配送时间：</label>
+                <input style="width: 160px;" type="date" class="form-control" name="btime" value="{{$search_conf.btime}}">
+                <span> -- </span>
+                <input style="width: 160px;" type="date" class="form-control" name="etime" value="{{$search_conf.etime}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>地址：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="address" value="{{$search_conf.address}}">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th width="6%">排线ID</th>
+                <th width="7%">仓库</th>
+                <th width="17%">订单</th>
+                <th width="5%">线种</th>
+                <th width="13%">车型</th>
+                <th width="17%">司机</th>
+                <th width="10%">接单时间</th>
+                <th width="10%">送达时间</th>
+                <th width="8%">状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{foreach $line_list as $line}}
+                <tr class="line_info" data-id="{{$line.id}}">
+                    <td>{{$line.id}}</td>
+                    <td>{{$warehouses[$line.wid]}}</td>
+                    <td>
+                        {{foreach $line.order_info as $oinfo}}
+                        <div style="margin-bottom:10px;">
+                            <a href="/order/order_detail.php?oid={{$oinfo.oid}}" target="blank">Oid:{{$oinfo.oid}}【{{$oinfo.step_desc}}】</a><br>
+                            <span>{{$oinfo.delivery_date}}</span><br>
+                            <span style="color:gray;">{{$oinfo.address}}</span>
+                        </div>
+                        {{/foreach}}
+                    </td>
+                    <td>
+                        {{if $line.can_trash}}
+                            拉垃圾
+                        {{elseif $line.can_escort}}
+                            押车
+                        {{else}}
+                            普通
+                        {{/if}}
+                    </td>
+                    <td>
+                        {{foreach $line._car_models as $model}}
+                        <div style="margin-top:5px;">
+                            <span style="margin-right:5px;">{{$model.desc}}：￥{{$model.price/100}}</span>
+                            {{if isset($model.step_desc)}}
+                            <span style="{{if isset($model.step_num) && $model.step_num>1}}color:green;{{else}}color:red;{{/if}}">【{{$model.step_desc}}】</span>
+                            {{/if}}
+                        </div>
+                        {{/foreach}}
+                    </td>
+                    <td>
+                        {{foreach $line._car_models as $model}}
+                        {{if isset($model.did)}}
+                        <div style="margin-top:5px;" class="driver_infos" data-step_num="{{$model.step_num}}" data-name="{{$model.name}}" data-did="{{$model.did}}" data-mobile="{{$model.mobile}}" data-desc="{{$model.step_desc}}">
+                            <span style="margin-right:5px;">{{$model.name}} (ID:{{$model.did}})</span><br>
+                            <span style="color:gray;">{{$model.mobile}}</span>
+                        </div>
+                        {{else}}
+                        <p>--</p>
+                        {{/if}}
+                        {{/foreach}}
+                    </td>
+                    <td>
+                        {{foreach $line._car_models as $model}}
+                        {{if isset($model.did)}}
+                        <div style="margin-top:5px;">
+                            <span>{{if $model.confirm_time!='0000-00-00 00:00:00'}}{{$model.confirm_time}}{{else}}--{{/if}}</span><br>
+                        </div>
+                        {{else}}
+                        <p>--</p>
+                        {{/if}}
+                        {{/foreach}}
+                    </td>
+                    <td>
+                        {{foreach $line._car_models as $model}}
+                        {{if isset($model.did)}}
+                        <div style="margin-top:5px;">
+                            <span>{{if $model.arrival_time!='0000-00-00 00:00:00'}}{{$model.arrival_time}}{{else}}--{{/if}}</span><br>
+                        </div>
+                        {{else}}
+                        <p>--</p>
+                        {{/if}}
+                        {{/foreach}}
+                    </td>
+                    <td>
+                        <span>{{$line.step_desc}}</span>
+                    </td>
+                    <td>
+                        {{if $line.order_max_step<7}}
+                        {{if !empty($_permissions['/logistics/ajax/change_order_line'])}}
+                        <a href="javascript:;" class="change_order_line" data-type="modify_order">改订单</a><br>
+                        {{/if}}
+                        {{if !empty($_permissions['/logistics/ajax/change_order_line'])}}
+                        <a href="javascript:;" class="change_order_line" data-type="chg_carmodel">换车型</a><br>
+                        {{/if}}
+                        {{if !empty($_permissions['/logistics/ajax/change_order_line'])}}
+                        <a href="javascript:;" class="change_order_line" data-type="reject">拒单</a><br>
+                        {{/if}}
+                        {{if !empty($_permissions['/logistics/ajax/change_order_line'])}}
+                        <a href="javascript:;" class="change_order_line" data-type="cancel">取消排线</a><br>
+                        {{/if}}
+                        {{else}}
+                        <span>--</span><br>
+                        {{/if}}
+                        {{if $line.driver_step == 4}}
+                        {{if !empty($_permissions['/logistics/ajax/get_order_line_info'])}}
+                        <a href="javascript:;" class="change_order_line" data-type="arrive">送达</a><br>
+                        {{/if}}
+                        {{/if}}
+                        {{if $line.driver_step >= 4 || $line.step_desc == '已送达'}}
+                        {{if !empty($_permissions['/logistics/ajax/change_order_line'])}}
+                        <a href="/logistics/logistics_track.php?line_id={{$line.id}}" target="_blank">物流轨迹</a>
+                        {{/if}}
+                        {{/if}}
+                    </td>
+                </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+                <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>
+
+
+<div class="modal fade _j_dialog" id="changeOrderLine" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:600px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">修改排线</h4>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="save_changeOrderLine" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

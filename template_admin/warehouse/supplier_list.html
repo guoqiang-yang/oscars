@@ -1,0 +1,147 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">
+    <span style="color:red;">{{if !empty($search_conf.wid)}}{{$_warehouseList[$search_conf.wid]}}{{else}}全部{{/if}}</span>供应商列表
+    {{if !empty($_permissions['/warehouse/add_supplier'])}}
+    <div style="float:right;font-size:16px;">
+        <a href="/warehouse/add_supplier.php" class="btn btn-primary">添加供应商</a>
+    </div>
+    {{/if}}
+  </h1>
+
+  <form class="form-horizontal" role="form" action="/warehouse/supplier_list.php">
+    <div class="placeholder">
+      <div class="form-group">
+          <input type="hidden" name="status" value="127">
+
+          <b>供应商ID：</b><input type="text" class="form-control" name="sid" value="{{$search_conf.sid}}" style="display: inline-block;width:200px;margin-right: 30px;">
+          <b>关键字：</b><input type="text" class="form-control" name="keyword" value="{{$search_conf.keyword}}" style="display: inline-block;width:200px;">
+          <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;display: inline-block;">搜索</button>
+            <div class="form-group" style="float:right;">
+                <button type="submit" name="action" value="download" class="btn btn-success">导出供应商清单</button>
+            </div>
+        </div>
+    </div>
+    <div class="placeholder">
+      <div class="form-group">
+        <div class="col-sm-10">
+          <ul class="nav nav-pills">
+            <li {{if 127 == $search_conf.status }}class="active"{{/if}}><a href="?status=127&keyword={{$search_conf.keyword}}&sid={{$search_conf.sid}}">全部</a></li>
+            <li {{if 0 == $search_conf.status }}class="active"{{/if}}><a href="?status=0&keyword={{$search_conf.keyword}}&sid={{$search_conf.sid}}">审核通过</a></li>
+            <li {{if 5 == $search_conf.status }}class="active"{{/if}}><a href="?status=5&keyword={{$search_conf.keyword}}&sid={{$search_conf.sid}}">待审核</a></li>
+            <li {{if 6 == $search_conf.status }}class="active"{{/if}}><a href="?status=6&keyword={{$search_conf.keyword}}&sid={{$search_conf.sid}}">已驳回</a></li>
+            <li {{if 4 == $search_conf.status }}class="active"{{/if}}><a href="?status=4&keyword={{$search_conf.keyword}}&sid={{$search_conf.sid}}">停用</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </form>
+  <hr>
+
+  <table class="table">
+    <thead>
+    <tr>
+        <th>id</th>
+        <th style="width:25%;">供应商</th>
+        <th style="width:10%;">联系人</th>
+        <th style="width:15%;">经营范围</th>
+        <th style="width:8%;">城市</th>
+        <th style="width:6%;">状态</th>
+        <th style="width:25%;">备注</th>
+        <th style="width:12%;">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $suppliers as $supplier}}
+    <tr data-sid="{{$supplier.sid}}">
+      <td>{{$supplier.sid}}</td>
+      <td>
+        {{if $supplier.type>0}}[{{$supplier._type}}] {{/if}}
+        {{$supplier.name}}<br/>{{if !empty($supplier.alias_name)}}[别名]{{$supplier.alias_name}}<br>{{/if}}
+        <span style="color:gray">地址：{{$supplier.address}}</span><br/>
+        <span>经营模式：{{$managing_modes[$supplier.managing_mode]}}</span>
+      </td>
+      <td>
+        {{$supplier.contact_name}}<br/>
+        <span style="color:gray">{{$supplier.phone|truncate:30:'...'}}</span>
+      </td>
+      <td>{{$supplier.products}}</td>
+      <td>
+        {{foreach $supplier.city as $city}}
+          <span>{{$city_list[$city]}}</span><br>
+        {{/foreach}}
+      </td>
+      <td>{{$status_list[$supplier.status]}}</td>
+      <td>
+          {{$supplier.note}}
+          <div style='color:gray;'>
+              <span>账期：{{if $supplier.payment_days>0}}{{$supplier.payment_days}}天{{else}}无{{/if}}</span><br>
+              <span>税点：{{if $supplier.invoice==2}}
+                        普票 {{if $supplier.duty!=0}}{{$supplier.duty}}%{{else}}[无]{{/if}}；
+                        专票 {{if $supplier.special_duty!=0}}{{$supplier.special_duty}}%{{else}}[无]{{/if}}；
+                    {{else}}不提供发票{{/if}}
+              </span>
+          </div>
+      </td>
+      <td>
+        {{if $supplier.status == 5 && !empty($_permissions['/warehouse/ajax/change_supplier_status'])}}
+        <a href="/warehouse/edit_supplier.php?sid={{$supplier.sid}}&exec_type=check">审核</a><br/>
+        {{/if}}
+        {{if !empty($_permissions['/warehouse/edit_supplier'])}}
+        <a href="/warehouse/edit_supplier.php?sid={{$supplier.sid}}">{{if $supplier.status == 5}}查看{{else}}编辑{{/if}}</a><br/>
+        {{/if}}
+        {{if $supplier.status == 0 && !empty($_permissions['/warehouse/ajax/change_supplier_status'])}}
+        <a href="javascript:void(0)" class="offline_supplier" data-sid="{{$supplier.sid}}" data-status="4">停用</a><br/>
+        {{/if}}
+        {{*if $supplier.status == 0 && !empty($_permissions['/warehouse/add_in_order'])}}
+        <a href="/warehouse/add_in_order.php?sid={{$supplier.sid}}">添加采购单</a><br/>
+        {{/if*}}
+        {{if !empty($_permissions['/warehouse/stock_in_lists'])}}
+        <a href="/warehouse/stock_in_lists.php?sid={{$supplier.sid}}">查看入库单</a><br/>
+        {{/if}}
+        {{if !empty($_permissions['/warehouse/in_order_list'])}}
+        <a href="/warehouse/in_order_list.php?sid={{$supplier.sid}}">查看采购单</a><br>
+        {{/if}}
+        {{if $supplier.status == 0 && !empty($_permissions['/finance/edit_input_invoice'])}}
+        <a href="/finance/edit_input_invoice.php?supplier_id={{$supplier.sid}}">添加发票</a><br/>
+        {{/if}}
+        {{if !empty($_permissions['/warehouse/supplier_sku_list'])}}
+        <a href="/warehouse/supplier_sku_list.php?supplier_id={{$supplier.sid}}">商品列表</a><br>
+        {{/if}}
+        {{if !empty($_permissions['/warehouse/ajax/get_supplier_info'])}}
+        <a href="javascript:;" data-sid="{{$supplier.sid}}" class="look_bank_info">银行账户信息</a><br>
+        {{/if}}
+        {{if !empty($_permissions['/finance/supplier_amount_list'])}}
+        <a href="/finance/supplier_amount_list.php?sid={{$supplier.sid}}">余额明细</a>
+        {{/if}}
+      </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" id="look_bank_info">
+  <div class="modal-dialog" role="document" style="width: 680px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">银行账户信息</h4>
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>

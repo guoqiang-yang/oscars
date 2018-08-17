@@ -1,0 +1,138 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        销售工资计算
+    </h1>
+    <form class="form-inline" role="form" action="/statistics/sales_salary.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>销售组：</label>
+                <select class="form-control" name="group" style="width: 80px;">
+                    {{foreach $groupList as $groupItem}}
+                    <option value="{{$groupItem.suid}}" {{if $group==$groupItem.suid}}selected="true"{{/if}}>
+                        {{$groupItem.name}}
+                    </option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>月份：</label>
+                <select class="form-control" name="month" style="width: 100px;">
+                    {{foreach $monthList as $monthItem}}
+                    <option {{if $month==$monthItem}}selected="true"{{/if}}>{{$monthItem}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr style="height: 60px; background: #FAEBD7">
+            <td width="80px" align="center">姓名</td>
+            <td width="80px" align="center">城市</td>
+            <td width="120px" align="center">本月目标</td>
+            <td width="120px" align="center">上月总销售额</td>
+            <td width="120px" align="center">本月销售额<br/>(当月为截止到当天，<br/>之前月为整月)</td>
+            <td width="120px" align="center">同比上月差额<br/>(上月同期)</td>
+            <td width="120px" align="center">累计完成率</td>
+            <td width="120px" align="center">增长基数</td>
+            {{if $canEdit}}
+            <td width="80px" align="center">操作</td>
+            {{/if}}
+        </tr>
+        </thead>
+
+        <tbody>
+        {{foreach $list as $item}}
+        <tr style="height: 60px">
+            <td width="80px" align="center">{{$item.name}}</td>
+            <td width="80px" align="center">{{$item.city_name}}</td>
+            <td width="120px" align="center" id="month_target_td">{{$item.month_target}}</td>
+            <td width="120px" align="center">{{$item.last_month_amount}}</td>
+            <td width="120px" align="center">{{$item.this_month_amount}}</td>
+            <td width="120px" align="center">{{$item.difference}}</td>
+            <td width="120px" align="center">{{$item.complete_rate}}</td>
+            <td width="120px" align="center">{{$item.increase_base}}</td>
+            {{if $canEdit}}
+            <td width="80px" align="center">
+                {{if $item.can_operate == 1}}
+                <u style="color: #428BCA" id="operation">编辑</u>
+                {{/if}}
+            </td>
+            {{/if}}
+            <td id="suid" hidden>{{$item.suid}}</td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+     aria-hidden="true" id="myModal">
+    <div class="modal-dialog modal-lg" style="vertical-align: middle;width: 300px; ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">编辑</h4>
+            </div>
+            <div class="modal-body" align="center">
+                <div>
+                    <label style="margin-right: 10px">本月目标</label>
+                    <input id="this_month_target_field" type="text">
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="button" class="btn btn-default"
+                        style="background: #428BCA; width: 100px;color: white" id="confirm_btn">确定
+                </button>
+                <button type="button" data-dismiss="modal" class="btn btn-default"
+                        style="background: #FA0D1B; width: 100px;color: white" id="close_btn">关闭
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function centerModals() {
+        $('#myModal').each(function (i) {
+            var $clone = $(this).clone().css('display', 'block').appendTo('body');
+            var top = Math.round(($clone.height() - $clone.find('.modal-content').height()) / 2);
+            top = top > 0 ? top : 0;
+            $clone.remove();
+            $(this).find('.modal-content').css("margin-top", top);
+        });
+    }
+    var index = 0;
+    $("u#operation").click(function () {
+        index = $("u#operation").index(this);
+        $('#this_month_target_field').val($('td#month_target_td').eq(index).text());
+        $('#myModal').on('show.bs.modal', centerModals);
+        $('#myModal').modal();
+    });
+
+    $("#confirm_btn").click(function () {
+        var this_month_target = Number($('#this_month_target_field').val());
+        var suid = $("td#suid").eq(index).text();
+        $.ajax({
+            url: '/statistics/ajax/modify_amount_target.php',
+            type: 'POST',
+            data: 'month_target=' + this_month_target + '&suid=' + suid,
+            dataType: 'json',
+            success: function (ret) {
+                if(ret.error.errno == 1){
+                    $('#myModal').modal('toggle');
+                    window.location.reload();
+                }
+                else {
+                    alert(ret.error.errmsg);
+                }
+            },
+            fail: function (ret) {
+                alert('更新失败，请重试');
+            }
+        });
+    });
+
+</script>

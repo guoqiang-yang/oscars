@@ -1,0 +1,59 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		运费&搬运费
+	</h1>
+
+	<form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+		<div class="placeholder">
+			<div class="form-group" style="display: inline; margin-right: 20px;{{if $view_mode == 'month'}}display: none;{{/if}}">
+				<label>时间：</label>
+				<input type="date" class="form-control" name="from_date" value="{{$from_date}}" style="display: inline-block;width: 160px;">
+				&nbsp;&nbsp;&nbsp;&nbsp;To&nbsp;&nbsp;&nbsp;&nbsp;
+				<input max="{{$yesterday}}" type="date" class="form-control" name="end_date" value="{{$end_date}}" style="display: inline-block;width: 160px;">
+			</div>
+			<div class="from-group" style="display: inline;margin-right: 20px;">
+				<select class="form-control" name="wid" >
+					<option value="0" {{if $wid==0}}selected="selected"{{/if}}>全部</option>
+					{{foreach $warehouses as $id => $wname}}
+					<option value="{{$id}}" {{if $wid==$id}}selected="selected"{{/if}}>{{$wname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+			<div class="form-group" style="float:right;">
+				<button type="submit" name="action" value="download" class="btn btn-success">导出当前数据</button>
+			</div>
+		</div>
+	</form>
+
+	{{if count($list) > 0}}
+	<table class="table table-bordered">
+		<thead>
+		<tr>
+			<th>日期</th>
+			<th>仓库</th>
+			<th>运费</th>
+			<th>搬运费</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+		<tr>
+			<td>{{$item.day}}</td>
+			<td>{{$item.wname}}</td>
+			<td>￥{{$item.freight / 100}}</td>
+			<td>￥{{$item.carriage / 100}}</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+	{{else}} 暂无记录 {{/if}}
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+		</ul>
+	</nav>
+</div>

@@ -1,0 +1,115 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">普采缺货列表</h1>
+
+    <form class="form-inline" role="form">
+        <div class="placeholder">
+
+            <div class="form-group">
+                <label>Skuid：</label>
+                <input type="text" class="form-control" required name="sid" {{if !empty($search.sid) }} value="{{$search.sid}}" {{/if}} style="margin-right: 20px; width: 100px;">
+            </div>
+            <div class="form-group">
+                <label>订单id：</label>
+                <input type="text" class="form-control" name="oid" {{if !empty($search.oid) }} value="{{$search.oid}}" {{/if}} style="margin-right: 20px; width: 100px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>状态：</label>
+                <select class="form-control" name="status">
+                    <option value="127" {{if $search.status == 127}} selected {{/if}}>全部</option>
+                    {{foreach $markStatus as $status => $name}}
+                    <option value="{{$status}}" {{if $search.status==$status}} selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>仓库：</label>
+                <select class="form-control" name="wid">
+                    {{foreach $_allowed_warehouses as $_wid=>$_wname}}
+                    <option value="{{$_wid}}" {{if $search.wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-top: 10px;">
+                <label>配送日期：</label>
+                <input type="date" class="form-control" required name="bdate" {{if empty($search.bdate)}} varlue="{{date('Y-m-d', time())}}" {{/if}}value="{{$search.bdate}}" style="margin-right: 20px;">
+                --&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="date" class="form-control" name="edate" value="{{$search.edate}}" style="margin-right: 20px;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:20px;margin-top: 10px;">搜 索</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <table class="table">
+        {{if !empty($list)}}
+        <thead>
+        <tr>
+            <th>Skuid/商品id</th>
+            <th>订单id</th>
+            <th>订单状态</th>
+            <th>商品名称</th>
+            <th>购买数量</th>
+            <th>缺货数量</th>
+            <th>配送时间</th>
+            <th>仓库</th>
+            <th width="9%">状态</th>
+            {{if !empty($_permissions['/warehouse/ajax/mark_stockout'])}}
+            <th width="9%">操作</th>
+            {{/if}}
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $product}}
+        <tr>
+            <td>{{$product.sid}}/{{$product.pid}}</td>
+            <td>{{if !empty($_permissions['/order/order_detail'])}}<a href="/order/order_detail.php?oid={{$product.oid}}" target="_blank">{{$product.oid}}</a>{{else}}{{$product.oid}}{{/if}}</td>
+            <td>{{$orderStatus[$product.step]}}</td>
+            <td>{{$product.sku_title}}</td>
+            <td style="color: red;">{{$product.num}}</td>
+            <td style="color: red;">{{if !empty($product.vnum)}}{{$product.vnum}}{{else}}--{{/if}}</td>
+            <td>{{$product.delivery_date}} <br>至 {{$product.delivery_date_end}}</td>
+            <td>{{$_allowed_warehouses[$search.wid]}}</td>
+            <td style="color: red;"><b>{{$markStatus[$product.vnum_deal_type]}}</b></td>
+            {{if !empty($_permissions['/warehouse/ajax/mark_stockout'])}}
+            <td><b>
+                {{if $product.vnum_deal_type==0}}
+                <a href="javascript:;" data-oid="{{$product.oid}}" data-sid="{{$product.sid}}" data-type="1" class="_j_mark_stockout">标外采</a><br>
+                <a href="javascript:;" data-oid="{{$product.oid}}" data-sid="{{$product.sid}}" data-type="2" class="_j_mark_stockout">标在途</a>
+                {{else if $product.vnum_deal_type==1}}
+                标外采<br><a href="javascript:;" data-oid="{{$product.oid}}" data-sid="{{$product.sid}}" data-type="2" class="_j_mark_stockout">标在途</a>
+                {{else if $product.vnum_deal_type==2}}
+                <a href="javascript:;" data-oid="{{$product.oid}}" data-sid="{{$product.sid}}" data-type="1" class="_j_mark_stockout">标外采</a><br>标在途
+                {{/if}}
+            </b></td>
+            {{/if}}
+        </tr>
+        {{/foreach}}
+        </tbody>
+        {{else}}
+            <div style="font-size: 30px;color: red;">无商品</div>
+        {{/if}}
+    </table>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

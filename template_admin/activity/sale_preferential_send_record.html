@@ -1,0 +1,74 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        销售优惠发放记录
+    </h1>
+
+    <form class="form-inline" role="form" action="/activity/sale_preferential_send_record.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>发放人ID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="send_suid" value="{{$search_conf.send_suid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>订单ID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="oid" value="{{$search_conf.oid}}">
+            </div>
+            <div class="form-group">
+                <label>发放日期：</label>
+                <input type="date" class="form-control" name="bdate" value="{{$search_conf.bdate}}">
+                &nbsp;--&nbsp;
+                <input type="date" class="form-control" name="edate" value="{{$search_conf.edate}}">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left: 30px;">查询</button>
+            {{if $search_conf.uid > 0 && !empty($_permissions['/crm2/edit_user_point'])}}
+            <button style="margin-left: 20px;" data-toggle="modal" data-target="#add_point" type="button" class="btn btn-warning" id="btn_add_point">增加积分</button>
+            {{/if}}
+        </div>
+    </form>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>订单ID</th>
+            <th>发放人</th>
+            <th>优惠金额</th>
+            <th>发放时间</th>
+            <th>修改时间</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $item}}
+        <tr>
+            <td>
+                <a href="/order/order_detail.php?oid={{$item.oid}}" target="_blank">{{$item.oid}}</a>
+            </td>
+            <td>
+                {{$item.send_name}}[{{$item.send_suid}}]
+            </td>
+            <td>
+                {{$item.amount/100}}元
+            </td>
+            <td>
+                {{$item.ctime}}
+            </td>
+            <td>
+                {{$item.mtime}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+            <li>
+                {{if $total_privilege > 0}} <a style="color:#555;">总优惠：{{$total_privilege}}元</a>{{/if}}
+            </li>
+        </ul>
+    </nav>
+</div>

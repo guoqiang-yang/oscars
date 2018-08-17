@@ -1,0 +1,74 @@
+<tr style="font-size:12px;" id="quickShowInorder_{{$oid}}">
+    <td colspan="9" style="padding-left: 20%;">
+        <table class="table" style="background-color:bisque;">
+            <thead>
+                <tr>
+                    <th>采购清单</th>
+                    <th>id</th>
+                    <th>名称</th>
+                    <th>单位</th>
+                    {{if !empty($_permissions['hc_show_purchase_cost_price'])}}
+                    <th>单价</th>
+                    {{/if}}
+                    <th>数量{{if 1 < $order.info.step}}(已入库){{/if}}</th>
+                    <th>库存</th>
+                    <th>占用</th>
+                    <th>周转天数</th>
+                    {{if !empty($_permissions['hc_show_purchase_cost_price'])}}
+                    <th>总价</th>
+                    {{/if}}
+                    <th>采购类型</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {{foreach $order as $source => $products}}
+            {{foreach $products as $productItem}}
+            <tr class="_j_product" data-pid="{{$productItem.sid}}" style="background-color:{{if $source==1}}beige{{else}}aliceblue{{/if}}">
+                <td></td>
+                <td>
+                    {{$productItem.sid}}
+                    <input type="hidden" name="num" value="{{$productItem.num}}">
+                    <input type="hidden" name="price" value="{{$productItem.price/100}}">
+                </td>
+                <td>{{$productItem.sku.title}}</td>
+                <td>{{$productItem.sku.unit|default:'个'}}
+                </td>
+                {{if !empty($_permissions['hc_show_purchase_cost_price'])}}
+                <td>￥{{$productItem.price/100}}</td>
+                {{/if}}
+                <td>
+                    {{$productItem.num}}
+                    {{if 1 < $order.info.step}}
+                    {{if $productItem._stock_in < $productItem.num}}<span style="color:red;">
+                    {{/if}}
+                    ({{$productItem._stock_in}})
+                    {{if $productItem._stock_in < $productItem.num}}
+                    </span>
+                    {{/if}}
+                    {{/if}}
+                </td>
+                <td>{{$stock_info[$productItem.sid]['num']}}</td>
+                <td>{{$stock_info[$productItem.sid]['occupied']}}</td>
+                <td>
+                    {{if $productItem.sku.cate1 != 99}}
+                    {{$stock_info[$productItem.sid]['turn_day']}}
+                    {{else}}
+                    --
+                    {{/if}}
+                </td>
+                
+                {{if !empty($_permissions['hc_show_purchase_cost_price'])}}
+                <td>￥{{$productItem.num * $productItem.price / 100}}</td>
+                {{/if}}
+                <td>{{if $source==1}}普采{{elseif $source==2}}临采{{else}}--{{/if}}</td>
+                <td>
+                    <a href="/warehouse/stock_history.php?sid={{$productItem.sid}}" style="margin-left:15px;" target="_blank">库存</a>
+                </td>
+            </tr>
+            {{/foreach}}
+            {{/foreach}}
+            </tbody>
+        </table>
+    </td>
+</tr>

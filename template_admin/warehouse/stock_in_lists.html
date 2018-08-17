@@ -1,0 +1,265 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">入库单列表</h1>
+
+	<form class="form-inline" role="form" action="/warehouse/stock_in_lists.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>入库单ID：</label>
+				<input type="text" class="form-control" name="id" value="{{$searchConf.id}}" style="width:80px;">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>采购单ID：</label>
+				<input type="text" class="form-control" name="oid" value="{{$searchConf.oid}}" style="width:80px;">
+			</div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>采购类型：</label>
+                <select class="form-control" name="source">
+                    <option value="0" {{if empty($searchConf.source)}} selected {{/if}}>全部</option>
+                    <option value="1" {{if $searchConf.source == 1}} selected {{/if}}>普采</option>
+                    <option value="2" {{if $searchConf.source == 2}} selected {{/if}}>临采</option>
+                </select>
+            </div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>供应商ID：</label>
+				<input type="text" class="form-control" name="sid" value="{{$searchConf.sid}}" style="width:80px;">
+			</div>
+
+			{{if count($_allowed_warehouses)>1}}
+			<div class="form-group" style="margin-right:50px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+                    {{if !$_user.wid}}
+					<option value="0" {{if !$searchConf.wid}} selected="selected" {{/if}}>全部</option>
+                    {{/if}}
+                    
+					{{foreach $_allowed_warehouses as $_wid=>$_wname}}
+					<option value="{{$_wid}}" {{if $searchConf.wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			{{/if}}
+            {{if !$_user.wid>=5}}
+            <div class="form-group" style="margin-right:50px;">
+				<label>上架：</label>
+				<select class="form-control" name="step">
+                    <option value="0" {{if $searchConf.step==0}} selected="selected"{{/if}}>全部</option>
+                    <option value="2" {{if $searchConf.step==2}} selected="selected"{{/if}}>未上架</option>
+                    <option value="3" {{if $searchConf.step==3}} selected="selected"{{/if}}>已上架</option>
+                </select>
+            </div>
+            {{/if}}
+			<div class="form-group">
+				<label>采购员：</label>
+				<select class="form-control" name="buyer_uid" style="margin-right:20px;">
+					<option value="0" {{if $searchConf.buyer_uid==0}} selected="selected" {{/if}}>全部</option>
+					{{foreach $buyerList as $oner}}
+					<option value="{{$oner.suid}}" {{if $searchConf.buyer_uid==$oner.suid}}selected="selected" {{/if}}>{{$oner.name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="placeholder">
+			<div class="form-group">
+				<label>付款方式：</label>
+				<select class="form-control" name="payment_type" style="margin-right:20px;">
+					<option value="0" {{if empty($searchConf.payment_type)}} selected="selected" {{/if}}>全部</option>
+					{{foreach $all_pay_types as $v=>$desc}}
+					<option value="{{$v}}" {{if $v==$searchConf.payment_type}} selected="selected" {{/if}}>{{$desc}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<div class="form-group">
+				<!--<label>是否付款：</label>-->
+				<!--<select class="form-control" name="paid" style="margin-right: 20px;">-->
+					<!--<option value="127" {{if $searchConf.paid==127}} selected="selected" {{/if}}>全部</option>-->
+					<!--<option value="0" {{if $searchConf.paid==0}} selected="selected" {{/if}}>未付款</option>-->
+					<!--<option value="1" {{if $searchConf.paid==1}} selected="selected" {{/if}}>已付款</option>-->
+                    <!--<option value="2" {{if $searchConf.paid==2}} selected="selected" {{/if}}>采购已兑账</option>-->
+                    <!--<option value="3" {{if $searchConf.paid==3}} selected="selected" {{/if}}>兑账未付款</option>-->
+				<!--</select>-->
+				<label>入库时间：</label>
+				<input type="date" class="form-control" name="from_date" value="{{if $searchConf.from_date}}{{$searchConf.from_date}}{{/if}}" style="width: 160px;"> —
+				<input type="date" class="form-control" name="end_date" value="{{if $searchConf.end_date}}{{$searchConf.end_date}}{{/if}}" style="width: 160px;">
+			</div>
+
+			<button style="margin-left: 50px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+
+    <nav class="nav navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav"  id="navbar" data-paid="{{$searchConf.paid}}">
+                    <li>
+                        <a href="{{$page_url}}" style="padding-right: 30px;padding-left: 30px;">
+                            全部
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&paid=0" style="padding-right: 30px;padding-left: 30px;">
+                            采购未兑账
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&paid=2" style="padding-right: 30px;padding-left: 30px;">
+                            采购已兑账
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&paid=3" style="padding-right: 30px;padding-left: 30px;">
+                            财务已兑账
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&paid=1"style="padding-right: 30px;padding-left: 30px;">
+                            已支付
+                        </a>
+                    </li>
+                </ul>
+                {{if !empty($_permissions['/warehouse/ajax/create_stockin_statements'])}}
+                <button style="margin: 10px auto;float:right;" type="button" class="btn btn-primary" id="btn_statements">生成结算单</button>
+                {{/if}}
+            </div>
+        </div>
+    </nav>
+
+	<table class="table" id="stock_in_list">
+		<thead>
+		<tr>
+			<th style="width:7%;">入库单id</th>
+			<th style="width:7%;">采购单id</th>
+			<th style="width:7%">结算单id</th>
+			<th style="width:14%;">供应商</th>
+			<th style="width:10%;">仓库</th>
+            {{if ($_isAdmin || $_isBuyer || $_isFinance)}}
+			<th style="width:8%;">总金额</th>
+            {{/if}}
+			<th style="width:9%;">入库单时间</th>
+			<th style="width:15%;">付款方式/是否付款</th>
+			<th style="width:12%;">操作人</th>
+			<th style="width:6%">操作</th>
+            <th><input type="checkbox" id="checkAll" />全选</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $stock_in_lists as $stock_in}}
+		<tr data-id="{{$stock_in.id}}" data-role="{{if $stock_in.paid==0}}buyer{{else}}finance{{/if}}">
+			<td><a href="/warehouse/edit_stock_in.php?id={{$stock_in.id}}" target="_blank">{{$stock_in.id}}</a></td>
+			<td>
+                <a href="/warehouse/detail_in_order.php?oid={{$stock_in.oid}}" target="_blank">{{$stock_in.oid}}</a><br>
+				<span>{{$stock_in.in_order_type}}</span><br/>
+                {{if $stock_in.source==2}}<span style="color:red; font-weight:bold;">临采单</span>{{/if}}
+            </td>
+			<td>
+				{{if $stock_in.statement_id>0}}
+                <a href="/finance/stockin_statement_detail.php?statement_id={{$stock_in.statement_id}}" target="_blank">{{$stock_in.statement_id}}</a>
+                {{/if}}
+			</td>
+			<td><a href="/warehouse/edit_supplier.php?sid={{$stock_in.sid}}" target="_blank">{{$stock_in._supplier.name}}</a></td>
+			<td>{{$stock_in._warehouse_name}}</td>
+            {{if ($_isAdmin || $_isBuyer || $_isFinance)}}
+			<td>￥{{$stock_in.price/100}}</td>
+            {{/if}}
+            
+			<td>{{$stock_in.ctime}}</td>
+			<td>
+                {{$stock_in._payment_type}} /
+                {{if $stock_in.paid==1}}
+                <span style="color:green;">【已支付】</span>
+                {{elseif $stock_in.paid==2}}
+                <span style="color:blue;">【采购已兑账】</span>
+                {{elseif $stock_in.paid==3}}
+                <span style="color:limegreen;">【财务已兑账】</span>
+                {{else}}
+                <span style="color:red;">【采购未兑账】</span>
+                {{/if}}
+            </td>
+			<td>
+                采购：{{if !empty($stock_in.buyer_name)}}{{$stock_in.buyer_name}}{{else}} -- {{/if}}<br>
+                入库：{{if !empty($stock_in.stockin_name)}}{{$stock_in.stockin_name}}{{else}} -- {{/if}}<br>
+                
+                {{if $stock_in.step && $stock_in._is_upgrade_wid && $stock_in.source!=2 && $stock_in.source!=4}}
+                上架：{{if !empty($stock_in.shelved_name)}}{{$stock_in.shelved_name}}{{else}} -- {{/if}}<br>
+                状态：
+                    {{if $stock_in.step==1}}<span style="color:red;">【待上架】</span>
+                    {{elseif $stock_in.step==3}}<span style="color:green;">【{{$all_steps[$stock_in.step]}}】</span>
+                    {{else}}<span style="color:red;">【{{$all_steps[$stock_in.step]}}】</span>{{/if}}
+                {{/if}}
+            </td>
+			<td>
+				{{if $stock_in._can_del && !empty($_permissions['/warehouse/ajax/delete_stockIn'])}}
+                <a href="javascript:;" class="_j_del_stockin" data-optype="del_stockin" data-id="{{$stock_in.id}}" style="margin-right: 10px;">删除</a>
+                {{/if}}
+                {{if !empty($_permissions['/warehouse/edit_stock_in'])}}
+                <a href="/warehouse/edit_stock_in.php?id={{$stock_in.id}}" target="_blank" style="margin-right: 10px;">查看</a><br/>
+                {{/if}}
+                <!--{{if $stock_in.paid==0 && !empty($_permissions['/warehouse/ajax/check_account'])}}-->
+                <!--<a href="javascript:;" data-toggle="modal" data-target="#checkAccountBox" data-id="{{$stock_in.id}}">兑账</a>-->
+                <!--{{/if}}-->
+			</td>
+            <td>
+                {{if ($stock_in.paid==2 || $stock_in.paid==3) && $stock_in.statement_id == 0 && !empty($_permissions['/warehouse/ajax/create_stockin_statements'])}}
+                <input type="checkbox" class="select_all_checkbox" name="account_bill" value="{{$stock_in.id}}" />
+                {{/if}}
+            </td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>
+<div class="modal fade _j_dialog" id="checkAccountBox" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">入库单商品列表</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="_j_save_check_account_box">已兑账</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="statements_info">
+    <div class="modal-dialog" role="document" style="width: 680px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="header"></h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+
+    });
+</script>

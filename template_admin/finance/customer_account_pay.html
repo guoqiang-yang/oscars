@@ -1,0 +1,123 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">客户结账</h1>
+	
+	<form class="form-inline" role="form" action="/finance/customer_account_pay.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>客户ID：</label>
+				<input class="form-control" type="text" name="cid" value="{{if $cid}}{{$cid}}{{/if}}" style="margin-right: 20px;" placeholder="请输入客户id">
+			</div>
+      
+			<div class="form-group" style="margin-right: 20px;">
+				<label>日期 (YYYY-MM-DD)：</label>
+				<input type="text" class="form-control" name="etime" value="{{if $etime}}{{$etime}}{{/if}}" style="width: 100px;">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+	
+	<hr>
+  
+	{{if !empty($order_list)}}
+  <form class="form-horizontal" role="form" id="customer_account_pay">
+    
+    <div class="order-bottom">
+      <div class="form-group">
+        <label class="col-sm-2 control-label">客户信息：</label>
+        <div class="col-sm-8">
+          <span class="text-value">【姓名】{{$customer.name}}</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">应收款汇总：</label>
+        <div class="col-sm-8">
+          <span class="text-value">【总计】{{$all_prices.summary/100}}元</span>
+          <span class="text-value" style="color:red;">【应付】{{$all_prices.real_pay/100}}元</span>
+          <span class="text-value">【已付】{{$all_prices.had_paid/100}}元</span>
+        </div>
+      </div>
+    
+      <div class="form-group">
+        <label class="col-sm-2 control-label">订单明细：</label>
+        <div class="col-sm-12">
+        <table class="table">
+          <thead>
+          <tr>
+            <th><input type="checkbox" id="tmp_pay_select_all">全选</th>
+            <th>订单ID</th>
+            <th>仓库ID</th>
+            <th>货款</th>
+            <th>运费</th>
+            <th>搬运费</th>
+            <th>优惠</th>
+            <th>退款/rids</th>
+            <th>已支付</th>
+            <th>应收款</th>
+            <th style="width:10%;">送货日期</th>
+            <th>实付金额</th>
+            <th>抹零金额</th>
+          </tr>
+          </thead>
+          <tbody>
+          {{foreach $order_list as $one}}
+          <tr>
+            <td><input type="checkbox" name="wait_ids" value="{{$one.oid}}" data-realpay="{{$one.bills.will_real_pay}}"></td>
+            <td><a href="/order/order_detail.php?oid={{$one.oid}}" target="_blank">{{$one.oid}}</a></td>
+            <td>{{$one.wid}}</td>
+            <td>￥{{$one.bills.price_price/100}}</td>
+            <td>￥{{$one.bills.freight/100}}</td>
+            <td>￥{{$one.bills.customer_carriage/100}}</td>
+            <td>￥{{$one.bills.privilege/100}}</td>
+            <td>￥{{$one.bills.refund_price/100}}<br>{{if !empty($one.bills.refund_ids)}}<a href="/aftersale/refund_list.php?oid={{$one.oid}}" target="_blank">{{$one.bills.refund_ids}}</a>{{else}} -- {{/if}}</td>
+            <td>￥{{$one.bills.had_paid/100}}</td>
+            <td  style="color:red;">￥{{$one.bills.will_real_pay/100}}</td>
+            <td>{{$one.delivery_date}}</td>
+            <td><input name="real_amount" value="{{$one.bills.will_real_pay/100}}" class="form-control" style="width: 80px;"/></td>
+            <td><input name="moling" value="0" class="form-control" style="width: 60px;" /></td>
+          </tr>
+          {{/foreach}}
+          </tbody>	
+        </table>
+        </div>
+      </div>
+    </div>
+      <div class="form-group">
+          <label class="col-sm-2 control-label">截止日期：</label>
+          <div class="col-sm-7">
+              <input  class="form-control" type="text" name="etime" value="{{$etime}}" style="display:inline-block;width:100px;" disabled="true">
+          </div>
+      </div>
+      <div class="form-group">
+          <label class="col-sm-2 control-label">*付款方式：</label>
+          <div class="col-sm-7">
+              <select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+                  {{foreach $payment_types as $type_id => $type_name}}
+                  {{if $type_id != 8}}
+                  <option value="{{$type_id}}">{{$type_name}}</option>
+                  {{/if}}
+                  {{/foreach}}
+              </select>
+          </div>
+      </div>
+      <div class="form-group">
+          <label class="col-sm-2 control-label">*备注：</label>
+          <div class="col-sm-7">
+              <textarea class="form-control" rows="2" name="note"></textarea>
+          </div>
+      </div>
+      <nav>
+          {{if !empty($_permissions['/finance/customer_account_pay'])}}
+          <a href="javascript:;" class="btn btn-primary" id="_j_customer_amount_paid" data-cid="{{$cid}}">收款</a>
+          {{/if}}
+      </nav>
+  </form>
+	{{else}}
+	<div style="font-size: 16px;">
+    <span style="color:red;">{{$show_msg}}</span>
+  </div>
+	{{/if}}
+
+</div>
+
+

@@ -1,0 +1,237 @@
+<style>
+    .area-bottom{
+      border-bottom:1px dashed #eee;
+      margin:20px;
+    }
+</style>
+
+<div style="display: none;" id="area-json">
+	{{$area}}
+</div>
+<div style="display: none;" id="city-json">
+	{{$city}}
+</div>
+<div style="display: none;" id="distinct-json">
+	{{$distinct}}
+</div>
+
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">{{if $bid}}编辑{{else}}添加{{/if}}企业号</h1>
+
+  <form class="form-horizontal" role="form">
+    <input type="hidden" class="form-control" id="bid" value="{{$bid}}">
+
+    <div class="area-bottom">
+        <div class="form-group">
+          <label class="col-sm-2 control-label">企业名称：</label>
+
+          <div class="col-sm-4">
+            <input type="text" class="form-control" name="bname" value="{{$business_info.bname}}">
+          </div>
+          <div class="col-sm-1">
+              <span class="text-value" style="font-size:14px; margin-left: -20px; color:red;">【必选】</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label">联系人：</label>
+
+          <div class="col-sm-4">
+            <input type="text" class="form-control" name="cname" value="{{$business_info.cname}}">
+          </div>
+          <div class="col-sm-1">
+              <span class="text-value" style="font-size:14px; margin-left: -20px; color:red;">【必选】</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label">联系电话：</label>
+
+          <div class="col-sm-4">
+            <input type="text" class="form-control" name="mobile" value="{{$business_info.mobile}}"> 
+            <span style="color:red;">登录凭证</span>
+          </div>
+          <div class="col-sm-1">
+              <span class="text-value" style="font-size:14px; margin-left: -20px; color:red;">【必选】</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">录入专员：</label>
+
+            <div class="col-sm-4">
+                <select class="form-control" name="record_suid">
+                    <option value="0" {{if empty($business_info.record_suid)}}selected="true" {{/if}}>请选择录入专员</option>
+                    {{foreach $record_list as $sales}}
+                        <option value="{{$sales.suid}}" {{if $business_info.record_suid== $sales.suid}}selected="true" {{/if}}>{{$sales.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">销售专员：</label>
+
+            <div class="col-sm-4">
+                <select class="form-control" name="sales_suid">
+                    <option value="0" {{if empty($business_info.sales_suid)}}selected="true" {{/if}}>请选择销售专员</option>
+                    {{foreach $sales_list as $sales}}
+                        <option value="{{$sales.suid}}" {{if $business_info.sales_suid== $sales.suid}}selected="true" {{/if}}>{{$sales.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">客户地址：</label>
+            <div class="col-sm-3" style="width:16%; margin-right: 14px;">
+                <select style="" id="select-city" class="form-control" name="city" data-id="{{$business_info.city}}"> </select>
+            </div>
+            <div id="district" class="col-sm-3" style="width: 16%; margin-right: 10px;">
+                <select id="select-district" class="form-control" name="district" data-id="{{$business_info.district}}"> </select>
+            </div>
+            <div id="area" class="col-sm-3" style="width: 16%;display: none;">
+                <select id="select-area" class="form-control" name="area" data-id="{{$business_info.area}}"> </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">详细地址：</label>
+            <div class="col-sm-5">
+                <textarea class="form-control" name="address" rows="2">{{$business_info.address}}</textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">经营范围：</label>
+
+            <div class="col-sm-5">
+                <textarea class="form-control" name="products" rows="2">{{$business_info.products}}</textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">备注：</label>
+
+            <div class="col-sm-5">
+                <textarea class="form-control" name="note" rows="2">{{$business_info.note}}</textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">代客户支付：</label>
+
+            <div class="col-sm-1">
+                <select class="form-control" name="is_pay" {{if !$_isAdmin}}disabled="true"{{/if}}>
+                    <option value="0" {{if $business_info.is_pay!=1}} selected="selected"{{/if}}>否</option>
+                    <option value="1" {{if $business_info.is_pay==1}} selected="selected"{{/if}}>是</option>
+                </select>
+            </div>
+        </div>  
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-primary" id="save_business" style="margin-right:20px;">保存</button>
+                {{if !empty($_permissions['hc_reset_business_passwd'])}}
+                <button type="button" class="btn btn-default reset_df_passwd" data-bid="{{$bid}}" style="margin-right:20px;">重置密码</button>
+                {{/if}}
+                {{if !empty($_permissions['/crm2/ajax/modify_business'])}}
+                <button type="button" class="btn btn-default"  style="margin-right:20px;" data-toggle="modal" data-target="#bind_customer">绑定客户</button>
+                {{/if}}
+            </div>
+        </div>
+    
+    </div>  
+    
+    <div class="area-bottom">
+        <div class="form-group">
+          <div class="col-sm-offset-1 col-sm-10">
+            <span style="font-size:16px; color:red;">绑定的客户：{{$bind_customers.total}}个</span>
+          </div>
+        </div>
+    
+        {{if $bind_customers.total}}
+        <div class="form-group">
+			<label class="col-sm-2 control-label"></label>
+
+            <div class="col-sm-9">
+                <table class="table">
+					<thead>
+					<tr>
+						<th>CID</th>
+						<th>姓名</th>
+                        <th style="width:20%;">电话</th>
+                        <th>订单数</th>
+                        <th>最后下单日期</th>
+						<th>销售专员</th>
+						<th>操作</th>
+					</tr>
+					</thead>
+                    <tbody>
+                        {{foreach $bind_customers.data as $customer}}
+                        <tr data-cid="{{$customer.cid}}">
+                            <td>{{$customer.cid}}</td>
+                            <td>{{$customer.name}}</td>
+                            <td>{{$customer.all_user_mobiles}}</td>
+                            <td>{{$customer.order_num}}</td>
+                            <td>{{if $customer.order_num}}{{$customer.last_order_date}}{{else}}无{{/if}}</td>
+                            <td>{{if !empty($customer._sales_suid)}}{{$customer._sales_suid.name}}{{else}}无{{/if}}</td>
+                            <td>
+                                <a href="/crm2/customer_detail.php?cid={{$customer.cid}}" target="_blank" style="margin-right:10px;">客户详情</a>
+                                {{if $_isAdmin}}
+                                <a class="unbind_customer" style="margin-right:10px;">解绑</a>
+                                {{/if}}
+                            </td>
+                        </tr>
+                        {{/foreach}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        {{else}}
+        <div style="text-align:center; margin: 20px 0px 50px 0px;">
+            <span style="font-size:25px;">暂无客户！</span>
+        </div>
+        {{/if}}
+        
+    </div>
+    
+  </form>
+
+</div>
+
+<div class="modal fade _j_dialog" id="bind_customer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">绑定客户</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">客户ID,手机号：</label>
+                        <div class="col-sm-7">
+                            <textarea class="form-control" rows="3" name="customers" style=""></textarea>
+                            <span style="color:red; font-size:14px;">请使用英文半角逗号分隔 ","</span>
+                        </div>
+                        <div class="col-sm-1">
+                            <a id="search_customer" class="btn btn-default" style="margin-top:40px;">查询</a>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display:">
+                        <label class="col-sm-3 control-label">客户列表：</label>
+                        <div class="col-sm-8" id="customers_area"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="confirm_bind_customers" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

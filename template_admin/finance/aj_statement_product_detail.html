@@ -1,0 +1,61 @@
+<div>
+    <h3>结算单{{$id}}商品清单</h3>
+    {{if !empty($refund_list)}}
+    <h4 style="color: red; text-align: left;">退货单：</h4>
+    <table class="table" style="text-align: left; width: 550px; margin: 10px auto;">
+        <thead>
+            <th style="width: 10%">sku_id</th>
+            <th style="width: 20%">名称</th>
+            <th style="width: 10%">数量</th>
+            <th style="width: 10%">单位</th>
+            <th style="width: 10%">单价</th>
+            <th style="width: 10%">总价</th>
+        </thead>
+        <tbody>
+        {{foreach $refund_list as $sid => $refund}}
+        {{foreach $refund as $item}}
+        <tr>
+            <td>{{$sid}}</td>
+            <td>{{$item.title}}</td>
+            <td>{{$item.num}}</td>
+            <td>{{$item.unit}}</td>
+            <td>￥{{$item.price/$item.num}}</td>
+            <td>￥{{$item.price}}</td>
+        </tr>
+        {{/foreach}}
+        {{/foreach}}
+        </tbody>
+    </table>
+    <h4 style="color: red; text-align: right;">总计：￥{{$refund_price}}</h4>
+    {{/if}}
+    {{if !empty($stockin_list)}}
+    <h4 style="color: red; text-align: left;">入库单：</h4>
+    <table class="table" style="text-align: left; width: 550px; margin: 10px auto;">
+        <thead>
+        <tr>
+            <th style="width: 10%">sku_id</th>
+            <th style="width: 20%">名称</th>
+            <th style="width: 10%">数量</th>
+            <th style="width: 10%">单位</th>
+            <th style="width: 10%">单价</th>
+            <th style="width: 10%">总价</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $stockin_list as $sid => $stockIn}}
+        {{foreach $stockIn as $info}}
+        <tr>
+            <td>{{$sid}}</td>
+            <td>{{$info.title}}</td>
+            <td>{{$info.num}}</td>
+            <td>{{$info.unit}}</td>
+            <td>￥{{$info.price/$info.num}}</td>
+            <td>￥{{$info.price}}</td>
+        </tr>
+        {{/foreach}}
+        {{/foreach}}
+        </tbody>
+    </table>
+    <h4 style="color: red; text-align: right">总计：￥{{$stockin_price}}</h4>
+    {{/if}}
+</div>

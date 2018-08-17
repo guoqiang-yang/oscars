@@ -1,0 +1,9 @@
+公众平台账号：
+公众平台密码：
+APPID：
+AppSecret：
+token：
+AESKey：
+支付平台商户号：
+操作密码：
+支付秘钥：

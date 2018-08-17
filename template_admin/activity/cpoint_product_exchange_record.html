@@ -1,0 +1,138 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        商品兑换记录
+    </h1>
+
+    <form class="form-inline" role="form" action="/activity/cpoint_product_exchange_record.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px;">
+                <label>兑换时间：</label>
+                <input type="date" class="form-control" name="btime" value="{{$search_conf.btime}}" />&emsp;To&emsp;<input type="date" class="form-control" name="etime" value="{{$search_conf.etime}}" />
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>客户CID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="cid" value="{{$search_conf.cid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>客户UID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="uid" value="{{$search_conf.uid}}">
+            </div>
+            <div class="form-group" style="margin-right:50px;">
+                <label>商品ID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="pid" value="{{$search_conf.pid}}">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+    <div style="border-bottom: 1px inset #DDDDDD; clear: both; position: relative; height:25px;margin-bottom: 20px;">
+        <a href="{{$step_url}}"><span {{if empty($search_conf.isexpress)}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>全部</span></a>
+        <a href="{{$step_url}}&isexpress=2"><span {{if $search_conf.isexpress == 2}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>未寄出</span></a>
+        <a href="{{$step_url}}&isexpress=1"><span {{if $search_conf.isexpress == 1}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>已寄出</span></a>
+    </div>
+
+    <table class="table" style="text-align: center;">
+        <thead>
+        <tr>
+            <th>客户ID</th>
+            <th>兑换积分</th>
+            <th>兑换时间</th>
+            <th>商品名&ID</th>
+            <th>兑换数量</th>
+            <th>收货地址</th>
+            <th>快递信息</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $item}}
+        <tr data-id="{{$item.pid}}" class="_j_pic">
+            <td>
+                {{$item._customer.name}}<br>
+                CID:{{$item.cid}}<br>
+                {{$item._user.name}}<br>
+                UID:{{$item.uid}}
+            </td>
+            <td>
+                {{$item.point}}
+            </td>
+            <td>
+                {{$item.ctime}}
+            </td>
+            <td>
+                {{foreach $item._product as $product}}
+                {{$product.title}}[<a href="/activity/show_customer_point_product.php?pid={{$product.pid}}" target="_blank">{{$product.pid}}</a>]
+                {{/foreach}}
+            </td>
+            <td>
+                {{foreach $item._product as $pid => $product}}
+                {{$product.num}}
+                {{/foreach}}
+            </td>
+            <td>
+               {{$item.city_id}} {{$item.district}} {{$item.address}}<br>
+                收件人：{{$item.contact_name}}<br>
+                联系电话：{{$item.contact_phone}}
+            </td>
+            <td>
+                {{if !empty($item.express)}}
+                [{{$express_list[$item.express]}}]&emsp;{{$item.tracking_num}}<br>
+                [运费]&nbsp;¥&nbsp;{{$item.freight/100}} &emsp;
+                <a href="javascript:;" class="edit_express_info" data-oid="{{$item.oid}}" data-express="{{$item.express}}" data-tracking_num="{{$item.tracking_num}}" data-freight="{{$item.freight/100}}">编辑</a>
+                {{else}}
+                <a href="javascript:;" class="add_express_info" data-oid="{{$item.oid}}">添加</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Modal -->
+<div class="modal fade _j_dialog" id="editTrackingModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                <table width="90%">
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">快递公司：</td>
+                        <td>
+                            <select name="express" id="edit_express" class="form-control">
+                                <option value="">请选择</option>
+                                {{foreach $express_list as $key=>$express}}
+                                <option value="{{$key}}">{{$express}}</option>
+                                {{/foreach}}
+                            </select>
+                            <input type="hidden" name="oid" id="edit_oid" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">快递单号：</td>
+                        <td><input type="text" class="form-control" name="tracking_num" id="edit_tracking_num"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">运费：</td>
+                        <td><input type="text" class="form-control" name="freight" id="edit_freight"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_save_tracking">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

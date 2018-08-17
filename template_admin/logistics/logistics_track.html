@@ -1,0 +1,97 @@
+<link href="/js/strack/css/track.css" type="text/css" rel="stylesheet">
+<link rel="stylesheet" href="/js/strack/css/fontawesome/css/font-awesome.min.css" type="text/css">
+<link href="/js/strack/css/jquery.datetimepicker.css" rel="stylesheet" type="text/css">
+<link href="/js/strack/css/pagination.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/js/strack/js/jquery.datetimepicker.js" charset="UTF-8"></script>
+<script type="text/javascript" src="/js/strack/js/jquery.pagination.js" charset="UTF-8"></script>
+<script type="text/javascript" src="/js/strack/js/mousewheel.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="/js/strack/js/baiduTemplate.js"></script>
+<script type="text/javascript" src="/js/strack/js/esl/esl.js"></script>
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=KrnrrmGcxmZVGB4YcxHywmwjC79NMVqm"></script>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">物流轨迹</h1>
+    <div id="order_line_view">
+
+        <div style="width:65%; float:left;">
+            <div style="height:600px;" id="mapContainer"></div>
+            <div style="display: none;;" id="mapContainer2"></div>
+            <input type="hidden" id="track" value="{{$ret}}">
+            <input type="hidden" id="points" value="{{$points}}">
+            <input type="hidden" id="center" value="{{$center}}">
+            <input type="hidden" id="linepoints" value="{{$linepoints}}">
+        </div>
+        <div class="timeline-ctrl" style="display: none;height: 0;">
+            <canvas id="timeline" width="780px" height="60px"></canvas>
+            &lt;!&ndash; <canvas id="cursor" width="1305px" height="60px"></canvas> &ndash;&gt;
+            <canvas id="timeCtr" width="16px" height="60px"></canvas>
+        </div>
+        <div id="order_line_area" style="width:32%;float:right; overflow-y:auto;height:800px;" data-max-oid="{{$max_oid}}">
+            <div class="un_selected_summary_order order_summary_info" data-oid="{{$oinfo.oid}}" data-priority="{{$oinfo.priority}}" id="order_summary_{{$oinfo.oid}}">
+                <div class="summary_info" style="width: 100%; background-color:#E4E4E4;">
+                    <table class="table table-bordered " style="background: white; text-align: center;">
+                        <tr>
+                            <td style="padding: 2px;" colspan="2">排线id：{{$data.line_id}}</td>
+                            <td style="padding: 2px;" colspan="2">{{$data.warehouse}}</td>
+                        </tr>
+                        {{foreach $data.items as $item}}
+                            <tr>
+                                <td style="padding: 2px;padding-left: 5px;width: 55%" colspan="2" align="left">司机：{{$item.name}}(ID：{{$item.did}})</td>
+                                <td style="background: {{$item.color}};width: 45%" colspan="2" align="left"></td>
+                            </tr>
+                            <tr style="background-color: #f2f2f2;font-size: 16px;">
+                                <th style="padding: 2px;text-align: center">地点</th>
+                                <th style="padding: 2px;text-align: center">距离</th>
+                                <th style="padding: 2px;text-align: center">时间</th>
+                            </tr>
+                            {{if !empty($item.infos)}}
+                                {{foreach $item.infos as $key => $info}}
+                                <tr style="">
+                                    {{if $key>0}}
+                                    <td style="padding: 2px;text-align: center">Oid：<a href="http://{{$host}}/order/order_detail.php?oid={{$info.oid}}" target="_blank">{{$info.oid}}</a></td>
+                                    {{else}}
+                                    <td style="padding: 2px;text-align: center">{{$info.oid}}</td>
+                                    {{/if}}
+                                    {{if $info.distance > 0}}
+                                    <td style="padding: 2px;text-align: center">+{{$info.distance}}Km</td>
+                                    {{else}}
+                                    <td style="padding: 2px;text-align: center">{{$info.distance}}</td>
+                                    {{/if}}
+                                    <td style="padding: 2px;text-align: center">{{$info.date}}</td>
+                                </tr>
+                                {{/foreach}}
+                            {{/if}}
+                            <tr style="background-color: #ffa7a3;">
+                                <td style="padding: 2px;text-align: center">总计</td>
+                                <td style="padding: 2px;text-align: center">{{$item.total_distance}}Km</td>
+                                <td style="padding: 2px;text-align: center">{{$item.total_date}}</td>
+                            </tr>
+                        {{/foreach}}
+                            <tr>
+                                <td style="padding: 2px;text-align: center;background: #ff0000" id="distance" colspan="3">数据读取中......</td>
+                            </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div style="clear:both;"></div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/js/strack/js/track/demo.js"></script>
+<script type="text/javascript" src="/js/strack/js/demoTrack.js"></script>
+<script type="text/javascript">
+    var map = new BMap.Map("mapContainer", {
+        enableMapClick: true
+    });
+    function mapInit() {
+        var point = new BMap.Point(116.404, 39.915);
+        map.centerAndZoom(point, 12);
+        map.enableScrollWheelZoom();
+    }
+    mapInit();
+    map.setMaxZoom(18);
+</script>

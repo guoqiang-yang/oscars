@@ -1,0 +1,14 @@
+网页端调用位置
+	入口文件：htdocs_client_h5/order/do_pay.php
+	调用接口：WeiXin_Api::getPayPackageNew();
+	调用接口：WeiXin_Api::getSignPackageNew();
+
+	回调文件：htdocs_client_h5/paycallback/weixin.php
+	调用接口：WeiXin_Api::authenticationNew();
+
+App端调用位置
+	入口文件：htdocs_app_api/order/weixin_prepay.php
+	调用接口：Weixin_App_New_Api::getPayPackage();
+
+	回调文件：htdocs_app_api/order/pay_callback_weixin.php
+	调用接口：Weixin_App_New_Api::authentication();

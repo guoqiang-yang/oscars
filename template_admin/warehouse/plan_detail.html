@@ -1,0 +1,136 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">创建盘点任务</h1>
+
+    <form class="form-inline" role="form" action="/warehouse/plan_list.php" data-pid="{{$plan.pid}}" data-wid="{{$plan.wid}}">
+        <div class="placeholder">
+            {{if $plan.step == 1}}
+            {{if !empty($_permissions['/warehouse/ajax/add_inventory_plan_products'])}}
+            <button type="button" class="btn btn-primary" data-pid="{{$plan.pid}}" data-step="1" id="btn_sure_plan_products" style="margin-right: 20px;">确认盘点商品</button>
+            {{/if}}
+            {{/if}}
+            {{if $plan.step != 1}}
+            <div class="form-group" style="margin-right:20px;">
+                <label>盘点进度：</label>
+                <select class="form-control" id="inventory_times" name="times" style="width: 150px;">
+                    {{foreach $times as $_times => $_name}}
+                    {{if $plan.times >= $_times}}
+                    <option value="{{$_times}}" {{if $conf_times==$_times}} selected="selected"{{/if}}>{{$times}}{{$_name}}</option>
+                    {{/if}}
+                    {{/foreach}}
+                </select>
+            </div>
+            {{/if}}
+            {{if $plan.step ==2}}
+            {{if !empty($_permissions['/warehouse/ajax/create_inventory_task'])}}
+            <button type="button" class="btn btn-primary" data-pid="{{$plan.pid}}" data-step="2" id="btn_create_task">生成任务</button>
+            {{/if}}
+            {{/if}}
+        </div>
+    </form>
+
+    <hr>
+
+    <h3>任务列表</h3>
+    <div style="color: #ff0000;">
+        总计：{{$count['total']}}个，未分配：{{$count['not_start']}}个，已分配：{{$count['allocated']}}个，进行中：{{$count['ongoing']}}个，已完成：{{$count['finished']}}个
+    </div>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>任务号</th>
+            <th>任务量</th>
+            <th>差异量</th>
+            <th>分配者</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $task_list as $_task}}
+        <tr data-tid="{{$_task.tid}}" data-wid="{{$_task.wid}}" data-pid="{{$_task.plan_id}}">
+            <td>{{$_task.tid}}</td>
+            <td>{{$_task.num}}</td>
+            <td>{{if empty($_task.diff_num)}}-{{else}}{{$_task.diff_num}}{{/if}}</td>
+            <td>{{$staff_list[$_task.alloc_suid]['name']}}</td>
+            <td>{{$step_list[$_task.step]}}</td>
+            <td>
+                {{if empty($_task.alloc_suid)}}
+                    {{if !empty($_permissions['/warehouse/ajax/save_inventory_task'])}}
+                    <a class="allocate_inventory_task" href="javascript: void(0)" style="margin-right: 10px;">分配</a>
+                    {{/if}}
+                {{/if}}
+                {{if !empty($_permissions['/warehouse/inventory_product_list'])}}
+                <a href="/warehouse/inventory_product_list.php?plan_id={{$_task.plan_id}}&task_id={{$_task.tid}}" target="_blank">查看商品</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade _j_dialog" id="modal_warehouse_staff_list" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">人员列表</h4>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade _j_dialog" id="modal_sure_plan_products" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">盘点商品明细列表</h4>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="btn-save-plan-product" data-pid="{{$plan.pid}}" data-wid="{{$plan.wid}}" class="btn btn-primary">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade _j_dialog" id="modal_create_task" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">生成盘点任务</h4>
+            </div>
+            <div class="modal-body">
+                {{if $plan.step == 2}}
+                <div style="font-size: 16px;">
+                    任务分配
+                </div>
+                <div style="font-size: 14px; margin: 8px auto 8px 20px;">
+                    <label>分配方式：</label>
+                    <label style="margin-right: 20px;"><input class="allocate_method" type="radio" name="allocate_method" value="1">自动</label>
+                    <label><input class="allocate_method" type="radio" name="allocate_method" value="2" checked>手动</label>
+                </div>
+                <div style="font-size: 14px; margin: 8px auto 8px 20px; display: none;" id="input_task_num">
+                    <label>请输入任务数：</label>
+                    <input style="margin-right: 20px;" type="text" name="task_num" value="1">
+                </div>
+                <div style="font-size: 14px; margin: 8px auto 8px 20px;" id="input_product_num">
+                    <label>请输入商品数：</label>
+                    <input style="margin-right: 20px;" type="text" name="product_num" value="0">
+                </div>
+                {{/if}}
+                <div id="allocate_product_list"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="create_inventory_task" data-pid="{{$plan.pid}}" data-wid="{{$plan.wid}}" class="btn btn-primary">确认</button>
+            </div>
+        </div>
+    </div>
+</div>

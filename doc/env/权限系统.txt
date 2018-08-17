@@ -1,0 +1,37 @@
+1、表结构说明
+    新增了t_role表用于存储角色相关信息；
+    t_staff_user表新增了roles字段，用于存储后台管理员所拥有的角色信息；
+
+2、权限模块组成
+    a.权限，即最终可操作项的定义，如“查看订单”，“修改用户”等；
+    b.角色，一个角色可以拥有多个不同的权限；
+    c.管理员，一个管理员可以拥有多个不同的角色；
+
+3、权限的定义
+    权限的定义在配置文件include/conf/Conf_Admin_Page.php 的$MODULES 静态变量中定义；
+    权限根据后台菜单结构分三级，上部菜单=》左侧菜单=》具体操作项，最终在t_role表里头存储的是
+    第三级buttons下面的key；
+    key的定义格式：取$_SERVER['SCRIPT_NAME']的值，然后去掉“.php”的后缀，例如,
+    http://sa.haocaisong.cn/order/order_list.php的SCRIPT_NAME值是/order/order_list.php，
+    去掉后缀“.php”，就是/order/order_list，所以在Conf_Admin_Page里定义“查看订单列表”权限的
+    key值就是/order/order_list；
+
+4、权限检测
+    在admin基类App_Admin_Web的checkAuth方法中，检测了当前管理员是否对当前页面有操作权限；如果没有，
+    就会跳转到“访问被拒绝”的页面；
+    一般情况，是不用去手动写代码检测权限的，系统会自动获取当前页面的SCRIPT_NAME进行处理，然后检测管理员
+    拥有的角色里是否有该页面的操作权限；
+    比较特殊的情况是，展示使用Page展示，修改的提交使用Ajax的情况；例如修改用户信息，使用的是/crm2/edit_customer.php
+    显示当前可编辑的信息，提交保存的时候使用的是/crm2/ajax/save_customer.php保存的信息；这种情况，Page
+    和Ajax使用的是一个权限，也就是“编辑用户信息”的权限；这种情况，“编辑用户信息”权限的key定义是“/crm2/edit_customer”，
+    则需要在Ajax的checkAuth方法里，调用父类的方法去检测权限，调用方式如：parent::checkAuth("/crm2/edit_customer");
+
+5、在模板中检测权限
+    在App_Admin_Web的setCommonPara里，已经将当前用户所有的页面权限，赋值给一个模板变量$_permission，
+    在模板中要检测是否拥有某个权限，代码如：
+    {{if !empty($_permissions["/crm2/edit_customer_tracking"])}}
+    有权限
+    {{else}}
+    没权限
+    {{/if}}
+

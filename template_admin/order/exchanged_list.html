@@ -1,0 +1,138 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">换货列表</h1>
+
+	<form class="form-inline" role="form" action="/aftersale/exchanged_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>换货日期：</label>
+                <input type="date" class="form-control" name="exchanged_date" value="{{$searchConf.exchanged_date}}" style="width: 160px;">&emsp;to&emsp;
+                <input type="date" class="form-control" name="exchanged_date_end" value="{{$searchConf.exchanged_date_end}}" style="width: 160px;">
+			</div>
+		</div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>换货单ID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="eid" value="{{$searchConf.eid}}">
+            </div>
+            <!--<div class="form-group" style="margin-right:20px;">-->
+                <!--<label>城市：</label>-->
+                <!--<select class="form-control" name="city_id">-->
+                    <!--<option value="0" {{if !$searchConf.city_id}} selected="selected" {{/if}}>全部</option>-->
+                    <!--{{foreach $city_list as $_cityId => $_cityName}}-->
+                    <!--<option value="{{$_cityId}}" {{if $searchConf.city_id==$_cityId}} selected="selected" {{/if}}>{{$_cityName}}</option>-->
+                    <!--{{/foreach}}-->
+                <!--</select>-->
+            <!--</div>-->
+            {{if !$_user.wid}}
+            <div class="form-group" style="margin-right:50px;">
+                <label>仓库：</label>
+                <select class="form-control" name="wid">
+                    <option value="0" {{if !$searchConf.wid}} selected="selected" {{/if}}>全部</option>
+                    {{foreach $_warehouseList as $_wid=>$_wname}}
+                    <option value="{{$_wid}}" {{if $searchConf.wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            {{/if}}
+        </div>
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:50px;">
+				<label>用户id：</label>
+				<input style="width: 100px;" type="text" class="form-control" name="cid" value="{{$searchConf.cid}}">
+			</div>
+			<div class="form-group">
+				<label>用户手机：</label>
+				<input type="text" class="form-control" name="mobile" value="{{$mobile}}" style="width: 120px; margin-right: 20px;">
+			</div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>订单号：</label>
+				<input style="width: 100px;" type="text" class="form-control" name="oid" value="{{$searchConf.oid}}">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+    <div style="border-bottom: 1px inset #DDDDDD; clear: both; position: relative; height:25px;margin-bottom: 20px;">
+        <a href="{{$step_url}}&step=0"><span {{if empty($searchConf.step) || $searchConf.step==0}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>全部</span></a>
+        {{foreach $exchanged_steps as $key=>$item}}
+        <a href="{{$step_url}}&step={{$key}}"><span {{if $searchConf.step==$key}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>{{$item}}</span></a>
+        {{/foreach}}
+    </div>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>id</th>
+			<th>订单id</th>
+			<th>金额</th>
+			<th style="width: 30%;">信息</th>
+            <th>换货时间</th>
+            <th>关联信息</th>
+			<th>状态</th>
+			<th>操作人</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $exchanged_list as $exchanged}}
+		<tr data-rid="{{$exchanged.eid}}">
+			<td>
+				<a href="/order/edit_exchanged.php?eid={{$exchanged.eid}}">{{$exchanged.eid}}</a>
+			</td>
+			<td>
+				<a href="/order/order_detail.php?oid={{$exchanged.oid}}" target="_blank">{{$exchanged.oid}}</a><br/>
+			</td>
+			<td>
+				[退]￥{{$exchanged._order.refund/100}}<br />
+				[原]￥{{$exchanged._order.price/100}}<br />
+			</td>
+			<td>
+				[客]<a href="/aftersale/exchanged_list.php?cid={{$exchanged.cid}}">{{$exchanged._customer.name}}</a><br/>
+				{{if !empty($exchanged._customer.contact_name)}}
+				[联]<span style="color:gray;">联系人:{{$exchanged._customer.contact_name}}</span><br />
+				{{/if}}
+				[址]{{$exchanged._order.address}}<br/>
+				[库]{{$_warehouseList[$exchanged.wid]}}
+			</td>
+			<td>
+                {{if $exchanged.m_type == 1}}
+                <span style="color:gray;">[始]{{$exchanged.exchanged_time}}<br>[终]{{$exchanged.exchanged_time_end}}</span>
+                {{else}}
+                随单换货
+                {{/if}}
+            </td>
+            <td>
+                {{if $exchanged.refund_id>0}}
+                [退货单]<a href="/order/edit_refund_new.php?rid={{$exchanged.refund_id}}" target="_blank">{{$exchanged.refund_id}}</a><br/>
+                {{/if}}
+                {{if $exchanged.aftersale_oid>0}}
+                [补单]<a href="/order/order_detail.php?oid={{$exchanged.aftersale_oid}}" target="_blank">{{$exchanged.aftersale_oid}}</a><br/>
+                {{/if}}
+            </td>
+            <td>
+                {{$exchanged_steps[$exchanged.step]}}
+            </td>
+			<td>
+				{{if $exchanged.suid}}<span style="color:gray;">制单:{{$exchanged.suid_info.name}}<br>{{$exchanged.ctime}}</span>{{/if}} {{if $exchanged.audit_suid}}<br/><span style="color:gray;">审核:{{$exchanged.audit_suid_info.name}}</span>{{/if}}
+			</td>
+			<td>
+                {{if !empty($_permissions['/order/edit_exchanged'])}}
+				<a href="/order/edit_exchanged.php?eid={{$exchanged.eid}}">编辑</a><br>
+                {{/if}}
+                {{if !empty($_permissions['/order/order_detail'])}}
+                <a href="/order/order_detail.php?oid={{$exchanged.oid}}" target="_blank">订单</a><br>
+                {{/if}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>

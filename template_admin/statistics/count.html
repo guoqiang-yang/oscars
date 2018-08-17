@@ -1,0 +1,129 @@
+
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">毛利&毛收入</h1>
+
+	<form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right: 20px;">
+				<label>时间：</label>
+				<input type="date" class="form-control" name="start_time" value="{{$start_time}}" style="display: inline-block;width: 170px;"> — <input max="{{$yesterday}}" type="date" class="form-control" name="end_time" value="{{$end_time}}" style="display: inline-block;width: 170px;">
+			</div>
+
+            <div class="form-group" style="margin-right:20px;">
+                <label>城市：</label>
+                <select class="form-control" name="city_id" id="select_city">
+                    <option value="0" {{if $city_id== 0}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $city_list as $cityId => $cityName}}
+                    <option value="{{$cityId}}" {{if $city_id==$cityId}}selected="selected" {{/if}}>{{$cityName}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>库房：</label>
+                <select class="form-control" name="wid" id="select_warehouse" data-id="{{$cur_wid}}" style="margin-right:20px;">
+                    <option data-city="0" value="0">全部</option>
+                    {{foreach $warehouse_list as $wid => $warehouse}}
+                    <option {{if $wid == $cur_wid}}selected="selected"{{/if}} {{if $city_id > 0 && $city_id != $warehouse.city}}style="display: none;"{{/if}} data-city="{{$warehouse.city}}" value="{{$wid}}">{{$warehouse.wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+			<span style="color:red;">　注意：统计的是“已出库”的订单</span>
+		</div>
+	</form>
+
+	<hr>
+
+	<table class="table table-bordered">
+		<tr>
+			<td rowspan="{{if $_hide_useless}}3{{else}}5{{/if}}"><h4>销售</h4></td>
+			<td><span style="font-size: 18px;font-weight: bold;">总销售额</span> {{if !$_hide_useless}}<span style="color: gray;">(没有减退款)</span>{{/if}}</td>
+			<td><span style="color: red;">{{$data.total_amount}}</span> 元（注：只是货款）</td>
+		</tr>
+		<tr>
+			<td><span style="color: gray;">订单数</span></td>
+			<td><span style="color: gray;">{{$data.order_num}}</span></td>
+		</tr>
+		<tr>
+			<td><span style="color: gray;">客单价（订单总金额 / (订单总数-补单数)）</span></td>
+			<td><span style="color: red;">{{$data.price_per_order}}</span> 元</td>
+		</tr>
+
+		{{if !$_hide_useless}}
+		<tr>
+			<td><span style="color: gray;">退款额</span></td>
+			<td><span style="color: gray;">{{$data.refund}} 元</span></td>
+		</tr>
+		<tr>
+			<td><span style="color: gray;">总销售额{{if !$_hide_useless}}(减去了退款){{/if}}</span></td>
+			<td><span style="color: gray;">{{$data.real_amount}} 元</span></td>
+		</tr>
+		{{/if}}
+		<tr>
+			<td rowspan="5"><h4>成本</h4></td>
+			<td><span style="font-size: 18px;font-weight: bold;">材料成本</span> <span style="color: gray;">(没有减退款)</span></td>
+			<td><span style="color: red;">{{$data.product_cost}}</span> 元</td>
+		</tr>
+		<tr>
+			<td>
+        运费补贴 <span style="color: gray;">(付司机运费-客户承担运费)</span>
+        <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="注意：回单后由调度录入，所以最近几天会比实际发生少"></span>
+      </td>
+			<td>{{$data.freight_subsidy}} 元 （{{$data.freight_out}} 元 - {{$data.freight_in}} 元）<span style="color: red;">（{{$data.freight_subsidy_per_order}} 元/单）</span></td>
+		</tr>
+		<tr>
+			<td>
+        搬运费补贴 <span style="color: gray;">(付搬运工费用-客户承担搬运费)</span>
+        <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="注意：回单后由调度录入，所以最近几天会比实际发生少"></span>
+      </td>
+			<td>{{$data.carry_subsidy}} 元 （{{$data.carry_out}} 元 - {{$data.carry_in}} 元）<span style="color: red;">（{{$data.carry_subsidy_per_order}} 元/单）</span></td>
+		</tr>
+		<tr>
+			<td>优惠补贴</td>
+			<td>{{$data.privilege_subsidy}} 元<span style="color: red;">（{{$data.privilege_subsidy_per_order}} 元/单）</span></td>
+		</tr>
+		<tr>
+			<td>总成本</span> <span style="color: gray;">(材料+运费补贴+搬运补贴+优惠补贴)</span></td>
+			<td>{{$data.total_cost}} 元</td>
+		</tr>
+		<tr>
+			<td rowspan="3"><h4>收入</h4></td>
+			<td>
+				<span style="font-size: 18px;font-weight: bold;">毛收入</span> <span style="color: gray;">(销售额-材料成本)注:没有减退款</span>
+			</td>
+			<td><span style="color: red;">{{$data.gross_income}}</span> 元</td>
+		</tr>
+		<tr>
+			<td>毛利率</td>
+			<td>{{$data.gross_rate}}%</td>
+		</tr>
+		{{*
+		<tr>
+			<td>准纯收入 <span style="color: gray;">(毛收入-3种补贴)</span></td>
+			<td>{{$data.income}} 元</td>
+		</tr>
+		*}}
+	</table>
+
+</div>
+
+<script>
+  $(document).ready(function(){
+	  $('[data-toggle="tooltip"]').tooltip();
+	  $('#select_city').on('change', _changeCity);
+	  function _changeCity()
+	  {
+		  var city = parseInt($('#select_city').val());
+		  $('#select_warehouse').val(0);
+		  $('#select_warehouse option').each(function() {
+			  if (city == 0 || parseInt($(this).data('city')) == city) {
+				  $(this).css('display', '');
+			  } else {
+				  $(this).css('display', 'none');
+			  }
+		  });
+	  }
+  });
+</script>

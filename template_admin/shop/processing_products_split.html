@@ -1,0 +1,86 @@
+<div style="margin-left: 50px;">
+    <div style="margin-bottom: 10px;">
+        <span style="font-size:18px;">整转零售</span>
+        <span style="color:red;margin-left:30px;">{{$short_combin_info}}</span>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:15%;">sid</th>
+                <th style="width:30%;">名称</th>
+                <th style="width:8%;">单位</th>
+                <th>货位：库存：消耗数量</th>
+            </tr>
+        </thead>
+        <tbody id="combinProductsArea_Split" data-sid="{{$combin_infos_combin.sid}}">
+            <tr class="_j_product">
+                <td>{{$combin_infos_combin.sid}}</td>
+                <td>{{$combin_infos_combin.title}}</td>
+                <td>{{$combin_infos_combin.unit|default:'个'}}</td>
+                <td>
+                    {{if !empty($combin_infos_combin.locs)}}
+                        {{foreach $combin_infos_combin.locs as $l}}
+                        <p>
+                            {{$l.loc}}：{{$l.num}}：
+                            <input name="num" value="" data-lnum="{{$l.num}}" data-loc="{{$l.loc}}" style="width:30%; margin-right: 150px; float:right;">
+                        </p>
+                        {{/foreach}}
+                    {{else}}
+                        <p>无库存</p>
+                    {{/if}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <div style="margin-bottom: 10px;">
+        <span style="font-size:18px;">配件信息</span>
+    </div>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:15%;">sid</th>
+                <th style="width:30%;">名称</th>
+                <th style="width:8%;">单位</th>
+                <th>货位：库存</th>
+                <th>上架货位</th>
+            </tr>
+        </thead>
+        <tbody id="partProductsArea_Split">
+            {{foreach $combin_infos_parts as $sku}}
+            <tr class="_j_product">
+                <td>{{$sku.sid}}</td>
+                <td>{{$sku.title}}</td>
+                <td>{{$sku.unit|default:'个'}}</td>
+                <td>
+                    {{if !empty($sku.locs)}}
+                        {{foreach $sku.locs as $l}}
+                        <p>
+                            <span style="margin-left:5px;">{{$l.loc}}：{{$l.num}}</span>
+                        </p>
+                        {{/foreach}}
+                    {{else}}
+                        <p>无库存</p>
+                    {{/if}}
+                </td>
+                <td>
+                    {{if !empty($sku.locs)}}
+                        {{foreach $sku.locs as $l}}
+                        {{if $l@index == 0}}
+                        <input name="location" value="{{$l.loc}}" class="form-control" style="width:50%;" data-sid="{{$sku.sid}}">
+                        {{/if}}
+                        {{/foreach}}
+                    {{else}}
+                        <input name="location" value="" class="form-control" style="width:50%;" data-sid="{{$sku.sid}}">
+                    {{/if}}
+                </td>
+            </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+    
+    <a href="javascript:void(0);" id="confirmSplitProduct" class="btn btn-primary" style="float:right;">确认转换</a>
+</div>

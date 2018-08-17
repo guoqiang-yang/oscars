@@ -1,0 +1,93 @@
+<style>
+  h1 {font-family: STKaiti;}
+  table {font-size:14px; border-spacing: 0;border-collapse: collapse; }
+  table td {padding:5px 10px;}
+  table.border td {border:1px solid #333;}
+</style>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">金融贴息列表</h1>
+	
+	<form class="form-inline" role="form" action="">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:10px;">
+				<label>客户ID：</label>
+				<input style="width: 120px;" class="form-control" type="text" name="cid" value="{{if $search.cid}}{{$search.cid}}{{/if}}" style="margin-right: 20px;" placeholder="请输入客户id">
+			</div>
+            <div class="form-group" style="margin-right:10px;">
+                <label>订单ID：</label>
+                <input style="width: 120px;" class="form-control" type="text" name="oid" value="{{if $search.oid}}{{$search.oid}}{{/if}}" style="margin-right: 20px;" placeholder="请输入订单id">
+            </div>
+            <div class="form-group" style="margin-right:10px;">
+                <label>开始时间：</label>
+                <input class="form-control" type="text" name="start_date" value="{{if $search.start_date}}{{$search.start_date}}{{/if}}" style="margin-right: 20px;" placeholder="请输入开始时间">
+            </div>
+            <div class="form-group" style="margin-right:10px;">
+                <label>结束时间：</label>
+                <input class="form-control" type="text" name="end_date" value="{{if $search.end_date}}{{$search.end_date}}{{/if}}" style="margin-right: 20px;" placeholder="请输入结束时间">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+	</form>
+
+    <hr>
+    
+	{{if !empty($list)}}
+		<table class="table">
+			<thead>
+			<tr>
+				<th>id</th>
+				<th>客户id</th>
+				<th>客户</th>
+				<th>订单id</th>
+                <th>贷款金额</th>
+				<th>贷款时间</th>
+                <th>计息日期</th>
+                <th>贴息金额</th>
+				<th>应还日期</th>
+				<th>还款日期</th>
+			</tr>
+			</thead>
+			<tbody>
+			{{foreach $list as $item}}
+				<tr>
+					<td>{{$item.id}}</td>
+					<td>
+                        {{$item.cid}}
+					</td>
+					<td>
+                        {{$item._customer.name}}
+					</td>
+					<td>
+                        {{$item.oid}}
+                    </td>
+					<td>
+                        ￥{{$item.price / 100}}
+                    </td>
+                    <td>{{$item._history.ctime}}</td>
+                    <td>{{$item.day}}</td>
+					<td>￥{{$item.accrual / 1000}}</td>
+					<td>{{$item._history.due_date}}</td>
+                    <td>
+                        {{if $item._history.paid_time == '0000-00-00 00:00:00'}}
+                        --
+                        {{else}}
+                        {{$item._history.paid_time}}
+                        {{/if}}
+                    </td>
+				</tr>
+			{{/foreach}}
+			</tbody>
+		</table>
+        
+		<nav>
+			<ul class="pagination" style="margin:0;">
+				{{$pageHtml nofilter}}
+				<li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+			</ul>
+		</nav>
+	{{else}}
+		<span>无贴息列表！！</span>
+	{{/if}}
+</div>

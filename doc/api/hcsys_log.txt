@@ -1,0 +1,47 @@
+
+/////////////////////////////////
+        HC 日志
+////////////////////////////////
+
+>>> 后台日志
+
+    Table：t_admin_log_2017
+    API：
+        1 写日志
+            Admin_Common_Api::addAminLog
+            [必须参数]
+                obj_id          操作对象
+                obj_type        操作对象的类型
+                action_type     操作类型
+
+        2 读日志
+            Admin_Common_Api::fetchAdminLog
+    说明：
+        该日志主要针对被记录的对象（obj_id）存在主键的情况下使用
+        比如：客户，供应商，优惠券，第三方工人结算单，商品，sku，小区，入库单，采购单等等
+
+        现在系统有独立日志记录：订单日志，排线系统日志
+
+    使用：
+        1 配置文件
+            Conf_Admin_Log
+        2 使用
+            2.1 查看一下对象的类型是否存在，Conf_Admin_Log::OBJTYPE_XXXXXX（现在已经定义了11种）
+            2.1 配置操作类型 Conf_Admin_Log::$Action_Formats
+
+            【使用方法：同订单日志！】
+
+        3 在页面显示：
+            在需要显示日志的HTML页面加入下面代码：
+            data-objid      【必选】
+            data-objtype    【必选】
+
+            <div id="show_hccommon_admin_log" data-objid="{{$objid_xxx}}" data-objtype="{{$objtype_xxxx}}" data-actiontype="{{xxxx}}"></div>
+            
+            php文件：htdocs_admin/common/ajax/admin_log.php
+            js文件： htdocs_amin/js/footer.js
+            html文件：template_admin/common/aj_admin_log.html
+                     template_admin/tail/tail_page.html
+
+
+    【这是一个比较初级的日志，后续功能，还要大家一起努力！！】

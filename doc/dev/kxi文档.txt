@@ -1,0 +1,45 @@
+1、中间层服务介绍
+	DBMan: 数据库访问代理服务, 封装了分表分库操作、链接池管理等;
+	KProxy: 为WEB程序访问其他KXI服务提供代理, 保持与KXI服务的长连接;
+
+
+2、DBMan配置管理
+(1) 数据表配置
+	使用前，要对DBMan代理的数据库和数据表进行配置。表说明：
+	server_setting: 数据库服务实例配置, 每个数据库服务实例一条记录;
+	kind_setting: "逻辑表"配置, 每个"逻辑表"一条记录; 一个"逻辑表"可能拆分成多个"物理表"存储;
+	table_setting: "物理表"配置, 每个"物理表"一条记录; 一个"逻辑表"可能拆分成多个"物理表"存储;
+
+	当添加新表时, 需要在kind_setting, table_setting中增加相应配置。
+	添加新表的工具脚本:  {$kxi_base_path}/bin/add_table.php
+
+
+(2) 服务配置
+	配置文件 conf.dbman： 配置数据库地址账号密码, 数据连接数等;
+
+(3) 命令
+	启动: {$kxi_base_path}/bin/start_dbman.sh
+	重启: {$kxi_base_path}/bin/restart_dbman.sh
+
+
+3、KProxy配置管理
+(1) 被代理的服务配置
+	配置文件 list.kproxy
+
+(2) 服务配置
+	配置文件 conf.kproxy 配置服务配置文件地址, 报文大小等;
+
+(3) 命令
+	启动: {$kxi_base_path}/bin/start_proxy.sh
+
+
+4、PHP封装
+	类: Ms_DBMan (单例模式, 先获取实例句柄, 再通过实例句柄调用查询操作)
+	查询接口: sQuery($kind, $hintId, $sql, $cacheTime)， 接口参数
+				$kind - 表名;
+				$hintId - 分表编号;
+				$sql - 实际的sql语句(表名为kind名)
+				$cacheTime - kproxy缓存时间
+
+
+

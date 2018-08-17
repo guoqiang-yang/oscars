@@ -1,0 +1,150 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">
+        案例管理
+        <a style="margin-left: 50px;" href="/activity/edit_case.php" class="btn btn-success">添加案例</a>
+    </h1>
+	<form class="form-inline" role="form" action="">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>id：</label>
+				<input style="max-width:80px;" type="text" class="form-control" name="id" value="{{$search_conf.id}}">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>工长id：</label>
+				<input style="max-width:80px;" type="text" class="form-control" name="fid" value="{{$search_conf.fid}}">
+			</div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>风格：</label>
+                <select class="form-control" name="house_style" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.house_style)}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $house_style as $id => $name}}
+                    <option value="{{$id}}" {{if $search_conf.house_style==$id}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>城市：</label>
+                <select class="form-control" name="city_id" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.city_id)}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $city_list as $id => $name}}
+                    <option value="{{$id}}" {{if $search_conf.city_id==$id}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>户型：</label>
+                <select class="form-control" name="house_type" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.house_type)}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $house_type as $id => $name}}
+                    <option value="{{$id}}" {{if $search_conf.house_type==$id}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>空间：</label>
+                <select class="form-control" name="house_space" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.house_space)}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $house_space as $id => $name}}
+                    <option value="{{$id}}" {{if $search_conf.house_space==$id}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>面积：</label>
+                <select class="form-control" name="house_area" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.house_area)}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $house_area as $id => $name}}
+                    <option value="{{$id}}" {{if $search_conf.house_area==$id}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+		</div>
+	</form>
+    <div style="border-bottom: 1px inset #DDDDDD; clear: both; position: relative; height:25px;margin-bottom: 20px;">
+        <a href="{{$search_url}}&status=127"><span {{if $search_conf.status == 127}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>全部</span></a>
+        <a href="{{$search_url}}&status=0"><span {{if $search_conf.status == 0}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>上线</span></a>
+        <a href="{{$search_url}}&status=4"><span {{if $search_conf.status == 4}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>下线</span></a>
+        <a href="{{$search_url}}&status=1"><span {{if $search_conf.status == 1}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>删除</span></a>
+    </div>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>ID</th>
+			<th>关联工长</th>
+            <th>城市</th>
+			<th>风格</th>
+			<th>户型</th>
+			<th>空间</th>
+			<th>面积</th>
+            <th>首页权重</th>
+			<th>编写人</th>
+			<th>状态</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+		<tr>
+			<td>
+				{{$item.id}}
+			</td>
+			<td>
+                {{if $item.fid > 0}}
+				工长：<a href="/activity/edit_forman.php?id={{$item.forman.fid}}" target="_blank">{{$item.forman.fid}}</a><br />
+                CID： <a href="/crm2/customer_detail.php?cid={{$item.forman.cid}}" target="_blank">{{$item.forman.cid}}</a><br />
+				销售：{{$item.suser.name}}
+                {{else}}
+                无
+                {{/if}}
+			</td>
+            <td>
+                {{$item._city}}
+            </td>
+			<td>
+				{{$item._house_style}}
+			</td>
+			<td>
+                {{$item._house_type}}
+			</td>
+            <td>
+                {{$item._house_space}}
+            </td>
+			<td>
+				{{$item._house_area}}
+			</td>
+            <td>
+                {{$item.index_sortby}}
+            </td>
+			<td>
+				{{$item.suser.name}}<br />
+                {{$item.ctime}}
+			</td>
+            <td>
+                {{if $item.status == 0}}
+                上线
+                {{else if $item.status == 4}}
+                下线
+                {{else}}
+                删除
+                {{/if}}
+            </td>
+			<td>
+				<a href="/activity/edit_case.php?id={{$item.id}}">编辑</a>
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>

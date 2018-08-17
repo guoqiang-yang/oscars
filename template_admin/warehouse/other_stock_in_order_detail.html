@@ -1,0 +1,102 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{$type_list[$order.type]}}单详情</h1>
+
+	<form class="form-horizontal _j_in_order_form" id="_j_stock_shift_form" role="form">
+		<div class="form-group">
+			<label class="col-sm-2 control-label" style="padding-top: 0px;">仓库：</label>
+			<div class="col-md-4">
+				<span>{{$_warehouseList[$order.wid]}}</span>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label" style="padding-top: 0px;">类型：</label>
+			<div class="col-md-4">
+				<span>{{$type_list[$order.type]}}</span>
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label" style="padding-top: 0px;">状态：</label>
+            <div class="col-md-4">
+                <span style="color: #ff0000;font-size: 18px;">{{$step_list[$order.step]}}</span>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label" style="padding-top: 0px;">原因：</label>
+			<div class="col-md-4">
+				<span>{{$reason_list[$order.type][$order.reason]}}</span>
+			</div>
+		</div>
+        {{if $order.type == 2}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label" style="padding-top: 0px;">供货商：</label>
+            <div class="col-md-4">
+                <span>{{$order.supplier_id}}</span>
+            </div>
+        </div>
+        {{/if}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label" style="padding-top: 0px;">备注：</label>
+            <div class="col-md-4">
+                <span>{{$order.note}}</span>
+            </div>
+        </div>
+        {{if count($order.products) > 0}}
+        <div class="form-group">
+            <div class="col-sm-10 text-right" style="color: #FF0000">已添加：{{count($order.products)}}</div>
+        </div>
+        {{/if}}
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">商品清单：</label>
+            <div class="col-sm-8">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>sku_id</th>
+                        <th>名称</th>
+                        <th>商品属性</th>
+                        <th>类别</th>
+                        <th>成本</th>
+                        <th>总数量</th>
+                        <th>已上架数量</th>
+                        <th>货位</th>
+                    </tr>
+                    </thead>
+                    <tbody id="other_stock_out_product_area">
+                    {{foreach $order.products as $product}}
+                    <tr>
+                        <td>{{$product.sid}}</td>
+                        <td>{{$product.title}}</td>
+                        <td>{{$product.buy_type}}</td>
+                        <td>{{$product.cate_desc}}</td>
+                        <td>{{$product.cost/100}}元</td>
+                        <td>{{$product.num}}</td>
+                        <td>{{$product.shelved_num}}</td>
+                        <td>{{if !empty($product.from_location)}}{{$product.from_location}}{{else}}--{{/if}}</td>
+                    </tr>
+                    {{/foreach}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                {{if !empty($order.products) && ($order.step == 1 || $order.step == 2)}}
+                <a class="btn btn-primary change_other_stock_out_order" style="float: left; margin-right: 20px;" data-oid="{{$order.oid}}" data-exec-type="wait_audit" data-order-type="{{$order.order_type}}">提交审核</a>
+                {{/if}}
+                {{if $order.step == 3}}
+                {{if !empty($_permissions['hc_audit_other_stock_in_order'])}}
+                <a class="btn btn-primary change_other_stock_out_order" style="float: left; margin-right: 20px;" data-oid="{{$order.oid}}" data-exec-type="audit" data-order-type="{{$order.order_type}}">审核</a>
+                {{/if}}
+                {{if !empty($_permissions['hc_un_audit_other_stock_in_order'])}}
+                <a class="btn btn-primary change_other_stock_out_order" style="float: left; margin-right: 20px;" data-oid="{{$order.oid}}" data-exec-type="un_audit" data-order-type="{{$order.order_type}}">驳回</a>
+                {{/if}}
+                {{elseif $order.step == 4 || $order.step == 5}}
+                <a href="/warehouse/other_stock_in_shelved_detail.php?oid={{$order.oid}}" class="btn btn-primary" style="margin-right:20px;background-color:darkblue;" target="_blank">上架</a>
+                {{/if}}
+            </div>
+        </div>
+    </form>
+
+</div>

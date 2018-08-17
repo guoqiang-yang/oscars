@@ -1,0 +1,168 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if empty($order.oid)}}添加{{else}}编辑{{/if}}其他出库单</h1>
+
+	<form class="form-horizontal _j_in_order_form" id="_j_stock_shift_form" role="form">
+		<div class="form-group">
+			<label class="col-sm-2 control-label">仓库：</label>
+			<div class="col-sm-2">
+				<select class="form-control" name="out_wid" {{if !empty($order.oid)}}disabled{{/if}}>
+					<option value="0" selected="selected">全部</option>
+					{{foreach $_warehouseList as $_wid=>$_wname}}
+					<option value="{{$_wid}}" {{if $_wid==$order.wid}}selected="selected"{{/if}}>{{$_wname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">类型：</label>
+			<div class="col-sm-2">
+				<select class="form-control" name="type" id="other_stock_out_order_type" data-order-type="1" {{if !empty($order.oid)}}disabled{{/if}}>
+					{{foreach $type_list as $_type=>$_tname}}
+					<option value="{{$_type}}" {{if $_type==$order.type}}selected="selected"{{/if}}>{{$_tname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">原因：</label>
+			<div class="col-sm-2">
+				<select class="form-control" name="reason" id="other_stock_out_order_reason" {{if $order.step >= 3}}disabled{{/if}}>
+					{{foreach $type_list as $_type => $_tname}}
+					{{foreach $reason_list[$_type] as $_rid=>$_rname}}
+					<option value="{{$_rid}}" data-type="{{$_type}}" {{if $order.type == $_type && $_rid==$order.reason}}selected="selected"{{/if}} {{if empty($order.oid) && $n >= 2}}style="display: none"{{/if}}{{$n++}}>{{$_rname}}</option>
+					{{/foreach}}
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group" {{if empty($order.oid) || $order.type == 1}}style="display: none;"{{/if}} id="other_stock_out_supplier_area">
+			<label class="col-sm-2 control-label">供货商：</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control" name="sid" value="{{$order.supplier_id}}" disabled>
+			</div>
+            {{if $order.step < 3}}
+			<a class="btn btn-default" id="_j_show_supplier_list">选择供应商</a>
+            {{/if}}
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">备注：</label>
+			<div class="col-sm-4">
+				<textarea name="note" class="form-control" cols="30" rows="10" placeholder="备注为必填项！" {{if $order.step >= 3}}disabled{{/if}}>{{$order.note}}</textarea>
+			</div>
+		</div>
+        {{if count($order.products) > 0}}
+        <div class="form-group">
+            <div class="col-sm-10 text-right" style="color: #FF0000">已添加：{{count($order.products)}}</div>
+        </div>
+        {{/if}}
+        {{if !empty($order.oid)}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">商品清单：</label>
+            <div class="col-sm-9">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>sku_id</th>
+                        <th>名称</th>
+                        <th>类别</th>
+                        <th>数量</th>
+                        <th>出库货位：数量</th>
+                        <th>备注</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="other_stock_out_product_area">
+                    {{foreach $order.products as $product}}
+                    <tr>
+                        <td>{{$product.sid}}</td>
+                        <td>{{$product.title}}</td>
+                        <td>{{$product.cate_desc}}</td>
+                        <td>{{$product.num}}</td>
+                        <td>
+                            {{if isset($product._from_location)}}
+                            {{foreach $order.loc_list[$product.sid] as $_loc => $_num}}
+                                <span style="color:red;">
+                                    {{$_loc}}：<input type="text" name="loc_num" style="width: 80px; line-height: 15px;
+                                     margin-top: 5px" value="{{$product['_from_location'][$_loc]['num']}}"
+                                     data-sid="{{$product.sid}}" data-loc="{{$_loc}}" data-loc-num="{{$_num}}"{{if $order.step == 3}}disabled{{/if}}> (库存: {{$_num}})
+                                </span><br>
+                            {{/foreach}}
+                            {{else}}
+                            --
+                            {{/if}}
+                        </td>
+                        <td><input type="text" name="note" value="{{$product.note}}" style="width: 120px; text-align: center;"></td>
+                        <td>
+                            {{if $order.step < 3}}
+                            <a href="javascript:;" class="_j_del_other_stock_out_product" data-oid="{{$order.oid}}" data-sid="{{$product.sid}}">删除</a>
+                            {{else}}
+                            --
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/foreach}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{/if}}
+	</form>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            {{if $order.step != 3}}
+            <button type="button" class="btn btn-primary" id="save_other_stock_out_order" data-oid="{{$order.oid}}" data-order-type="1">保存</button>
+            {{/if}}
+            {{if !empty($order.oid) && $order.step < 3}}
+            {{*<button type="button" class="btn btn-default" id="_j_show_shift_product" data-type="other_stock_out_order" style="margin-left:16px;">添加商品</button>*}}
+            <button type="button" class="btn btn-default" id="show_product_common" data-objid="{{$order.oid}}" data-objtype="2" style="margin-left:16px;">添加商品</button>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="dlgSupplierList" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">
+                    选择供应商 </h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="placeholder">
+
+                    <div class="form-group" style="margin-right:20px; display: inline;">
+                        <input type="text" class="form-control" name="keyword" value="{{$search_conf.keyword}}" placeholder="公司/联系人/电话" style="width:60%; display: inline;">
+                    </div>
+                    <button type="button" class="btn btn-primary _j_order_search_supplier">搜索</button>
+                </div>
+                <hr>
+                <div id="supplier_list_area">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dlgShiftStock" data-oid="{{$order.oid}}" data-order-type="1" role="dialog">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			{{*include "warehouse/block_stock_shift.html"*}}
+		</div>
+	</div>
+</div>
+
+{{include "common/block_add_product_for_stock.html"}}
+<script>
+    $('document').ready(function(){
+        var params = ['sid', 'num'];
+        add_product_dlg.init(params);
+    });
+</script>

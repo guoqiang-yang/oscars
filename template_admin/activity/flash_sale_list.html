@@ -1,0 +1,76 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        商品列表
+    </h1>
+    <a href="/activity/search_product.php?fid={{$fid}}&url=/activity/add_flash_sale.php" class="btn btn-primary">添加商品</a>
+    <div style="float:right;">
+        <a type="button" style="margin-left:20px;" class="btn btn-default" href='/activity/flash_activity_list.php' >返回>>></a>
+    </div>
+</div>
+<div class="col-sm-9 col-sm-offset-2 col-md-10 main">
+<table class="table table-bordered " style="background: white; text-align: center;">
+    <thead style="background-color: #898989;color: white;font-size: 16px;">
+    <tr style="text-align: center">
+        <th style="text-align: center">序号</th>
+        <th style="text-align: center">商品图片</th>
+        <th style="text-align: center">商品名称</th>
+        <th style="text-align: center">商品规格</th>
+        <th style="text-align: center">活动平台</th>
+        <th style="text-align: center;width: 200px;">在线时间</th>
+        <th style="text-align: center">商品原价</th>
+        <th style="text-align: center">商品活动价</th>
+        <th style="text-align: center">状态</th>
+        <th style="text-align: center;width:20px;">排序</th>
+        <th style="text-align: center">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $list as $id => $item}}
+    <tr>
+        <td style="vertical-align: middle;">{{$item.id}}</td>
+        <td style="vertical-align: middle;"><img src="{{if empty($item.cover)}}/i/nopic100.jpg {{else}} {{$item.cover}} {{/if}}" style="width: 80px"/></td>
+        <td style="vertical-align: middle;">{{$item.p_name}}</td>
+        <td style="vertical-align: middle;">{{$item.package}}</td>
+        <td style="vertical-align: middle;">{{$item.platform}}</td>
+        <td style="vertical-align: middle;">{{$item.start_time}}~{{$item.end_time}}</td>
+        <td style="vertical-align: middle;">&yen;{{$item.o_price/100}}</td>
+        <td style="vertical-align: middle;">&yen;{{$item.sale_price/100}}</td>
+        <td style="vertical-align: middle;">
+            {{if $item.end_time <= $date}}
+            <span style="color: #ff0000;">已结束</span>
+            {{else if $item.start_time >= $date}}
+            <span>待上线</span>
+            {{else if $item.start_time < $date && $item.end_time > $date}}
+            {{if $item.online == 0}}
+            <span style="color: #6ad346;">在线</span>
+            {{else if $item.online == 1}}
+            <span style="color: #ff0000;">已下架</span>
+            {{/if}}
+            {{/if}}
+        </td>
+        <td style="vertical-align: middle;">
+                <input style="width: 50px; text-align: center;" type="text" id="data-{{$item.id}}" value="{{$item.sort}}"/>
+                <button style="width: 50px; margin-top: 5px;" class="sale_sort" data-id="{{$item.id}}">更改</button>
+        </td>
+        <td style="vertical-align: middle;">
+            <a href="/activity/add_flash_sale.php?id={{$item.id}}&pid={{$item.pid}}">编辑</a><br/>
+            {{if ($item.online == 1 || $item.start_time >= $date) && $item.end_time > $date}}
+            <a class="action" data-id="{{$item.id}}" method="up" href="javascript:;">上架</a><br/>
+            {{else if $item.online == 0 && ($date > $item.start_time && $date < $item.end_time)}}
+            <a class="action" data-id="{{$item.id}}" method="down" href="javascript:;">下架</a><br/>
+            {{/if}}
+        </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+        </ul>
+    </nav>
+
+</div>

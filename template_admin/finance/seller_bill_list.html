@@ -1,0 +1,94 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">商家结算列表</h1>
+
+    <form class="form-inline" role="form" action="/finance/seller_bill_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>结算单ID：</label>
+                <input type="text" class="form-control" name="bid" value="{{$search_conf.bid}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>商家：</label>
+                <select name="wid" class="form-control">
+                    <option value="0">请选择</option>
+                    {{foreach $warehouse as $wid => $name}}
+                    <option value="{{$wid}}"{{if $search_conf.wid == $wid}} selected{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button style="margin-left: 50px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width:7%;">ID</th>
+            <th style="width:18%;">结算日期</th>
+            <th style="width:10%;">经销商</th>
+            <th style="width:10%;">订单总金额</th>
+            <th style="width:10%;">退款总金额</th>
+            <th style="width:10%;">结算金额</th>
+            <th style="width:10%;">状态</th>
+            <th style="width:10%;">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $bill_list as $item}}
+        <tr>
+            <td>{{$item.bid}}</td>
+            <td>{{$item.balance_date_start}}／{{$item.balance_date_end}}</td>
+            <td>
+                {{$warehouse[$item.wid]}}
+            </td>
+            <td>{{$item.order_amount/100}}</td>
+            <td>{{$item.refund_amount/100}}</td>
+            <td>{{$item.bill_amount/100}}</td>
+            <td>
+                {{if $item.step == 1}}未结算
+                {{else}}
+                已结算（{{$payment_list[$item.payment_type]}}）<br>
+                <span style='color:gray;font-size:12px;'>{{$item.pay_time}}</span>
+                {{/if}}
+            </td>
+            <td>
+                {{if $item.step == 1 && !empty($_permissions['/finance/ajax/seller_bill'])}}
+                <a href="javascript:;" class="_j_finance_seller_bill" style="margin-right: 10px;" data-bid="{{$item.bid}}">结算</a>
+                {{/if}}
+                {{if !empty($_permissions['/finance/seller_bill_detail'])}}
+                <a href="/finance/seller_bill_detail.php?bid={{$item.bid}}" style="margin-right: 10px;" target="_blank">查看</a>
+                {{/if}}
+                {{if !empty($_permissions['/finance/ajax/seller_bill_download'])}}
+                <br>
+                <a href="/finance/ajax/seller_bill_download.php?bid={{$item.bid}}" style="margin-right: 10px;" target="_blank">下载明细</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="sellerBillModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">商家结算</h4>
+            </div>
+            <div class="modal-body" id="sellerBillModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="_j_finance_seller_bill_submit">结算</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>

@@ -1,0 +1,16 @@
+1、在mysql5.6版本之前，fulltext只能用在myisam表上不能用在innodb上；
+
+2、由于MySQL默认的ft_min_word_len是4，也就是说小于4个字符在fulltext上是没有搜索结果的，所以需要把
+   ft_min_word_len修改为1。修改方法为：在my.conf中添加ft_min_word_len=1，然后重启mysql；
+
+3、全文搜索将忽略"常见的"单词，而"常见"在这里的含义是"至少在一半的数据行里出现过"。
+   千万不要忘记这个特点，尤其是在你准备对数据表进行全文搜索测试时。你至少要在测试数据表里插入3个数据行。
+   如果那个数据表只有一个或两个数据行，它里面的每个单词将至少有50%的出现几率，
+   所以对它进行全文搜索将不会有任何结果。
+   可用的一种解决方案是：
+   select * from table_name WHERE MATCH (filed_1,filed_2) AGAINST ('+keyword_1 -keyword_2' IN BOOLEAN MODE);
+   然后keword_1是你要搜索的词，keyword_2是一个不可能出现在表中的词，例如“囧”；
+
+4、对于中文的处理，可以使用将汉字用空格分隔，然后将搜索词也用空格分隔的方式进行匹配搜索；
+
+5、MATCH (field) AGAINST (search_str)结果是一个匹配度，可以根据这个值的大小排序；

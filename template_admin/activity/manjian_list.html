@@ -1,0 +1,82 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		满减活动配置
+	</h1>
+
+	<a href="/activity/update_manjian.php" class="btn btn-primary">新增配置</a>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>id</th>
+			<th>开始时间</th>
+			<th>结束时间</th>
+			<th>满减配置</th>
+			<th>包含砂石</th>
+			<th>余额可用</th>
+			<th>状态</th>
+			<th>录入人</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+			<tr>
+				<td>
+					{{$item.id}}
+				</td>
+				<td>
+					{{$item.stime}}
+				</td>
+				<td>
+					{{$item.etime}}
+				</td>
+				<td>
+					{{foreach $item.conf as $price => $privilege}}
+						满{{$price}}元 减 {{$privilege}}元<br />
+					{{/foreach}}
+				</td>
+				<td>
+					{{if $item.is_sand}}
+					<span style="color: #00CC33;">Y</span>
+					{{else}}
+					<span style="color: #C71A2A;">N</span>
+					{{/if}}
+				</td>
+				<td>
+					{{if $item.is_vip}}
+					<span style="color: #00CC33;">Y</span>
+					{{else}}
+					<span style="color: #C71A2A;">N</span>
+					{{/if}}
+				</td>
+				<td>
+					{{if $item.status == 0}}
+					<span style="color: #00CC33;">上线</span>
+					{{else}}
+					<span style="color: #C71A2A;">下线</span>
+					{{/if}}
+				</td>
+				<td>
+					{{$item._suser}}
+				</td>
+				<td>
+					<a style="margin-right: 20px;" href="/activity/update_manjian.php?id={{$item.id}}">修改</a>
+				</td>
+			</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li>
+				<a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+			</li>
+		</ul>
+	</nav>
+</div>

@@ -1,0 +1,187 @@
+<style>
+    .modal-body{
+        text-align: center;
+    }
+</style>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        审核-财务
+    </h1>
+
+    <form class="form-inline" role="form" action="/finance/check_statement.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:10px;">
+                <label>创建时间：</label>
+                <input style="width: 180px;" type="date" class="form-control" name="start_ctime" value="{{$search_conf.start_ctime}}">
+                &nbsp; - &nbsp;
+                <input style="width: 180px;" type="date" class="form-control" name="end_ctime" value="{{$search_conf.end_ctime}}">
+            </div>
+            <div class="form-group" style="margin-right:10px;">
+                <label>结算时间：</label>
+                <input style="width: 180px;" type="date" class="form-control" name="start_pay_time" value="{{$search_conf.start_pay_time}}">
+                &nbsp; - &nbsp;
+                <input style="width: 180px;" type="date" class="form-control" name="end_pay_time" value="{{$search_conf.end_pay_time}}">
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>结算单号：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="id" value="{{$search_conf.id}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>批次号：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="batch" value="{{$search_conf.batch}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>工人ID：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="cuid" value="{{$search_conf.cuid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>工人类型：</label>
+                <select class="form-control" name="user_type" {{if $_user['user_type']}}disabled="true"{{/if}}>
+                {{foreach $user_types as $id => $type}}
+                <option value="{{$id}}" {{if $search_conf.user_type==$id}}selected="selected"{{/if}}>{{$type}}</option>
+                {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>仓库：</label>
+                <select class="form-control" name="wid">
+                    <option value="0" {{if $search_conf.step==$step}}selected="selected"{{/if}}>请选择</option>
+                    {{foreach $warehouse_list as $wid => $name}}
+                    <option value="{{$wid}}" {{if $search_conf.wid==$wid}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>结算状态：</label>
+                <select class="form-control" name="step">
+                    <option value="" {{if $search_conf.step==$step}}selected="selected"{{/if}}>请选择</option>
+                    {{foreach $step_list as $step => $name}}
+                    <option value="{{$step}}" {{if $search_conf.step==$step}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:10px;">查询</button>
+            {{if $statement_list && ($search_conf.step == 4 || ($search_conf.step == 5 && $search_conf.batch))}}
+            {{if !empty($_permissions['/order/download_statement'])}}
+            <button type="button" class="btn btn-primary" id="statement_output" style="margin-left:10px;">导出</button>
+            {{/if}}
+            {{/if}}
+        </div>
+    </form>
+
+    <hr>
+
+    <table class="table" style="text-align: center">
+        <thead>
+            <tr>
+                <th style="width:15%; text-align: center">
+                    <label><input type="checkbox" id="statement_select_all">&nbsp;&nbsp;&nbsp;结算单号</label>
+                </th>
+                <th style="width:5%; text-align: center">批次</th>
+                <th style="width:10%; text-align: center">仓库</th>
+                <th style="width:10%; text-align: center">司机信息</th>
+                <th style="width:10%; text-align: center">应付总额</th>
+                <th style="width:10%; text-align: center">结算单状态</th>
+                <th style="width:10%; text-align: center">创建人</th>
+                <th style="width:10%; text-align: center">确认人</th>
+                <th style="width:10%; text-align: center">审核人</th>
+                <th style="width:10%; text-align: center">操作</th>
+            </tr>
+        </thead>
+        <tbody id="statement_area">
+            {{foreach $statement_list as $statement}}
+                <tr>
+                    <td>
+                        <label><input type="checkbox" name="bluk_pay" value="{{$statement.id}}" data-price="{{$statement.price/100}}"> {{$statement.id}}</label>
+                    </td>
+                    <td>{{if $statement.batch}}{{$statement.batch}}{{/if}}</td>
+                    <td>{{$warehouse_list[$statement.wid]}}</td>
+                    {{if $statement['user_type'] == 1}}
+                    <td>
+                        {{$driver_list[$statement['cuid']]['name']}}<br/>
+                        (ID:{{$statement.cuid}})<br/>
+                        {{$driver_list[$statement['cuid']]['mobile']}}<br/>
+                        来源: {{$source_list[$driver_list[$statement['cuid']]['source']]}}
+                    </td>
+                    {{elseif $statement['user_type'] == 2}}
+                    <td>
+                        {{$carrier_list[$statement['cuid']]['name']}}<br/>
+                        (ID:{{$statement.cuid}})<br/>
+                    </td>
+                    {{/if}}
+                    <td>{{$statement.price/100}} 元</td>
+                    <td>
+                        {{$statement_steps[$statement.step]}}
+                    </td>
+                    <td>{{$staff_list[$statement.suid]}}</td>
+                    <td>{{$staff_list[$statement.sure_suid]}}</td>
+                    <td>{{$staff_list[$statement.check_suid]}}</td>
+                    <td>
+                        {{if !empty($_permissions['/order/statement_detail'])}}
+                        <a href="statement_detail.php?statement_id={{$statement.id}}&user_type={{$statement.user_type}}" target="_blank">详情</a>&nbsp;
+                        {{/if}}
+                        {{if $statement.step == 2 && $search_conf.step == 2}}
+                        {{if !empty($_permissions['/order/ajax/check_statement'])}}
+                        <a class="check_statement_detail" data-id="{{$statement.id}}" href="javascript:void(0)">审核</a>&nbsp;
+                        {{/if}}
+                        {{/if}}
+                    </td>
+                </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+    <div>
+        {{if $statement_list}}
+        {{if !empty($_permissions['/order/print_statement_finance'])}}
+        <a href="javascript:void(0);" class="btn btn-primary" id="print_statement_finance" style="float:right;margin-left:20px;">打印</a>
+        {{/if}}
+        {{if $search_conf.batch && $search_conf.step == 4}}
+        {{if !empty($_permissions['hc_order_paid_coopworker'])}}
+        <a href="javascript:void(0);" class="btn btn-primary pay_statement" style="float:right;margin-left:20px;">结算</a>
+        <div style="width:20%; float:right;margin-left:20px;">
+            <select class="form-control" id="_j_bulk_payment_type">
+                <option value="0">请选择支付类型</option>
+                {{foreach $coopworker_payment_types as $payid=>$payname}}
+                <option value="{{$payid}}" {{if $payment_df==$payid}} selected="selected"{{/if}}>{{$payname}}</option>
+                {{/foreach}}
+                {{foreach $bank_desc as $payid=>$payname}}
+                <option value="{{$payid}}" {{if $payment_df==$payid}} selected="selected"{{/if}}>{{$payname}}</option>
+                {{/foreach}}
+            </select>
+        </div>
+        {{/if}}
+        {{/if}}
+        {{/if}}
+    </div>
+    <div class="modal fade _j_dialog" id="contentDetail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">{{if $search_conf.step == 2}}司机结算详情{{elseif $search_conf.step == 4}}提示{{/if}}</h4>
+                </div>
+                <div class="modal-body">{{if $search_conf.step == 4}}<span style="font-size: 18px;">是否生成批次号{{elseif $search_conf.step == 5 && $search_conf.batch}}是否导出结算单{{/if}}</span></div>
+                <div class="modal-footer">
+                    {{if $search_conf.step == 2}}
+                    <button type="button" class="btn btn-default" id="check_statement" data-id="">审核</button>
+                    {{elseif $search_conf.step == 4}}
+                    {{if !empty($_permissions['/order/ajax/generate_batch'])}}
+                    <button type="button" class="btn btn-default" id="generate_batch" data-id="">生成批次号</button>
+                    {{/if}}
+                    {{/if}}
+                    {{if $search_conf.step == 2}}
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    {{elseif $search_conf.step == 4}}
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="cancel_generate_batch">取消</button>
+                    {{elseif $search_conf.step == 5 && $search_conf.batch}}
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="cancel_generate_batch">导出</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

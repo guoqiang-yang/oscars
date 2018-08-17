@@ -1,0 +1,73 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if $info.id}}编辑{{else}}添加{{/if}}满减配置</h1>
+
+	<form class="form-horizontal" role="form">
+		<input type="hidden" id="referer" value="{{$referer}}"/>
+
+		{{if $info.id}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">ID：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="id" value="{{$info.id}}" readonly="true">
+			</div>
+		</div>
+		{{/if}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">开始时间：</label>
+			<div class="col-sm-4">
+				<input type="text" placeholder="1970-01-01 00:00:00" class="form-control" id="stime" value="{{$info.stime}}" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">结束时间：</label>
+			<div class="col-sm-4">
+				<input type="text" placeholder="2016-01-01 00:00:00" class="form-control" id="etime" value="{{$info.etime}}" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">是否包含砂石类：</label>
+			<div class="col-sm-4">
+				<input type="radio" {{if $info.is_sand == 1}}checked="checked"{{/if}} class="radio-inline" name="is_sand" value="1"> 包含
+				<input type="radio" {{if $info.is_sand == 0}}checked="checked"{{/if}}class="radio-inline" name="is_sand" value="0"> 不包含
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">余额账户能否参加：</label>
+			<div class="col-sm-4">
+				<input type="radio" {{if $info.is_vip == 1}}checked="checked"{{/if}} class="radio-inline" name="is_vip" value="1" /> 可参加
+				<input type="radio" {{if $info.is_vip == 0}}checked="checked"{{/if}} class="radio-inline" name="is_vip" value="0" /> 不可参加
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">在线状态：</label>
+			<div class="col-sm-4">
+				<input type="radio" {{if $info.status == 0}}checked="checked"{{/if}} class="radio-inline" name="status" value="0" /> 上线
+				<input type="radio" {{if $info.status == 4}}checked="checked"{{/if}} class="radio-inline" name="status" value="4" /> 下线
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">满减配置：</label>
+			<div class="col-sm-4">
+				<textarea rows="8" class="form-control" id="conf">
+					{{$info.conf}}
+				</textarea>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">配置说明：</label>
+			<div class="col-sm-4">
+				例如：满2000减50；满1000减20配置如下：（以此类推）<br />
+				2000:50<br />
+				1000:20<br />
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="button" class="btn btn-primary" id="save_manjian" style="margin-right:20px;">保存</button>
+			</div>
+		</div>
+
+	</form>
+
+</div>

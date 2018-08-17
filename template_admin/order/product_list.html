@@ -1,0 +1,120 @@
+<div style="background: #eee; padding: 10px 0; margin: 10px 0;">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">销售清单：</label>
+        <div class="col-sm-8">
+            
+            {{if !empty($show_city)}}
+            <span class="text-value" style="color:red;font-size:12px;">
+                <span style="margin-right: 50px;">商品：{{$show_city['p']}}</span>
+                <span>订单：{{$show_city['o']}}</span>
+            </span>
+            {{/if}}
+        </div>
+    </div>
+	<div class="form-group">
+		<label class="col-sm-1 control-label">
+        </label>
+		<div class="col-sm-10">
+			<div class="form-horizontal" role="form">
+				<input type="hidden" class="form-control" name="oid" value="{{if !$copy}}{{$order.oid}}{{/if}}">
+				<div class="form-group">
+					<table class="table">
+						<thead>
+						<tr>
+                            {{if $order.step < 2 && !empty($_permissions['/order/edit_order'])}}
+							<th><input class="select_all_del_products" type="checkbox"></th>
+                            {{/if}}
+							<th>id</th>
+							<th>名称</th>
+							<th>类别</th>
+							<th>总数</th>
+							<th>单价/总价</th>
+							<th>库存/占用</th>
+							<th>备注</th>
+							{{if $order.step < 2}}
+							<th>操作</th>
+							{{/if}}
+						</tr>
+						</thead>
+						<tbody>
+						{{foreach $order_products as $productItem}}
+                        {{if $productItem.num > 0}}
+						<tr class="_j_product" data-pid="{{$productItem.pid}}">
+                            {{if $order.step<2 && !empty($_permissions['/order/edit_order'])}}
+							<td><input type="checkbox" name="select_bulk_del_products"></td>
+                            {{/if}}
+							<td>
+								{{$productItem.product.pid}}
+							</td>
+							<td>
+								<a href="/shop/product_search.php?keyword={{$productItem.product.pid}}" target="_blank">{{$productItem.sku.title}}</a>
+							</td>
+							<td>
+								{{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}
+                                <br><span style="color:gray;font-size:12px;">【{{$all_citys[$productItem['city_id']]}}】</span>
+							</td>
+							<td>
+								<input style="width: 60px; text-align: center;" id="product_num_{{$productItem.product.pid}}" type="text" class="product_num" value="{{$productItem.num}}" {{if $productItem.tmp_inorder_num!=0}} disabled=true{{/if}}/>
+                                {{if $productItem.tmp_inorder_num!=0}}<br><span style="color:red;font-size:10px;">已临采，不能改数量</span>{{/if}}
+							</td>
+							<td>
+								￥{{$productItem.price / 100}}／{{$productItem.num * $productItem.price / 100}}
+							</td>
+							<td>
+								{{if $productItem.product.buy_type == 1}}
+								{{if isset($stocks_list[$productItem.product.sid])}}
+								{{$stock=$stocks_list[$productItem.product.sid]}}
+								{{if $stock.num<1 || $stock.occupied<0 || ($stock.num-$stock.occupied)<$productItem.num}}
+								<span style="color: red;">{{$stocks_list[$productItem.product.sid].num}}&nbsp;/&nbsp;{{$stocks_list[$productItem.product.sid].occupied}}</span>
+								{{else}}
+								<span>{{$stocks_list[$productItem.product.sid].num}}&nbsp;/&nbsp;{{$stocks_list[$productItem.product.sid].occupied}}</span>
+								{{/if}}
+								{{else}}
+								<span style="color: red;">0&nbsp;/&nbsp;0</span>
+								{{/if}}
+								{{else}}
+								<span>临采</span>
+								{{/if}}
+							</td>
+							<td>
+								{{if $productItem.vnum}}k#{{$productItem.vnum}}　{{/if}}<input style="width: 100px; text-align: center;" id="product_note_{{$productItem.product.pid}}" type="text" class="product_note" value="{{$productItem.note}}"/>
+							</td>
+							{{if $order.step < 2}}
+							<td>
+                                {{if !empty($_permissions['/order/edit_order'])}}
+								<a style="margin-right: 20px;" href="javascript:void(0);" class="change_product_num" data-oid="{{$order.oid}}" data-pid="{{$productItem.product.pid}}" >保存</a>
+								{{/if}}
+                                {{if !empty($_permissions['/order/edit_order'])}}
+                                <a href="javascript:void(0);" class="_j_del_order_product">删除</a>　
+                                {{/if}}
+							</td>
+							{{/if}}
+						</tr>
+                        {{/if}}
+						{{/foreach}}
+						{{if !empty($order_products) && $order.step < 2 && !empty($_permissions['/order/edit_order'])}}
+						<tr>
+							<td colspan="9">
+                                <a class="btn btn-default select_invert_del_products">反选</a>
+                                <a id="bulk_del_order_products" class="btn btn-primary" style="margin-left: 20px;">删除</a>
+                            </td>
+						</tr>
+						{{/if}}
+						{{if count($order_products)>0}}
+						<tr>
+							<td></td>
+							<td>价格汇总:</td>
+							<td>￥<span id="product_total_price">{{($order.price-$activity_products_amount)/100}}</span></td>
+							<td style="color: #9B0D62;" colspan="1">砂石类：￥{{$sand_price}}</td>
+							<td style="color: #062784;" colspan="1">非砂石类：￥{{$other_price}}</td>
+							<td colspan="6"></td>
+						</tr>
+						{{/if}}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="order_activity_products_list"></div>

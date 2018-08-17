@@ -1,0 +1,16 @@
+<div style="float: left; width: 20%;font-size:20px;color:red; text-align:center; border-right: 1px solid black">
+    <img src="http://haocaisong.oss-cn-hangzhou.aliyuncs.com/common/priority_case.jpg" style=""><br/>
+    <span style="font-size: 14px;">代号注释：</span><br/>
+    <span style="font-size: 14px;"> 0=普通订单  1=VIP订单</span><br/>
+    <span style="font-size: 14px;">2=付款订单  3=首次下单</span>
+</div>
+
+<div style="float: left; width: 80%; font-size: 14px;">
+    <div style="float: left;width:100%;text-indent: 5px;font-size: 16px;">可用车辆/总量</div>
+    {{foreach $drivers as $d}}
+    <div style="width:25%;float:left;padding-left: 5px;">
+        <label>{{$car_models[$d.car_model]}}：</label>
+        <span class="text-value"><span style="color:red;">{{$d.av_num}}</span>/{{$d.total}}</span>
+    </div>
+    {{/foreach}}
+</div>

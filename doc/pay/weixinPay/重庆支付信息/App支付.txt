@@ -1,0 +1,8 @@
+开放平台
+账号：chongqinghaocai@haocaisong.cn
+密码：chongqing_hc_
+APPID：wx5c512a5c6be52bba
+
+支付平台
+商户号：1501702341
+支付秘钥：45a838097d9ed179186e0947ad186137

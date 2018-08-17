@@ -1,0 +1,95 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">优惠券详情</h1>
+	<table class="table">
+		<thead>
+		<tr>
+			<td style="width: 300px;text-align: right;">优惠券id：</td>
+            <td>{{$info.id}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">优惠券名：</td>
+            <td>{{$info.title}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">优惠券类型：</td>
+            <td>{{$coupon_type_list[$info.coupon_type]}}</td>
+        </tr>
+        {{if $info.coupon_type != 3}}
+        <tr>
+            <td style="width: 300px;text-align: right;">是否共享：</td>
+            <td>
+                {{if empty($info.type_ids)}}
+                不共享
+                {{else}}
+                {{foreach $info.type_ids as $type_id}}
+                {{$type_list[$type_id]}}、
+                {{/foreach}}
+                {{/if}}
+            </td>
+        </tr>
+        {{/if}}
+        <tr>
+			<td style="width: 300px;text-align: right;">有效期：</td>
+            <td>
+                {{if $info.validity_type == 1}}
+                [始]{{$info.validity_stime}}<br>[终]{{$info.validity_etime}}
+                {{else}}
+                {{$info.validity_extand}}日之内可用
+                {{/if}}
+            </td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">额度配置：</td>
+            <td>
+                {{if $info.coupon_type != 3}}
+                {{foreach $info.conf2 as $key => $value}}
+                满{{$key}}元 减 {{$value}}元
+                {{/foreach}}
+                {{else}}
+                最高减{{$info.conf}}元
+                {{/if}}
+            </td>
+        </tr>
+        {{if $info.coupon_type != 3}}
+        <tr>
+			<td style="width: 300px;text-align: right;">可否和满减活动叠加：</td>
+            <td>{{$str_list[$info.contain_manjian]}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">是否包含砂石/砖/水泥：</td>
+            <td>{{$str_list[$info.contain_sand]}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">是否包含美巢产品：</td>
+            <td>{{$str_list[$info.contain_meichao]}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">是否包含特价商品：</td>
+            <td>{{$str_list[$info.contain_special]}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">是否包含热卖商品：</td>
+            <td>{{$str_list[$info.contain_hot]}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">商品白名单：</td>
+            <td style="word-break: break-all;">{{$info.goods_whitelist}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">商品黑名单：</td>
+            <td style="word-break: break-all;">{{$info.goods_blacklist}}</td>
+        </tr>
+        {{/if}}
+        <tr>
+			<td style="width: 300px;text-align: right;">活动说明：</td>
+            <td>{{$info.coupon_content}}</td>
+		</tr>
+		</thead>
+	</table>
+</div>
+<div id="show_hccommon_admin_log" data-objid="{{$info.id}}" data-objtype="3"></div>
+<script type="text/javascript">
+    $(function () {
+
+    });
+</script>

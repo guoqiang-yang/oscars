@@ -1,0 +1,471 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">
+      客户列表
+      {{if !empty($_permissions["/crm2/download"])}}
+      {{*<a href="/crm2/download.php?{{$query}}" class="btn btn-success" id="btn_download" style="margin-left:50px;">下载</a>*}}
+      {{if !$_hide_useless && !empty($_permissions["/crm2/download2"])}}
+      <a href="/crm2/download2.php" class="btn btn-success" style="margin-left:50px;">下载无账期用户欠款信息</a>
+      {{/if}}
+	  {{/if}}
+  </h1>
+
+  <form id="search_form" class="form-inline" role="form" action="/crm2/customer_list.php">
+
+    <div class="placeholder">
+        <div class="form-group" style="margin-right:30px;">
+        <label>客户类型：</label>
+
+        <select class="form-control" name="identity" >
+          <option value="0" {{if $search_conf.identity==0}} selected="selected"{{/if}}>全部</option>
+          {{foreach $crm_identity as $identity => $desc}}
+          <option value="{{$identity}}" {{if $search_conf.identity==$identity}}selected="selected"{{/if}}>{{$desc}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-right:{{if $search_conf.customer_kind==0}}30px;{{else}}5px;{{/if}}">
+        <label>下单状况：</label>
+
+        <select class="form-control customer_kind" name="customer_kind" >
+            <option value="0" {{if $search_conf.customer_kind==0}}selected="selected"{{/if}}>全部</option>
+            <option value="1" {{if $search_conf.customer_kind==1}}selected="selected"{{/if}}>未下单客户</option>
+            <option value="2" {{if $search_conf.customer_kind==2}}selected="selected"{{/if}}>已下单客户</option>
+        </select>
+      </div>
+
+      {{* 该逻辑下单，暂不删除代码
+      <div class="form-group level_for_saler" style="margin-right:30px; {{if $search_conf.customer_kind==0}}display: none;{{/if}}">
+        <label></label>
+
+        <select class="form-control customer_kind_has_order" {{if $search_conf.customer_kind==2}}name="level_for_saler" {{else}}style="display:none;"{{/if}}>
+          <option value="0" {{if $search_conf.level_for_saler==0}} selected="selected"{{/if}}>全部</option>
+          <option value="1" {{if $search_conf.level_for_saler==1}} selected="selected"{{/if}}>普通客户</option>
+          <option value="2" {{if $search_conf.level_for_saler==2}} selected="selected"{{/if}}>大客户</option>
+        </select>
+
+        <select class="form-control customer_kind_no_order" {{if $search_conf.customer_kind==1}}name="level_for_saler" {{else}}style="display:none;"{{/if}}>
+          <option value="0" {{if $search_conf.level_for_saler==0}} selected="selected"{{/if}}>全部</option>
+          <option value="3" {{if $search_conf.level_for_saler==3}} selected="selected"{{/if}}>意向客户</option>
+          <option value="4" {{if $search_conf.level_for_saler==4}} selected="selected"{{/if}}>待跟进客户</option>
+        </select>
+      </div>
+      *}}
+      {{*
+      <div class="form-group" style="margin-right:30px;">
+            <label>销售级别：</label>
+
+            <select class="form-control customer_kind" name="level_for_saler">
+                <option value="127" {{if $search_conf.level_for_saler==127}} selected="selected"{{/if}}>全部</option>
+                {{foreach $sales_levels as $_level => $_desc}}
+                <option value="{{$_level}}" {{if $search_conf.level_for_saler==$_level}}selected="selected"{{/if}}>{{$_desc}}（{{$_level}}类）</option>
+                {{/foreach}}
+            </select>
+      </div>
+      *}}
+      
+      <div class="form-group" style="margin-right:30px;">
+        <label>公/私海：</label>
+
+        {{if $_isAdmin}}
+        <select class="form-control" name="sale_status" >
+          <option value="0" {{if $search_conf.sale_status==0}} selected="selected"{{/if}}>全部</option>
+          {{foreach $sale_status as $s_status => $desc}}
+          <option value="{{$s_status}}" {{if $search_conf.sale_status==$s_status}}selected="selected"{{/if}}>{{$desc}}</option>
+          {{/foreach}}
+        </select>
+        {{elseif $_isSalesDirectorAssistant}}
+          <select class="form-control" name="sale_status">
+              <option value="1" {{if $search_conf.sale_status==1}} selected="selected"{{/if}}>私海用户</option>
+              {{if !$is_partjob || $_uid==1040}}
+              <option value="2" {{if $search_conf.sale_status==2}} selected="selected"{{/if}}>公海用户</option>
+              {{/if}}
+              <option value="99" {{if $search_conf.sale_status==99}} selected="selected"{{/if}}>无效客户</option>
+          </select>
+        {{else}}
+        <select class="form-control" name="sale_status">
+          <option value="1" {{if $search_conf.sale_status==1}} selected="selected"{{/if}}>私海用户</option>
+          {{if !$is_partjob || $_uid==1040}}
+          <option value="2" {{if $search_conf.sale_status==2}} selected="selected"{{/if}}>公海用户</option>
+          {{/if}}
+        </select>
+        {{/if}}
+      </div>
+
+      <div class="form-group" style="margin-right:30px;">
+        <label>状态：</label>
+
+        <select class="form-control" name="status" >
+          {{foreach $status_list as $status => $status_name}}
+          <option value="{{$status}}" {{if $search_conf.status==$status}}selected="selected"{{/if}}>{{$status_name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+      {{if $_isAdmin }}
+      <div class="form-group" style="margin-right:30px;">
+        <label>销售专员：</label>
+        <select class="form-control" name="sales_suid" style="width:105px;">
+          <option value="0" {{if empty($search_conf.sales_suid)}} selected="selected"{{/if}}>请选择</option>
+          {{foreach $salesman_list as $man}}
+          <option value="{{$man.suid}}" {{if $search_conf.sales_suid==$man.suid}}selected="selected"{{/if}}>{{$man.name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+      {{else if !empty($team_members)}}
+      <div class="form-group" style="margin-right:30px;">
+        <label>团队成员：</label>
+
+        {{if !empty($team_members)}}
+        <select class="form-control" name="sales_suid" style="width:105px;">
+          {{foreach $team_members as $member}}
+          <option value="{{$member.suid}}" {{if $member.suid == $search_conf.sales_suid}}selected="selected"{{/if}}>{{$member.name}}</option>
+          {{/foreach}}
+        </select>
+        {{/if}}
+      </div>
+      {{/if}}
+    </div>
+
+    {{*
+    <div class="placeholder">
+      <div class="form-group" style="margin-right:30px;">
+        <label>录入人：</label>
+        <select class="form-control" name="record_suid" style="margin-right: 20px;">
+          <option value="0" {{if empty($search_conf.record_suid)}}selected="selected"{{/if}}>请选择</option>
+          <option value="1" {{if $search_conf.record_suid == 1}}selected="selected"{{/if}}>无专员</option>
+          {{foreach $allsaler_list as $man}}
+          <option value="{{$man.suid}}" {{if $search_conf.record_suid==$man.suid}}selected="selected"{{/if}}>{{$man.name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-right:30px;">
+        <label>地址：</label>
+        <input type="text" class="form-control" name="address" value="{{$search_conf.address}}" style="width:420px;">
+      </div>
+    </div>
+    *}}
+    
+    <div class="placeholder">
+      <div class="form-group" style="margin-right:30px;">
+        <label>客户Cid ：</label>
+        <input style="width:105px;" type="text" class="form-control" name="cid" value="{{$search_conf.cid}}">
+      </div>
+
+      <div class="form-group" style="margin-right:30px;">
+        <label>手机：</label>
+        <input type="text" class="form-control" name="mobile" value="{{$search_conf.mobile}}">
+      </div>
+
+      <div class="form-group" style="margin-right:30px;">
+        <label>名称：</label>
+        <input type="text" class="form-control" name="name" value="{{$search_conf.name}}">
+      </div>
+        {{if !$_isSales}}
+      <div class="form-group" style="margin-right:30px;">
+          <label>城市：</label>
+          <select class="form-control" name="city_id">
+              <option value="0">全部</option>
+              {{foreach $cities as $city_id => $city_name}}
+              <option value="{{$city_id}}" {{if $search_conf.city_id==$city_id}}selected="true"{{/if}}>{{$city_name}}</option>
+              {{/foreach}}
+          </select>
+      </div>
+        {{/if}}
+    </div>
+
+    <div class="placeholder">
+      <div class="form-group" style="margin-right:15px;">
+        <label>首单/复购时间：</label>
+        <input type="text" class="form-control" name="btime" value="{{$search_conf.btime}}" placeholder="YYYY-MM-DD">
+        <span> -- </span>
+        <input type="text" class="form-control" name="etime" value="{{$search_conf.etime}}" placeholder="YYYY-MM-DD">
+      </div>
+
+      <div class="form-group" style="margin-right:15px;">
+        <div class="checkbox" style="font-size: 18px;">
+          <label>
+            <input type="checkbox" name="first_order" {{if !empty($search_conf.first_order)}}checked="checked"{{/if}}> 首单
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-right:15px;">
+        <div class="checkbox" style="font-size: 18px;">
+          <label>
+            <input type="checkbox" name="second_order" {{if !empty($search_conf.second_order)}}checked="checked"{{/if}}> 复购
+          </label>
+        </div>
+      </div>
+    </div>
+
+      <div class="placeholder">
+          <div class="form-group" style="margin-right:15px;">
+              <label>注册时间：</label>
+              <input type="text" class="form-control" name="start_ctime" value="{{$search_conf.start_ctime}}" placeholder="YYYY-MM-DD">
+              <span> -- </span>
+              <input type="text" class="form-control" name="end_ctime" value="{{$search_conf.end_ctime}}" placeholder="YYYY-MM-DD">
+          </div>
+          <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+      </div>
+
+  </form>
+
+  <hr>
+  {{if $total > 0}}
+  <table class="table">
+    <thead>
+    <tr>
+      <th>CId</th>
+      <th style="width:16%;">客户信息</th>
+      <th style="width:10%;">录入人</th>
+      <th style="width:10%;">销售/流入时间</th>
+      {{if !$_hide_useless}}
+      <th style="width:13%;">欠款/账期</th>
+      {{/if}}
+      <th style="width:12%;">
+        <a href="{{$base_url}}&order=order_num">订单数</a>
+        /
+        <a href="{{$base_url}}&order=last_order_date">最后下单</a>
+      </th>
+      <th style="width:12%;">
+        <a href="{{$base_url}}&order=total_amount">订单金额</a>
+      </th>
+      <th style="width:8%;">优惠券</th>
+      <th style="width:18%;">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $customers as $customer}}
+    <tr {{if $customer.is_auto_save == 1}}style="background:#FAEBD7;"{{/if}} data-cid="{{$customer.cid}}">
+      <td>
+        {{$customer.cid}}
+        {{if $customer.status<>0}}
+        <br/>
+        <span style="color:red;">({{$status_list[$customer.status]}})</span>
+        {{/if}}
+      </td>
+      <td>
+          {{if $customer.identity==1}}
+            {{if $customer.name == $customer.all_user_names}}
+            {{$customer.all_user_names}}
+            {{else}}
+            {{$customer.name}}
+            {{if $customer.all_user_names<>'HC_工长'}}-{{$customer.all_user_names}}{{/if}}
+            {{/if}}
+          {{else}}
+          {{$customer.name}}
+          {{/if}}
+        {{if $customer.is_show_mobile}}
+        <br/>
+        <span style="color:gray;">[联]: {{$customer.mobiles[0]}} {{if count($customer.mobiles)>1}} 等{{/if}}</span>
+        {{/if}}
+        <br/>
+        {{if $customer.address}}
+        <span style="color:gray;">[址]: {{$customer.address}}</span>
+        <br />
+        {{/if}}
+        {{if !empty($customer.business)}}
+          <span style="color:#1940EB;">[司]: 所属公司：{{$customer.business.name}}</span><br />
+        {{/if}}
+        {{*if !$customer.has_weixin}}
+        <span style="color:red;">[登]: 未登陆微信商城</span>
+        <br />
+        {{/if*}}
+        <span style="color:red;">[地]: {{$city_list[$customer.city_id]}}</span>
+        <br />
+        <span style="color:blue;">
+          [状]: {{if !empty($customer.identity)}}<span>{{$crm_identity[$customer.identity]}}</span>{{else}}<span style="color:blue;">暂无</span>{{/if}}
+                <span> - {{$sale_status[$customer.sale_status]}}</span>
+        </span>
+	    {{if $customer.has_duty}}
+	      <br />
+	      <span style="color:red;">[税]: 含税账户</span>
+	    {{/if}}
+        {{if $customer.level_for_saler}}
+          <br/>
+          <span style="color: #00CC33">{{$crm_level_saler[$customer.level_for_saler]}}</span>
+        {{/if}}
+      </td>
+
+      <td>
+        {{if $customer._record_suid.name}}{{$customer._record_suid.name}}{{else}}自己注册{{/if}}
+        <br>
+        {{$customer.member_date}}
+      </td>
+
+      <td>
+        {{if 1||$customer.is_show_mobile && $customer._sales_suid}}
+            {{$customer._sales_suid.name|default:'暂无'}}<br>
+            {{$customer.chg_sstatus_time}}<br>
+            {{if $customer.lday_2_public>0}}<span style="color:red;font-size:20px;">{{$customer.lday_2_public}}天</span>{{/if}}
+        {{else}}
+          ---
+        {{/if}}
+      </td>
+    {{if !$_hide_useless}}
+      <td>
+        欠：
+        {{if $customer.account_balance > 0}}
+        <span style="color:red;">{{$customer.account_balance / 100}}元</span><br />
+        {{else}}
+        无<br />
+        {{/if}}
+        账：
+        {{if $customer.payment_days > 0}}
+          {{$customer.payment_days}} 天
+        {{else}}
+          无
+        {{/if}}
+        <br/>
+        额：{{$customer.payment_amount/100}}元
+          {{if $customer.payment_amount > 0 && $customer.account_balance > $customer.payment_amount}}
+          <br/>
+          <span style="color: red;">已超额</span>
+          {{/if}}
+          {{if $customer.account_balance > 0 && $customer.payment_due_date >0 && $customer.payment_due_date < date('Y-m-d')}}
+          <br/>
+          <span style="color: red;">已逾期</span>
+          {{/if}}
+      </td>
+      {{/if}}
+      <td>
+          <span>{{$customer.order_num}}</span> /
+          <span>{{if empty($customer.last_order_date) || '0000-00-00'==$customer.last_order_date}}-{{else}}{{$customer.last_order_date}}{{/if}}</span>
+        <br>
+        {{if $customer._consume.price_per_order}}
+        <span style="color:gray;">均价: ￥{{$customer._consume.price_per_order}}</span>
+        <br/>
+        {{/if}}
+        {{if $customer._consume.order_inter}}
+        <span style="color:gray;">间隔: {{$customer._consume.order_inter}}天</span>
+        <br/>
+        {{/if}}
+        {{if ($_isAdmin || $_isCS || $_isSales) &&  $customer.rival_desc > 1}}
+        <span style="color:red;">{{$rival_desc_list[$customer.rival_desc]}}</span>
+        {{/if}}
+	    {{*if $customer._statistics.gross_income > 0}}
+	      <span style="color:gray;">毛收入: {{$customer._statistics.gross_income / 100}} 元</span>
+	      <br/>
+	      <span style="color:gray;">毛利率: {{$customer._statistics.gross_rate}}%</span>
+	      <br/>
+	    {{/if*}}
+      </td>
+
+      <td>
+          [总]<span>￥{{$customer.total_amount/100}}元</span><br />
+          [退]<span>￥{{$customer.refund_amount/100}}元</span>
+      </td>
+
+      <td>
+        <a href="/crm2/coupon_list.php?cid={{$customer.cid}}" style="margin-right: 10px;">
+        {{if $customer._coupon.500}}{{$customer._coupon.500}}#500<br/>{{/if}}
+        {{if $customer._coupon.300}}{{$customer._coupon.300}}#300<br/>{{/if}}
+        {{if $customer._coupon.200}}{{$customer._coupon.200}}#200<br/>{{/if}}
+        {{if $customer._coupon.100}}{{$customer._coupon.100}}#100<br/>{{/if}}
+        {{if $customer._coupon.80}}{{$customer._coupon.80}}#80<br/>{{/if}}
+        {{if $customer._coupon.60}}{{$customer._coupon.60}}#60<br/>{{/if}}
+        {{if $customer._coupon.50}}{{$customer._coupon.50}}#50<br/>{{/if}}
+        {{if $customer._coupon.30}}{{$customer._coupon.30}}#30<br/>{{/if}}
+        {{if $customer._coupon.20}}{{$customer._coupon.20}}#20<br/>{{/if}}
+        {{if $customer._coupon.10}}{{$customer._coupon.10}}#10<br/>{{/if}}
+          </a>
+      </td>
+
+      <td>
+          {{if !empty($_permissions["/crm2/customer_detail"])}}
+          <a href="/crm2/customer_detail.php?cid={{$customer.cid}}" style="margin-right: 10px;">详情</a>
+          {{/if}}
+          {{if ($customer.is_show_mobile)}}
+              {{if !empty($_permissions["/crm2/edit_customer"])}}
+              <a href="/crm2/edit_customer.php?cid={{$customer.cid}}" style="margin-right: 10px;">编辑</a>
+              {{/if}}
+              {{if $customer.order_num > 0}}
+                  <a href="/order/order_list.php?cid={{$customer.cid}}&saler_suid={{$search_conf.sales_suid}}">订单</a>
+              {{/if}}
+              <br>
+              {{if $customer.bid == 0 && !empty($_permissions["/crm2/coupon_list"])}}
+              <a href="/crm2/coupon_list.php?cid={{$customer.cid}}" style="margin-right: 10px;">优惠券</a>
+              {{/if}}
+              {{if !empty($_permissions["/crm2/edit_customer_tracking"])}}
+              <a href="/crm2/edit_customer_tracking.php?tid=0&cid={{$customer.cid}}&sales_suid={{$customer.sales_suid}}" style="margin-right: 20px;">回访记录</a>
+              {{/if}}
+          {{else}}
+          {{/if}}
+          {{if !empty($_permissions["/crm2/ajax/send_vip_coupon"]) || !empty($_permissions['/crm2/ajax/send_coupon_temporary'])}}
+          <br /><a data-cid="{{$customer.cid}}" href="javascript:;" class="send_vip_coupon" data-toggle="modal" data-target="#send_vip_coupon">发放vip现金券</a>
+          {{/if}}
+          {{if !empty($_permissions["/crm2/edit_invoice"])}}
+          <br /><a href="/crm2/edit_invoice.php?cid={{$customer.cid}}" target="_blank">申请发票</a>
+          {{/if}}
+          {{if !empty($_permissions["/crm2/edit_customer_visit"])}}
+          <br /><a href="/crm2/edit_customer_visit.php?cid={{$customer.cid}}" target="_blank">添加拜访</a>
+          {{/if}}
+          {{if !empty($_permissions["/crm2/ajax/save_sale_schedule"])}}
+          <br /><a href="javascript:;" class="addSaleSchedule" data-cid="{{$customer.cid}}">添加日程</a>
+          {{/if}}
+          {{if !empty($_permissions["/crm2/search_plan_history"])}}
+          <br /><a href="/crm2/search_plan_history.php?cid={{$customer.cid}}" >户型搜索记录</a>
+          {{/if}}
+          {{if !empty($_permissions['/order/customer_list_cs'])}}
+          <br><a href="/order/customer_list_cs.php?cid={{$customer.cid}}" style="margin-right: 10px; color: purple;">去下单</a><br>
+          {{/if}}
+      </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+  {{else}}
+    无此用户！
+    {{if !empty($search_conf.mobile)}}
+    你可以：
+    <!--a class="btn btn-primary" href="javascript:;" id="auto_save_customer">创建客户快速下单</a-->
+    <a href="/crm2/new_customer.php" class="btn btn-primary">添加客户</a>
+    {{/if}}
+  {{/if}}
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>
+
+{{include file="crm2/block/coupon_dialog.html"}}
+{{include file="crm2/block/sale_schedule_dialog.html"}}
+
+<div class="modal fade" id="send_vip_coupon" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog modal-sm" role="document" style="width:600px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">发放VIP现金券</h4>
+			</div>
+			<div class="modal-body">
+				<input id="send_to_cid" type="hidden" value="0" />
+                <div class="form-group" style="">
+                    <label>现金券类型：</label>
+                    <select class="form-control" id="coupon_id" style="width: 300px; display: inline-block; margin-right: 50px;">
+                        {{foreach $vip_coupon_list as $key => $name}}
+                        <option value="{{$key}}">{{$name}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+				<div class="form-group" style="">
+                    <label>发放数量：</label>
+					<select class="form-control" id="coupon_num" style="width: 300px; display: inline-block; margin-right: 50px;">
+						{{for $i = 1; $i <= 20; $i++}}
+						<option value="{{$i}}">{{$i}}张</option>
+						{{/for}}
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" id="send_btn" class="btn btn-primary">发放</button>
+			</div>
+		</div>
+	</div>
+</div>

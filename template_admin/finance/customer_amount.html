@@ -1,0 +1,90 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">客户 - 账号余额</h1>
+	
+	<form class="form-inline" role="form" action="/finance/customer_amount.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>手机：</label>
+				<input class="form-control" type="text" name="mobile" value="{{$search.mobile}}" >
+			</div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>名称：</label>
+				<input type="text" class="form-control" name="name" value="{{$search.name}}">
+			</div>
+
+			<div class="form-group" style="margin-right:50px;">
+				<label>会员ID：</label>
+				<input type="text" class="form-control" name="cid" value="{{$search.cid}}">
+			</div>
+		</div>
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:50px;">
+				<label>客户专员：</label>
+				<select class="form-control" name="sales_suid">
+					<option value="0" {{if empty($search.sales_suid)}} selected="selected"{{/if}}>请选择</option>
+          <option value="1" {{if $search.sales_suid==1}} selected="selected"{{/if}}>无销售客户</option>
+					{{foreach $salesman_list as $man}}
+					<option value="{{$man.suid}}" {{if $search.sales_suid==$man.suid}}selected="selected"{{/if}}>{{$man.name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+      
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+	
+	<hr>
+	
+	<table class="table">
+		<thead>
+			<tr>
+			  <th>id</th>
+			  <th>名称/联系人</th>
+			  <th>门店地址、电话</th>
+        <th>账号余额</th>
+			  <th>销售专员</th>
+			  <th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{foreach $customer_list as $customer}}
+			<tr data-cid="{{$customer.cid}}">
+				<td>{{$customer.cid}}</td>
+				<td>{{$customer.name}}
+					{{if $customer.name <> $customer.contact_name}}
+						<br/>
+						{{$customer.contact_name}}
+					{{/if}}
+					{{if !empty($customer.business)}}
+						<br />
+						<span style="color: #E61A1A;">所属企业：{{$customer.business.name}}</span>
+					{{/if}}
+				</td>
+				<td>
+				  {{$customer.address}}
+				  {{if $customer.address}}<br/>{{/if}}{{$customer.phone}}
+				</td>
+        <td style="color:red;">￥{{$customer.account_amount/100}}</td>
+				<td>
+					{{$customer._suser.name}}
+					{{if $customer._suser2.name}}
+						 / {{$customer._suser2.name}}
+					{{/if}}
+				</td>
+				<td>
+					<a href="/finance/customer_amount_list.php?cid={{$customer.cid}}">余额明细</a>
+				</td>
+			</tr>
+			{{/foreach}}
+		</tbody>
+	</table>
+	
+	<nav>
+		<ul class="pagination">
+		  {{$pageHtml nofilter}}
+		  <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+			<li><a style="color:#555;">总金额{{$sum}}元</a></li>
+		</ul>
+	</nav>
+</div>

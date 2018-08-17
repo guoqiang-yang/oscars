@@ -1,0 +1,55 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+        商品加工详情
+	</h1>
+    
+    <form class="form-inline" role="form" action="/shop/processing_products.php">
+        <input type="hidden" name="sid" value="{{$sid}}">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:30px;">
+                <label>商品信息：</label>
+                <span class="text-value">{{$short_combin_info}}</span>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:30px;">
+                <label>仓库：</label>
+                <select class="form-control" name="wid" {{if count($_warehouseList)==1}}disabled="true"{{/if}}>
+                    <option value="0" {{if !$wid}} selected="selected" {{/if}}>请选择</option>
+                    {{foreach $_warehouseList as $_wid=>$_wname}}
+                    <option value="{{$_wid}}" {{if $wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+    </form>
+    
+    <hr>
+    
+    {{if !empty($combin_infos_parts)}}
+    
+        <ul style="margin-bottom: 20px;" class="nav nav-tabs">
+            <li role="presentation" {{if $processed_type == 1}}class="active"{{/if}}><a href="/shop/processing_products.php?sid={{$sid}}&wid={{$wid}}&processed_type=1"><h4>组合售卖</h4></a></li>
+            <li role="presentation" {{if $processed_type == 2}}class="active"{{/if}}><a href="/shop/processing_products.php?sid={{$sid}}&wid={{$wid}}&processed_type=2"><h4>整转零售</h4></a></li>
+        </ul>
+
+        {{if $processed_type == 1}}
+            {{include file="shop/processing_products_combin.html"}}
+        {{elseif $processed_type == 2}}
+            {{include file="shop/processing_products_split.html"}}
+        {{else}}
+        <div>
+            <span>页面不存在！</span>
+        </div>
+        {{/if}}
+
+    
+    {{else}}
+        <div>
+            <p style="color:red; font-size:18px;">{{$err_html}}</p>
+        </div>
+    {{/if}}
+    
+</div>

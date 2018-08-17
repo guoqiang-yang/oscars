@@ -1,0 +1,116 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        结算单详情
+    </h1>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width:6%;">订单id</th>
+            <th style="width:8%;">客户信息</th>
+            <th style="width:15%;">配送地址</th>
+            <th style="width:13%;">订单信息</th>
+            <th style="width:10%;">配送日期</th>
+            <th style="width:10%;">司机信息</th>
+            <th style="width:10%;">司机运费</th>
+            <th style="width:10%;">应付运费</th>
+            <th style="width:13%;">备注</th>
+            <th style="width:8%;">操作</th>
+        </tr>
+        </thead>
+        <tbody id="coopworker_order_area">
+        {{foreach $orders as $order}}
+        <tr class="coopworker_order" data-id="{{$order.id}}" data-oid="{{$order.oid}}" data-cuid="{{$order.cuid}}" data-type="{{$order.type}}" data-usertype="{{$order.user_type}}" data-price="{{$order.price}}">
+            <td>
+                {{if !$_isYunniao}}
+                <a href="/order/order_detail.php?oid={{$order.oid}}" target="_blank">{{$order.oid}}</a>
+                {{else}}
+                <span>{{$order.oid}}</span>
+                {{/if}}
+                {{if !empty($order._order.source_oid)}}<span style="color:red;">[补单]</span>{{/if}}
+            </td>
+            <td>
+                {{if !$_isYunniao}}
+                <a href="/order/customer_list_cs.php?cid={{$order._order.cid}}&oid={{$order._order.oid}}" target="_blank">{{$order._order.contact_name}}</a><br>
+                {{else}}
+                {{$order._order.contact_name}}<br>
+                {{/if}}
+                <span>{{$order._order.contact_phone}}</span><br/>
+                <span style="color: #ff0000;">账期:{{$order._customer.payment_days}}天(已到期)</span>
+            </td>
+            <td>
+                <span>{{$order._order.address}}</span>
+            </td>
+            <td>
+                <span>{{$warehouse[$order._order.wid]}}</span><br>
+                <span>商品总价:￥{{$order._order.price/100}}</span><br>
+                <!--span>惠:￥{{$order_order.privilege/100}}|  运:￥{{$order._order.freight/100}}|  搬:￥{{$order._order.customer_carriage/100}}</span-->
+                <br>
+                <span>{{$order_steps[$order._order.step]}}</span>
+                <span style="color:{{if $order._order.paid==1}}green{{else}}red{{/if}};">【{{$paid_status[$order._order.paid]}}】</span>
+                {{if $order._order.is_guaranteed==1}}<br><span style="color:blue;">[已担保]</span>{{/if}}
+                {{if $order._order.step==5 && ($_isAdmin||$_isFinance)}}
+                <a href="javascript:void(0);" class="btn btn-primary _j_chg_order_step" data-next_step="7" style="height:28px;font-size: 13px;">已回单</a>
+                {{/if}}
+            </td>
+            <td>
+                <span>{{$order._order.delivery_date}}</span>
+            </td>
+            <td>
+                {{if !$_isYunniao}}
+                {{if $statement.user_type==1}}
+                <a href="/logistics/add_driver.php?did={{$order._worker.did}}" target="_blank">{{$order._worker.name}}(ID:{{$order._worker.did}})</a><br>
+                {{elseif $statement.user_type==2}}
+                <a href="/logistics/add_carrier.php?cid={{$order._worker.cid}}" target="_blank">{{$order._worker.name}}(ID:{{$order._worker.cid}})</a><br>
+                {{/if}}
+                {{else}}
+                <span>{{$order._worker.name}}(ID:{{$order._worker.did}})</span><br>
+                {{/if}}
+                <span>{{$order._worker.mobile}}</span><br>
+                {{if $statement.user_type==1}}
+                <span>来源：{{$source_list[$order._worker.source]}}</span>
+                {{/if}}
+            </td>
+            <td>
+                <span style="color:purple">{{if $order.type==1}}运费{{else}}搬运费{{/if}}: {{$order.price/100}}元</span><br>
+                {{if $order.type==1}}<span>{{if empty($order.car_model)}}【{{$car_models[$order._worker.car_model]}}】{{else}}【{{$car_models[$order.car_model]}}】{{/if}}</span><br>{{/if}}
+                {{if $order.paid==0}}
+                {{if $order.statement}}
+                <span style="color:red;">待支付</span>
+                {{else}}
+                <span style="color:red;">未支付</span>
+                {{/if}}
+                {{else}}
+                <span style="color:green;">已支付</span>
+                {{/if}}
+            </td>
+            <td>
+                {{if $order.type == 1}}
+                    {{if $order.fee != 0}}{{$order.fee/100}}元
+                    {{elseif !empty($order.all_dfee)}}
+                        {{foreach $order.all_dfee as $_car_model => $_price}}
+                        <span>{{$car_models[$_car_model]}}: {{$_price/100}}元</span>
+                        {{/foreach}}
+                    {{else}}
+                        <a href="/order/edit_community_fee.php?community_id={{$order._order.community_id}}&wid={{$order.wid}}" target="_blank">点击查看</a>
+                    {{/if}}
+                {{elseif $order.type == 2}}
+                    {{$order._order.customer_carriage/100}}元
+                {{/if}}
+            </td>
+            <td><span>{{$order._order.note}}</span></td>
+            <td>
+                <a href="/order/order_detail.php?oid={{$order.oid}}" target="_blank">订单详情</a><br>
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+</div>

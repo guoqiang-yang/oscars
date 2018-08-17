@@ -1,0 +1,77 @@
+<input type="hidden" id="origin-lat" value="{{$origin.lat}}" />
+<input type="hidden" id="origin-lng" value="{{$origin.lng}}" />
+<input type="hidden" id="dest-lat" value="{{$dest.lat}}" />
+<input type="hidden" id="dest-lng" value="{{$dest.lng}}" />
+<input type="hidden" id="wid" value="{{$wid}}" />
+<input type="hidden" id="community_id" value="{{$community_id}}" />
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<div style="float: left; width: 38%; margin: 0 1%;">
+		<form class="form-horizontal" role="form">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">起点：</label>
+				<div class="col-sm-6">
+					<b style="color: green;">{{$origin_name}}</b>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">终点：</label>
+				<div class="col-sm-6">
+					<b style="color: green;">{{$dest_name}}</b>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">距离：</label>
+				<div class="col-sm-6">
+					<input type="text" class="form-control" data-distance="{{$distance}}" id="distance" value="{{$distance}}" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">备注：</label>
+				<div class="col-sm-6">
+					<textarea class="form-control" id="note">{{$note}}</textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">状态：</label>
+				<div class="col-sm-6">
+					<input {{if $status == 0}}checked="checked"{{/if}} type="radio" name="status" class="radio-inline status" value="0" /> 已验证
+					<input {{if $status == 5}}checked="checked"{{/if}} type="radio" name="status" class="radio-inline status" value="5" /> 未验证
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="button" class="btn btn-primary" id="_j_btn_save_fee" style="margin-right:20px;">保存</button>
+				</div>
+			</div>
+		</form>
+
+		<div style="margin: 50px 0; font-size: 16px;">
+			小区定位有误？
+			<a target="_blank" href="/order/delivery_community.php?cmid={{$community_id}}">点击编辑小区</a>
+		</div>
+		<div style="margin: 20px 0; font-size: 16px;">
+			<b>说明</b><br /><br />
+			1、运费计算规则：<br />
+            {{if $city4wid == 120}}
+            金杯: 5公里60元，超过1公里，按照每公里5元计算；<br />
+			小面：5公里35元，超过1公里，按照每公里3.5元计算；<br /><br />
+            {{else}}
+			金杯: 5公里60元，超过1公里，按照每公里6元计算；<br />
+			小面：5公里40元，超过1公里，按照每公里4元计算；<br /><br />
+            {{/if}}
+			2、右侧地图上路线可以拖动，如果知道司机经常走某条路线，可以拖动路线，然后查看地图下的距离；<br /><br />
+			3、右侧地图的路线，距离等只是百度推荐，仅供参考；如果你确定距离，可以忽略这个推荐；<br /><br />
+		</div>
+	</div>
+	<div style="float: left; width: 58%; margin: 0 1%; overflow: auto;">
+		<div id="map" style="overflow: auto; width: 100%; height: 500px;"></div>
+		<div id="r-result"></div>
+	</div>
+</div>
+<div id="show_hccommon_admin_log" data-objid="{{$community_id}}" data-objtype="6" data-actiontype="1"></div>
+
+<form class="form-horizontal">
+	{{include "order/block_add_community.html"}}
+</form>

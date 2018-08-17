@@ -1,0 +1,149 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+        调拨单列表
+        {{if !empty($_permissions['/warehouse/stock_shift'])}}
+		<div style="float:right;font-size:16px;">
+            <a href="/warehouse/stock_shift.php" class="btn btn-primary">创建调拨单</a>
+        </div>
+		{{/if}}
+    </h1>
+
+    <form class="form-inline" role="form" action="/warehouse/stock_shift_list.php">
+        <div class="placeholder">
+
+            <div class="form-group" style="margin-right: 20px;">
+                <label>调拨单ID：</label>
+                <input type="text" class="form-control" name="ssid" value="{{$search_conf.ssid}}" style="width: 100px;">
+            </div>
+
+            {{if count($_allowed_warehouses)}}
+            <div class="form-group" style="margin-right:20px;">
+                <label>仓库（移出）：</label>
+                <select class="form-control" name="src_wid">
+                    <option value="0" {{if !$search_conf.src_wid}} selected="selected"{{/if}}>全部</option>
+                    {{foreach $_allowed_warehouses as $_wid=>$_wname}}
+                    <option value="{{$_wid}}" {{if $search_conf.src_wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-right:20px;">
+                <label>仓库（移入）：</label>
+                <select class="form-control" name="des_wid">
+                    <option value="0" {{if !$search_conf.des_wid}} selected="selected"{{/if}}>全部</option>
+                    {{foreach $_allowed_warehouses as $_wid=>$_wname}}
+                    <option value="{{$_wid}}" {{if $search_conf.des_wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            {{/if}}
+
+            <div class="form-group" style="margin-right: 20px;">
+                <label>类型：</label>
+                <select class="form-control" name="step">
+                    <option value="0" {{if empty($search_conf.step)}} selected="selected"{{/if}}>全部</option>
+                    {{foreach $steps as $_val=>$_name}}
+                    <option value="{{$_val}}" {{if $search_conf.step==$_val}} selected="selected" {{/if}}>{{if $_val==4}}未上架{{else}}{{$_name}}{{/if}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-right: 20px;">
+                <label>管理员：</label>
+                <select class="form-control" name="create_suid">
+                    <option value="0" {{if empty($search_conf.create_suid)}} selected="selected"{{/if}}>全部</option>
+                    {{foreach $buyers as $_buyer}}
+                    <option value="{{$_buyer.suid}}" {{if $search_conf.create_suid==$_buyer.suid}} selected="selected" {{/if}}>{{$_buyer.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:50px;">
+                <label>SKU_ID：</label>
+                <input type="text" class="form-control" name="sku_id" value="{{$search_conf.sku_id}}" style="width:80px;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+
+    <hr>
+
+    {{if empty($shift_list)}}
+    没有记录
+    {{else}}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>移库单ID</th>
+                <th>仓库（移出）</th>
+                <th>仓库（移入）</th>
+                <th>状态</th>
+                <th style="width:10%;">创建时间</th>
+                <th style="width:15%;">操作人</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{foreach $shift_list as $info}}
+            <tr>
+                <td>{{$info.ssid}}</td>
+                <td>{{$_all_warehouses[$info.src_wid]}}</td>
+                <td>{{$_all_warehouses[$info.des_wid]}}</td>
+                <td>
+                    {{if $info.step==1}}
+                        {{if $info.status == 5}}
+                        <span style="color:red;">{{$info.src_wid}}#待处理</span>（{{$steps[$info.step]}}）
+                        {{else if $info.status == 6}}
+                        <span style="color:red;">{{$info.src_wid}}#已驳回</span>（{{$steps[$info.step]}}）
+                        {{else}}
+                        <span style="color:red;">{{$info.src_wid}}#未出库</span>（{{$steps[$info.step]}}）
+                        {{/if}}
+                    {{else if $info.step == 2}}
+                    <span style="color:blue">{{$info.des_wid}}#未入库</span>（{{$steps[$info.step]}}）
+                    {{else}}
+                        {{if $info._is_upgrade_wid && $info.step<5}}
+                        <span>{{$info.des_wid}}#</span>
+                        <span style="color:red;">【待上架，{{$steps[$info.step]}}】</span>
+                        {{else}}
+                        <span>完成（{{$steps[$info.step]}}）</span>
+                        {{/if}}
+                    {{/if}}
+                </td>
+                <td>{{$info.ctime}}</td>
+                <td>
+                    创建：{{$info.create_suid_name}}<br>
+                    出库：{{if !empty($info.stockout_suid_name)}}{{$info.stockout_suid_name}}{{else}}--{{/if}}<br>
+                    入库：{{if !empty($info.stockin_suid_name)}}{{$info.stockin_suid_name}}{{else}}--{{/if}}<br>
+                    {{if $info._is_upgrade_wid}}
+                    上架：{{if !empty($info.shelved_suid_name)}}{{$info.shelved_suid_name}}{{else}}--{{/if}}
+                    {{/if}}
+                </td>
+                <td>
+                    {{if !empty($_permissions['/warehouse/stock_shift_detail'])}}
+                    <a href="/warehouse/stock_shift_detail.php?ssid={{$info.ssid}}" style="margin-right: 10px;">详情</a>
+                    {{/if}}
+                    {{if $info.step==1 && $info.status<>0 && !empty($_permissions['/warehouse/stock_shift'])}}
+                    <a href="/warehouse/stock_shift.php?ssid={{$info.ssid}}" style="margin-right: 10px;">编辑</a>
+                    {{/if}}
+                    {{if $info.step==1 && $info.status<>0 && !empty($_permissions['/warehouse/stock_shift'])}}
+                    <a href="javascript:;" class="_j_cannel_stock_shift" data-ssid="{{$info.ssid}}" style="margin-right: 10px;">取消</a>
+                    {{/if}}
+                    {{if !empty($_permissions['/warehouse/stock_shift_print'])}}
+                    <a href="/warehouse/stock_shift_print.php?ssid={{$info.ssid}}">打印</a>
+                    {{/if}}
+                </td>
+            </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+    {{/if}}
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

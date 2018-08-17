@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{{$title}}</title>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            if (document.cookie) {
+                var name = document.cookie.substring(document.cookie.lastIndexOf('_') + 1);
+                $('.nav_right li:eq(0) a').prop('href', 'javascript:;').css({'cursor': 'default', 'color': '#fff'}).html(name);
+                var $li = $("<li><a href = '/user/logout.php'>退出</li>");
+                $('.nav_right').append($li);
+            }
+        });
+    </script>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries --><!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->{{$cssHtml nofilter}} {{$jsHtml nofilter}}
+</head>
+
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+            </button>
+            {{if $can_change_city}}
+            <span id="city_name" data-toggle="modal" data-target="#showCityList" style="font-size: 14px; color:#D71818; cursor: pointer;" class="navbar-brand">{{$cur_city}}  [切换]</span>
+            {{else}}
+            <span style="font-size: 14px; color:#D71818;" class="navbar-brand">当前城市：{{$cur_city}}</span>
+            {{/if}}
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                {{foreach $modules as $key => $item name=module_iter}}
+                {{if $item.display != "hidden"}}
+                <li class="{{if $smarty.foreach.module_iter.first}}first{{/if}} {{if $curModule==$key}}active{{/if}}">
+                    <a href="{{if empty($item['pages'])}}#{{else}}{{$item['pages'][0]['url']}}{{/if}}">{{$item.name}}</a>
+                </li>
+                {{/if}}
+                {{/foreach}}
+                {{if $_uid}}
+                <li>
+                    <div class="dropdown" style="margin-top: 8px;">
+                        <button class="btn dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" style="background-color: #222222;color: #9d9d9d;">
+                            {{$_user['name']}}<sup id="tip_message_top" style="display:none; border-radius: 10px; background: #CC0000; font-size: 9px; padding: 2px 5px; color: #FFFFFF;"></sup>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                            <li role="presentation" style="clear: both;"><a href="/user/message.php" role="menuitem" tabindex="-1">消息<span id="tip_message_body" style="display:none; float:right;border-radius: 10px; background: #CC0000; font-size: 12px; padding: 1px 5px; color: #FFFFFF;"></span></a></li>
+                            <li role="presentation" class="divider"></li>
+                            <li role="presentation" style="clear: both;"><a href="/user/chgpwd.php" role="menuitem" tabindex="-1">修改密码<span id="" style="display:none; float:right;border-radius: 10px; background: #CC0000; font-size: 12px; padding: 1px 5px; color: #FFFFFF;"></span></a></li>
+                            <li role="presentation" class="divider"></li>
+                            <li role="presentation"><a href="/user/logout.php" role="menuitem" tabindex="-1">退出</a></li>
+                        </ul>
+                    </div>
+                </li>
+                {{/if}}
+            </ul>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                {{$module}}
+                {{foreach $modules[$curModule]['pages'] as $item name=page_iter}}
+                <li class="{{if $curPage == $item.page }}active{{/if}}">
+                    <a href="{{$item.url}}" title="{{$item.name}}">{{$item.name}}</a>
+                </li>
+                {{/foreach}}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="max-time" value="{{$max_time}}"/>
+
+<!-- Modal -->
+<div class="modal fade" id="showCityList" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <span class="modal-title f16" id="myModalLabel">选择城市</span>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                {{foreach $city_list as $cityId => $city}}
+                <a href="/shop/change_city.php?city_id={{$cityId}}">
+                    <button id="change_city_btn" style="margin-right: 1rem;" data-cid="{{$cityId}}" type="button" class="change_city_btn btn btn-lg btn-default">{{$city}}</button>
+                </a>
+                {{/foreach}}
+            </div>
+            <div class="modal-footer">
+                <span class="f14">当前城市：{{$cur_city}}</span>
+            </div>
+        </div>
+    </div>
+</div>

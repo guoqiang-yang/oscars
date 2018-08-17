@@ -1,0 +1,145 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if $info.id}}编辑{{else}}添加{{/if}}工单</h1>
+
+	<form class="form-horizontal" role="form">
+		<input type="hidden" name="all_staffs" value="{{$staff_grouped}}">
+		<input type="hidden" name="all_short_descs" value="{{$show_desc_of_objtype}}">
+		<input type="hidden" class="form-control" id="id" value="{{$info.id}}">
+		<div class="form-group">
+			<label class="col-sm-2 control-label">问题类型：</label>
+			<div class="col-sm-4">
+				<select id="_adtask_change_objtype" class="form-control" name="objtype" style="width:49%; margin-right:5px; display:inline;">
+					<option value="0">请选择分类</option>
+					{{foreach $objtypes as $_objtype=>$_desc}}
+					<option value="{{$_objtype}}" {{if $_objtype==$objtype}} selected="selected"{{/if}}>{{$_desc}}</option>
+					{{/foreach}}
+				</select>
+
+				<select id="short_desc" name="short_desc" class="form-control" style="width:49%; display:inline;">
+					<option value="0"> -- </option>
+				</select>
+
+			</div>
+			<label style="color:red;text-align:left;" class="col-sm-3 control-label">*</label>
+		</div>
+		<div id="oid_container" class="form-group" style="display: none;">
+			<label id="objid_text" class="col-sm-2 control-label">订单/客户ID：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="objid" value="{{$oid}}">
+			</div>
+			<label style="color:red;text-align:left;" class="col-sm-3 control-label"><span id="type_other">*</span>多个ID请以英文逗号隔开</label>
+		</div>
+		<div style="display: none;" id="type_container" class="form-group">
+			<label id="type_label" class="col-sm-2 control-label">补/退/换单id：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="rid" value="{{$info.rid}}">
+			</div>
+			<label style="color:red;text-align:left;" class="col-sm-3 control-label">多个ID请以英文逗号隔开</label>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">反馈人：</label>
+			<div class="col-sm-4">
+				<select class="form-control" id="fb_type">
+					<option value="0" {{if !$info.fb_type}} selected="selected" {{/if}}>请选择</option>
+					{{foreach $fb_type as $type_id => $type}}
+					<option value="{{$type_id}}" {{if $info.fb_type == $type_id}} selected="selected" {{/if}}>{{$type}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<label style="color:red;text-align:left;" class="col-sm-3 control-label">*</label>
+		</div>
+		<div class="form-group" id="fb_id_container">
+			<label class="col-sm-2 control-label" id="fb_id_lable">ID：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="fb_id" value="{{if $info.fb_uid}}{{$info.fb_uid}}{{/if}}">
+		</div>
+		</div>
+		<div class="form-group" id="fb_name_container">
+			<label class="col-sm-2 control-label" id="fb_name_lable">姓名：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="fb_name" value="{{$info.contact_name}}">
+			</div>
+		</div>
+		<div class="form-group" id="fb_mobile_container">
+			<label class="col-sm-2 control-label" id="fb_mobile_lable">电话：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="fb_mobile" value="{{$info.contact_mobile}}">
+			</div>
+			<label style="color:red;text-align:left;" class="col-sm-3 control-label" id="mobile_remark"></label>
+		</div>
+		<div class="form-group" id="fb_contact_container">
+			<label class="col-sm-2 control-label" id="fb_contact_lable">其他联系方式：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="fb_contact" value="{{$info.contact_way}}" maxlength="40">
+			</div>
+			<label style="color:red;text-align:left;" class="col-sm-2 control-label" id="type_other_contact">内容在40字以内</label>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">问题描述：</label>
+			<div class="col-sm-4">
+				<textarea class="form-control" id="content" maxlength="500">{{$info.content}}</textarea>
+			</div>
+			<label style="color:red;text-align:left;" class="col-sm-2 control-label">*内容在500字以内</label>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">指派部门及责任人：</label>
+			<div class="col-sm-4">
+				<select id="_adtask_change_role" name="exec_role" class="form-control" style="width:49%; margin-right:5px; display:inline;">
+					<option value="0">请选择角色</option>
+					{{foreach $staff_roles as $_role=>$_desc}}
+					<option value="{{$_role}}">{{$_desc}}</option>
+					{{/foreach}}
+				</select>
+
+				<select id="exec_suid" name="exec_suid" class="form-control" style="width:49%; display:inline;">
+					<option value="0"> -- </option>
+				</select>
+
+			</div>
+			<label style="color:red;text-align:left;" class="col-sm-3 control-label">不选择部门则默认指派给自己</label>
+		</div>
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label">抄送给：</label>
+			<div class="col-sm-6">
+				<div class="checkbox">
+					{{foreach $department_list as $_aid => $_aname}}
+					<label style="margin-right:10px;" class="col-sm-4">
+						<input type="checkbox" value="{{$_aname['value']}}" name="copy_department" {{if strpos($info.join_suids, (string)$_aname['value']) !==false}} checked="checked" {{/if}}>{{$_aname['dname']}}
+					</label>
+					{{/foreach}}
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label">选择照片：</label>
+			<div class="col-sm-8">
+				<div style="display:inline-block;" class="_j_logo_wrap" data-x="{{$picture._picinfo.srcinfo.x}}" data-y="{{$picture._picinfo.srcinfo.y}}" data-w="{{$picture._picinfo.srcinfo.w}}" data-h="{{$sku._picinfo.srcinfo.h}}" data-url="{{if $sku._picinfo._srcpic}}{{$sku._picinfo._srcpic.middle}}{{else}}{{if $sku._pic.middle}}{{$sku._pic.middle}}{{/if}}{{/if}}">
+					<img id="_j_upload_view_img" src="{{if !empty($article.pic_url)}}{{$article.pic_url}}{{else}}/i/nopic100.jpg{{/if}}" width="150">
+				</div>
+				<button style="display:inline-block; margin-left:10px;" type="button" class="btn btn-default" id="_j_btn_select_pic" data-path="activity">
+					从电脑选择图片
+				</button>
+			</div>
+
+		</div>
+
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="button" class="btn btn-primary" id="btn_save" style="margin-right:20px;">保存</button>
+			</div>
+		</div>
+	</form>
+</div>
+{{if $oid>0}}
+<script type="text/javascript">
+	var oid='{{$oid}}';
+	{{if $a_id>0}}
+	var id = '{{$a_id}}';
+	{{else}}
+	var id = 0;
+	{{/if}}
+</script>
+{{/if}}

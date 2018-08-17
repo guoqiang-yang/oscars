@@ -1,0 +1,152 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+        促销活动列表
+	</h1>
+
+	<form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+		<div class="placeholder">
+			<div class="form-group _j_date_selecter">
+				<label>活动时间：</label>
+				<input type="date" class="form-control" name="a_stime" value="{{$conf.a_stime}}" style="display: inline-block;width: 160px;">
+				&emsp;To&emsp;
+				<input type="date" class="form-control" name="a_etime" value="{{$conf.a_etime}}" style="display: inline-block;width: 160px;">
+			</div>
+			<div class="form-group" style="margin:0 20px;">
+				<label>活动城市：</label>
+				<select class="form-control" name="a_city" style="width: 100px;">
+					<option value="0" {{if $conf.a_city == 0}}selected="selected"{{/if}}>全部</option>
+					{{foreach $city_list as $key=>$city}}
+					<option value="{{$key}}" {{if $conf.a_city == $key}}selected="selected"{{/if}}>{{$city}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px;">
+                <label>活动&emsp;id&nbsp;：</label>
+                <input type="number" class="form-control" name="a_id" value="{{$conf.a_id}}" />
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>&emsp;&nbsp;活动名称：</label>
+                <input type="text" class="form-control" name="a_title" value="{{$conf.a_title}}" />
+            </div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+
+    <div style="border-bottom: 1px inset #DDDDDD; clear: both; position: relative; height:25px;margin-bottom: 20px;">
+        <a href="{{$status_url}}&a_status=0"><span {{if empty($conf.a_status) || $conf.a_status==0}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>全部</span></a>
+        {{foreach $status_list as $key=>$item}}
+        <a href="{{$status_url}}&a_status={{$key}}"><span {{if $conf.a_status==$key}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>{{$item}}</span></a>
+        {{/foreach}}
+        {{if !empty($_permissions["/activity/promotion_manjian_update"])}}
+        <label style="float: right; margin-top: -15px;"><a href="/activity/promotion_manjian_update.php"><button type="button" class="btn btn-primary">新建活动</button></a></label>
+        {{/if}}
+    </div>
+
+	{{if count($list) > 0}}
+	<table class="table table-bordered" id="receivable_table">
+		<thead>
+		<tr>
+			<th width="60px">活动ID</th>
+			<th width="200px">活动名</th>
+			<th width="80px">活动类型</th>
+			<th width="180px">活动时间</th>
+			<th width="260px">活动额度</th>
+			<th width="100px">活动城市</th>
+			<th width="80px">状态</th>
+            <th width="80px">创建人</th>
+            <th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+		<tr>
+			<td align="center">{{$item.id}}</td>
+			<td>{{$item.title}}</td>
+			<td>{{$type_list[$item.activity_type]}}{{if $item.m_type == 1}}-平台{{/if}}{{if $item.m_type == 2}}-指定用户{{/if}}</td>
+			<td>[始]{{$item.stime}}<br>[终]{{$item.etime}}</td>
+			<td>
+                {{if $item.m_type == 1}}
+                {{if $item.conf.amount > 0}}满{{$item.conf.amount}}元打{{/if}}{{$item.conf.rate}}折,
+                {{elseif $item.m_type == 2}}
+                {{elseif $item.activity_type==1}}
+                {{foreach $item.conf as $privilege}}
+                满{{$privilege['amount']}}元 立减 {{$privilege['privilege']}}元<br />
+                {{/foreach}}
+                {{elseif $item.activity_type==2}}
+                {{foreach $item.conf as $privilege}}
+                满{{$privilege['amount']}}元 送券 [id]{{$privilege['coupon_id']}} ；数量：{{$privilege['num']}} <br />
+                {{/foreach}}
+                {{elseif $item.activity_type==3}}
+                {{foreach $item.conf as $privilege}}
+                满{{$privilege['amount']}}元 立减 {{$privilege['privilege']}}元；送券[id]{{$privilege['coupon_id']}}，数量：{{$privilege['num']}}<br />
+                {{/foreach}}
+                {{elseif $item.activity_type==5}}
+                {{foreach $item.conf as $privilege}}
+                满{{$privilege['amount']}}元 赠送 [sid]{{$privilege['sid']}}；数量：{{$privilege['num']}}<br />
+                {{/foreach}}
+                {{elseif $item.activity_type==6}}
+                {{foreach $item.conf as $privilege}}
+                满{{$privilege['amount']}}元 特价购 [sid]{{$privilege['sid']}}； 价格：{{$privilege['price']}}；数量：{{$privilege['num']}}<br />
+                {{/foreach}}
+                {{/if}}
+            </td>
+            <td>
+                {{foreach $item.city_ids as $city_id}}
+                {{$city_list[$city_id]}},
+                {{/foreach}}
+            </td>
+			<td>
+                {{$status_list[$item.m_status]}}
+            </td>
+            <td>{{$item.create_suser}}</td>
+            <td align="center">
+                {{if !empty($_permissions["/activity/promotion_manjian_update"])}}
+                    <a style="margin-right: 20px;" href="/activity/promotion_manjian_update.php?mode=show&id={{$item.id}}">详情</a><br>
+                    {{if $item.m_status<4 }}<a style="margin-right: 20px;" href="/activity/promotion_manjian_update.php?id={{$item.id}}">修改</a><br>{{/if}}
+                    {{if $item.m_status==1}}
+                    <a style="margin-right: 20px;" href="javascript:;" class="del_activity" data-id="{{$item.id}}">删除</a>
+                    {{else}}
+                    {{if !empty($_permissions["/activity/promotion_manjian_list"])}}
+                    <a style="margin-right: 20px;" href="/activity/promotion_manjian_list.php?mode=order&aid={{$item.id}}">订单</a>
+                    {{/if}}
+                    {{/if}}
+                {{/if}}
+            </td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+        </ul>
+    </nav>
+	{{else}}
+	暂无记录
+	{{/if}}
+</div>
+<script>
+	$(function () {
+        function onSaveSucc(data)
+        {
+            alert(data);
+            window.location.href = '/activity/promotion_manjian_list.php';
+        }
+
+        function onSaveFail(data)
+        {
+            alert(data.errmsg);
+            is_submit = false;
+        }
+	    $('.del_activity').on('click',function (){
+            if(confirm("确定要删除该活动吗？")){
+                var data = 'id='+$(this).attr('data-id')+'&action_type=delete';
+                K.post('/activity/ajax/save_promotion_manjian.php', data, onSaveSucc('删除成功'), onSaveFail);
+            }
+        });
+	});
+</script>

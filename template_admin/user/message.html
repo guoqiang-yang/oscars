@@ -1,0 +1,39 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">消息列表</h1>
+	<table class="table table-bordered">
+		<tbody>
+		{{foreach $list as $item}}
+		<tr {{if $item.has_read == 0}}class="info"{{/if}}>
+			<td>
+				{{if $item.m_type == 1}}
+				时间：{{$item.ctime}}，内容：{{$item.content}}&emsp;{{if !empty($item.url)}}<a href="{{$item.url}}" target="_blank">点击查看>></a>{{/if}}
+				{{else if $item.m_type == 2}}
+				[工单 <a href="/aftersale/detailLog.php?id={{$item.typeid}}" target="_blank">{{$item.typeid}}</a>] 时间：{{$item.ctime}}，{{$item.content}}<a href="/aftersale/detailLog.php?id={{$item.typeid}}" target="_blank">点击查看>></a>
+				{{else if $item.m_type == 3}}
+				[退货单 <a href="/order/edit_refund_new.php?rid={{$item.typeid}}" target="_blank">{{$item.typeid}}</a>] 时间：{{$item.ctime}}，{{$item.content}}<a href="/order/edit_refund_new.php?rid={{$item.typeid}}" target="_blank">点击查看>></a>
+				{{else if $item.m_type == 4}}
+				[换货单 <a href="?id={{$item.typeid}}" target="_blank">{{$item.typeid}}</a>] 时间：{{$item.ctime}}，{{$item.content}}<a href="/order/edit_exchanged.php?eid={{$item.typeid}}" target="_blank">点击查看>></a>
+				{{else if $item.m_type == 6}}
+				您有新的日程。时间：{{$item.ctime}}，内容：[{{$item.content}}]
+				{{else if $item.m_type == 5}}
+				生日提醒 ：时间：{{$item.ctime}}，内容：[{{$item.content}}]<a href="/crm2/customer_detail.php?cid={{$item.typeid}}" target="_blank">点击查看>></a>
+                {{else if $item.m_type == 7}}
+                预约提醒 ：时间：{{$item.ctime}}，内容：[{{$item.content}}]<a href="/aftersale/edit_appointment.php?id={{$item.typeid}}" target="_blank">点击处理>></a>
+                {{else if $item.m_type == 8}}
+                装修提醒 ：时间：{{$item.ctime}}，内容：[{{$item.content}}]<a href="{{$item.url}}" target="_blank">点击查看>></a>
+				{{/if}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>

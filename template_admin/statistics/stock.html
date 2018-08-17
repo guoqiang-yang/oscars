@@ -1,0 +1,40 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">库存</h1>
+
+    <table class="table table-bordered">
+        <tr>
+            <th>仓库</th>
+            <th>总占用</th>
+            {{foreach $cate1_list as $cate1}}
+                <th>{{$cate1.name}}</th>
+            {{/foreach}}
+        </tr>
+        {{foreach $data as $wid => $stock}}
+        {{if in_array($wid, $wids)}}
+            <tr>
+                <td>{{$warehouse_list[$wid]}}</td>
+                <td><a href="/statistics/stock_sku.php?cate1=0&wid={{$wid}}">{{$stock.total / 100}}元</a></td>
+                {{foreach $cate1_list as $cate1 => $info}}
+                    <td>
+                        <a href="/statistics/stock_sku.php?cate1={{$cate1}}&wid={{$wid}}">{{{{$stock[$cate1]['total']}} / 100}}元</a>
+                        <span style="color:gray;">  ({{$stock[$cate1]['percent']}}%)</span>
+                    </td>
+                {{/foreach}}
+            </tr>
+        {{/if}}
+        {{/foreach}}
+
+        <tr>
+            <td>汇总</td>
+            <td><a href="/statistics/stock_sku.php?cate1=0&wid=0">{{$sum.total /100}}元</a></td>
+        {{foreach $cate1_list as $cate1 => $info}}
+            <td>
+                <a href="/statistics/stock_sku.php?cate1={{$cate1}}&wid=0">{{{{$sum[$cate1]['total']}} / 100}}元</a>
+            </td>
+        {{/foreach}}
+        </tr>
+
+    </table>
+
+</div>

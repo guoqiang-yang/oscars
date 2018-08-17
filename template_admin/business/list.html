@@ -1,0 +1,119 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">企业列表</h1>
+
+    <form class="form-inline" role="form" action="/business/list.php">
+        <div class="placeholder">
+            {{if $_uid<=1004 || $_isAdmin || !$_isSales }}
+            <div class="form-group">
+                <label>销售人员：</label>
+                <select class="form-control" name="sales_suid" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.sales_suid)}}selected="selected" {{/if}}>请选择</option>
+                    <option value="1" {{if $search_conf.sales_suid== 1}}selected="selected" {{/if}}>无专员</option>
+                    {{foreach $salesman_list as $man}}
+                    <option value="{{$man.suid}}" {{if $search_conf.sales_suid==$man.suid}}selected="selected"{{/if}}>
+                        {{$man.name}}
+                    </option>
+                    {{/foreach}}
+                </select>
+            </div>
+            {{else if !empty($team_members)}}
+            <div class="form-group">
+                <label>团队成员：</label>
+                {{if !empty($team_members)}}
+                    <select class="form-control" name="sales_suid">
+                        {{foreach $team_members as $member}}
+                        <option value="{{$member.suid}}" {{if $member.suid== $search_conf.sales_suid}}selected="selected" {{/if}}>{{$member.name}}</option>
+                        {{/foreach}}
+                    </select>
+                {{/if}}
+            </div>
+            {{/if}}
+            <div class="form-group" style="margin-right:50px;">
+                <label>名称：</label>
+                <input type="text" class="form-control" name="name" value="{{$search_conf.name}}">
+            </div>
+            <div class="form-group" style="margin-right:50px;">
+                <label>联系人：</label>
+                <input type="text" class="form-control" name="contract_name" value="{{$search_conf.contract_name}}">
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:50px;">
+                <label>联系电话：</label>
+                <input type="text" class="form-control" name="contract_phone" value="{{$search_conf.contract_phone}}">
+            </div>
+            <div class="form-group" style="margin-right:50px;">
+                <label>企业id：</label>
+                <input style="max-width:120px;" type="text" class="form-control" name="bid" value="{{$search_conf.bid}}">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>企业ID</th>
+            <th>企业名称</th>
+            <th>联系人</th>
+            <th>联系电话</th>
+            <th>账期</th>
+            <th>工长数量</th>
+            <th>销售专员</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $business as $b}}
+        <tr data-bid="{{$b.bid}}">
+            <td>
+                {{$b.bid}}
+            </td>
+            <td>
+                {{$b.name}}
+                <br/>
+                {{$b.address}}
+            </td>
+            <td>
+                {{$b.contract_name}}
+            </td>
+            <td>
+                {{$b.contract_phone}}
+                {{if !empty($b.contract_phone2)}}
+                    <br/> {{$b.contract_phone2}}
+                {{/if}}
+            </td>
+            <td>
+                {{$b.payment_days}} 天
+            </td>
+            <td>
+                {{$b.staff_count}} 个
+            </td>
+            <td>
+                {{$b._suser.name}}
+                {{if !empty($b._suser2.name)}}
+                    <br/> {{$b._suser2.name}}
+                {{/if}}
+            </td>
+            <td>
+                <a href="/business/edit.php?bid={{$b.bid}}">编辑信息</a>　
+                <a href="/crm/new_customer.php?bid={{$b.bid}}">新增客户</a><br/>
+                <a href="/crm/customer_list.php?bid={{$b.bid}}">客户列表</a>　
+                <a href="/order/order_list.php?bid={{$b.bid}}">订单列表</a><br/>
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

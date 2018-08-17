@@ -1,0 +1,33 @@
+{{if !empty($product_list)}}
+<div id="location_list" style="font-size: 16px;color: #286090;{{if $step == 2}}display: none;{{/if}}">
+    <a class="change_location" data-location="0" href="javascript: void(0)" style="margin-right: 20px;">全部</a>
+    {{foreach $location_list as $location}}
+    <a class="change_location" data-location="{{$location}}" href="javascript: void(0)" style="margin-right: 20px;">{{$location}}区</a>
+    {{/foreach}}
+</div>
+<div style="color: #ff0000; margin-top: 20px;">
+    共计SID：<span id="total_skus">{{$total}}</span>个  *如果明细问题请点击确认进行任务分配。
+</div>
+<table class="table">
+    <thead>
+    <tr>
+        <th>sid</th>
+        <th>sku信息</th>
+        <th>单位</th>
+        <th>货位</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $product_list as $id => $product}}
+    <tr class="row-sku" data-sid="{{$product['sid']}}" data-num="{{$product.num}}" data-location="{{$product['location']}}" data-location-letter="{{substr($product['location'], 0, 1)}}">
+        <td>{{$product['sid']}}</td>
+        <td>{{$product['title']}}</td>
+        <td>{{$product['unit']}}</td>
+        <td>{{$product['location']}}</td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>
+{{else}}
+没有可盘点商品！
+{{/if}}

@@ -1,0 +1,137 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">贷款审批</h1>
+	<form class="form-inline" role="form" action="">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:50px;">
+				<label>cid：</label>
+				<input style="max-width:120px;" type="text" class="form-control" name="cid" value="{{$search_conf.cid}}">
+			</div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>姓名：</label>
+				<input style="max-width:120px;" type="text" class="form-control" name="name" value="{{$search_conf.name}}">
+			</div>
+            <div class="form-group" style="margin-right:50px;">
+                <label>手机号：</label>
+                <input style="max-width:120px;" type="text" class="form-control" name="mobile" value="{{$search_conf.mobile}}">
+            </div>
+		</div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:50px;">
+                <label>公司名：</label>
+                <input style="max-width:120px;" type="text" class="form-control" name="company" value="{{$search_conf.company}}">
+            </div>
+            <div class="form-group" style="margin-right:50px;">
+                <label>法人姓名：</label>
+                <input style="max-width:120px;" type="text" class="form-control" name="legal_person_name" value="{{$search_conf.legal_person_name}}">
+            </div>
+            <div class="form-group" style="margin-right:50px;">
+                <label>状态：</label>
+                <select class="form-control" name="step_show" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.step)}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $step_show as $id => $name}}
+                    <option value="{{$id}}" {{if $search_conf.step==$id}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+	</form>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>ID</th>
+			<th>客户</th>
+            <th>提交信息</th>
+            <th>状态</th>
+			<th>第三方审核</th>
+			<th>好材审核</th>
+			<th>操作人</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+		<tr>
+			<td>
+				{{$item.id}}
+			</td>
+			<td>
+				cid：{{$item.cid}}<br />
+				姓名：{{$item._customer.name}}<br />
+                类型：{{$item._type}}<br />
+                申请时间：{{$item.ctime}}
+			</td>
+			<td>
+                {{if $item.type == 1}}
+                手机号：{{$item.mobile}}<br />
+                姓名：{{$item.real_name}}<br />
+                身份证号：{{$item.id_card_no}}<br />
+                银行卡号：{{$item.bank_card}}
+                {{else}}
+                公司名：{{$item.company}}<br />
+                法人姓名：{{$item.legal_person_name}}<br />
+                手机号：{{$item.mobile}}<br />
+                身份证号：{{$item.id_card_no}}<br />
+                统一社会信用代码：{{$item.social_code}}
+                {{/if}}
+			</td>
+            <td>
+                {{$item._step}}
+            </td>
+            <td>
+                {{if $item.step == -1}}
+                处理时间：{{$item.tp_deal_time}}
+                {{else if $item.step == 1}}
+                --
+                {{else}}
+                额度：{{$item.tp_total_amount}} 元<br />
+                期限：{{$item.tp_due_date}} 天<br />
+                处理时间：{{$item.tp_deal_time}}
+                {{/if}}
+            </td>
+			<td>
+                {{if $item.step == -1}}
+                --
+                {{else if $item.step == -11}}
+                处理时间：{{$item.hc_deal_time}}
+                {{else if $item.step == 1}}
+                --
+                {{else if $item.step == 11}}
+                --
+                {{else}}
+                额度：{{$item.hc_total_amount}} 元<br />
+                期限：{{$item.hc_due_date}} 天<br />
+                处理时间：{{$item.hc_deal_time}}<br />
+                授信时间：{{$item.hc_crdit_time}}
+                {{/if}}
+			</td>
+			<td>
+                {{if $item.suid > 0}}
+				{{$item._suser.name}}
+                {{else}}
+                --
+                {{/if}}
+			</td>
+			<td>
+                {{if $item.step == -11 || $item.step == -1 || $item.step == 33}}
+                <a href="/activity/edit_finance_apply.php?id={{$item.id}}">查看</a>
+                {{else}}
+				<a href="/activity/edit_finance_apply.php?id={{$item.id}}">处理</a>
+                {{/if}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>

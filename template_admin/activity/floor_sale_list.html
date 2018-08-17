@@ -1,0 +1,88 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        添加活动
+    </h1>
+    <input id="fid" value="{{$fid}}" type="hidden"/>
+    <form class="form-inline" role="form" action="/activity/floor_sale_list.php" >
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px">
+                <label>楼层名称：</label>
+                <select class="form-control" name="type"  style="width: 150px;">
+                    <option value="0" >全部</option>
+                    {{foreach $floor as $id => $text}}
+                    <option value="{{$id}}" {{if $searchConf.type == $id}} selected="selected" {{/if}}>{{$text}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px; width: 70px;">查询</button>
+            {{if !empty($_permissions["/activity/add_floor_sale"])}}
+            <a href="/activity/add_floor_sale.php?fid={{$fid}}&url=/activity/add_floor_sale.php" class="btn btn-success" style="margin-left: 50px">添加活动</a>
+            {{/if}}
+            <div style="float:right;">
+                <a type="button" style="margin-left:20px;" class="btn btn-default" href='/activity/floor_activity_list.php' >返回>>></a>
+            </div>
+        </div>
+    </form>
+    <table class="table table-bordered " style="background: white; text-align: center;">
+        <thead style="background-color: #898989;color: white;font-size: 16px;">
+        <tr style="text-align: center">
+            <th style="text-align: center">序号</th>
+            <th style="text-align: center">活动位置</th>
+            <th style="text-align: center">活动图片</th>
+            <th style="text-align: center">活动商品名称</th>
+            <th style="text-align: center">活动时间</th>
+            <th style="text-align: center">状态</th>
+            <th style="text-align: center">排序</th>
+            <th style="text-align: center">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $id => $item}}
+        <tr>
+            <td style="vertical-align: middle;">{{$item.sid}}</td>
+            <td style="vertical-align: middle;">{{$item._type}}</td>
+            <td style="vertical-align: middle;"><img src="{{if empty($item.pic_url)}}/i/nopic100.jpg {{else}} {{$item.pic_url}} {{/if}}" style="width: 80px"/></td>
+            <td style="vertical-align: middle;">{{$item.name}}</td>
+            <td style="vertical-align: middle;">{{$item.start_time}}~{{$item.end_time}}</td>
+            <td style="vertical-align: middle;">
+                {{if $item.end_time <= $date}}
+                <span style="color: #ff0000;">已结束</span>
+                {{else if $item.start_time >= $date}}
+                <span>待上线</span>
+                {{else if $item.start_time < $date && $item.end_time > $date}}
+                    {{if $item.online == 0}}
+                    <span style="color: #6ad346;">在线</span>
+                    {{else if $item.online == 1}}
+                    <span style="color: #ff0000;">已下架</span>
+                    {{/if}}
+                {{/if}}
+            </td>
+            <td style="vertical-align: middle;">
+                <input style="width: 50px; text-align: center;" type="text" id="data-{{$item.sid}}" value="{{$item.sort}}"/><br />
+                {{if !empty($_permissions["/activity/add_floor_sale"])}}
+                <button style="width: 50px; margin-top: 5px;" class="sale_sort" data-id="{{$item.sid}}">更改</button>
+                {{/if}}
+            </td>
+            <td style="vertical-align: middle;">
+                {{if !empty($_permissions["/activity/add_floor_sale"])}}
+                    <a href="/activity/add_floor_sale.php?sid={{$item.sid}}&pid={{$item.pid}}">编辑</a><br/>
+                    {{if ($item.online == 1 || $item.start_time >= $date) && $item.end_time > $date}}
+                    <a class="sale_action" data-id="{{$item.sid}}" data-type="{{$item.type}}" method="up" start_time="{{$item.start_time}}" end_time="{{$item.end_time}}" href="javascript:;">上架</a><br/>
+                    {{else if $item.online == 0 && ($date > $item.start_time && $date < $item.end_time)}}
+                    <a class="sale_action" data-id="{{$item.sid}}" data-type="{{$item.type}}" start_time="{{$item.start_time}}" end_time="{{$item.end_time}}" method="down" href="javascript:;">下架</a><br/>
+                    {{/if}}
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+        </ul>
+    </nav>
+</div>

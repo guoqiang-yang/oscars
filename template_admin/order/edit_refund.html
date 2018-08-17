@@ -1,0 +1,207 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    {{if !empty($refund)}}
+        {{$rid = $refund.info.rid}}
+        {{$products = $refund.products}}
+    {{else}}
+        {{$products = $order_products}}
+    {{/if}}
+    <h1 class="page-header">{{if $rid}}编辑{{else}}新建{{/if}}退款单</h1>
+
+    <form class="form-horizontal" role="form">
+
+        <input type="hidden" class="form-control" name="rid" value="{{$refund.info.rid}}">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">订单ID：</label>
+
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="oid" value="{{if $order.oid}}{{$order.oid}}{{/if}}" readonly="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">联系人：</label>
+
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="contact_name" value="{{if $order.contact_name}}{{$order.contact_name}}{{else}}{{$customer.contact_name}}{{/if}}" readonly="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">联系电话：</label>
+
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="contact_phone" value="{{if $order.contact_phone}}{{$order.contact_phone}}{{else}}{{$customer.mobile}}{{/if}}" readonly="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">工地地址：</label>
+
+            <div class="col-sm-8">
+                <input type="text" class="form-control" name="address" value="{{$order.address}}" readonly="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">送货日期：</label>
+
+            <div class="col-sm-2">
+                <input type="text" class="form-control" name="delivery_date" value="{{if $order.delivery_date}}{{$order.delivery_date}}{{else}}{{$smarty.now|date_format:'%Y-%m-%d'}}{{/if}}" readonly="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">仓库：</label>
+
+            <div class="col-sm-2">
+                <select class="form-control" name="wid" {{if isset($refund.info) && $refund.info.step>=2}} disabled="true"{{/if}}>
+                    {{foreach $warehouse_list as $_wid=>$_wname}}
+                    <option value="{{$_wid}}" {{if $curr_wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">状态：</label>
+
+            <div class="col-sm-8">
+                <select class="form-control" name="order_step" style="display:inline-block;width:150px;" disabled="true"> {{foreach $refund_steps as $step_id => $step_name}}
+                    <option value="{{$step_id}}" {{if $refund.info.step== $step_id}}selected="selected" {{/if}}>{{$step_name}}</option>
+                    {{/foreach}}
+                </select>
+
+              <span style="color:gray;">　制单人：{{$refund._suser.name}}</span>
+              {{if $refund._received_suser}}　<span style="color:gray;">入库人：{{$refund._received_suser.name}}</span>{{/if}}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">少退金额：</label>
+
+            <div class="col-sm-8">
+                <input type="text" class="form-control" name="adjust" value="{{$refund.info.adjust/100|string_format:'%d'}}" style="width:60px;">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">原因：</label>
+
+            <div class="col-sm-8">
+                <textarea class="form-control" rows="2" name="note">{{$refund.info.note nofilter}}</textarea>
+            </div>
+        </div>
+
+        {{if $refund.info.step >= 3 && $refund.info.paid==0}}
+	    <div class="form-group">
+		    <label class="col-sm-2 control-label">实付款：</label>
+
+		    <div class="col-sm-8">
+			    <span style="color: red;">{{$order.real_amount / 100}} 元（退入余额的金额理论上不应该大于支付金额，退款时请注意！！！）</span>
+		    </div>
+	    </div>
+
+        <div class="form-group" style="color:red;">
+            <label class="col-sm-2 control-label">退入余额：</label>
+
+            <div class="col-sm-8" style="font-size: 18px; margin-top: 5px;">
+                <input type="checkbox" name="refund_to_balance" {{if $refund_to_balance}} checked="true" {{/if}}> 退款金额：{{($refund.info.price-$refund.info.adjust)/100}}元
+
+            </div>
+        </div>
+        {{/if}}
+        
+        {{if $refund.info.paid==1}}
+        <div class="form-group">
+		    <label class="col-sm-2 control-label"></label>
+
+		    <div class="col-sm-8">
+			    <span style="color:red; font-size:25px;">已退款</span>
+		    </div>
+	    </div>
+        {{/if}}
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">清单：</label>
+
+            <div class="col-sm-10">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>名称</th>
+                        <th>类别</th>
+                        <th>单价</th>
+                        <th>原数量</th>
+                        <th>已退数量</th>
+                        <th style="color:red;">可退数量</th>
+                        <th>退货数量</th>
+                        {{if $refund.info.step==2}}
+                        <th style="width:6%;color:red;font-weight:bold;">是否入库上架</th>
+                        {{/if}}
+                    </tr>
+                    </thead>
+                    <tbody class="refund_products_area">
+                    {{foreach $products as $productItem}}
+                    <tr class="_j_product" data-pid="{{$productItem.product.pid}}">
+                        <td>{{$productItem.product.pid}}</td>
+                        <td>
+                            <a href="/shop/edit_product.php?pid={{$productItem.product.pid}}" target="_blank">{{$productItem.sku.title}}</a>
+                        </td>
+                        <td>
+                            {{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}
+                        </td>
+                        <td>
+                            {{$productItem.price / 100}} <input type="hidden" name="price" value="{{$productItem.price / 100}}">
+                        </td>
+
+                        <td>{{if empty($refund)}}{{$productItem.num}}{{else}}{{$productItem.order_num}}{{/if}}</td>
+                        <td>{{$productItem.has_refund_num}}</td>
+                        <td>
+                            {{if empty($refund)}} {{$productItem.num-$productItem.has_refund_num}} {{else}} {{$productItem.order_num-$productItem.has_refund_num}} {{/if}}
+                        </td>
+                        <td>
+                            {{if empty($refund) || $refund.info.step<2}} <input type="text" class="form-control" name="num" value="{{if !empty($refund)}}{{$productItem.num}}{{else}}0{{/if}}" style="width:80px;"> {{else}} {{$productItem.num}} {{/if}}
+                        </td>
+                        {{if $refund.info.step==2}}
+                        <td>
+                            <div class="checkbox" style="font-size: 18px;margin-right:10px;">
+                                <label><input type="checkbox" name="stock_shelves" checked="checked" {{if !$_is_upgrade_wid}} disabled="true"{{/if}}></label>
+                            </div>
+                        </td>
+                        {{/if}}
+                    </tr>
+                    {{/foreach}} {{if $order.price>0}}
+                    <tr>
+                        <td>产品总价:￥{{$refund.info.price/100}}</td>
+                        <td>价格调整:￥{{$refund.info.adjust/100}}</td>
+                        <td colspan="4">实退金额:￥-{{($refund.info.price-$refund.info.adjust)/100}}</td>
+                    </tr>
+                    {{/if}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-default" id="_j_btn_save_refund" style="margin-right:20px;">保存</button>
+                {{$op_button_html nofilter}} 
+                
+                {{if $refund.info.paid==0 && $refund.info.step >= 3 &&($_isFinance||$_isAdmin)}}
+                <a href="javascript:void(0);" class="btn btn-primary btn-lg _j_chg_refund_step" data-optype="finance" style="margin-right:20px;">已退款</a>
+                {{/if}}
+                
+                {{if $refund.info.oid}}
+                <a href="/order/order_detail.php?oid={{$refund.info.oid}}" class="btn btn-default" style="margin-right:20px;">查看订单</a>
+                {{/if}} 
+                {{if $refund.info.step>=2}}
+                <a href="/order/refund_print.php?rid={{$refund.info.rid}}" class="btn btn-default" style="margin-right:20px;">打印</a>
+                {{/if}}
+                
+                {{if $_is_upgrade_wid && $refund.info.step>=3 && $refund.info.step!=6}}
+                <a href="/warehouse/shelved_detail.php?objid={{$refund.info.rid}}&type=3" class="btn btn-primary" style="margin-right:20px;background-color:darkblue;" target="_blank">上架</a>
+                {{/if}}
+            </div>
+        </div>
+
+    </form>
+
+</div>

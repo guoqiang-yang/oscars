@@ -1,0 +1,106 @@
+{{if $obj_type == 1 || $obj_type == 2 || $obj_type == 3}}
+{{if empty($search_products)}}暂无商品{{else}}
+<table class="table">
+    <thead>
+        <tr>
+            <th>商品编号</th>
+            <th>图片</th>
+            <th width="200">商品信息</th>
+            <th>库存/占用/残损&预盘亏</th>
+            <th>可转移量</th>
+            <th width="15%">转移量</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{foreach $search_products as $product}}
+        <tr class="_j_product_item">
+            <input type="hidden" name="sid" value="{{$product.sid}}">
+            <td>{{$product.sid}}</td>
+            <td><img width="100" src="{{if $product._pic}}{{$product._pic.small}}{{else}}/i/nopic100.jpg{{/if}}"></td>
+            <td>
+                {{$product.title}}<br/>
+                {{$product.package}}<br/>
+            </td>
+            <td>{{$product._stock.num}}/{{$product._stock.occupied}}/{{$product._stock.damaged_num}}</td>
+            <td>
+                {{if $product.available_num>0}}
+                {{$product.available_num}}
+                {{else}}
+                <span style="color:red;">无库存</span>
+                {{/if}}
+            </td>
+            <td>
+                <input type="text" class="form-control" name="num" data-rest="{{$product._stock.num-$product._stock.occupied}}" {{if $product.has_selected}} value="{{$product.num}}" disabled {{else}} value="0" {{/if}}>
+            </td>
+            <td>
+                {{if $product.has_selected}}
+                <label class="control-label">已添加</label>
+                {{else}}
+                <a href="javascript:void(0)" class="add_product" data-objtype="{{$obj_type}}" data-objid="{{$obj_id}}" data-sid="{{$product.sid}}">添加</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+    </tbody>
+</table>
+<div>
+    <ul class="pagination">
+        {{$pageHtml nofilter}}
+        <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+</div>
+{{/if}}
+{{elseif $obj_type == 4}}
+{{if empty($search_products)}}暂无商品{{else}}
+<table class="table">
+    <thead>
+    <tr>
+        <th>商品编号</th>
+        <th>图片</th>
+        <th>商品信息</th>
+        <th>成本/采购价</th>
+        <th style="width:10%;">价格</th>
+        <th>采购数量</th>
+        <th>单位</th>
+        <!--<th>入库数量</th>-->
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $search_products as $product}}
+    <tr class="_j_product_item">
+        <input type="hidden" name="sid" value="{{$product.sku.sid}}">
+        <td>{{$product.product.sid}}</td>
+        <td><img width="120" src="{{if $product.sku._pic}}{{$product.sku._pic.small}}{{else}}/i/nopic100.jpg{{/if}}"></td>
+        <td>
+            {{$product.sku.title}}<br/> {{$product.sku.package}}<br/><span {{if $product.product.managing_mode == 2}}style="color:#FF0000"{{/if}}>{{$managing_modes[$product.product.managing_mode]}}</span>
+        </td>
+        <td>
+            {{$product.product.cost/100}}元 / {{$product.supplier_purchase_price/100}}元
+        </td>
+        <td class="col-sm-1">
+            <input type="text" class="form-control" name="price" value="{{$product._inorder.price/100}}" {{if $source == 1}}disabled="true"{{/if}}>
+        </td>
+        <td class="col-sm-1">
+            <input type="text" class="form-control" name="num" {{if $product.has_selected}} value="{{$product._inorder.num}}" disabled {{else}} value="0" {{/if}}>
+        </td>
+        <td class="col-sm-1"  style="color:red;">
+            {{if !empty($product.sku.unit)}}/{{$product.sku.unit}}{{else}}/个{{/if}}
+        </td>
+        {{*<td class="col-sm-1">
+            <input type="text" class="form-control" name="stockin_num" value="{{$product._stockin.num}}" disabled="true">
+        </td>*}}
+        <td>
+            {{if $product.has_selected}}
+            <label class="control-label">已添加</label>
+            {{else}}
+            <a href="javascript:void(0)" class="add_product" data-objtype="{{$obj_type}}" data-objid="{{$obj_id}}" data-sid="{{$product.sid}}">添加</a>
+            {{/if}}
+        </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>
+{{/if}}
+{{/if}}

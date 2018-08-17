@@ -1,0 +1,102 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">操作日志</h1>
+
+    <form class="form-inline" role="form" action="/logistics/action_log.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>订单号：</label>
+                <input style="width: 90px;" type="text" class="form-control" name="oid" value="{{$searchConf.oid}}">
+            </div>
+
+            <div class="form-group" style="margin-right:20px;">
+                <label>排线ID：</label>
+                <input style="width: 90px;" type="text" class="form-control" name="line_id" value="{{$searchConf.line_id}}">
+            </div>
+
+	        <div class="form-group" style="margin-right:20px;">
+		        <label>工人id：</label>
+		        <input style="width: 90px;" type="text" class="form-control" name="cuid" value="{{$searchConf.cuid}}">
+	        </div>
+
+            <div class="form-group">
+                <label>操作类型：</label>
+                <select class="form-control" name="action_type" style="margin-right: 20px;">
+                    <option value="0" {{if empty($searchConf.action_type)}}selected="selected" {{/if}}>请选择</option>
+                    {{foreach $action_type_list as $key => $action}}
+                    <option value="{{$key}}" {{if $searchConf.action_type==$key}}selected="selected"{{/if}}>{{$action}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+    </form>
+
+    <hr>
+
+    {{if !empty($list)}}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>订单</th>
+            <th>排线id</th>
+	        <th>工人</th>
+            <th>操作管理员</th>
+            <th>操作类型</th>
+            <th>描述</th>
+            <th>操作时间</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $action}}
+        <tr>
+            <td>
+                {{$action.id}}
+            </td>
+            <td>
+	            {{if !empty($action.oid)}}
+                <a target="_blank" href="/order/order_detail.php?oid={{$action.oid}}">{{$action.oid}}</a>
+                {{else}}
+	            --
+	            {{/if}}
+            </td>
+            <td>
+                <a href="order_line_list.php?id={{$action.line_id}}">{{$action.line_id}}</a>
+            </td>
+            <td>
+                {{$action._worker.name}}{{if $action.type==1}}(司机){{else}}搬运工{{/if}}<br />
+	            id：{{$action.cuid}}
+            </td>
+	        <td>
+		        {{$action.admin_name}}
+	        </td>
+            <td>
+                {{$action.action}}
+            </td>
+            <td>
+                {{$action.desc}}
+            </td>
+            <td>
+                {{$action.mtime}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+    
+    {{else}}
+    <div>
+        <p style="font-size:30px;">请输入条件查询！！！</p>
+    </div>
+    {{/if}}
+
+</div>

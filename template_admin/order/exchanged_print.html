@@ -1,0 +1,119 @@
+<style>
+  h1 {font-family: STKaiti;}
+  table {font-size:12px; border-spacing: 0;border-collapse: collapse; }
+  table td {padding:5px 10px;}
+  table.border td {border:1px solid #333;}
+</style>
+<style type="text/css" media=print>
+  .noprint{display : none }
+</style>
+{{*<script type="text/javascript" src="/js/apps/print.js"></script>*}}
+
+<div class="">
+  <!--begin-->
+
+  <h1 style="text-align: center;">北京好材装修建材换货单</h1>
+
+  <table width="90%" style="margin: auto;">
+    <tbody>
+    <tr>
+      <td width="45%">客户单位：{{$exchanged.info._customer.name}}</td>
+      <td width="55%">收 货 人：{{$exchanged.order.contact_name}}（{{$exchanged.order.contact_phone}}{{if $exchanged.order.contact_phone2}} , {{$exchanged.order.contact_phone2}}{{/if}}）</td>
+    </tr>
+      <tr>
+        <td width="33%">发货仓库：{{$warehouse_list[$exchanged.info.wid]}}</td>
+        <td width="33%">收货地址：{{$exchanged.order.print_address}}</td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <table class="border" style="text-align: center;margin: auto;" width="90%">
+    <thead>
+      <tr><td colspan="5" style="text-align: left;">订单ID:{{$exchanged.info.oid}}</td></tr>
+      <tr>
+        <td>商品PID</td>
+        <td>商品全名</td>
+        <td>单位</td>
+        <td>购买数量</td>
+        <td>退回数量</td>
+      </tr>
+    </thead>
+    <tbody>
+    {{foreach $orderProducts as $product}}
+     <tr>
+       <td>{{$product.pid}}</td>
+       <td>{{$product.sku.title}}</td>
+       <td>{{if $product.sku.unit}}{{$product.sku.unit}}{{else}}个{{/if}}</td>
+       <td>{{$product.num}}</td>
+       <td>{{$product.exchanged_refund_num}}</td>
+     </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  <table class="border" style="text-align: center;margin: 20px auto;" width="90%">
+    <thead>
+    <tr><td colspan="4" style="text-align: left;">换货单ID:{{$exchanged.info.eid}}</td></tr>
+    <tr>
+      <td>商品PID</td>
+      <td>商品全名</td>
+      <td>单位</td>
+      <td>发货数量</td>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $exchangedProducts as $product}}
+    <tr>
+      <td>{{$product.pid}}</td>
+      <td>{{$product.sku.title}}</td>
+      <td>{{if $product.sku.unit}}{{$product.sku.unit}}{{else}}个{{/if}}</td>
+      <td>{{$product.num}}</td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  <table width="100%" style="margin: auto;">
+    <tbody>
+    <tr>
+      <td width="20%" style="text-align: right;">订购热线：</td><td width="29%">400-058-5788</td>
+      <td width="20%" style="text-align: right;">售后电话：</td><td>010-53350903，010-53399670</td>
+    </tr>
+    <tr>
+      <td width="20%" style="text-align: right;">销售专员：</td><td width="29%">{{if !empty($saler_name)}}{{$saler_name.name}}({{$saler_name.mobile}}){{/if}}</td>
+      <td width="20%" style="text-align: right;">司机：</td><td>{{$driver_name}}</td>
+    </tr>
+    <tr>
+      <td width="20%" colspan="2" style="text-align: center;">白联记账&emsp;&emsp;&emsp;粉联客户&emsp;&emsp;&emsp;蓝联库房&emsp;&emsp;&emsp;黄联存根</td>
+      <td width="20%" colspan="2" style="text-align: center;">请仔细核对商品，禾人签字即视为同意接受</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <table width="90%" style="margin: auto;">
+    <tbody>
+    <tr>
+      <td style="font-size:16px;">配货签字：</td>
+      <td style="font-size:16px;">司机签字：</td>
+      <td style="font-size:16px;">客户签字：</td>
+    </tr>
+    <tr>
+      <td style="font-size:16px;"></td>
+      <td style="font-size:16px;">实收款额：</td>
+      <td style="font-size:16px;">实付款额：</td>
+    </tr>
+    </tbody>
+  </table>
+  <!--end-->
+  <div class="noprint">
+    <div style="margin-top:30px; text-align: center;">
+      {{*<input type="button" value="打印" onclick="javascript:printOrder();" >*}}
+      <input type="button" value="打印" onclick="javascript:window.print();" style="font-size: 25px;padding: 5px 15px;">
+    </div>
+  </div>
+
+
+</div>
+
+

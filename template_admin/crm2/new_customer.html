@@ -1,0 +1,37 @@
+<style>
+    .area-bottom{
+      border-bottom:1px dashed #eee;
+      margin:20px;
+    }
+</style>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">添加客户</h1>
+  <ul id="myTab" class="nav nav-tabs">
+    <li class="active">
+      <a href="#home" data-toggle="tab">
+        基本信息
+      </a>
+    </li>
+  </ul>
+  <div id="myTabContent" class="tab-content">
+      <div class="tab-pane fade in active" id="home">
+        <form class="form-horizontal" role="form">
+
+          {{include file="crm2/block/customer_edit_info.html"}}
+
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <button type="button" class="btn btn-primary" id="_j_save_customer_info" style="margin-right:20px;">保存</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="tab-pane fade" id="workinfo">
+      </div>
+      <div class="tab-pane fade" id="friend">
+      </div>
+  </div>
+</div>

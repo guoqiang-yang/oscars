@@ -1,0 +1,285 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">工单列表</h1>
+
+	<form class="form-inline" role="form" action="/aftersale/list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right: 20px;">
+				<label>id：</label>
+				<input type="text" style="width: 80px;" class="form-control" name="id" value="{{$searchConf.id}}" />
+			</div>
+			<div class="form-group" style="margin-right: 20px;">
+				<label>反馈人类型：</label>
+				<select class="form-control" name="fb_type">
+					<option value="0" >全部</option>
+					{{foreach $fb_type as $id => $text}}
+					<option value="{{$id}}" {{if $searchConf.fb_type == $id}} selected="selected" {{/if}}>{{$text}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<div class="form-group" style="margin-right: 20px;">
+				<label>反馈人id：</label>
+				<input type="text" class="form-control" name="contact_id" value="{{$searchConf.contact_id}}" style="width: 120px;" />
+			</div>
+			<div class="form-group" style="margin-right: 20px;">
+				<label>反馈人手机：</label>
+				<input type="text" class="form-control" name="contact_mobile" value="{{$searchConf.contact_mobile}}" style="width: 120px;" />
+			</div>
+			<div class="form-group" style="margin-right: 20px;">
+				<label>相关订单ID：</label>
+				<input type="text" class="form-control" name="objid" value="{{$searchConf.objid}}" style="width: 80px;" />
+			</div>
+		</div>
+		<div class="placeholder">
+
+			<div class="form-group" style="margin-right: 20px;">
+				<label>问题类型：</label>
+				<select class="form-control" name="type" id="_adtask_change_objtype" style="margin-right: 20px;">
+					<option value="0" >全部</option>
+					{{foreach $type as $id => $text}}
+					<option value="{{$id}}" {{if $searchConf.type == $id}} selected="selected" {{/if}}>{{$text}}</option>
+					{{/foreach}}
+				</select>
+				<select id="short_desc" name="typeid" class="form-control">
+					<option value="0"> -- </option>
+				</select>
+			</div>
+			<div class="form-group" style="margin-right: 20px;">
+				<label>创建时间：</label>
+				<input placeholder="2016-01-01" type="date" class="form-control" name="start_from_date" value="{{if $searchConf.start_from_date}}{{$searchConf.start_from_date}}{{/if}}" style="width: 160px;"> —
+				<input placeholder="2016-12-12" type="date" class="form-control" name="start_to_date" value="{{if $searchConf.start_to_date}}{{$searchConf.start_to_date}}{{/if}}" style="width: 160px;">
+			</div>
+		</div>
+		<div class="placeholder">
+			<div class="form-group" style="margin-right: 20px;">
+				<label>最后操作时间：</label>
+				<input placeholder="2016-01-01" type="date" class="form-control" name="end_from_date" value="{{if $searchConf.end_from_date}}{{$searchConf.end_from_date}}{{/if}}" style="width: 160px;"> —
+				<input placeholder="2016-12-12" type="date" class="form-control" name="end_to_date" value="{{if $searchConf.end_to_date}}{{$searchConf.end_to_date}}{{/if}}" style="width: 160px;">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px; width: 70px;">查询</button>
+			<div class="form-group" style="float:right;">
+				<button type="submit" name="action" value="download" class="btn btn-success">导出当前数据</button>
+			</div>
+            {{if !empty($_permissions["/aftersale/edit"])}}
+			<a href="/aftersale/edit.php" class="btn btn-success" style="margin-left:40px; width: 70px;">新建</a>
+            {{/if}}
+		</div>
+	</form>
+	<nav class="nav navbar-default" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+			</div>
+			<div class="collapse navbar-collapse">
+				<ul class="nav navbar-nav"  id="navbar" name="{{$searchConf.exec_status}}">
+					<li>
+						<a href="{{$page_url}}" style="padding-right: 30px;padding-left: 30px;">
+							全部
+						</a>
+					</li>
+					<li>
+						<a href="{{$page_url}}&exec_status=2,3" style="padding-right: 30px;padding-left: 30px;">
+							待处理
+						</a>
+					</li>
+					<li>
+						<a href="{{$page_url}}&exec_status=4" style="padding-right: 30px;padding-left: 30px;">
+							处理中
+						</a>
+					</li>
+					<li>
+						<a href="{{$page_url}}&exec_status=5" style="padding-right: 30px;padding-left: 30px;">
+							已处理
+						</a>
+					</li>
+					<li>
+						<a href="{{$page_url}}&exec_status=6"style="padding-right: 30px;padding-left: 30px;">
+							已关闭
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>{{if $searchConf.order == 'asc'}}<a href="{{$order_url}}&order=desc">ID↓</a>{{else}}<a href="{{$order_url}}&order=asc">ID↑</a>{{/if}}</th>
+			<th>反馈人</th>
+			<th>问题类型</th>
+			<th style="...">问题描述</th>
+			<th>创建人</th>
+			<th>受理人</th>
+			<th>{{if $searchConf.order == 'asc'}}<a href="{{$order_url}}&order=desc&order_name=mtime">工单状态↓</a>{{else}}<a href="{{$order_url}}&order=asc&order_name=mtime">工单状态↑</a>{{/if}}</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+		<tr>
+			<td>
+				{{$item.id}}
+			</td>
+			<td class="col-sm-2">
+				【反馈】{{$item.contact_name}}<br />
+				 {{if $item.fb_type == 1}}
+					{{if $item.type == 2 && $item.typeid==1}}
+				【客户ID】<a target="_blank" href="/order/customer_list_cs.php?cid={{$item.fb_uid}}">{{$item.fb_uid}}</a><br />
+					{{else}}
+				【客户ID】<a target="_blank" href="/crm2/customer_detail.php?cid={{$item.fb_uid}}">{{$item.fb_uid}}</a><br />
+					{{/if}}
+				 {{else if $item.fb_type == 2}}
+				【司机ID】<a target="_blank" href="/logistics/driver.php?id={{$item.fb_uid}}">{{$item.fb_uid}}</a><br />
+				 {{else if $item.fb_type == 3}}
+				【搬运工ID】<a target="_blank" href="/logistics/carrier.php?id={{$item.fb_uid}}">{{$item.fb_uid}}</a><br />
+				 {{else}}
+				【工作人员ID】<a target="_blank" href="/admin/staff_list.php?name={{$item.contact_name}}&mobile={{$item.contact_mobile}}">{{$item.fb_uid}}</a><br />
+				 {{/if}}
+				【电话】{{$item.contact_mobile}}<br />
+				【类型】{{$item._type}}<br />
+				{{if $item.contact_way}}
+				【其他】{{$item.contact_way}}<br />
+				{{/if}}
+			</td>
+			<td style="width:130px;">
+				【{{$item._type}}】<br />
+				{{foreach $item.objid as $oid}}
+				{{if $oid}}
+				<a target="_blank" href="/order/order_detail.php?oid={{$oid}}">【订单】{{$oid}}</a><br />
+				{{/if}}
+				{{/foreach}}
+				{{foreach $item.rid as $r}}
+					{{if $item.type == 1 && $r}}
+						<a target="_blank" href="/order/order_detail.php?oid={{$oid}}">【退货单】{{$r}}</a><br />
+					{{else if $item.type == 2 && $r}}
+						<a target="_blank" href="/order/order_detail.php?oid={{$oid}}">【换货单】{{$r}}</a><br />
+					{{else if $item.type == 3 && $r}}
+						<a target="_blank" href="/order/order_detail.php?oid={{$oid}}">【补漏单】{{$r}}</a><br />
+					{{/if}}
+				{{/foreach}}
+			</td>
+			<td class="col-sm-3">
+				<a data-toggle="modal" data-target="#contentDetail" data-content="{{$item.content}}" data-result="{{$item.exec_result}}" href="javascript:;" class="content">
+					【问题】{{$item._content}}<br />
+				</a>
+			</td>
+			<td style="width:130px;">
+				录入：{{$item._create_suid.name}}<br />
+				{{$item.ctime}}
+			</td>
+			<td align="center">
+				{{if !empty($item._duty_department) }}
+				【受理部门】<br/>
+				{{$item._duty_department}}<br />
+				{{/if}}
+				{{if !empty($item._exec_suid.name) }}
+				【受理人】<br />
+				{{$item._exec_suid.name}}
+				{{/if}}
+			</td>
+			<td>
+				<b style="color: red;">【{{$status_list[$item.exec_status]}}】</b>
+				<br />
+				{{$item.mtime}}
+			</td>
+			<td class="col-sm-1" align="center">
+                {{if !empty($_permissions["/aftersale/detailLog"])}}
+				<a href="/aftersale/detailLog.php?id={{$item.id}}">详情</a><br />
+                {{/if}}
+                {{if !empty($_permissions["/aftersale/deal"])}}
+                    {{if ($item.exec_suid == 0 && ($item.duty_department==$_user.role || !empty($_permissions['/aftersale/deal']))) && $item.exec_status < 5}}
+                    <a href="/aftersale/deal.php?id={{$item.id}}&claim=1">认领</a><br />
+                    {{elseif $item.exec_suid>0 }}
+                        {{if ($_uid == $item.exec_suid || !empty($_permissions['/aftersale/deal'])) && $item.exec_status < 5}}
+                        <a href="/aftersale/deal.php?id={{$item.id}}">处理</a><br />
+                        {{else if (($_uid == $item.create_suid && !in_array($item.typeid,array(12,13,14,15,16)) ) || !empty($_permissions['/aftersale/deal'])) && $item.exec_status == 5}}
+                        <a href="/aftersale/deal.php?id={{$item.id}}">处理／关闭</a><br />
+                        {{/if}}
+                    {{/if}}
+                {{/if}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>
+
+<div class="modal fade _j_dialog" id="contentDetail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">详情</h4>
+			</div>
+			<div class="modal-body">
+				<label class="label-default">问题内容</label>
+				<div id="real_content" style="width:100%;" class="container"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+			</div>
+		</div>
+	</div>
+</div>
+<input type="hidden" name="all_short_descs" value="{{$all_short_descs}}">
+<script type="text/javascript">
+	$(function(){
+        $('.content').on('click', showContent);
+        function showContent() {
+            $('#real_content').text($(this).data('content'));
+            $('#real_result').text($(this).data('result'));
+        }
+		function changeCateOfShortDesc(objtype){
+			var shortDescHtml = '<option value="0">请选择</option>';
+			var allShortDescs = eval('(' + $('input[name=all_short_descs]').val() + ')');
+			for (var _objtype in allShortDescs){
+				if (_objtype == objtype){
+					for (var i in allShortDescs[_objtype]){
+						shortDescHtml += '<option value="'+i+'">'+allShortDescs[_objtype][i]+'</option>';
+					}
+				}
+			}
+			return shortDescHtml;
+		}
+		switch ($('#navbar').attr('name')) {
+			case '2,3':
+				$($('#navbar li')[1]).attr('class','active');
+				break;
+			case '4':
+				$($('#navbar li')[2]).attr('class','active');
+				break;
+			case '5':
+				$($('#navbar li')[3]).attr('class','active');
+				break;
+			case '6':
+				$($('#navbar li')[4]).attr('class','active');
+				break;
+            default:
+                $($('#navbar li')[0]).attr('class','active');
+                break;
+		}
+		$('#_adtask_change_objtype').on('change', function(){
+			var objtype = $(this).val();
+			$('#short_desc').html(changeCateOfShortDesc(objtype));
+		});
+		{{if $searchConf.type >0}}
+		$('#short_desc').html(changeCateOfShortDesc('{{$searchConf.type}}'));
+			{{if $searchConf.typeid>0}}
+		    $('#short_desc').val('{{$searchConf.typeid}}');
+			{{/if}}
+		{{/if}}
+	});
+</script>

@@ -1,0 +1,91 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        楼层活动运营
+    </h1>
+
+    <form class="form-inline" role="form" action="/activity/floor_activity_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px">
+                <label>楼层名称：</label>
+                <select class="form-control" name="type"  style="width: 150px;">
+                    <option value="0" >全部</option>
+                    {{foreach $floor as $id => $text}}
+                    <option value="{{$id}}" {{if $searchConf.type == $id}} selected="selected" {{/if}}>{{$text}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>活动城市：</label>
+                <select class="form-control" name="city" style="width: 150px;">
+                    <option value="0" >全部</option>
+                    {{foreach $city as $id => $text}}
+                    <option value="{{$id}}" {{if $searchConf.city == $id}} selected="selected" {{/if}}>{{$text}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px; width: 70px;">查询</button>
+            {{if !empty($_permissions["/activity/add_floor_activity"])}}
+            <a href="/activity/add_floor_activity.php" class="btn btn-success" style="margin-left: 50px">添加新楼层</a>
+            {{/if}}
+        </div>
+    </form>
+    <table class="table table-bordered " style="background: white; text-align: center;">
+        <thead style="background-color: #898989;color: white;font-size: 16px;">
+        <tr style="text-align: center">
+            <th style="text-align: center">序号</th>
+            <th style="text-align: center">楼层类型</th>
+            <th style="text-align: center">活动城市</th>
+            <th style="text-align: center">状态</th>
+            <th style="text-align: center">排序</th>
+            <th style="text-align: center">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $id => $item}}
+        <tr>
+            <td style="vertical-align: middle;">{{$item.fid}}</td>
+            <td style="vertical-align: middle;">{{$item._type}}</td>
+            <td style="vertical-align: middle;">{{$item._city}}</td>
+            <td style="vertical-align: middle;">
+                {{if $item.online == 1}}
+                <span style="color: #1f9e0b;">待上线</span>
+                {{else if $item.online == 0}}
+                <span style="color: red;">在线</span>
+                {{/if}}
+            </td>
+            <td style="vertical-align: middle;">
+                <input style="width: 50px; text-align: center;" type="text" id="data-{{$item.fid}}" value="{{$item.sort}}"/><br />
+                {{if !empty($_permissions["/activity/add_floor_activity"])}}
+                <button style="width: 50px; margin-top: 5px;" class="floor_sort" data-id="{{$item.fid}}">更改</button>
+                {{/if}}
+            </td>
+            </td>
+            <td style="vertical-align: middle;">
+                <input type="hidden" id="data-city-{{$item.fid}}" value="{{$item.city}}">
+                <input type="hidden" id="data-type-{{$item.fid}}" value="{{$item.type}}">
+                {{if !empty($_permissions["/activity/add_floor_activity"])}}
+                    <a href="/activity/add_floor_activity.php?id={{$item.fid}}">编辑</a><br/>
+                    {{if $item.online == 1}}
+                    <a class="floor_action" data-id="{{$item.fid}}" method="up" href="javascript:;">上线</a><br/>
+                    {{else if $item.online == 0}}
+                    <a class="floor_action" data-id="{{$item.fid}}" method="down" href="javascript:;">下线</a><br/>
+                    {{/if}}
+                    {{*<a class="delete_btn" data-id="{{$item.fid}}" href="javascript:;">删除</a><br/>*}}
+                {{/if}}
+                {{if !empty($_permissions["/activity/floor_sale_list"])}}
+                <a href="/activity/floor_sale_list.php?fid={{$item.fid}}">查看详情</a><br/>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+        </ul>
+    </nav>
+</div>

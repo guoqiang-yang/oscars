@@ -1,0 +1,77 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">添加采购订单</h1>
+
+  <form class="form-horizontal _j_in_order_form" role="form">
+    {{include "warehouse/block_edit_order_info.html" order=array()}}
+    <div class="form-group">
+      <label class="col-sm-2 control-label">采购清单：</label>
+
+      <div class="col-sm-10">
+        <form class="form-horizontal" role="form">
+          <input type="hidden" class="form-control" name="oid" value="{{$order.info.oid}}">
+
+          <div class="form-group">
+            <div class="col-sm-10">
+              <style type="text/css">
+                .table>tbody>tr>td {vertical-align:middle;}
+              </style>
+
+              <table class="table">
+                <thead>
+                <tr>
+                  <th>产品id</th>
+                  <th>产品名称</th>
+                  <th>类别</th>
+                  <th>单价</th>
+                  <th>数量</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{foreach $order.products as $productItem}}
+                {{$stock_can_use = $productItem._stock.num - $productItem._stock.occupied + $productItem._stock.vnum}}
+                {{if $stock_can_use < $productItem.num}}
+                <tr class="_j_product" data-pid="{{$productItem.pid}}">
+                  <td>{{$productItem.pid}}</td>
+                  <td><a href="/shop/edit_product.php?pid={{$productItem.pid}}" target="_blank">{{$productItem.title}}</a></td>
+                  <td>{{$cate1_list[$productItem.cate1]['name']}} -
+                    {{$cate2_list_all[$productItem.cate1][$productItem.cate2]['name']}}
+                  </td>
+                  <td>
+                    <input type="text" class="form-control" name="price" value="{{$productItem.cost/100}}" style="width:60px;display:inline-block;">
+                  </td>
+                  <td>
+                    <input type="text" class="form-control" name="num" value="{{if $stock_can_use<$productItem.num}}{{$productItem.num - $stock_can_use}}{{else}}0{{/if}}" style="width:80px;display:inline-block;">
+                  </td>
+                </tr>
+                {{/if}}
+                {{/foreach}}
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="button" class="btn btn-primary" id="_j_btn_save_order_quick" style="margin-right:20px;">保存</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Modal -->
+  <div class="modal fade" id="dlgSupplierList" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        {{include "warehouse/dlg_supplier_list.html"}}
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>

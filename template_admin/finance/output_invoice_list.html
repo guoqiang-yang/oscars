@@ -1,0 +1,160 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">销售发票列表</h1>
+
+    <form class="form-inline" role="form" action="/finance/output_invoice_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px;">
+                <label>开票日期：</label>
+                <input type="date" class="form-control" name="from_day" value="{{if $search_conf.from_day}}{{$search_conf.from_day}}{{/if}}" style="width: 160px;"> —
+                <input type="date" class="form-control" name="end_day" value="{{if $search_conf.end_day}}{{$search_conf.end_day}}{{/if}}" style="width: 160px;">
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>创建日期：</label>
+                <input type="date" class="form-control" name="from_ctime" value="{{if $search_conf.from_ctime}}{{$search_conf.from_ctime}}{{/if}}" style="width: 160px;"> —
+                <input type="date" class="form-control" name="end_ctime" value="{{if $search_conf.end_ctime}}{{$search_conf.end_ctime}}{{/if}}" style="width: 160px;">
+            </div>
+            <div class="form-group">
+                <label>发票类型：</label>
+                <select class="form-control" name="invoice_type" style="margin-right:20px;">
+                    <option value="0" {{if $search_conf.invoice_type==0}} selected="selected" {{/if}}>全部</option>
+                    {{foreach $invoice_types as $key=>$type}}
+                    <option value="{{$key}}" {{if $search_conf.invoice_type==$key}}selected="selected" {{/if}}>{{$type}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>发票ID：</label>
+                <input type="text" class="form-control" name="id" value="{{$search_conf.id}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>票号：</label>
+                <input type="text" class="form-control" name="number" value="{{$search_conf.number}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>结算单/采购单ID：</label>
+                <input type="text" class="form-control" name="bill_ids" value="{{$search_conf.bill_ids}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>客户ID：</label>
+                <input type="text" class="form-control" name="cid" value="{{$search_conf.cid}}" style="width:80px;">
+            </div>
+            <div class="form-group">
+                <label>开票城市：</label>
+                <select class="form-control" name="city_id" style="margin-right:20px;">
+                    <option value="0" {{if $search_conf.city_id==0}} selected="selected" {{/if}}>全部</option>
+                    {{foreach $city_list as $key=>$city}}
+                    <option value="{{$key}}" {{if $search_conf.city_id==$key}}selected="selected" {{/if}}>{{$city}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button style="margin-left: 50px; margin-right: 20px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+            <div class="btn-group">
+                <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">导出
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <a href="{{$download_url}}&action=download&type=invoice">发票清单</a>
+                    </li>
+                    <li>
+                        <a href="{{$download_url}}&action=download&type=invoice_products">发票商品清单</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </form>
+
+    <nav class="nav navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav"  id="navbar2" data-step="{{$step}}">
+                    <li>
+                        <a href="{{$page_url}}" style="padding-right: 30px;padding-left: 30px;">
+                            全部
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&step=3" style="padding-right: 30px;padding-left: 30px;">
+                            待确认
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&step=4" style="padding-right: 30px;padding-left: 30px;">
+                            待开票
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{$page_url}}&step=5" style="padding-right: 30px;padding-left: 30px;">
+                            已开票
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width:7%;">发票ID</th>
+            <th>发票类型</th>
+            <th style="width:12%;">发票名</th>
+            <th style="width:10%;">开票金额</th>
+            <th style="width:8%;">票号</th>
+            <th style="width:8%;">订单ID</th>
+            <th>开票城市</th>
+            <th style="width:8%;">状态</th>
+            <th style="width:8%;">开票时间</th>
+            <th style="width:8%">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $invoice_list as $invoice}}
+        <tr {{if $invoice.is_diff}} style="color: red;"{{/if}}>
+            <td>{{$invoice.id}}</td>
+            <td>{{$invoice_types[$invoice.invoice_type]}}</td>
+            <td>{{$invoice.title}}</td>
+            <td>{{$invoice.invoice_amount/100}}</td>
+            <td>{{$invoice.number}}</td>
+            <td>
+                {{if !empty($invoice.bill_ids)}}
+                {{foreach $invoice.bill_ids as $bill}}
+                <a href="/order/order_detail.php?oid={{$bill}}" target="_blank">{{$bill}}</a><br>
+                {{/foreach}}
+                {{/if}}
+            </td>
+            <td>{{$city_list[$invoice.city_id]}}</td>
+            <td>{{$step_list[$invoice.step]}}</td>
+            <td>{{if $invoice.step ==5}}{{$invoice._finance_user}}<br>{{$invoice.finish_time}}{{/if}}</td>
+            <td>
+                {{if $invoice.step <5 && !empty($_permissions['/finance/edit_output_invoice'])}}
+                <a href="/finance/edit_output_invoice.php?id={{$invoice.id}}" target="_blank">编辑</a><br/>
+                {{/if}}
+                <a href="/finance/show_output_invoice.php?id={{$invoice.id}}">查看</a><br/>
+                {{if !empty($_permissions['/finance/print_output_invoice'])}}
+                <a href="/finance/print_output_invoice.php?id={{$invoice.id}}" target="_blank">打印</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

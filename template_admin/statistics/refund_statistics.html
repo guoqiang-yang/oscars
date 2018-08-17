@@ -1,0 +1,154 @@
+<pre id="reason_data" style="display:none">
+{{$reason_data}}
+</pre>
+<pre id="reason_detail_data" style="display: none;">
+    {{$reason_detail_data}}
+</pre>
+<pre id="reason_type_data" style="display: none;">
+    {{$reason_type_data}}
+</pre>
+<pre id="wid_refund_data_key" style="display: none;">
+    {{$wid_refund_data_key}}
+</pre>
+<pre id="wid_refund_data_val" style="display: none;">
+    {{$wid_refund_data_val}}
+</pre>
+
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        退款统计
+    </h1>
+    <form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+        <div class="placeholder">
+            <div class="form-group _j_date_selecter" style="margin-right: 20px;">
+                <label>时间：</label>
+                <input type="date" class="form-control" name="start_time" value="{{$start_time}}" style="display: inline-block;width: 160px;">
+                To
+                <input type="date" class="form-control" name="end_time" value="{{$end_time}}" style="display: inline-block;width: 160px;">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+            <div class="form-group" style="float:right;">
+                <!--<button type="submit" name="action" value="download" class="btn btn-success">导出当前数据</button>-->
+            </div>
+        </div>
+    </form>
+
+    <div style="overflow: auto;">
+        <div style="height: 100px;text-align: center;line-height: 50px;border: 2px solid #CCC;font-size: 18px;float: left; width: 20%; margin-right: 5%;">
+            创建退货单量：<br />
+            {{$refund_total}} ({{($refund_total * 100 / $order_total)|string_format:"%.2f"}}%)
+        </div>
+        <div style="height: 100px;text-align: center;line-height: 50px;border: 2px solid #CCC;font-size: 18px;float: left; width: 20%; margin-right: 5%;">
+            退款金额：<br />
+            {{$refund_price / 100}} ({{($refund_price * 100 / $order_price)|string_format:"%.2f"}}%)
+        </div>
+    </div>
+
+    <div style="overflow: auto; margin: 10px 0;">
+        <div id="refund_reason" style="float: left; width: 48%; margin-right: 4%; height: 400px;"></div>
+        <div id="refund_reason_detail" style="float: left; width: 48%; height: 400px;"></div>
+    </div>
+    <div style="overflow:auto; margin: 10px 0;">
+        <div id="refund_type" style="float: left; width: 48%; margin-right: 4%; height: 400px;"></div>
+        <div id="refund_by_wid" style="float: left; width: 48%; height: 400px;"></div>
+    </div>
+
+    <h3>品牌退货top10</h3>
+    <div style="margin-top: 20px; text-align: center;">
+        {{if !empty($refund_product_data)}}
+        {{$i = 1}}
+        <table class="table">
+            <thead>
+            <tr>
+                <th>排序</th>
+                <th>品牌id</th>
+                <th>品牌名称</th>
+                <th>退货商品数量</th>
+                <th>退货商品占比</th>
+                <th>退货数量/售卖数量</th>
+                <th>查看</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{foreach $refund_product_data as $info}}
+            <tr>
+                <td>
+                    {{$i++}}
+                </td>
+                <td>
+                    {{$info.bid}}
+                </td>
+                <td>
+                    {{$info.name}}
+                </td>
+                <td>
+                    {{$info.refund_num}}
+                </td>
+                <td>
+                    {{$info.refund_rate}}%
+                </td>
+                <td>
+                    {{$info.refund_sale_rate}}%
+                </td>
+                <td>
+                    <a href="#brand_products" class="check_brand_products" data-bid="{{$info.bid}}" >查看</a>
+                </td>
+            </tr>
+            {{/foreach}}
+            </tbody>
+        </table>
+        {{else}}
+        <div>暂无数据！</div>
+        {{/if}}
+    </div>
+
+    <a href="#" name="brand_products"></a>
+    <h3>品牌商品退货top10</h3>
+    {{foreach $refund_brand_products as $bid => $list}}
+    <div class="brnad_products" id="brand_product_{{$bid}}" style="display: none; margin-top: 20px; text-align: center;">
+        {{if !empty($list)}}
+        {{$i = 1}}
+        <table class="table">
+            <thead>
+            <tr>
+                <th>排序</th>
+                <th>商品id</th>
+                <th>商品名称</th>
+                <th>退货商品数量</th>
+                <th>退货商品占比</th>
+                <th>退货数量/售卖数量</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{foreach $list as $info}}
+            <tr>
+                <td>
+                    {{$i++}}
+                </td>
+                <td>
+                    {{$info.pid}}
+                </td>
+                <td>
+                    {{$info.pname}}
+                </td>
+                <td>
+                    {{$info.refund_num}}
+                </td>
+                <td>
+                    {{($info.refund_num * 100 / $refund_products_total)|string_format:"%.2f"}}%
+                </td>
+                <td>
+                    {{($info.refund_num * 100 / $info.sale_num)|string_format:"%.2f"}}%
+                </td>
+            </tr>
+            {{/foreach}}
+            </tbody>
+        </table>
+        {{else}}
+        <div>暂无数据！</div>
+        {{/if}}
+    </div>
+    {{/foreach}}
+
+</div>

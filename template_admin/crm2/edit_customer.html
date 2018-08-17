@@ -1,0 +1,404 @@
+<style>
+	.area-bottom {
+		border-bottom: 1px dashed #eee;
+		margin: 20px;
+	}
+	.tips {
+		color: red;
+		font-size: 25px;
+		margin: 20px 200px;
+	}
+</style>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">编辑客户</h1>
+	<ul id="myTab" class="nav nav-tabs">
+		<li class="active" id="home_tab">
+			<a href="#home" data-toggle="tab">
+				基本信息
+			</a>
+		</li>
+		{{if !empty($_permissions['crm2_update_customer_detail_info'])}}
+		<li>
+			<a href="#certificate" data-identity="{{$customer.identity}}" data-step="{{$customer.identity_step}}" class="certificate_tab" data-toggle="tab">认证信息</a>
+		</li>
+		<!--<li><a href="#workinfo" data-toggle="tab">工作信息</a></li>-->
+		<li>
+			<a href="#detail" data-toggle="tab">详细信息</a>
+		</li>
+		{{/if}}
+		<li>
+			<a href="#friend" data-toggle="tab">亲朋信息</a>
+		</li>
+	</ul>
+	<div id="myTabContent" class="tab-content">
+		<div class="tab-pane fade in active" id="home">
+			<form class="form-horizontal" role="form">
+
+				{{include file="crm2/block/customer_edit_info.html"}}
+
+				<div class="form-group">
+					<div class="col-sm-offset-2 col-sm-10">
+						<button type="button" class="btn btn-primary" id="_j_save_customer_info" style="margin-right:20px;">保存</button>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="col-sm-offset-1 col-sm-10" style="margin-top:15px;">
+						<span style="font-size:16px; color:red;">【联系人】信息</span>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label"></label>
+
+					<div class="col-sm-8">
+						{{if !empty($users)}}
+						<table class="table">
+							<thead>
+							<tr>
+								<th>UID</th>
+								<th>姓名</th>
+								<th>电话</th>
+								<th>籍贯</th>
+								<th>真实姓名</th>
+								<th>身份证号</th>
+								<th>管理员</th>
+								<th>操作</th>
+							</tr>
+							</thead>
+							<tbody>
+							{{foreach $users as $_user}}
+							<tr class="_j_one_user">
+								<td class="uid">{{$_user.uid}}</td>
+								<td class="name">{{$_user.name}}</td>
+								<td class="mobile">{{if $_isAdmin || ($customer.sales_suid==$_uid)}}{{$_user.mobile}}{{else}} -- {{/if}}</td>
+								<td class="hometown">{{if !empty($_user.hometown)}}{{$_user.hometown}}{{else}}--{{/if}}</td>
+								<td class="real_name">{{$_user.real_name}}</td>
+								<td class="id_card_no">{{$_user.id_card_no}}</td>
+								<td class="is_admin" data-isadmin="{{$_user.is_admin}}">{{if $_user.is_admin}}是{{else}}否{{/if}}</td>
+								<td>
+									{{if $can_edit}}
+										<a href="javascript:;" class="_j_modify_userinfo" data-type="modify">修改信息</a>
+										<span style="margin-left:5px; margin-right: 5px;">|</span>
+										<a href="javascript:;" class="_j_modify_userinfo" data-type="unbind">解除绑定</a>
+									{{else}}
+										--
+									{{/if}}
+								</td>
+							</tr>
+							{{/foreach}}
+							</tbody>
+						</table>
+						{{/if}}
+					</div>
+				</div>
+
+				{{if $can_edit}}
+				<div style="text-align:center;  font-size:18px; color:red;">
+					<button type="button" class="btn btn-primary _j_modify_userinfo" data-type="bind" style="margin-right:20px;">请添加联系人</button>
+				</div>
+				{{/if}}
+
+			</form>
+		</div>
+		<div class="tab-pane fade" id="workinfo">
+		</div>
+		<div class="tab-pane fade" id="friend">
+			<table class="table">
+				<tr>
+                    <th>ID</th>
+					<th>姓名</th>
+					<th>称呼</th>
+					<th>性别</th>
+					<th>年龄</th>
+					<th>关系</th>
+					<th>电话</th>
+					<th>微信</th>
+					<th>操作</th>
+				</tr>
+				{{foreach $friend_list.list as $friend}}
+				<tr>
+                    <td>{{$friend.crid}}</td>
+					<td>{{$friend.name}}</td>
+					<td>{{$friend.nick_name}}</td>
+					<td>{{if $friend.sex == 0}}男{{else}}女{{/if}}</td>
+					<td>{{$friend.age}}</td>
+					<td>{{$friend_types[$friend.relation]}}</td>
+					<td>{{$friend.mobile}}</td>
+					<td>{{$friend.weixin}}</td>
+					<td>
+                        <a href="javascript:;" class="edit_customer_friend" data-crid="{{$friend.crid}}" data-relation="{{$friend.relation}}" data-name="{{$friend.name}}" data-nick_name="{{$friend.nick_name}}" data-sex="{{$friend.sex}}" data-age="{{$friend.age}}" data-mobile="{{$friend.mobile}}" data-weixin="{{$friend.weixin}}" data-qq="{{$friend.qq}}" data-email="{{$friend.email}}" data-shape="{{$friend.shape}}" data-trade="{{$friend.trade}}" data-interest="{{$friend.interest}}" data-note="{{$friend.note}}">编辑</a> <br>
+                        <a href="javacript:;" class="delete_customer_friend" data-crid="{{$friend.crid}}">删除</a>
+                    </td>
+				</tr>
+				{{/foreach}}
+			</table>
+			<a href="javascript:;" class="add_customer_friend">+添加亲朋信息</a>
+		</div>
+		<div class="tab-pane fade" id="detail" style="margin-top: 30px">
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">年龄：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="age" value="{{$customer.age}}" style="display:inline;">
+				</div>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">生日：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" placeholder="格式:11-11" name="birthday" value="{{$customer.birthday}}" style="display:inline;">
+				</div>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">工龄：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="work_age" value="{{$customer.work_age}}" style="display:inline;">
+				</div>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">兴趣爱好：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="interest" value="{{$customer.interest}}" style="display:inline;">
+				</div>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">{{if !empty($customer.identity) && $customer.identity == 2}}公司地址{{else}}家庭住址{{/if}}：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="address" value="{{$customer.address}}" style="display:inline;">
+				</div>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">工作区域：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="work_area" value="{{$customer.work_area}}" style="display:inline;">
+				</div>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">性格标签：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="character_tag" value="{{$customer.character_tag}}" style="display:inline;">
+				</div>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">微信：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="weixin" value="{{$customer.weixin}}" style="display:inline;">
+				</div>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">QQ：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="qq" value="{{$customer.qq}}" style="display:inline;">
+				</div>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">邮箱：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" name="email" value="{{$customer.email}}" style="display:inline;">
+				</div>
+			</div>
+			<input type="hidden" value="{{$customer.cid}}" name="cid">
+			<input type="hidden" value="{{$users.uid}}" name="uid">
+			<button type="button" style="margin: 50px 350px;" class="btn btn-primary _j_save_person_detail_info">保存</button>
+		</div>
+		<div class="tab-pane fade" id="certificate" style="margin-top: 30px;">
+			<input type="hidden" name="identity" value="{{$customer.identity}}">
+			<input type="hidden" name="cert_type" value="{{$customer.cert_type}}">
+			{{if $customer.identity == 3 && empty($customer.identity_step)}}
+			<div class="form-group col-sm-12 tips">
+				该用户为新客户，请到基本信息中申请改变【客户类型】！
+			</div>
+			{{/if}}
+			{{if empty($customer.identity_step) && $customer.identity != 3}}
+			<div class="form-group col-sm-12 tips">
+				该客户尚未提交实名认证信息，请及时提交！
+			</div>
+			{{/if}}
+			{{if $customer.identity_step == '认证中'}}
+			<div class="form-group col-sm-12 tips">
+				客户信息审核中，请耐心等待！
+			</div>
+			{{/if}}
+			{{if $customer.identity_step == '认证未通过'}}
+			<div class="form-group col-sm-12 tips">
+				客户信息审核未通过，请再次提交真实信息！
+			</div>
+			{{/if}}
+
+			{{if $customer.identity == 2 || ($customer.identity == 3 && $customer.cert_type == 2)}}
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">公司名称：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" {{if $customer.identity_step == "已认证" || $customer.identity_step == "认证中"}} disabled {{/if}} name="company_name" value="{{$customer.company_name}}" style="display:inline;">
+				</div><span style="color: red">【必选】</span>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">法人名称：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" {{if $customer.identity_step == "已认证" || $customer.identity_step == "认证中"}} disabled {{/if}} name="legal_person_name" value="{{$customer.legal_person_name}}" style="display:inline;">
+				</div><span style="color: red">【必选】</span>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">法人身份证号：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" {{if $customer.identity_step == "已认证" || $customer.identity_step == "认证中"}} disabled {{/if}} name="legal_person_id_number" value="{{$customer.legal_person_id_number}}" style="display:inline;">
+				</div><span style="color: red">【必选】</span>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">企业注册号/统一信用代码：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" {{if $customer.identity_step == "已认证" || $customer.identity_step == "认证中"}} disabled {{/if}} name="social_credit_number" value="{{$customer.social_credit_number}}" style="display:inline;">
+				</div><span style="color: red">【必选】</span>
+			</div>
+			{{if $customer.identity_step != '已认证' && $customer.identity_step != "认证中"}}
+			<button type="button" class="btn btn-primary _j_save_person_cert_info" style="margin: 30px 350px">保存</button>
+			{{/if}}
+			{{elseif $customer.identity == 1 || ($customer.identity == 3 && $customer.cert_type == 1)}}
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">姓名：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" {{if ($customer.identity_step == "已认证" && empty($customer.band_card_number)) || $customer.identity_step == "认证中"}} disabled {{/if}} name="real_name" value="{{$customer.real_name}}" style="display:inline;">
+				</div><span style="color: red">【必选】</span>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">身份证：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" {{if ($customer.identity_step == "已认证" && empty($customer.band_card_number)) || $customer.identity_step == "认证中"}} disabled {{/if}} name="id_number" value="{{$customer.id_number}}" style="display:inline;">
+				</div><span style="color: red">【必选】</span>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">认证手机号：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" {{if ($customer.identity_step == "已认证" && empty($customer.band_card_number)) || $customer.identity_step == "认证中"}} disabled {{/if}} name="identity_mobile" value="{{$customer.identity_mobile}}" style="display:inline;">
+				</div><span style="color: red">【必选】</span>
+			</div>
+			<div class="form-group col-sm-12">
+				<label class="col-sm-2 control-label">银行卡号：</label>
+				<div class="col-sm-4">
+					<input type="text" class="form-control" {{if $customer.identity_step == "认证中"}} disabled {{/if}} name="band_card_number" value="{{$customer.band_card_number}}" style="display:inline;">
+				</div>
+			</div>
+			{{if $customer.identity_step != "认证中"}}
+			<button type="button" class="btn btn-primary _j_save_person_cert_info" style="margin: 30px 350px">保存</button>
+			{{/if}}
+			{{/if}}
+		</div>
+	</div>
+
+</div>
+{{include file="crm2/block/user_dialog.html"}}
+{{*添加/修改亲朋信息*}}
+<div class="modal fade _j_dialog" id="modifyFriendInfoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-cid="{{$customer.cid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:600px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title"></h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">关系：</label>
+
+						<div class="col-sm-7">
+							<select name="relation" class="form-control">
+								<option value="0">--请选择--</option>
+								{{foreach $friend_types as $key => $friend}}
+								<option value="{{$key}}">{{$friend}}</option>
+								{{/foreach}}
+							</select>
+						</div>
+                        <div class="col-sm-2">
+                            <span class="text-value" style="font-size:14px; margin-left: -20px; color:red;">【必选】</span>
+                        </div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">姓名：</label>
+
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="name" value="" style="display:inline-block; width: 80%;">
+						</div>
+                        <div class="col-sm-2">
+                            <span class="text-value" style="font-size:14px; margin-left: -20px; color:red;">【必填】</span>
+                        </div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">称呼：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="nick_name" value="" style="display:inline;">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">性别：</label>
+						<div class="col-sm-7">
+							<label class="checkbox-inline"><input type="radio" name="sex" value="0" style="display:inline;" checked>&nbsp;男</label>
+							<label class="checkbox-inline"><input type="radio" name="sex" value="1" style="display:inline;" >&nbsp;女</label>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">年龄：</label>
+
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="age" value="" style="display:inline-block; width: 80%;">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">电话：</label>
+
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="mobile" value="" style="display:inline-block; width: 80%;">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">微信：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="weixin" value="" style="display:inline;">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">QQ：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="qq" value="" style="display:inline;">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">邮箱：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="email" value="" style="display:inline;">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">兴趣爱好：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="interest" value="" style="display:inline;">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">身体状况：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="shape" value="" style="display:inline;">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">从事事业：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="trade" value="" style="display:inline;">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">其它信息：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="note" value="" style="display:inline;">
+						</div>
+					</div>
+				</form>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary _j_save_modify_friendinfo">保存</button>
+			</div>
+		</div>
+	</div>
+</div>

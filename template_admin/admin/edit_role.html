@@ -1,0 +1,91 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if $role.id > 0}}编辑{{else}}添加{{/if}}角色</h1>
+
+	<form class="form-horizontal" role="form" action="">
+		<input type="hidden" name="submit" value="1" />
+		{{if $role.id}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">ID：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="id" value="{{$role.id}}" readonly="true">
+			</div>
+		</div>
+		{{/if}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">角色名称：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="role" value="{{$role.role}}" />
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">唯一标识符：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="rkey" value="{{$role.rkey}}" />
+            </div>
+            <label style="color: red;" class="col-sm-4 control-label">英文，数字，下划线组成的唯一标记，程序使用</label>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">部门：</label>
+			<div class="col-sm-4">
+				<select class="form-control" name="department">
+					<option value="0" {{if empty($role.department)}}selected="selected"{{/if}}>全部</option>
+					{{foreach $departments as $id => $name}}
+					<option value="{{$id}}" {{if $role.department == $id}}selected="selected"{{/if}}>{{$name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+        <div class="form-group">
+			<label class="col-sm-2 control-label">关联角色：</label>
+			<div class="col-sm-4">
+                <textarea class="form-control" name="rel_role" placeholder="复用角色ID，多个使用逗号分开">{{$role.rel_role}}</textarea>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="button" class="btn btn-primary" id="save" style="margin-right:20px;">保存</button>
+			</div>
+		</div>
+
+	</form>
+    
+    <hr>
+    <form class="form-horizontal" role="form" action="">
+        <div class="form-group">
+			<label class="col-sm-2 control-label">已关联角色：</label>
+            {{if empty($role.rel_role)}}
+            <div class="text-value"><p style="font-size:20px;">暂无关联角色！</p></div>
+            {{else}}
+            <div class="tab-content col-sm-6">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>标识</th>
+                        <th>名称</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {{foreach $rel_roles as $item}}
+                        <tr>
+                            <td>{{$item['id']}}</td>
+                            <td>{{$item['rkey']}}</td>
+                            <td>{{$item['role']}}</td>
+                            <td>
+                                <a href="javascript:;" class="del_rel_role" data-id="{{$item['id']}}" style="margin-right: 15px;">删除</a>
+                                
+                                <a href="/admin/edit_permission.php?id={{$item['id']}}" target="_blank">查看权限</a>
+                            </td>
+                        </tr>
+                        {{/foreach}}
+                    </tbody>
+                </table>
+            </div>
+            {{/if}}
+		</div>
+    </form>
+    
+
+</div>

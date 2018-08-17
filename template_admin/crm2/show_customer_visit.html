@@ -1,0 +1,43 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">查看拜访</h1>
+    <table class="table">
+        <tr>
+            <td style="width: 30%; text-align: right;">ID：</td>
+            <td>{{$info.id}}</td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right;">客户CID：</td>
+            <td>{{$info.cid}}</td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right;">时间：</td>
+            <td>{{$info.visit_time}}</td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right;">拜访类型：</td>
+            <td>{{$visit_types[$info.visit_type]}}</td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right;">拜访地址：</td>
+            <td>{{$info.address}}</td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right;">拜访反馈：</td>
+            <td>{{$info.content}}</td>
+        </tr>
+        <tr>
+            <td style="width: 30%; text-align: right;">上传图片：</td>
+            <td>
+                <div id="img_list" class="gridly" style="position: relative;">
+                    {{foreach $info.image_list as $pic}}
+                    <div class="img_item brick" style="float: left; width: 250px; height: 250px; margin: 20px;" data-pic="{{$pic.pic_tag}}">
+                        <a href="{{$pic.url}}" target="_blank"><img class="img_img" style="max-width: 250px; max-height: 250px;" data-pic="{{$pic.pic_tag}}" src="{{$pic.url}}" /></a>
+                    </div>
+                    {{/foreach}}
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</div>

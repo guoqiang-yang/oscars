@@ -1,0 +1,139 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if empty($info.id)}}添加{{else}}编辑{{/if}}案例</h1>
+
+	<form class="form-horizontal" role="form">
+		{{if $info.id}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">url：</label>
+            <div class="col-sm-10">
+                <a href="http://{{$TOC_H5_MAIN_HOST}}/case/detail.php?id={{$info.id}}" target="_blank">
+                    http://{{$TOC_H5_MAIN_HOST}}/case/detail.php?id={{$info.id}}
+                </a>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">id：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="id" value="{{$info.id}}" readonly="true">
+			</div>
+		</div>
+		{{/if}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">城市：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="city_id">
+                    <option value="0">请选择</option>
+                    {{foreach $city_list as $id => $item}}
+                    <option {{if $info.city_id == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">标题：</label>
+			<div class="col-sm-4">
+				<input maxlength="15" type="text" class="form-control" name="title" value="{{$info.title}}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">封面：</label>
+			<div class="col-sm-4">
+                <button style="margin-bottom: 20px;" type="button" class="btn btn-default" id="_j_btn_select_pic" data-path="cpoint/product">从电脑选择图片</button><br />
+                <div id="img_list" class="gridly" style="position: relative;">
+                    {{if !empty($info.cover)}}
+                    <div class="img_item brick" style="" data-pic="{{$info.cover}}">
+                        <img style="width: 100%;" class="img_img" data-pic="{{$info.cover}}" src="{{$info._cover}}" />
+                    </div>
+                    {{/if}}
+                </div>
+                <div style="clear: both;"></div>
+                <input type="hidden" name="cover" value="{{$info.cover}}">
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">状态：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="status">
+                    <option {{if $info.status == 0}} selected="selected" {{/if}} value="0">上线</option>
+                    <option {{if $info.status == 4}} selected="selected" {{/if}} value="4">下线</option>
+                    <option {{if $info.status == 1}} selected="selected" {{/if}} value="1">删除</option>
+                </select>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">关联工长id：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="fid" value="{{$info.fid}}">
+            </div>
+            <label class="col-sm-2 control-label"><a href="/activity/forman_list.php" target="_blank">去查询</a></label>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">风格：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="house_style">
+                    <option value="0">请选择</option>
+                    {{foreach $house_style as $id => $item}}
+                    <option {{if $info.house_style == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">户型：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="house_type">
+                    <option value="0">请选择</option>
+                    {{foreach $house_type as $id => $item}}
+                    <option {{if $info.house_type == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">空间：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="house_space">
+                    <option value="0">请选择</option>
+                    {{foreach $house_space as $id => $item}}
+                    <option {{if $info.house_space == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">面积：</label>
+            <div class="col-sm-4">
+                <select class="form-control" name="house_area">
+                    <option value="0">请选择</option>
+                    {{foreach $house_area as $id => $item}}
+                    <option {{if $info.house_area == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">首页显示权重：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="index_sortby" value="{{$info.index_sortby}}">
+            </div>
+            <label class="col-sm-2 control-label">越大在首页显示越靠前，为0不在首页显示：</label>
+        </div>
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label">正文：</label>
+            <div class="col-sm-8">
+                <!-- 加载编辑器的容器 -->
+                <script id="editor" name="description" type="text/plain">
+                    {{$description}}
+                </script>
+            </div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="button" class="btn btn-primary" id="btn_save_case">保存</button>
+			</div>
+		</div>
+	</form>
+
+</div>

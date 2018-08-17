@@ -1,0 +1,36 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">入库单排行</h1>
+
+	<form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right: 20px;">
+				<label>时间：</label>
+				<input type="date" class="form-control" name="start_time" value="{{$start_time}}" style="display: inline-block;width: 170px;"> — <input type="date" class="form-control" name="end_time" value="{{$end_time}}" style="display: inline-block;width: 170px;">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+
+	<hr>
+
+	<table class="table table-bordered">
+		<tr>
+			<th>排行</th>
+			<th>id</th>
+			<th>供应商</th>
+			<th>类型</th>
+			<th>入库单总金额</th>
+		</tr>
+		{{$row_index = 1}}
+		{{foreach $data as $item}}
+		<tr>
+			<td>{{$row_index++}}</td>
+			<td>{{$item.info.sid}}</td>
+			<td>{{$item.info.name}}</td>
+			<td>{{$item.info._type}}</td>
+			<td>{{$item.total / 100}} 元</td>
+		</tr>
+		{{/foreach}}
+	</table>
+</div>

@@ -1,0 +1,70 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">库存预警</h1>
+
+  {{if count($_warehouseList) > 1}}
+	<form class="form-inline" role="form" action="/warehouse/stock_alert.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:50px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+					{{foreach $_warehouseList as $_wid=>$_wname}}
+					<option value="{{$_wid}}" {{if $wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+  {{/if}}
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>商品编号</th>
+      {{if !$_hide_useless}}
+      <th>图片</th>
+      {{/if}}
+      <th>商品信息</th>
+			<th width="10%;">仓库</th>
+      <th width="10%">总库存/被占用</th>
+      <th width="8%">库存预警值</th>
+      <th width="10%">差额</th>
+      <th width="8%">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $products as $p}}
+    {{if !$_hide_useless || $p.num>0}}
+    <tr class="_j_product">
+      <td>{{$p.sid}}</td>
+      {{if !$_hide_useless}}
+      <td><img width="100" src="{{if $p.pinfo.pic}}{{$p.pinfo.pic}}{{else}}/i/nopic100.jpg{{/if}}"></td>
+      {{/if}}
+      <td>
+        {{$p.pinfo.title}}<br/>
+        <span style="color:gray;">{{$p.pinfo.alias}}</span>
+      </td>
+			<td>{{$_warehouseList[$p.wid]}}</td>
+      {{if $_hide_useless && $p.num<0}}{{$p.num=$p.occupied+8}}{{/if}}
+      <td>{{$p.num|string_format:"%d"}} / {{$p.occupied|string_format:"%d"}}</td>
+      <td>{{$p.alert_threshold}}</td>
+      <td>{{if $p.pureStock<=$p.alert_threshold}}<span style="color:red;">库存紧张<br/>需采: {{$p.pre_buy}}</span>{{else}}富余：{{$p.pureStock-$p.alert_threshold}}{{/if}}</td>
+      <td>
+        <a href="/warehouse/edit_stock.php?wid={{$p.wid}}&sid={{$p.sid}}" target="_blank">编辑</a><br/><br/>
+        <a href="/warehouse/stock_history.php?date=&wid={{$p.wid}}&type=-1&sid={{$p.sid}}" target="_blank">库存历史</a>
+      </td>
+    </tr>
+    {{/if}}
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

@@ -1,0 +1,53 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        配置可能有问题的商品
+    </h1>
+
+    {{if count($products) > 0}}
+        <table class="table">
+            <thead>
+            <tr>
+                <th>商品编号</th>
+                <th>图片</th>
+                <th>商品信息</th>
+                <th>成本</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{foreach $products as $product}}
+            <tr data-pid="{{$product.pid}}" class="_j_product">
+                <td>{{$product.pid}}</td>
+                <td><img width="100" src="{{if $product._pic}}{{$product._pic.middle}}{{else}}/i/nopic100.jpg{{/if}}"></td>
+                <td>
+                    {{$product.title}}<br/><br/>
+                    <span style="color:red;">￥{{$product.price/100}}</span>元/{{if $product.unit}}{{$product.unit}}{{else}}个{{/if}} 　{{$product.package}}<br/><br/>
+                    {{if $product.alias}}<span style="color:gray;">俗称：{{$product.alias}}</span><br/><br/>{{/if}}
+                    上次修改：{{$product.mtime|truncate:16:""}}
+                </td>
+                <td><span style="color:gray;">
+                    成本：</span><br>
+                    ￥{{$product.cost/100}}元
+                </td>
+                <td>
+                    {{if $product.status > 0}}<span style="color:red;">(下架)</span>{{else}}上架{{/if}}<br/> {{*<span style="color:gray;">库存:{{$product._stock.num|string_format:"%d"}}</span>*}}
+                </td>
+                <td>
+                    <a href="/shop/edit_product.php?pid={{$product.pid}}">编辑</a><br/> <a href="/shop/edit_product.php?pid={{$product.pid}}&copy=1">复制</a><br/> <a href="javascript:void(0);" class="_j_del_product">删除</a><br/> <a href="/warehouse/stock_history.php?type=-1&wid=3&sid={{$product.sid}}">库存</a>
+                </td>
+            </tr>
+            {{/foreach}}
+            </tbody>
+        </table>
+    {{else}}
+        没有找到商品
+    {{/if}}
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+        </ul>
+    </nav>
+
+</div>

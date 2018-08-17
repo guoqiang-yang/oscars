@@ -1,0 +1,42 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">订单统计</h1>
+
+	<div id="days" style="display: none;">
+		{{$days}}
+	</div>
+	<div id="total" style="display: none;">
+		{{$total}}
+	</div>
+	<div id="price" style="display: none;">
+		{{$price}}
+	</div>
+	<div>
+		<form action="/statistics/order.php">
+			<input style="position: relative; display: inline-block; width: 150px; height: 25px; background-color: #4C4346; font: 14px/20px Microsoft YaHei;color: #fff; margin: 10px 0;" type="date" name="start_date" value="{{$start_date}}" />
+			&nbsp;&nbsp;-&nbsp;&nbsp;
+			<input style="position: relative; display: inline-block; width: 150px; height: 25px; background-color: #4C4346; font: 14px/20px Microsoft YaHei;color: #fff; margin: 10px 0;" type="date" name="end_date" value="{{$end_date}}" />
+
+			<input style="position: relative; display: inline-block; width: 150px; height: 25px; background-color: #4C4346; font: 14px/20px Microsoft YaHei;color: #fff; margin: 10px  0 10px 20px;" type="text" name="start_time" value="{{$start_time}}" />
+			&nbsp;&nbsp;-&nbsp;&nbsp;
+			<input style="position: relative; display: inline-block; width: 150px; height: 25px; background-color: #4C4346; font: 14px/20px Microsoft YaHei;color: #fff; margin: 10px 0;" type="text" name="end_time" value="{{$end_time}}" />
+
+			<select style="position: relative; display: inline-block; width: 150px; height: 25px; background-color: #4C4346; font: 14px/20px Microsoft YaHei;color: #fff; margin: 10px 0 10px 20px;" id="sel_mode" name="sel_mode">
+				<option {{if $mode == 'ctime'}}selected="selected"{{/if}} value="ctime">按下单时间</option>
+				<option {{if $mode == 'delivery_date'}}selected="selected"{{/if}} value="delivery_date">按配送时间</option>
+			</select>
+
+			<select style="position: relative; display: inline-block; width: 150px; height: 25px; background-color: #4C4346; font: 14px/20px Microsoft YaHei;color: #fff; margin: 10px 0 10px 20px;" id="city_id" name="city_id">
+                <option {{if empty($city_id)}}selected="selected"{{/if}} value="all">全部</option>
+                {{foreach $city_list as $id => $city}}
+				<option {{if $id == $city_id}}selected="selected"{{/if}} value="{{$id}}">{{$city}}</option>
+                {{/foreach}}
+			</select>
+
+			<input style="margin-left: 20px;" type="submit" class="btn-primary" value="查询" />
+
+      <span style="color:red;">　注意：是客服确认后的订单</span>
+		</form>
+	</div>
+	<div id="daily_order_num"></div>
+	<div id="daily_order_price" style="margin-top: 50px;"></div>
+</div>

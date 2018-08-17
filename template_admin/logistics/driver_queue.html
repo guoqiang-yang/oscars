@@ -1,0 +1,179 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">司机队列</h1>
+
+	<form class="form-inline" role="form" action="/logistics/driver_queue.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>司机id：</label>
+				<input style="width: 150px;" type="text" class="form-control" name="did" value="{{$search_conf.did}}">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>姓名：</label>
+				<input style="width: 150px;" type="text" class="form-control" name="name" value="{{$search_conf.name}}">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>线路id：</label>
+				<input style="width: 150px;" type="text" class="form-control" name="line_id" value="{{$search_conf.line_id}}">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>车型：</label>
+				<select class="form-control" name="car_model">
+					<option value="0" {{if empty($search_conf.car_model)}}selected="selected" {{/if}}>请选择</option>
+					{{foreach $model_list as $mid => $model}}
+						<option value="{{$mid}}" {{if $search_conf.car_model== $mid}}selected="selected" {{/if}}>{{$model}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>签到仓库：</label>
+				<select class="form-control" name="wid"  {{if $_user.wid!=0}} disabled="true"{{/if}}>
+					<option value="0" {{if empty($search_conf.wid)}}selected="selected" {{/if}}>全部</option>
+					{{foreach $warehouse as $wid => $wname}}
+						<option value="{{$wid}}" {{if $search_conf.wid == $wid}}selected="selected" {{/if}}>{{$wname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>状态：</label>
+				<select class="form-control" name="step">
+					<option value="0" {{if empty($search_conf.step)}}selected="selected" {{/if}}>全部</option>
+					{{foreach $steps as $sid => $step}}
+					<option value="{{$sid}}" {{if $search_conf.step == $sid}}selected="selected" {{/if}}>{{$step}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+
+			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+		</div>
+	</form>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>id</th>
+			<th>姓名</th>
+			<th>电话</th>
+			<th>车型</th>
+			<th>车牌号</th>
+			<th>押车</th>
+			<th>拉垃圾</th>
+			<th>线路id</th>
+			<th>签到库房</th>
+			<th>签到时间</th>
+			<th>队列状态</th>
+			<th>连续拒单</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $driver_list as $driver}}
+			<tr data-cid="{{$driver.did}}">
+				<td>
+					{{$driver.did}}
+				</td>
+				<td>
+                    {{$driver._driver.name}}<br>
+                    {{if $driver._driver.isLimited}}<span style="color:red;">今日限行</span>{{/if}}
+				</td>
+				<td>
+					{{$driver._driver.mobile}}
+				</td>
+				<td>
+					{{$driver._car_model}}
+				</td>
+				<td>{{$driver._driver.car_province}}{{str_replace($driver._driver.car_province, '', $driver._driver.car_number)}}</td>
+                <td>{{if $driver._driver.can_escort}}是{{else}}否{{/if}}</td>
+                <td>{{if $driver._driver.can_trash}}是{{else}}否{{/if}}</td>
+				<td>
+					<a href="order_line_list.php?id={{$driver.line_id}}" target="_blank">{{$driver.line_id}}</a>
+				</td>
+				<td>
+					{{$driver._wid}}
+				</td>
+				<td>
+					{{$driver.check_time}}
+				</td>
+				<td>
+					{{$driver._step}}
+				</td>
+				<td>
+                    <span>{{$driver.refuse_num}} 次</span>
+                    {{if $driver.refuse_num>=2}}
+					{{if !empty($_permissions['/logistics/ajax/clear_refuse_num'])}}
+                    <br>
+					<a href="#" class="clear_refuse_num" data-did="{{$driver.did}}">清除拒单</a>
+                    {{/if}}
+                    {{/if}}
+				</td>
+                {{if !empty($_permissions['/logistics/ajax/clear_queue_status'])}}
+				<td>
+                    <a href="javascript:void(0)" class="clear_queue_status" data-did="{{$driver.did}}" data-line-id="{{$driver.line_id}}">重置</a>
+				</td>
+                {{/if}}
+			</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>
+
+<!-- Modal -->
+<div class="modal fade _j_dialog" id="edit_check_in" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">更改签到状态</h4>
+			</div>
+			<input type="hidden" id="check_did" value="0" />
+			<div class="modal-body">
+				<div class="form-group">
+					<span style="margin-right: 50px;" class="radio-inline"><input {{if empty($driver._queue)}}checked="checked"{{/if}} type="radio" name="new_type" value="-1" />未签到</span>
+					<span class="radio-inline"><input {{if $driver._queue.type==1}}checked="checked"{{/if}} type="radio" name="new_type" value="1" />已签到</span>
+				</div>
+				<div class="form-group">
+					<select style="width:200px;" class="form-control" id="check_in_wid">
+						<option value="0">请选择</option>
+						{{foreach $warehouse as $wid => $wname}}
+						<option value="{{$wid}}">{{$wname}}</option>
+						{{/foreach}}
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" id="change_check_in" class="btn btn-primary">保存</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="edit_alloc" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">更改接单状态</h4>
+			</div>
+			<div class="modal-body">
+				<span class="radio-inline"><input {{if $driver._queue.type==2}}checked="checked"{{/if}} type="radio" name="new_type" value="2" />未接单</span>
+				<span class="radio-inline"><input {{if $driver._queue.type==3}}checked="checked"{{/if}} type="radio" name="new_type" value="3" />已接单</span>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" id="change_accept" class="btn btn-primary">保存</button>
+			</div>
+		</div>
+	</div>
+</div>

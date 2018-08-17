@@ -1,0 +1,21 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <ul style="margin-bottom: 20px;" class="nav nav-tabs">
+        <li role="presentation" {{if $cate == 0}}class="active"{{/if}}><a href="/warehouse/tmp_purchase.php?cate=0"><h4>待采购</h4></a></li>
+        <li role="presentation" {{if $cate == 1}}class="active"{{/if}}><a href="/warehouse/tmp_purchase.php?cate=1"><h4>已采购</h4></a></li>
+        <li role="presentation" {{if $cate == 2}}class="active"{{/if}}><a href="/warehouse/tmp_purchase.php?cate=2"><h4>预警</h4></a></li>
+    </ul>
+    
+    {{if $cate == 0}}
+        {{include file="warehouse/tmp_wait_list.html"}}
+    {{elseif $cate == 1}}
+        {{include file="warehouse/tmp_bought_list.html"}}
+    {{elseif $cate == 2}}
+        {{include file="warehouse/tmp_alert_list.html"}}
+    {{else}}
+    <div>
+        <span>页面不存在！</span>
+    </div>
+    {{/if}}
+    
+</div>

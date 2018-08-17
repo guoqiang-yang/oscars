@@ -1,0 +1,144 @@
+<div style="width: 90%;margin: 0 auto">
+	<!--begin-->
+	<div style="text-align: center">
+        <p style="text-align: center;display: inline-block; font-size:30px; font-weight:bold;">好材采购订单（{{$order_info.oid}}）
+            <img src="http://img.haocaisong.cn/static/logo-rectangle.png@80w">
+        </p>
+		
+	</div>
+    
+    <div>
+        <table cellspacing="0" cellpadding="5px" width="100%" style="font-size: 13px">
+            <tbody>
+            <tr>
+                <td width="15%"><p>商户ID</p></td>
+                <td width="35%"><p>{{$order_info.sid}}</p></td>
+                <td width="15%"><p>联系人</p></td>
+                <td width="35%"><p>{{$suppllier.contact_name}}</p></td>
+            </tr>
+            <tr>
+                <td><p>供货商</p></td>
+                <td><p>{{$suppllier.name}}</p></td>
+                <td><p>联系方式</p></td>
+                <td><p>{{$suppllier.phone}}</p></td>
+            </tr>
+            <tr>
+                <td><p>送货日期</p></td>
+                <td><p>{{$order_info.delivery_date|truncate:10:''}}</p></td>
+                <td><p>仓库</p></td>
+                <td><p>{{$order_info._warehouse_name}}</p></td>
+            </tr>
+            <tr>
+                <td><p>付款方式</p></td>
+                <td colspan="3"><p>{{$payment_types[$order_info.payment_type]}}</p></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 10px">
+        <p style="font-size:12px;font-weight:bold; margin: 2px auto">采购明细</p>
+        <table border="1" cellspacing="0" width="100%" style="font-size: 13px;">
+            <thead>
+                <tr>
+                    <td bgcolor="#CCCCCC" ><p>行号</p></td>
+                    <td bgcolor="#CCCCCC" ><p>ID</p></td>
+                    <td bgcolor="#CCCCCC" ><p>名称</p></td>
+                    <td bgcolor="#CCCCCC" ><p>类别</p></td>
+                    <td bgcolor="#CCCCCC"><p>单位</p></td>
+                    <td bgcolor="#CCCCCC" ><p>单价（元）</p></td>
+                    <td bgcolor="#CCCCCC" ><p>数量</p></td>
+                    <td bgcolor="#CCCCCC" ><p>总价（元）</p></td>
+                    <td bgcolor="#CCCCCC" ><p>类型</p></td>
+                    <td bgcolor="#CCCCCC" ><p>缺货备注</p></td>
+                </tr>
+            </thead>
+            <tbody>
+                {{foreach $products as $source => $_products}}
+                {{foreach $_products as $p}}
+                <tr>
+                    <td><p>{{$p@index+1}}</p></td>
+                    <td><p>{{$p.sid}}</p></td>
+                    <td><p>{{$p.sku.title}}</p></td>
+                    <td>
+                        <p>{{$cate1_list[$p.sku.cate1]["name"]}} - {{$cate2_list_all[$p.sku.cate1][$p.sku.cate2]["name"]}}</p>
+                    </td>
+                    <td><p>{{$p.sku.unit}}</p></td>
+                    <td><p>{{$p.price/100}}</p></td>
+                    <td><p>{{$p.num}}</p></td>
+                    <td><p>{{$p.price*$p.num/100}}</p></td>
+                    <td><p>{{if $source==1}}普采{{elseif $source==2}}临采{{else}}{{/if}}<p></td>
+                    <td></td>
+                </tr>
+                {{/foreach}}
+                {{/foreach}}
+                <tr>
+                    <td><p>总计</p></td>
+                    <td colspan="5"></td>
+                    <td><p>{{$total.num}}</p></td>
+                    <td><p>{{$total.price}}</p></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><p>备注</p></td>
+                    <td colspan="9"><p>{{$order_info.note}}</p></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 10px">
+        <p style="font-size:12px;font-weight:bold; margin:2px auto">仓库信息</p>
+        <table cellspacing="0" cellpadding="5px" width="100%" style="font-size: 13px">
+            <tbody>
+                <tr>
+                    <td width="15%"><p>收货联系人</p></td>
+                    <td width="85%"><p>{{$receiver.name}}（ID：{{$receiver.suid}}）</p></td>
+                </tr>
+                <tr>
+                    <td><p>联系电话</p></td>
+                    <td><p>{{$receiver.mobile}}</p></td>
+                </tr>
+                <tr>
+                    <td><p>收货地址</p></td>
+                    <td><p>{{$receiver.addr}}</p></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    {{*
+    <div style="margin-top:10px; font-size: 12px">
+        <p style="font-weight:bold; margin: 2px auto">注意事项</p>
+        <p style="margin: 2px auto">一.  如供方未能按合同规定的条款交货，则需方有权拒收货物或拒付货款。 </p>
+        <p style="margin: 2px auto">二.  由于供方延迟交货造成额外费用全部由供方承担，并按合同总价1%每日的金额补偿给需方。</p>
+        <p style="margin: 2px auto">三.  因合同产品的质量问题而造成的一切经济损失，均由供方负责。</p>
+        <p style="margin: 2px auto">四.  除另有说明外，所有供方至需方指定仓库的一切运输费用均由供方自理。</p>
+        <p style="margin: 2px auto">五.  请在送货日期前将货物送达指定仓库。</p>
+        <p style="margin: 2px auto; font-weight: bolder">六.  采购合同与产品检测报告需随货同行。 </p>
+        <br>
+        <table style="font-size: 12px" width="100%">
+            <tr>
+                <td width="60%" valign="top">
+                    <p style="font-weight:bold; margin: 20px auto;">请收到订单后回复确认！</p>
+                    <p style="font-weight:bold; margin: 4px auto">如有问题，可咨询 梁昌达 15210006714，谢谢配合！</p>
+                </td>
+                <td width="40%">
+                        <img style="width:150px" src="http://img.haocaisong.cn/static/stamp.jpg@200w.png" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    商祺
+                </td>
+                <td>
+                    <p style="font-weight: bold; text-indent:11px; font-size: 15px">乙方:</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+    *}}
+</div>
+
+

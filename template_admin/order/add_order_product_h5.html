@@ -1,0 +1,50 @@
+<style>
+    .table tbody tr td {border: none;}
+	.nav-sidebar {display: none;}
+	.edit_product {float: right; margin-bottom: 10px;}
+	.edit_product_num {-webkit-border-radius: 20px; border-radius: 20px; padding: 2px 8px;}
+</style>
+<input type="hidden" id="oid" value="{{$oid}}" />
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" style="padding-top: 10px; margin-bottom: 30px;">
+    <form action="" >
+        <table class="table">
+            <tr>
+                <td style="width: 100%; padding: 8px 10px 8px 0;">
+                    <input type="text" class="form-control" name="keyword" value="{{$keyword}}" placeholder="添加商品 输入商品信息" />
+                </td>
+                <td style="padding: 8px 0;">
+                    <input type="hidden" name="oid" value="{{$oid}}" />
+                    <button type="submit" class="btn btn-danger">搜索</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+    {{foreach $product_list as $product}}
+    <div style="overflow: auto; border-bottom: 1px solid #ccc; margin-bottom: 10px;">
+        <div style="float: left; position: relative; width: 30%;">
+        <img style="width: 100%;" src="{{if $product.sku._pic}}{{$product.sku._pic.small}}{{else}}/i/nopic100.jpg{{/if}}">
+        </div>
+        <div style="float: right; position: relative; width: 60%;">
+            <p style="font-size: 16px;">{{$product.sku.title}}</p>
+            {{if !empty($product.sku.alias)}}<p style="font-size: 16px;">{{$product.sku.alias}}</p>{{/if}}
+
+            {{if $product.product.sale_price > 0}}
+            <del style="color: #DADB80">￥{{$product.product.price / 100}}元/{{if !empty($product.sku.unit)}}{{$product.sku.unit}}{{else}}个{{/if}}</del><br />
+            <p style="font-size: 15px;">￥{{$product.product.sale_price / 100}}元/{{if !empty($product.sku.unit)}}{{$product.sku.unit}}{{else}}个{{/if}}</p>
+            {{else}}
+            <p style="font-size: 15px;">￥{{$product.product.price / 100}}元/{{if !empty($product.sku.unit)}}{{$product.sku.unit}}{{else}}个{{/if}}</p>
+            {{/if}}
+            <div class="edit_product">
+            	<a data-pid="{{$product.product.pid}}" class="btn btn-sm btn-danger edit_product_num minus_product_num" href="javascript:;">-</a>
+                <input id="product_num_{{$product.product.pid}}" data-product-id="{{$product.product.pid}}" class="product_list" type="number" style="width: 60px;border: 1px solid #999; margin: 0 10px; height: 30px; line-height: 30px;text-align: center;" value="{{if $product.num>0}}{{$product.num}}{{else}}0{{/if}}" />
+                <a data-pid="{{$product.product.pid}}" class="btn btn-sm btn-danger edit_product_num plus_product_num" href="javascript:;">+</a>
+            </div>
+        </div>
+    </div>
+    {{/foreach}}
+    <div style="position: fixed;bottom: 0; right: 0; left: 0;width: 100%;background: #ccc;padding: 10px;">
+        <span style="float: left; font-size: 18px;">共<b id="total_price">{{$total_price / 100}}</b>元</span>
+       	<span style="float: right;"><a class="btn btn-danger btn-large" id="plus_product" href="javascript:void(0);">确认选择</a></span>
+       	<span style="float: right; margin-right: 10px;"><a class="btn btn-warning btn-large" href="/order/edit_order_product_h5.php?oid={{$oid}}">取消</a></span>
+    </div>
+</div>

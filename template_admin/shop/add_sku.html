@@ -1,0 +1,227 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if empty($sku.sid)}}添加sku{{else}}编辑sku{{/if}}</h1>
+  {{$_can_edit_sku = (empty($sku.sid) || $_isAdmin || $_isEditor) ? 1:0}}
+	<form class="form-horizontal" role="form">
+		{{if $sku.sid}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">sid：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="sid" value="{{$sku.sid}}" readonly="true">
+			</div>
+		</div>
+		{{/if}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">名称：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="title" value="{{$sku.title}}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">其他名称：</label>
+			<div class="col-sm-9">
+				<input type="text" class="form-control" name="alias" value="{{$sku.alias}}" style="width:300px;display:inline-block;"> 　例如：木龙骨，又叫“木方”
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">类别：</label>
+			<div class="col-sm-2">
+				<select class="form-control" name="cate1" data-init="{{$sku.cate1}}">
+					{{foreach $cate1_list as $id => $item}}
+					<option {{if $sku.cate1== $id}}selected="selected" {{/if}} value="{{$id}}">{{$item.name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<div class="col-sm-2">
+				<select class="form-control" name="cate2" data-init="{{$sku.cate2}}">
+					{{foreach $cate2_list as $id => $item}}
+					<option {{if $sku.cate2== $id}}selected="selected" {{/if}} value="{{$id}}">{{$item.name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+            <div class="col-sm-2">
+                <select class="form-control" name="cate3" data-init="{{$sku.cate3}}">
+                    {{foreach $cate3_list as $id => $item}}
+                    <option {{if $sku.cate3== $id}}selected="selected" {{/if}} value="{{$id}}">{{$item.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">品牌：</label>
+			<div class="col-sm-3">
+				<select class="form-control" name="bid" data-init="{{$sku.bid}}">
+					<option>--选择品牌--</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">型号：</label>
+			<div data-init="{{$sku.mids}}" id="model-container" class="col-sm-6"></div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label">单位：</label>
+			<div class="col-sm-1">
+				<input type="text" class="form-control" name="unit" placeholder="单位" value="{{$sku.unit}}">
+			</div>
+			<label class="col-sm-2 control-label">比如：卷，袋，根</label>
+		</div>
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label">规格&包装：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="package" value="{{$sku.package}}">
+			</div>
+			<label class="col-sm-2 control-label">比如：DN20, 3米/根 100米/卷</label>
+		</div>
+        
+        <div class="form-group">
+			<label class="col-sm-2 control-label">包装含量：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="picking_note" value="{{$sku.picking_note}}">
+			</div>
+			<label class="col-sm-2 control-label">比如：200根一包</label>
+		</div>
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label">二维码类型：</label>
+			<div class="col-sm-4">
+				{{foreach $qrcode_type as $id => $type}}
+				<label class="radio-inline"><input type="radio" name="qrcode_type" value="{{$id}}" {{if $id == $sku.qrcode_type}}checked="checked" {{/if}}> {{$type}} </label>
+				{{/foreach}}
+			</div>
+			<label class="col-sm-4 control-label">品类码多个商品只需扫一次；单品码多个商品要扫多次；</label>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">长度：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="length" value="{{$sku.length / 100}}">
+            </div>
+            <label class="col-sm-2 control-label">长度，单位（米）</label>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">宽度：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="width" value="{{$sku.width / 100}}">
+            </div>
+            <label class="col-sm-2 control-label">宽度，单位（米）</label>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">高度：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="height" value="{{$sku.height / 100}}">
+            </div>
+            <label class="col-sm-2 control-label">高度，单位（米）</label>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">重量：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="weight" value="{{$sku.weight / 1000}}">
+            </div>
+            <label class="col-sm-2 control-label">重量，单位（千克）</label>
+        </div>
+    {{*
+		<div class="form-group">
+			<label class="col-sm-2 control-label">是否上架：</label>
+			<div class="col-sm-4">
+				<label class="radio-inline"><input type="radio" name="online" value="1" {{if 0== $sku.status}}checked="checked" {{/if}}> 是 </label>
+				<label class="radio-inline"> <input type="radio" name="online" value="0" {{if 4== $sku.status}}checked="checked" {{/if}}> 否 </label>
+			</div>
+		</div>
+    *}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">sku类型：</label>
+            <div class="col-sm-2">
+                <select class="form-control" id="chgSelectSkuType" name="type" data-init="{{$sku.type}}">
+                    <option {{if empty($sku.type)}}selected="selected" {{/if}} value="{{$id}}">请选择</option>
+                    {{foreach $sku_types as $id => $desc}}
+                    <option {{if $sku.type== $id}}selected="selected" {{/if}} value="{{$id}}">{{$desc}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            {{if !empty($_permissions['/shop/ajax/add_sku_4_relation'])}}
+            <div class="col-sm-2">
+                <a class="text-value showAddRelationSkus" href="javascript:;" data-toggle="modal" data-target="#addSku4Relation" style="{{if $sku.type!=2&&$sku.type!=3}}display:none;{{/if}}">添加关联sku</a>
+            </div>
+            {{/if}}
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"></label>
+            <div class="col-sm-6 relation_skus_area" style="{{if $sku.type!=2&&$sku.type!=3}}display:none;{{/if}}">
+                {{if isset($sku._rel_sku) && !empty($sku._rel_sku)}}
+                {{include file="shop/block_relation_sku_list.html" rel_skus=$sku._rel_sku}}
+                {{else}}
+                <div><span class="text-value" style="color:red;font-size:15px;">暂无关联SKU！！</span></div>
+                {{/if}}
+            </div>
+            <input type="hidden" id="currRelationSku" name="rel_sku" value="{{$sku.rel_sku}}">
+        </div>
+
+		<div id="wrap" class="form-group" style="background-color: #f3f3f3;">
+			<label class="col-sm-2 control-label">图片：</label>
+			<div class="col-sm-10">
+
+				<button style="margin-bottom: 20px;" type="button" class="btn btn-default" id="_j_btn_select_pic">从电脑选择图片</button><br />
+
+				<div id="img_list" class="gridly" style="position: relative;">
+					{{foreach $sku._pics as $pic}}
+					<div class="img_item brick" style="float: left; width: 200px; height: 244px;" data-pic="{{$pic.pic_tag}}">
+						<img class="img_img" data-pic="{{$pic.pic_tag}}" src="{{$pic.normal}}" />
+						<div style="margin-bottom: 5px; margin-top: 5px;">
+							<a style="margin-right:10px;" href="#" onclick="delete_pic('{{$pic.pic_tag}}');return false;" class="btn btn-default">删除</a>
+						</div>
+					</div>
+					{{/foreach}}
+				</div>
+				<input type="hidden" name="pic_ids" value="{{$sku.pic_ids}}">
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+                {{if !empty($_permissions['/shop/edit_sku'])}}
+                <button type="button" class="btn btn-primary" id="btn_save_sku">保存</button>
+                {{/if}}
+                {{if !empty($_permissions['shop_check_sku_sale_detail'])}} 　
+                <a type="button" class="btn btn-default" href="/warehouse/stock_history.php?sid={{$sku.sid}}" target="_blank">销售明细</a>
+                {{/if}}
+                <a type="button" style="margin-left:20px;" class="btn btn-default" href="{{if $sku._picinfo._srcpic}}{{$sku._picinfo._srcpic.src}}{{else}}{{if $sku._pic.src}}{{$sku._pic.src}}{{/if}}{{/if}}" target="_blank">打开图片</a>
+			</div>
+		</div>
+	</form>
+
+</div>
+
+<div class="modal fade _j_dialog" id="addSku4Relation" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:1000px;">
+        <div class="modal-content">
+            <div class="modal-df-datas" data-sid="{{$sku.sid}}"></div>
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">
+                    <span style="font-size:25px;">sku列表</span>
+                    
+                    <div style="float:right;font-size:16px;margin-right:15px;">
+                        <div class="form-inline _j_form">
+                            <div class="form-group" style="margin-right:10px;">
+                                <input type="text" class="form-control" name="keyword" value="{{$keyword}}">
+                            </div>
+                            <button type="button" class="btn btn-primary searchSkuList">搜索</button>
+                        </div>
+                    </div>
+                </h4>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label"></label>
+                <div id="showSkuListForRelation" style="margin-left:30px;">
+                    <p style="font-size:25px;">暂无SKU，请输入检索关键词，搜索！！</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <a class="btn btn-primary" data-dismiss="modal">完成</a>
+            </div>
+        </div>
+    </div>
+</div>

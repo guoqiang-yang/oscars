@@ -1,0 +1,104 @@
+<div style="margin-left: 50px;">
+    <div style="margin-bottom: 10px;">
+        <span style="font-size:18px;">加工商品</span>
+        <span style="color:red;margin-left:30px;">{{$short_combin_info}}</span>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:15%;">sid</th>
+                <th style="width:30%;">名称</th>
+                <th style="width:8%;">单位</th>
+                <th>货位：库存</th>
+            </tr>
+        </thead>
+        <tbody id="combinProductsArea_Combin" data-sid="{{$combin_infos_combin.sid}}">
+            <tr class="_j_product">
+                <td>{{$combin_infos_combin.sid}}</td>
+                <td>{{$combin_infos_combin.title}}</td>
+                <td>{{$combin_infos_combin.unit|default:'个'}}</td>
+                <td>
+                    {{if !empty($combin_infos_combin.locs)}}
+                        {{foreach $combin_infos_combin.locs as $l}}
+                        <p>{{$l.loc}}：{{$l.num}}</p>
+                        {{/foreach}}
+                    {{else}}
+                        <p>无库存</p>
+                    {{/if}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <div style="margin-bottom: 10px;">
+        <span style="font-size:18px;">配件信息</span>
+    </div>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th style="width:15%;">sid</th>
+                <th style="width:30%;">名称</th>
+                <th style="width:8%;">单位</th>
+                <th>货位：库存</th>
+            </tr>
+        </thead>
+        <tbody id="partProductsArea_Combin">
+            {{foreach $combin_infos_parts as $sku}}
+            <tr class="_j_product">
+                <td>{{$sku.sid}}</td>
+                <td>{{$sku.title}}</td>
+                <td>{{$sku.unit|default:'个'}}</td>
+                <td>
+                    {{if !empty($sku.locs)}}
+                        {{foreach $sku.locs as $l}}
+                        <p data-sid="{{$sku.sid}}" data-lnum="{{$l.num}}" data-rate="{{$sku.rate_num}}" data-loc="{{$l.loc}}">
+                            <label><input class="wait_select_loc_2_processing" type="checkbox" name="wait_processed" checked="checked"></label>
+                            <span style="margin-left:5px;">{{$l.loc}}：{{$l.num}}</span>
+                        </p>
+                        {{/foreach}}
+                    {{else}}
+                        <p>无库存</p>
+                    {{/if}}
+                </td>
+            </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+
+    <div style="margin-bottom: 10px;">
+        <span style="font-size:18px;">加工信息</span>
+    </div>
+    
+    <form class="form-horizontal">
+    <div id="createCombinArea_Combin" style="border: 1px dashed #eee;margin: 20px; background: #F2F2F2;">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">请输入要组合的数量：</label>
+            <div class="col-sm-2">
+                <input class="form-control" type="text" name="num" value="">
+            </div>
+            <div class="text-value col-sm-5">
+                最大组合数量：<span id="maxNum4ProcessedOrder">{{$max_combin_num}}</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">请输入要上架的储位：</label>
+            <div class="col-sm-2" style="display:inline-block">
+                {{if !empty($combin_infos_combin.locs)}}
+                    <input class="form-control" type="text" name="location" value="{{$combin_infos_combin.locs[0]['loc']}}">
+                    <span>系统货位：</span><br>
+                    {{foreach $combin_infos_combin.locs as $l}}
+                    <span style="margin-left:10px;">{{$l.loc}}</span><br>
+                    {{/foreach}}
+                {{else}}
+                <input class="form-control" type="text" name="location" value="">
+                <span>货位：暂无</span>
+                {{/if}}
+            </div>
+            <a href="javascript:void(0);" id="confirmCombinProduct" class="btn btn-primary">确认组合</a>
+        </div>
+    </div>
+    </form>
+</div>

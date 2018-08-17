@@ -1,0 +1,226 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        司机订单列表
+    </h1>
+
+    <form class="form-inline" role="form" action="/logistics/driver_order_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>司机id：</label> <input style="width: 80px;" type="text" class="form-control" name="cuid" value="{{$search_conf.cuid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>手机：</label> <input style="width: 120px;" type="text" class="form-control" name="mobile" value="{{$search_conf.mobile}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>姓名：</label> <input style="width:80px;" type="text" class="form-control" name="name" value="{{$search_conf.name}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>来源：</label>
+                <select class="form-control" name="source">
+                <option value="0" {{if empty($search_conf.source)}}selected="selected" {{/if}}>请选择</option>
+                {{foreach $source_list as $sid => $source}}
+                    <option value="{{$sid}}" {{if $search_conf.source== $sid}}selected="selected" {{/if}}>{{$source}}</option>
+                {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>所属库房：</label>
+                <select class="form-control" name="wid">
+                    <option value="0" {{if empty($search_conf.wid)}}selected="selected" {{/if}}>请选择</option>
+                    {{foreach $warehouse as $wid => $name}}
+                    <option value="{{$wid}}" {{if $search_conf.wid==$wid}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>配送日期：</label>
+                <input style="width: 40%;" type="date" class="form-control" name="btime" value="{{$search_conf.btime}}" placeholder="YYYY-MM-DD">
+                <span> - </span>
+                <input style="width: 40%;" type="date" class="form-control" name="etime" value="{{$search_conf.etime}}" placeholder="YYYY-MM-DD">
+            </div>
+        
+            <div class="form-group" style="margin-right:15px;">
+                <div class="checkbox" style="font-size: 18px;">
+                  <label>
+                    <!--<input type="checkbox" name="order_return_unpaid" {{if !empty($search_conf.order_return_unpaid)}}checked="checked"{{/if}}> 回单未收款-->
+                  </label>
+                </div>
+            </div>
+            {{if !empty($_permissions['hc_order_paid_coopworker']) || !empty($_permissions['/order/ajax/generate_statement'])}}
+            <div class="form-group" style="margin-right:15px;">
+                <div class="checkbox" style="font-size: 18px;">
+                    <label>
+                        {{if !empty($_permissions['hc_order_paid_coopworker'])}}
+                        <input type="checkbox" name="driver_unpaid" {{if !empty($search_conf.driver_unpaid)}}checked="checked"{{/if}}> 批量结算
+                        {{/if}}
+                    </label>
+                </div>
+                <div class="checkbox" style="font-size: 18px;">
+                    <label>
+                        {{if !empty($_permissions['/order/ajax/generate_statement'])}}
+                        <input type="checkbox" name="generate_statement" {{if !empty($search_conf.generate_statement)}}checked="checked"{{/if}}> 生成结算单
+                        {{/if}}
+                    </label>
+                </div>
+            </div>
+            {{/if}}
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+
+    </form>
+
+    <hr>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width:6%;">订单id</th>
+                <th style="width:8%;">客户信息</th>
+                <th style="width:15%;">配送地址</th>
+                <th style="width:13%;">订单信息</th>
+                <th style="width:10%;">配送日期</th>
+                <th style="width:10%;">司机信息</th>
+                <th style="width:10%;">司机运费</th>
+                <th style="width:13%;">备注</th>
+                <th style="width:8%;">操作</th>
+                <th><label><input type="checkbox" id="coopworker_pay_select_all">全选</label></th>
+            </tr>
+        </thead>
+        <tbody id="coopworker_order_area">
+            {{foreach $orders as $order}}
+                <tr class="coopworker_order" data-id="{{$order.id}}" data-oid="{{$order.oid}}" data-cuid="{{$order.cuid}}" data-type="{{$order.type}}" data-usertype="{{$order.user_type}}" data-price="{{$order.price}}">
+                    <td>
+                        <a href="/order/order_detail.php?oid={{$order.oid}}" target="_blank">{{$order.oid}}</a>
+                        {{if !empty($order._order.source_oid)}}<span style="color:red;">[补单]</span>{{/if}}
+                    </td>
+                    <td>
+                        <a href="/order/customer_list_cs.php?cid={{$order._order.cid}}&oid={{$order._order.oid}}" target="_blank">{{$order._order.contact_name}}</a><br>
+                        <span>{{$order._order.contact_phone}}</span><br/>
+                        <span style="color: #ff0000;">
+                            {{if $order._customer.payment_days}}
+                            账期:{{$order._customer.payment_days}}天
+                            {{if (time() - strtotime($order._customer.first_unpaid_order_pay_time)) >= ($order._customer.payment_days * 89280)}}
+                            {{if strtotime($order._customer.first_unpaid_order_pay_time) > 0}}
+                            (已过期)
+                            {{/if}}
+                            {{/if}}
+                            {{/if}}
+                        </span>
+                    </td>
+                    <td>
+                        <span>{{$order._order.address}}</span>
+                    </td>
+                    <td>
+                        <span>{{$warehouse[$order._order.wid]}}</span><br>
+                        <span>商品总价:￥{{$order._order.price/100}}</span><br>
+                        <br>
+                        <span>{{$order_steps[$order._order.step]}}</span>
+                        <span style="color:{{if $order._order.paid==1}}green{{else}}red{{/if}};">【{{$paid_status[$order._order.paid]}}】</span>
+                        {{if $order._order.is_guaranteed==1}}<br><span style="color:blue;">[已担保]</span>{{/if}}
+                        {{*if $order._order.step==5 && ($_isAdmin||$_isFinance)}}
+                        <a href="javascript:void(0);" class="btn btn-primary _j_chg_order_step" data-next_step="7" style="height:28px;font-size: 13px;">已回单</a>
+                        {{/if*}}
+                    </td>
+                    <td>
+                        <span>{{$order._order.delivery_date}}</span>
+                    </td>
+                    <td>
+                        <a href="/logistics/add_driver.php?did={{$order._worker.did}}" target="_blank">{{$order._worker.name}}(ID:{{$order._worker.did}})</a><br>
+                        <span>{{$order._worker.mobile}}</span><br>
+                        <span>来源：{{$source_list[$order._worker.source]}}</span>
+                    </td>
+                    <td>
+                        <span style="color:purple">{{if $order.type==1}}运费{{else}}搬运费{{/if}}: {{$order.price/100}}元</span><br>
+                        {{if $order.paid==0}}
+                            {{if $order.statement_id}}
+                        <span style="color:red;">待支付</span>
+                            {{else}}
+                        <span style="color:red;">未支付</span>
+                            {{/if}}
+                        {{else}}
+                        <span style="color:green;">已支付</span>
+                        {{/if}}
+                    </td>
+                    <td><span>{{$order._order.note}}</span></td>
+                    <td>
+                        <a href="/order/order_detail.php?oid={{$order.oid}}" target="_blank">订单详情</a><br>
+                        {{if $order.can_paid}}
+                        {{if !empty($_permissions['hc_order_paid_coopworker'])}}
+                        <a href="javascript:;" class="paid_coopworker">支付费用</a>
+                        {{/if}}
+                        {{/if}}
+                    </td>
+                    <td>
+                        {{if $can_bluk_pay}}
+                        {{if !empty($_permissions['hc_order_paid_coopworker']) || !empty($_permissions['/order/ajax/generate_statement'])}}
+                            {{if $order.can_paid && ($search_conf.driver_unpaid=='on' || $search_conf.generate_statement=='on')}}
+                            <div class="checkbox" style="font-size: 16px;">
+                                <label><input type="checkbox" name="bluk_pay" value="{{$order.id}}"></label>
+                            </div>
+                            {{/if}}
+                        {{/if}}
+                        {{/if}}
+                    </td>
+                </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+    
+    <div>
+        {{if  $can_bluk_pay && $search_conf.cuid && $search_conf.driver_unpaid=='on'}}
+        {{if !empty($_permissions['hc_order_paid_coopworker'])}}
+        <a href="javascript:;" class="btn btn-primary bluk_pay_coopworker" style="float:right;margin-left:20px;">批量支付</a>
+        <div style="width:20%; float:right;margin-left:20px;">
+            <select class="form-control" id="_j_bulk_payment_type">
+                <option value="0">请选择支付类型</option>
+                {{foreach $payment_types as $payid=>$payname}}
+                <option value="{{$payid}}" {{if $payment_df==$payid}} selected="selected"{{/if}}>{{$payname}}</option>
+                {{/foreach}}
+            </select>
+        </div>
+        {{/if}}
+        {{if !empty($_permissions['/order/coopworker_order_print'])}}
+        <a href="javascript:;" class="btn btn-default print_coopworker_order" style="float:right;margin-left:20px;">打印</a>
+        {{/if}}
+        {{/if}}
+        {{if $can_bluk_pay && !empty($search_conf.cuid) && $search_conf.generate_statement=='on'}}
+        {{if !empty($_permissions['/order/ajax/generate_statement'])}}
+        <a href="javascript:;" class="btn btn-primary gen_coopworker_statement" style="float:right;margin-left:20px;" data-wid="{{$user_wid}}">生成结算单</a>
+        {{/if}}
+        {{/if}}
+    </div>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+          {{if $_isAdmin}}
+            <li><a style="color:#555;">货值：￥{{$products_price|string_format:"%d"}}元</a></li>
+          {{/if}}
+        </ul>
+    </nav>
+
+</div>
+<div class="modal fade _j_dialog" id="selectWid" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+    <div class="modal-dialog modal-sm" role="document" style="width:300px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">结算单仓库选择</h4>
+            </div>
+            <div class="modal-body">
+                {{if !empty($user_wids)}}
+                {{foreach $user_wids as $wid}}
+                {{if !empty($warehouse[$wid])}}<label><input type="radio" name="user_wid" value="{{$wid}}" style="margin-right: 5px;">{{$warehouse[$wid]}}</label><br>{{/if}}
+                {{/foreach}}
+                {{/if}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_save_coopworkers_statement">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

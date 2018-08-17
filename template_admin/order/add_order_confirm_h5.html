@@ -1,0 +1,222 @@
+<style>
+    .table tbody tr td {border: none;}
+	.table tbody tr td.title {text-align: right; width: 30%}
+	.nav-sidebar {display: none;}
+</style>
+
+<input type="hidden" value="{{$oid}}" id="oid" />
+{{if !empty($order_products)}}
+<!-- 订单商品start -->
+<h5 style="padding: 5px 10px;">订单商品清单</h5>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" style="border-top: 1px solid #ccc; padding: 10px 20px;">
+	{{foreach $order_products as $product}}
+    <div style="overflow: auto; border-bottom: 1px solid #ccc;">
+        <div style="float: left; position: relative; width: 30%; padding: 2%;">
+            <img style="width: 100%;" src="{{if $product.sku._pic}}{{$product.sku._pic.small}}{{else}}/i/nopic100.jpg{{/if}}">
+        </div>
+        <div style="float: right; position: relative; width: 60%; margin-top: 8%;">
+            <p style="font-size: 16px;">{{$product.sku.title}}</p>
+            {{if !empty($product.sku.alias)}}<p style="font-size: 16px;">{{$product.sku.alias}}</p>{{/if}}
+
+            <p style="font-size: 15px;">￥{{$product.price / 100}}元/{{if !empty($product.sku.unit)}}{{$product.sku.unit}}{{else}}个{{/if}} X {{$product.num}}</p>
+        </div>
+    </div>
+    {{/foreach}}
+</div>
+<!-- 订单商品end -->
+{{/if}}
+
+{{if !empty($giftProducts)}}
+<!-- 赠品start -->
+<h5 style="padding: 5px 10px;">赠品清单</h5>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" style="border-top: 1px solid #ccc; padding: 10px 20px;">
+	{{foreach $giftProducts as $product}}
+    <div style="overflow: auto; border-bottom: 1px solid #ccc;">
+        <div style="float: left; position: relative; width: 30%; padding: 2%;">
+            <img style="width: 100%;" src="{{$product.image}}" />
+        </div>
+        <div style="float: right; position: relative; width: 60%; margin-top: 8%;">
+            <p style="font-size: 16px;">{{$product.title}}</p>
+            {{if !empty($product.sku.alias)}}<p style="font-size: 16px;">{{$product.sku.alias}}</p>{{/if}}
+
+            <p style="font-size: 15px;">￥{{$product.price / 100}}元/{{$product.unit}} X {{$product.num}}</p>
+        </div>
+    </div>
+    {{/foreach}}
+</div>
+<!-- 赠品end -->
+{{/if}}
+{{if !empty($discountProducts)}}
+<!-- 特价商品start -->
+<h5 style="padding: 5px 10px;">特价商品清单</h5>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" style="border-top: 1px solid #ccc; padding: 10px 20px;">
+	{{foreach $discountProducts as $product}}
+    <div style="overflow: auto; border-bottom: 1px solid #ccc;">
+        <div style="float: left; position: relative; width: 30%; padding: 2%;">
+            <img style="width: 100%;" src="{{$product.image}}" />
+        </div>
+        <div style="float: right; position: relative; width: 60%; margin-top: 8%;">
+            <p style="font-size: 16px;">{{$product.title}}</p>
+            {{if !empty($product.sku.alias)}}<p style="font-size: 16px;">{{$product.sku.alias}}</p>{{/if}}
+
+            <p style="font-size: 15px;">￥{{$product.price / 100}}元/{{$product.unit}} X {{$product.num}}</p>
+        </div>
+    </div>
+    {{/foreach}}
+</div>
+<!-- 特价商品end -->
+{{/if}}
+<!-- 订单信息start -->
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <table class="table" style="margin-bottom: 50px;">
+        <tr>
+            <td class="title">用户cid：</td>
+            <td>{{$order.cid}}</td>
+        </tr>
+        <tr>
+            <td class="title">订单城市：</td>
+            <td>{{$order._city}}</td>
+        </tr>
+        <tr>
+            <td class="title">送货方式：</td>
+            <td>{{$order._delivery_type}}</td>
+        </tr>
+        {{if $order.delivery_type == 2}}
+        <tr>
+            <td class="title">取货人：</td>
+            <td>{{$order.contact_name}}</td>
+        </tr>
+        <tr>
+            <td class="title">联系方式：</td>
+            <td>{{$order.contact_phone}}</td>
+        </tr>
+        <tr>
+            <td class="title">取货日期：</td>
+            <td>{{$order._delivery_date}}</td>
+        </tr>
+        {{else if $order.delivery_type == 3}}
+        <tr>
+            <td class="title">收货人：</td>
+            <td>{{$order.contact_name}}</td>
+        </tr>
+        <tr>
+            <td class="title">联系方式：</td>
+            <td>{{$order.contact_phone}}</td>
+        </tr>
+        <tr>
+            <td class="title">配送地址：</td>
+            <td>{{$order._address}}</td>
+        </tr>
+        <tr>
+            <td class="title">送货日期：</td>
+            <td>{{$order._delivery_date}}</td>
+        </tr>
+        <tr>
+            <td class="title">客户运费：</td>
+            <td>{{$order.freight / 100}}元</td>
+        </tr>
+        <tr>
+            <td class="title">是否上楼：</td>
+            <td>{{if $order.service == 2}}楼梯上楼{{else if $order.service == 1}}电梯上楼{{else}}不上楼{{/if}}</td>
+        </tr>
+        <tr>
+            <td class="title">搬运费：</td>
+            <td>{{$order.customer_carriage / 100}} 元</td>
+        </tr>
+        {{if $order.service == 2}}
+	        <tr>
+	            <td class="title">楼层数：</td>
+	            <td>{{$order.floor_num}}</td>
+	        </tr>
+	    {{/if}}
+        {{else}}
+        <tr>
+            <td class="title">收货人：</td>
+            <td>{{$order.contact_name}}</td>
+        </tr>
+        <tr>
+            <td class="title">联系方式：</td>
+            <td>{{$order.contact_phone}}</td>
+        </tr>
+        <tr>
+            <td class="title">配送地址：</td>
+            <td>{{$order._address}}</td>
+        </tr>
+        <tr>
+            <td class="title">送货日期：</td>
+            <td>{{$order._delivery_date}}</td>
+        </tr>
+        <tr>
+            <td class="title">客户运费：</td>
+            <td>{{$order.freight / 100}}元</td>
+        </tr>
+        <tr>
+            <td class="title">是否上楼：</td>
+            <td>{{if $order.service == 2}}楼梯上楼{{else if $order.service == 1}}电梯上楼{{else}}不上楼{{/if}}</td>
+        </tr>
+        <tr>
+            <td class="title">搬运费：</td>
+            <td>{{$order.customer_carriage / 100}} 元</td>
+        </tr>
+        {{if $order.service == 2}}
+	        <tr>
+	            <td class="title">楼层数：</td>
+	            <td>{{$order.floor_num}}</td>
+	        </tr>
+	    {{/if}}
+        {{/if}}
+        <tr>
+            <td class="title">库房：</td>
+            <td>{{$order._warehouse_name}}</td>
+        </tr>
+        <tr>
+            <td class="title">打印价格：</td>
+            <td>{{if $order._op_note.nopprice == 1}}否{{else}}是{{/if}}</td>
+        </tr>
+        <tr>
+            <td class="title">内部备注：</td>
+            <td>{{$order.note}}</td>
+        </tr>
+        <tr>
+            <td class="title">付款方式：</td>
+            <td>
+            	{{foreach $payment_types as $type_id => $type_name}}
+					{{if $order.payment_type== $type_id}}
+						{{$type_name}}
+					{{/if}}
+				{{/foreach}}
+			</td>
+        </tr>
+        <tr>
+            <td class="title">货款：</td>
+            <td>{{$order.price/100}}元</td>
+        </tr>
+        <tr>
+            <td class="title">运费：</td>
+            <td>+ {{$order.freight/100}}元</td>
+        </tr>
+        <tr>
+            <td class="title">搬运费：</td>
+            <td>+ {{$order.customer_carriage/100}}元</td>
+        </tr>
+        <tr>
+            <td class="title">优惠：</td>
+            <td>- {{$order.privilege/100}}元</td>
+        </tr>
+        <tr>
+            <td class="title">订单总金额：</td>
+            <td>{{$order.total_order_price/100}}元</td>
+        </tr>
+    </table>
+</div>
+<!-- 订单信息end -->
+<table class="table" style="position: fixed;bottom: 0;right: 0;margin-bottom: 0; background: #ccc;">
+    <tr>
+        <td style="padding: 10px;">
+            <a id="modify_order_btn" href="/order/add_order_logistics_h5.php?oid={{$oid}}" style="width: 100%;" class="btn btn-warning">修改订单</a>
+        </td>
+        <td style="padding: 10px;">
+            <a id="confirm_order_btn" href="javascript:;" style="width: 100%;" class="btn btn-danger">确认提交</a>
+        </td>
+    </tr>
+</table>

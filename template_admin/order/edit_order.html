@@ -1,0 +1,99 @@
+<input type="hidden" id="pre_date" value="{{$privilege.pre_date}}"/>
+<input type="hidden" id="pre_date_privilege" value="{{$privilege.pre_date_privilege}}"/>
+<input type="hidden" id="cur_date" value="{{$date}}"/>
+<input type="hidden" id="cur_hour" value="{{$hour}}"/>
+<input type="hidden" id="pre_order_set" value="{{$privilege.pre_order_set}}"/>
+<input type="hidden" id="is_in_picking" value="{{$is_in_picking}}"/>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">
+        {{if $order.oid && !$copy}}编辑{{else}}新建{{/if}}订单
+        {{if $order.is_franchiess}}
+        <span style="color: red; margin-left: 50px;">加盟商订单</span>
+        {{/if}}
+    </h1>
+
+	<form class="form-horizontal" role="form" data-oid="{{$order.oid}}" data-cid="{{$order.cid}}">
+		{{include "order/block_edit_order_info.html"}}
+		{{include "order/product_list.html"}}
+		<div id="freight_alert" class="form-group" style="display: none;">
+			<label class="col-sm-2 control-label">提示：</label>
+			<div class="col-sm-4" style="font-weight: bold;  width:50%; color: red;">
+				六环外的运费需人工计算，填写之后方可保存订单！！！！！！！
+			</div>
+		</div>
+		<!-- 操作按钮开始 -->
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+                {{if !empty($_permissions['/order/edit_order'])}}
+				<button type="button" class="btn btn-primary" id="_j_btn_save_order_edit" style="margin-right:20px;">保存</button>
+                {{/if}}
+                
+				{{if $order.step >= 2 && $order.step < 5 && $order.aftersale_type == 0 && !empty($_permissions['/order/edit_order'])}}
+				<a href="javascript:void(0);" class="btn btn-primary _j_back_order_step" style="margin-right:20px;">修改商品</a>
+				{{/if}}
+                
+				{{if $order.step < 2  && !empty($_permissions['/order/edit_order'])}}
+				<button id="add_product" type="button" class="btn btn-default" data-toggle="modal" data-target="#dlgAddProduct" style="margin-right:20px;">添加商品</button>
+				{{/if}}
+                
+                {{if !empty($_permissions['/order/order_detail'])}}
+				<a href="/order/order_detail.php?oid={{$order.oid}}" target="_blank" class="btn btn-default" style="margin-right:20px;">查看详情</a>
+                {{/if}}
+			</div>
+		</div>
+		<!-- 操作按钮结束 -->
+	</form>
+
+	<!-- Modal -->
+	<div class="modal fade" id="dlgAddProduct" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div id="product_list_container">
+					{{include "order/dlg_product_list.html"}}
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary" id="_j_btn_save_products" data-oid="{{$order.oid}}">确认选择</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    <!-- Modal -->
+    <div id="change_order_city" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="text-align: center;">
+                    <a class="close" data-dismiss="modal">×</a>
+                    <h3 style="color: #FF0000;">切换城市后，以下商品将无法配送，请先删除后再切换城市</h3>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>商品ID</th>
+                            <th>skuId</th>
+                            <th>商品名</th>
+                            <th>类别</th>
+                            <th>总数</th>
+                        </tr>
+                        </thead>
+                        <tbody id="change_order_city_body">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{if $customer.account_balance > 0 && !$_hide_useless}}
+	<div style="position: fixed; width: 500px; height: 50px; background-color: #999999; top: 60px; right: 50px; color: red; font-size: 26px; padding: 5px 10px;">
+		该用户有欠款{{$customer.account_balance / 100}}元！
+	</div>
+	{{/if}}
+
+</div>
+
+

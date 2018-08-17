@@ -1,0 +1,58 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">客户应收 - 仅财务催账使用</h1>
+	
+	<form class="form-inline" role="form" action="/finance/customer_list_for_finance.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>日期：</label>
+				<input class="form-control" type="text" name="ctime" value="{{$ctime}}" >
+        <span style="color:gray;"> (YYYY-MM-DD)</span>
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+	
+	<hr>
+	
+	<table class="table">
+		<thead>
+			<tr>
+			  <th>id</th>
+			  <th>名称/联系人</th>
+			  <th>门店地址、电话</th>
+        <th>应收金额</th>
+			  <th>销售专员</th>
+			  <th>操作</th>
+        <th>日期</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{foreach $customer_list as $customer}}
+			<tr data-cid="{{$customer.cid}}">
+				<td>{{$customer.cid}}</td>
+				<td>{{$customer._customer.name}}<br/>{{if $customer._customer.name <> $customer._customer.contact_name}}{{$customer._customer.contact_name}}{{/if}}</td>
+				<td>
+				  {{$customer._customer.address}}
+				  {{if $customer._customer.address}}<br/>{{/if}}{{$customer._customer.phone}}
+				</td>
+        <td style="color:red;">￥{{$customer.amount/100}}</td>
+				<td>{{$customer._saler.name}}</td>
+				<td>
+					<a href="/finance/customer_bill_list.php?cid={{$customer.cid}}">应收明细</a>　
+          <a href="/order/order_list.php?cid={{$customer.cid}}">查看订单</a>
+				</td>
+        <td>{{$customer.ctime}}</td>
+			</tr>
+			{{/foreach}}
+		</tbody>
+	</table>
+	
+	<nav>
+		<ul class="pagination">
+		  {{$pageHtml nofilter}}
+		  <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		  <li><a style="color:#555;">共{{$total_price/100}}元</a></li>
+		</ul>
+	</nav>
+</div>

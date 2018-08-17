@@ -1,0 +1,74 @@
+一、微信支付
+1、公众号支付
+	详情页点击去付款，跳到付款页：/order/pay.php?oid=****
+	选择支付方式,js跳转到：/order/do_pay.php?type=2&use_balance=undefined&oid=407277
+	
+1) 生成预支付订单号
+	htdocs_client_h5/order/do_pay.php
+		--> Weixin_API::getPayPackage($openid, $orderid, $amount, $payType = 'single', $useBalance = 0)
+			--> Weixin_Func::prePay($openid, $orderId, $amount, $payType)
+	
+2) 司机客户端 生成支付二维码
+	htdocs_driver_api/homepage/weixin_pay.php
+		--> Weixin_API::getprePayQrcode($orderid, $amount, $useBalance = 0)
+			--> Weixin_Func::prePayQrcode($orderId, $amount)
+
+3) 微信支付回调文件
+	htdocs_client_h5/paycallback/weixin.php
+
+
+
+2、App支付
+1) 生成预支付订单号
+	htdocs_app_api/order/weixin_prepay.php
+		--> WeiXin_App_Api::getPayPackage($cid, $orderid, $useBalance)
+			--> Weixin_App_Func::prePay($orderId, $amount, $useBalance)
+
+2) 微信支付回调文件
+	htdocs_app_api/order/pay_callback_weixin.php
+
+
+
+
+
+
+二、支付宝支付
+1、h5支付
+1) 生成预支付订单号
+	htdocs_client_h5/order/alipay.php
+		--> Alipay_Api::mobilePay($oid, $amount, $useBalance = 0)
+
+2) 支付宝回调文件
+	htdocs_client_h5/paycallback/alipay_notify_url.php
+  htdocs_client_h5/paycallback/alipay_return_url.php
+
+
+2、App支付
+1) 生成预支付订单号
+	htdocs_app_api/order/alipay_prepay.php
+		--> Alipay_Api::appPay($oid, $useBalance)
+
+2) 支付宝回调文件
+	htdocs_app_api/order/pay_callback_alipay.php
+
+
+
+三、相关表
+1、第三方平台在线支付交易号表：防止支付回调多次
+	
+CREATE TABLE t_out_trade (
+    id            int             not null auto_increment,
+    out_trade_no  varchar(100)    not null default ''   comment '支付宝/微信支付的订单号',
+    oid           INT             not null default 0    comment '系统订单号',
+    amount        INT             not null default 0    comment '本次支付金额',
+    payment_type  INT             not null default 0    comment '支付方式',
+    ctime         timestamp       not null default 0,
+    mtime         timestamp       not null default current_timestamp ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    INDEX(oid),
+    INDEX(out_trade_no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+	
+	

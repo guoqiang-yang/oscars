@@ -1,0 +1,342 @@
+<style>
+	.form-group {
+		margin-bottom: 6px;
+	}
+
+	.order-bottom {
+		border-bottom: 1px dashed #eee;
+		margin: 20px;
+	}
+
+	.coopworker-list {
+		padding: 6px 12px;
+	}
+    .btn-selected {
+        color: #fff;
+        background-color: #E22121;
+        border-color: #2e6da4;
+    }
+</style> 
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		拣货单详情-单号:{{$order.oid}}{{if $order.aftersale_type == 2}}<span style="font-size: 14px; color: #ff0000;">*注 此单为售后费用单据，请告知司机不需要走库房拉货</span>{{/if}}
+	</h1>
+
+	<form class="form-horizontal" role="form" data-oid="{{$order.oid}}" data-wid="{{$order.wid}}">
+
+		{{*基本信息*}}
+		<div class="order-bottom" style="background: #F2F2F2;">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">收货地址：</label>
+				<div class="col-sm-10">
+					<span class="text-value">{{$order._district}}  {{$order.address}}</span>
+                    <a class="btn btn-primary" href="/order/edit_community_fee.php?community_id={{$order.community_id}}&wid={{$order.wid}}" target="_blank">查看地图</a>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">配送日期：</label>
+				<div class="col-sm-10">
+					<span class="text-value col-sm-5">{{$order._delivery_date}}</span>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">配送信息：</label>
+				<div class="col-sm-10">
+					<div class="text-value col-sm-5">
+						<span style="color:red;">{{$delivery_types[$order.delivery_type]}}</span>
+                        <span class="text-value">【{{$order._warehouse_name}}】</span>
+                        <span style="color:red; font-size:18px;">【{{$order._step}}】</span>
+					</div>
+				</div>
+			</div>
+			{{if $order.customer_note}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label">客户备注：</label>
+				<div class="col-sm-10">
+					<span class="text-value" style="color:red;">
+						{{$order.customer_note nofilter}}&nbsp;&nbsp;
+					</span>
+				</div>
+			</div>
+			{{/if}}
+		</div>
+		{{*调度模块*}}
+		<div class="order-bottom">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">司机信息：</label>
+				<div class="col-sm-8">
+					{{if !empty($order.driver_list)}}
+						{{foreach $order.driver_list as $_driver}}
+							<div class="col-sm-12 coopworker_info" style="margin:2px;" data-usertype="{{$_driver.user_type}}" data-type="1" data-cuid="{{$_driver.cuid}}" data-price="{{$_driver.price}}">
+								<span class="col-sm-3 name">{{$_driver.name}}</span>
+								<span class="col-sm-2 phone">{{$_driver.phone}}</span>
+							</div>
+						{{/foreach}}
+					{{else}}
+						<span class="text-value no_driver">无司机信息</span>
+					{{/if}}
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">搬运工信息：</label>
+				<div class="carrier-list col-sm-8">
+					{{if !empty($order.carrier_list)}}
+						{{foreach $order.carrier_list as $_carrier}}
+							<div class="col-sm-12 coopworker_info" style="margin:2px;" data-usertype="{{$_carrier.user_type}}" data-type="2" data-cuid="{{$_carrier.cuid}}" data-price="{{$_carrier.price}}">
+								<span class="col-sm-3 name">{{$_carrier.name}}{{if $_carrier.user_type==1}}【司机】{{/if}}</span> 
+                                <span class="col-sm-2 phone">{{$_carrier.phone}}</span>
+							</div>
+						{{/foreach}}
+					{{else}}
+						<span class="text-value no_driver">无搬运工信息</span>
+					{{/if}}
+				</div>
+			</div>
+        </div>
+        <div class="order-bottom all_picking_area" style="background: #F2F2F2;">
+            <div class="form-group">
+				<label class="col-sm-2 control-label">选择货区：</label>
+                
+                {{foreach $valid_areas as $_area}}
+                <div class="checkbox" style="font-size: 18px;width:10%; display:inline-block;">
+                    <label><input type="checkbox" name="area_cb" checked="checked" data-area="{{$_area}}" onclick="javascript:selectPickingArea();"> {{$_area}}区</label>
+                </div>
+                {{/foreach}}
+                
+                {{if !empty($_permissions['/order/picking_print'])}}
+                <a href="javascript:printPicking();" class="btn btn-default" style="margin-right:20px;">打印拣货单</a>
+                {{/if}}
+                
+                <div class="checkbox" style="font-size: 15px;width:10%; display:inline-block;">
+                    <label><input type="checkbox" checked="checked" onclick="javascript:selectAllPicking();"> 全选</label>
+                </div>
+                
+            </div>
+        </div>
+        
+        <div class="order-bottom">
+            <div class="form-group">
+                {{foreach $products as $area => $_products}}
+                <div id="picking_area_{{$area}}" class="picking_area_4_products">
+                    <label class="col-sm-2 control-label">【{{$area}}区】清单：</label>
+                    <div class="col-sm-10">
+                        <div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:8%;">商品id</th>
+                                        <th style="width:15%;">名称</th>
+                                        <th style="width:12%;">类别（单位）</th>
+                                        <th style="width:8%;">总数</th>
+                                        <th style="width:8%;">空采数</th>
+                                        <th style="width:10%;">补货数</th>
+                                        <th style="width:13%;">货位</th>
+                                        <th style="width:10%;">备注</th>
+                                        <th style="width:5%;">状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {{foreach $_products as $p}}
+                                <tr class="dialog" data-oid="{{$order.oid}}" data-pid="{{$p.pid}}" data-sid="{{$p.sid}}">
+                                    <td>{{$p.pid}}</td>
+                                    <td class="p_title" data-title="{{$p.sku.title}}">
+                                        {{$p.sku.title}}<br>
+                                        <span style="color:grey;">skuid: {{$p.sid}}</span>
+                                    </td>
+                                    <td>
+                                        {{$cate1_list[$p.sku.cate1]['name']}} - {{$cate2_list_all[$p.sku.cate1][$p.sku.cate2]['name']}}
+                                        <span style="color:blue;">（{{$p.sku.unit|default: '个'}}）</span>
+                                        <p style="color:hotpink;">{{$buytype_desc[$p.show_buy_type]}}</p>
+                                    </td>
+                                    <td><span style="font-weight:bold;font-size:20px;">{{$p.num}}</span></td>
+                                    <td>
+                                        <span style="font-weight:bold;color:green;">{{$p.show_tmp_num}}{{if $p.show_tmp_num>0}}（空）{{/if}}</span>
+                                    </td>
+                                    <td>
+                                        <span style="font-weight:bold;color:blue;">{{$p.show_lack_num}}{{if $p.show_lack_num>0}}（缺）{{/if}}</span>
+                                        {{if $p.vnum_deal_type==1}}
+                                        <p style="color:brown;">【已外采】</p>
+                                        {{/if}}
+                                        {{if $p.tmp_inorder_num}}
+                                        <br>
+                                        <a href="/warehouse/detail_in_order.php?oid={{$p.tmp_inorder_id}}" target="_blank">采购单：{{$p.tmp_inorder_id}}</a>
+                                        {{/if}}
+                                    </td>
+                                    <td>
+                                        {{foreach $p._location as $one}}
+                                        <span>{{$one.loc}}: <span style="font-weight:bold;color:red;">{{$one.num}}</span></span><br>
+                                        {{/foreach}}
+                                    </td>
+                                    <td>{{$p.note}}</td>
+                                    <td>
+                                        {{if $p.picked}}<span style="color:green;">已拣（{{$p.picked}}）</span>
+                                        {{else}}<span style="font-weight:bold;color:red;">未拣</span>
+                                        {{/if}}
+                                    </td>
+                                    <td>
+                                        {{if !empty($_permissions['/order/ajax/get_occupied_product_by_order'])}}
+                                        <a href="javascript:;" class="get_occupied_products" style="color:gray;">查占用</a><br />
+                                        {{/if}}
+                                        {{if $order.step < 5}}
+                                            {{if 0&&!empty($_permissions['/order/ajax/refresh_picking_product'])}}
+                                            <a href="javascript:;" class="refresh_picking_product">刷新</a><br>
+                                            {{/if}}
+                                            {{if $p.show_lack_num>0 && $p.vnum_deal_type==0 &&($order.wid!=3||!in_array($p.pid, $sand_series)) && !empty($_permissions['/order/ajax/mark_vnum_flag'])}}
+                                            <a href="javascript:;" class="mark_vnum_flag" data-flag="lack">标为外采</a><br>
+                                            {{/if}}
+                                            {{if !empty($_permissions['/order/ajax/update_vnum'])}}
+                                            <a href="javascript:;" data-oid="{{$order.oid}}" data-sid="{{$p.sid}}" data-total="{{$p.num}}" data-vnum="{{$p.vnum}}" class="update_vnum">更新缺货</a><br />
+                                            {{/if}}
+                                            {{if !empty($_permissions['/order/ajax/refresh_force'])}}
+                                            <a href="javascript:;" data-oid="{{$order.oid}}" data-sid="{{$p.sid}}" class="refresh_force">强制刷新</a><br>
+                                            {{/if}}
+                                            {{if !empty($_permissions['/order/ajax/refresh_force']) && $p.picked>0}}
+                                            <a href="javascript:;" data-oid="{{$order.oid}}" data-pid="{{$p.pid}}" class="clear_picked_num">清空拣货数</a>
+                                            {{/if}}
+                                        {{/if}}
+                                        
+                                    </td>
+                                </tr>
+                                {{if $p.sku.type==3 && !empty($p.sku._rel_sku)}}
+                                <tr class="dialog"><td colspan="10" style="padding-left: 15%;">
+                                    <table class="table" style="background-color:bisque;">
+                                        <thead>
+                                            <tr>
+                                                <th>套餐商品</th>
+                                                <th>skuid</th>
+                                                <th>名称</th>
+                                                <th>单位</th>
+                                                <th>数量</th>
+                                        </thead>
+                                        <tbody>
+                                        {{foreach $p.sku._rel_sku as $r_item}}
+                                        <tr>
+                                            <td></td>
+                                            <td>{{$r_item.sid}}</td>
+                                            <td>{{$r_item.title}}</td>
+                                            <td>{{$r_item.unit|default:'个'}}</td>
+                                            <td>{{if $area=='空采'}}{{$r_item.num*$p.vnum}}{{else}}{{$r_item.num*($p.num-$p.vnum)}}{{/if}}</td>
+                                        </tr>
+                                        {{/foreach}}
+                                        </tbody>
+                                    </table>
+                                </td></tr>
+                                {{/if}}
+                                {{/foreach}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {{/foreach}}
+            </div>
+        </div>
+
+	</form>
+    
+    <div class="modal fade _j_dialog" id="show_occupied_products" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog modal-sm" role="document" style="width:600px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">查看占用</h4>
+				</div>
+				<div class="modal-body">
+					
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade _j_dialog" id="update_vnum_dlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog modal-sm" role="document" style="width:600px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">更新缺货</h4>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal">
+						<div class="form-group">
+							<label class="col-sm-2 control-label">总数：</label>
+							<div class="col-sm-4">
+								<input id="total_num" type="text" class="form-control" name="cid" value="" readonly="true">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label">当前缺货数：</label>
+							<div class="col-sm-4">
+								<input id="vnum_num" type="text" class="form-control" name="cid" value="{{if $order.cid}}{{$order.cid}}{{else}}{{$customer.cid}}{{/if}}" readonly="true">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label">新缺货数：</label>
+							<div class="col-sm-4">
+								<input id="new_vnum" type="text" class="form-control" name="cid" value="" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label"></label>
+							<div class="col-sm-4">
+								<span id="alert_msg" style="color: red;">取值范围：100-999</span>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button disabled="disabled" type="button" id="update_vnum" class="btn btn-primary" data-oid="{{$order.oid}}">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+    <script>
+    function selectPickingArea(){
+        var tgt = $(event.target);
+        if (event.target.checked)
+        {
+            $('#picking_area_'+ tgt.data('area')).show();
+        }
+        else
+        {
+            $('#picking_area_'+ tgt.data('area')).hide();
+        }
+    }
+    function selectAllPicking(){
+        if (event.target.checked)
+        {
+            $('.all_picking_area').find('input[name=area_cb]').each(function(){
+                this.checked=true;
+            });
+            $('.picking_area_4_products').each(function(){
+                $(this).show();
+            });
+        }
+        else
+        {
+            $('.all_picking_area').find('input[name=area_cb]').each(function(){
+                this.checked=false;
+            });
+            $('.picking_area_4_products').each(function(){
+                $(this).hide();
+            });
+        }
+    }
+    function printPicking() {
+      var areas = [];
+      $("input[name='area_cb']").each(function () {
+        if (this.checked) {
+          areas.push($(this).data('area'));
+        }
+      });
+      areas = areas.join(",");
+      window.open('/order/picking_print.php?oid={{$order.oid}}&areas=' + areas);
+    }
+    </script>

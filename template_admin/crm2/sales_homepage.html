@@ -1,0 +1,158 @@
+<style>
+    .form-group {
+        margin-bottom: 6px;
+    }
+
+    .detail_main {
+        min-width: 800px;
+        clear: both;
+    }
+    .clear {
+        clear: both;
+    }
+
+    .btn {
+        margin: 0 10px 10px;
+    }
+
+    .table-bordered {
+        width: 100%;
+    }
+
+    .table-bordered td, th {
+        padding: 5px 10px;
+    }
+
+    .table td, th {
+        padding: 5px 10px;
+    }
+
+    .table-striped {
+        width: 100%;
+    }
+
+    .table-striped td, th {
+        padding: 5px 10px;
+    }
+</style>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">销售主页 - {{$sale_info.name}}</h1>
+    {{if $is_sale}}
+    <div class="detail_main">
+        {{if !empty($_permissions["/crm2/customer_list"])}}
+        <a href="/crm2/customer_list.php?sales_suid={{$sale_info.suid}}" class="btn btn-default" target="_blank">查看客户</a>
+        {{/if}}
+        {{if !empty($_permissions["/order/order_list"])}}
+        <a href="/order/order_list.php?saler_suid={{$sale_info.suid}}" class="btn btn-default" target="_blank">查看订单</a>
+        {{/if}}
+        {{if !empty($_permissions["/aftersale/list"])}}
+        <a href="/aftersale/list.php?exec_status=2,3" class="btn btn-default" target="_blank">查看售后单</a>
+        {{/if}}
+        {{if !empty($_permissions["/crm2/customer_visit_list"])}}
+        <a class="btn btn-default" href="/crm2/customer_visit_list.php?group_leader={{$sale_info.suid}}" target="_blank">拜访记录</a>
+        {{/if}}
+        {{if !empty($_permissions['/crm2/manager_page'])}}
+        <a class="btn btn-default " href="/crm2/manager_page.php" target="_blank">我的管理台</a>
+        {{/if}}
+    </div>
+    <div class="detail_main" style="margin-top: 20px; color: white;">
+        <div class="col-sm-3" style="background-color: #80b201; padding: 5px 10px; margin: 0 20px 0 80px;">
+            <div style="text-align: right;"><a href="/order/customer_order_list.php?saler_suid={{$sale_info.suid}}" target="_blank">查看明细</a></div>
+            <div class="form-group">
+                <p>本月订单量：{{$sale_info.order_num}}</p>
+                <p>本月销售额：¥&nbsp;{{$sale_info.order_amount}}</p>
+                <p>&emsp;</p>
+            </div>
+        </div>
+        <div class="col-sm-3" style="background-color: #f14e7a; padding: 5px 10px; margin: 0 20px;">
+            <div style="text-align: right;"><a href="/aftersale/refund_list.php?sales_suid={{$sale_info.suid}}" target="_blank">查看明细</a></div>
+            <div class="form-group">
+                <p>退单量：{{$sale_info.refund_num}}{{if $sale_info.order_num>0}}（{{($sale_info.refund_num/$sale_info.order_num*100)|string_format:"%.2f"}}%）{{else}}0.00%{{/if}}</p>
+                <p>退款额：¥&nbsp;{{$sale_info.refund_amount}}{{if $sale_info.order_amount>0}}（{{($sale_info.refund_amount/$sale_info.order_amount*100)|string_format:"%.2f"}}%）{{else}}0.00%{{/if}}</p>
+                <p>售后单：{{$sale_info.aftersale_num}}</p>
+            </div>
+        </div>
+        <div class="col-sm-3" style="background-color: #3692f6; padding: 5px 10px; margin: 0 20px;">
+            <div style="float: right;">
+                <a href="/crm2/customer_visit_list.php" target="_blank">拜访记录</a><br>
+                <a href="/crm2/sale_schedule_list.php" target="_blank">待办日程</a>
+            </div>
+            <div class="form-group" style="margin-top: 20px;">
+                <p>客户数：{{$sale_info.total_customer}}</p>
+                <p>拜访客户：{{$sale_info.visit_num}}</p>
+                <p>待办日程：{{$sale_info.schedule_num}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div class="detail_main" style="border: solid 1px #dad7d7; margin-top: 20px;">
+        <div style="background-color: #4c3a24; padding: 10px; color: white;">我的日程({{$schedule_total}})<span style="float: right;"><a href="/crm2/sale_schedule_list.php" target="_blank">查看全部</a>&emsp;<a href="javascript:;" data-toggle="modal" data-target="#addSaleScheduleModal"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QAAKqNIzIAAAAJcEhZcwAAASwAAAEsAHOI6VIAAAAHdElNRQffBRgKEROoARNCAAAA5UlEQVQoz43RPU4CcRAF8N+yS4EtlS1mT2D2AHsAexILEwuuYIwnkOwZzNoZEmIJiQUHoNIekqXGwmRjwYdY8JdSeN2bNzOZeY89YrlSZWWlUsrFeyECbXdufZua4ULmzJNHn4I8UCukYSqWKtQG2nvaV+uFXX+I9NT6YnJLxUHu6h5aCks5pYU0FBMjI0lgqYUykZuaB7kpQhMbzE3liXMzW3TdiFzi1c6zF1szVw1HURmG9xItY2OtcEVsqGqYyHTAxtrOztoGdGQmsS/XEm/gx9a7j/DmvczDCUYdsfqksP6N+xcsZ1GcJM7MwAAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxNi0wOS0xN1QxNToyMTozNiswODowMLPxMQgAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTUtMDUtMjRUMTA6MTc6MTkrMDg6MDBc8QkkAAAATXRFWHRzb2Z0d2FyZQBJbWFnZU1hZ2ljayA3LjAuMS02IFExNiB4ODZfNjQgMjAxNi0wOS0xNyBodHRwOi8vd3d3LmltYWdlbWFnaWNrLm9yZ93ZpU4AAABjdEVYdHN2Zzpjb21tZW50ACBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE2LjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIHILdZYAAAAYdEVYdFRodW1iOjpEb2N1bWVudDo6UGFnZXMAMaf/uy8AAAAYdEVYdFRodW1iOjpJbWFnZTo6SGVpZ2h0ADM2OVOTYHwAAAAXdEVYdFRodW1iOjpJbWFnZTo6V2lkdGgAMzY5wGIwIQAAABl0RVh0VGh1bWI6Ok1pbWV0eXBlAGltYWdlL3BuZz+yVk4AAAAXdEVYdFRodW1iOjpNVGltZQAxNDMyNDMzODM5p49s2AAAABJ0RVh0VGh1bWI6OlNpemUANy45OUtCe7jM/wAAAF90RVh0VGh1bWI6OlVSSQBmaWxlOi8vL2hvbWUvd3d3cm9vdC9zaXRlL3d3dy5lYXN5aWNvbi5uZXQvY2RuLWltZy5lYXN5aWNvbi5jbi9zcmMvMTE4NzQvMTE4NzQ0Ni5wbmfxlgdUAAAAAElFTkSuQmCC"/></a></span></div>
+        {{if !empty($schedule_list)}}
+        {{foreach $schedule_list as $schedule}}
+        <div class="form-group" style="border-bottom: solid;">
+            <table class="table-striped">
+                <tr>
+                    <td width="150px;">时间：</td>
+                    <td>{{$schedule.schedule_time}}</td>
+                </tr>
+                {{if $schedule.cid > 0}}
+                <tr>
+                    <td>客户：</td>
+                    <td>{{$schedule.customer_name}}&emsp;({{$schedule.cid}})</td>
+                </tr>
+                {{/if}}
+                <tr>
+                    <td>内容：</td>
+                    <td>{{$schedule.content}}</td>
+                </tr>
+            </table>
+        </div>
+        {{/foreach}}
+        {{/if}}
+    </div>
+    <div class="clear"></div>
+    <div class="detail_main" style="border: solid 1px #dad7d7; margin-top: 20px;">
+        <div style="background-color: #e6b16d; padding: 10px; color: white;">未完成工单<span style="float: right;"><a href="/aftersale/list.php" target="_blank">查看全部</a></span></div>
+        <table class="table-bordered">
+            <tr>
+                <th>ID</th>
+                <th>问题类型</th>
+                <th>反馈人</th>
+                <th>问题描述</th>
+                <th>创建时间</th>
+                <th>状态</th>
+                <th>处理人</th>
+            </tr>
+            {{foreach $aftersale_list.list as $item}}
+            <tr>
+                <td>{{$item.id}}</td>
+                <td>{{$item._type}}</td>
+                <td>
+                    {{$item.contact_name}}
+                </td>
+                <td>{{$item._content}}</td>
+                <td>{{$item.ctime}}</td>
+                <td>{{$status_list[$item.exec_status]}}</td>
+                <td>
+                    {{if !empty($item._duty_department) }}
+                    【处理部门】<br/>
+                    {{$item._duty_department}}<br />
+                    {{/if}}
+                    {{if !empty($item._exec_suid.name) }}
+                    【处理人】<br />
+                    {{$item._exec_suid.name}}
+                    {{/if}}
+                </td>
+            </tr>
+            {{/foreach}}
+        </table>
+    </div>
+    {{else}}
+    <div class="detail_main"><span style="color: red;">该用户不是销售，不能显示</span></div>
+    {{/if}}
+</div>
+
+<!-- Modal -->
+{{include file="crm2/block/sale_schedule_dialog.html"}}

@@ -1,0 +1,54 @@
+/*
+ * imgAreaSelect default style
+ */
+
+.imgareaselect-border1 {
+    /*background: url(border-v.gif) repeat-y left top;*/
+}
+
+.imgareaselect-border2 {
+    /*background: url(border-h.gif) repeat-x left top;*/
+}
+
+.imgareaselect-border3 {
+    /*background: url(border-v.gif) repeat-y right top;*/
+}
+
+.imgareaselect-border4 {
+    /*background: url(border-h.gif) repeat-x left bottom;*/
+}
+
+.imgareaselect-border1, .imgareaselect-border2,
+.imgareaselect-border3, .imgareaselect-border4 {
+    filter: alpha(opacity=50);
+    border: 1px dashed #6B6962;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+}
+
+.imgareaselect-handle {
+    background-color: #fff;
+    border: solid 1px #000;
+    filter: alpha(opacity=50);
+    opacity: 0.5;
+}
+
+.imgareaselect-outer {
+    background-color: #000;
+    filter: alpha(opacity=50);
+    opacity: 0.5;
+}
+
+.imgareaselect-selection {
+    background-image: url('/i/bg_none.gif');
+}
+
+.reg_logo_wrap {
+	background: url("/i/reg_photo.png") no-repeat scroll center 60px #F2F2F2;
+	border: 1px solid #CCCCCC;
+	line-height: 0;
+	min-height: 280px;
+	min-width: 280px;
+	text-align: center;
+}

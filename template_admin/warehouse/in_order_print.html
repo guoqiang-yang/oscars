@@ -1,0 +1,130 @@
+<style>
+	h1 {
+		font-family: STKaiti;
+	}
+
+	table {
+		font-size: 12px;
+		border-spacing: 0;
+		border-collapse: collapse;
+	}
+
+	table td {
+		padding: 2px 5px;
+	}
+
+	table.border td {
+		border: 1px solid #333;
+	}
+</style>
+<style type="text/css" media=print>
+	.noprint {
+		display: none
+	}
+</style>
+<div>
+	<!--begin-->
+	<div style="text-align: center;">
+		<h1 style="text-align: center;display: inline-block;">
+			好材采购单（{{$order.info.oid}}）
+		</h1>
+	</div>
+	<table width="100%">
+		<tbody>
+		<tr>
+			<td width="50%">供应商：{{$order.supplier.name}}（商户ID：{{$order.supplier.sid}}）</td>
+			<td width="50%">联系方式：{{$order.supplier.contact_name}} -- {{$order.supplier.phone}}</td>
+		</tr>
+		<tr>
+			<td width="50%">
+				采购人：
+				{{if !empty($buyer)}}
+				<span>{{$buyer.name}}（ID：{{$buyer.suid}}； 电话：{{$buyer.mobile}}）</span>
+				{{else}}
+				<span> -- </span>
+				{{/if}}
+			</td>
+			<td width="50%">送货日期：{{$order.info.delivery_date}}</td>
+		</tr>
+		<tr>
+			<td width="50%">
+				付款方式：
+				<span style="font-weight:bold;font-size: 16px;">{{$payment_types[$order.info.payment_type]}}</span>
+				{{if 3== $order.info.payment_type}}
+				<span style="margin-left: 10px; color:red;">{{if $order.info.paid == 1}}【已支付】{{else}}【未支付】{{/if}}</span>
+				{{/if}}
+			</td>
+			<td width="50%">仓库：{{$order.info._warehouse_name}}</td>
+		</tr>
+		</tbody>
+	</table>
+
+	{{$row_index=1}}
+	<table class="border" width="100%">
+		<thead>
+		<tr>
+			<td>行号</td>
+			<td>id</td>
+			<td>名称</td>
+			<td>类别</td>
+			<td>单位</td>
+			{{if $_isAdmin || $_isBuyer}}<td>单价</td>{{/if}}
+			<td>数量{{if 1 < $order.info.step}}(已入库){{/if}}</td>
+			{{if $_isAdmin || $_isBuyer}}<td>总价</td>{{/if}}
+            <td>类型</td>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $order.products as $_source => $_products}}
+        {{foreach $_products as $productItem}}
+		<tr data-area="{{$area}}">
+			<td>{{$row_index}}</td>
+			<td>{{$productItem.sid}}</td>
+			<td>{{$productItem.sku.title}}</td>
+			<td>
+				{{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}
+			</td>
+			<td>{{$productItem.sku.unit}}</td>
+			{{if $_isAdmin || $_isBuyer}}<td>￥{{$productItem.price/100}}</td>{{/if}}
+			<td>
+				{{$productItem.num}}
+				{{if 1 < $order.info.step}}
+				{{if $productItem._stock_in < $productItem.num}}<span style="color:red;">{{/if}}
+				({{$productItem._stock_in}})
+				{{if $productItem._stock_in < $productItem.num}}
+				</span>
+				{{/if}}
+				{{/if}}
+			</td>
+			{{if $_isAdmin || $_isBuyer}}<td>￥{{$productItem.num * $productItem.price / 100}}</td>{{/if}}
+            <td>{{if $_source==1}}普采{{elseif $_source==2}}临采{{else}}--{{/if}}</td>
+		</tr>
+		{{$row_index=$row_index+1}}
+		{{/foreach}}
+        {{/foreach}}
+
+		<tr>
+			<td>备注</td>
+			<td colspan="8">
+				<span style="margin-left:10px; font-size: 14px;">{{$order.info.note}}</span>
+			</td>
+		</tr>
+
+		<tr>
+			<td>总计</td>
+			<td colspan="8">{{$order.info.total/100}}元</td>
+		</tr>
+
+		</tbody>
+	</table>
+
+	<div class="noprint">
+		<div style="margin-top:30px;">
+			<input id="print-order" type="button" value="打印" data-oid="{{$order.oid}}" style="font-size: 25px;padding: 5px 15px;">
+		</div>
+	</div>
+
+
+</div>
+
+

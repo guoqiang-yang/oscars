@@ -1,0 +1,139 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">盘点差异处理</h1>
+
+    <form class="form-inline" role="form" action="/warehouse/deal_diff_products.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>计划号：</label>
+                <input class="form-control" type="text" name="pid" value="{{$search_conf.pid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>状态：</label>
+                <select class="form-control" name="is_deal">
+                    <option value="0">全部</option>
+                    <option value="1" {{if $search_conf.is_deal==1}} selected="selected"{{/if}}>已处理</option>
+                    <option value="2" {{if $search_conf.is_deal==2}} selected="selected"{{/if}}>未处理</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-right: 20px;">查询</button>
+            {{if !empty($search_conf.pid) && $plan['step'] == 3 && $plan['is_update'] != 1}}
+            {{if !empty($_permissions['/warehouse/ajax/save_inventory_location_stock'])}}
+            <button type="button" class="btn btn-primary" data-pid="{{$search_conf.pid}}" id="sure_inventory_plan" style="margin-right: 20px;">盘点确认</button>
+            {{/if}}
+            {{/if}}
+            {{if !empty($search_conf.pid) && $plan['step'] == 3 && $plan['is_update'] == 1}}
+            {{if !empty($_permissions['/warehouse/download_inventory_report'])}}
+            <a href="/warehouse/download_inventory_report.php?pid={{$plan.pid}}" class="btn btn-primary" style="margin-right: 20px;">下载盘点报告</a>
+            {{/if}}
+            {{/if}}
+        </div>
+    </form>
+
+    <div class="form-inline" id="diff-product-area-list" style="font-size: 16px; margin: 20px auto 50px auto;{{if empty($area_list)}}display: none{{/if}}">
+        <div style="margin-right:20px; float: left;">
+            <a class="change_area" href="javascript: void(0)" data-area="0">全部</a>
+        </div>
+        {{foreach $area_list as $area}}
+        <div style="margin-right:20px; float: left;">
+            <a class="change_area" href="javascript: void(0)" data-area="{{$area}}">{{$area}}区</a>
+        </div>
+        {{/foreach}}
+    </div>
+
+    <table class="table" id="diff_product_area">
+        <thead>
+        <tr>
+            <th>sid</th>
+            <th>sku信息</th>
+            <th>单位</th>
+            <th>货位</th>
+            {{foreach $times as $_time => $_name}}
+            {{if $_time <= $plan.times}}
+            <th>{{$_name}}</th>
+            {{/if}}
+            {{/foreach}}
+            {{if !empty($_permissions['hc_deal_diff_show_stock_num'])}}
+            <th>库存</th>
+            {{/if}}
+            <th>差异</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $product_list as $id => $product}}
+        <tr class="row-sku" data-pid="{{$product['plan_id']}}"  data-sid="{{$product['sid']}}" data-num="{{$product.num}}" data-last-num="{{$product.last_num}}" data-location="{{$product['location']}}" data-location-letter="{{substr($product['location'], 0, 1)}}">
+            <td>{{$product['sid']}}</td>
+            <td>{{$product['title']}}</td>
+            <td>{{$product['unit']}}</td>
+            <td>{{$product['location']}}</td>
+            {{foreach $times as $_time => $_name}}
+            {{if $_time <= $plan.times}}
+            <td>
+                {{if $_time == 1}}{{$product['first_num']}}
+                {{elseif $_time == 2}}{{$product['second_num']}}
+                {{elseif $_time == 3}}{{$product['third_num']}}
+                {{/if}}
+            </td>
+            {{/if}}
+            {{/foreach}}
+            {{if !empty($_permissions['hc_deal_diff_show_stock_num'])}}
+            <td>{{$product['num']}}</td>
+            {{/if}}
+            <td>{{$product['diff_num']}}</td>
+            <td>
+                {{if $product.is_deal != 1}}
+                {{if !empty($_permissions['/warehouse/ajax/update_diff_num'])}}
+                <a class="deal_diff_num" href="javascript:void(0)">差异处理</a>
+                {{/if}}
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+</div>
+
+<div class="modal fade _j_dialog" id="modal_deal_diff" tabindex="-1" data-pid="" data-sid="" data-location="" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">差异调整</h4>
+            </div>
+            <div class="modal-body">
+                <div style="width: 100%; height: 40px;">
+                    <div style="width: 30%; float: left; text-align: right">最终盘点数量：</div>
+                    <div style="width: 60%; float: left; text-align: left">
+                        <input name="num" class="form-control" placeholder="请输入实物数量">
+                    </div>
+                </div>
+                <div style="width: 100%; height: 100px;">
+                    <div style="width: 30%; float: left; text-align: right">备注：</div>
+                    <div style="width: 60%; float: left; text-align: left">
+                        <textarea name="diff_note" class="form-control diff_note" rows="4" placeholder="备注为必填项"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="btn-update-diff-num" class="btn btn-primary">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade _j_dialog" id="warning_in_operation" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">操作提示</h4>
+            </div>
+            <div class="modal-body">
+                <h2>系统正在更新库存，请勿关闭当前窗口，请耐心等待！</h2>
+            </div>
+        </div>
+    </div>
+</div>

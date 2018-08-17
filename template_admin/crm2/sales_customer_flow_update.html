@@ -1,0 +1,101 @@
+<style>
+	/* 表格样式 */
+	.table_style thead tr th {
+		border-color: #000000;
+		border-right: 1px solid;
+		border-bottom: 0;
+	}
+	.table_style tbody tr td {
+		border-color: #000000;
+		border-top: 1px solid;
+		border-right: 1px solid;
+	}
+	.clear_list {
+		height: 1px;
+		background: #000000;
+	}
+</style>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<div class="clear_list"></div>
+	{{if $result.code <> 0}}
+	<h3>销售：{{$result.sales_user.name}}&nbsp;&nbsp;
+			SUID：{{$result.sales_user.suid}}&nbsp;&nbsp;
+			共转出：{{$result.sales_user.customer_num}}个客户&nbsp;&nbsp;
+			时间：{{$result.date}}
+			<button type="submit" class="btn btn-success" id="btn_commit" style="margin-left:40px;">确认转出</button>
+	</h3>
+	<div style="display: none;">
+		<input type="hidden" name="sales_suid" value="{{$sales_suid}}" />
+		<input type="hidden" name="update_date" value="{{$result.date}}" />
+		<div id="sales_flow_suid">
+			{{foreach $sales_flow_suid as $v}}
+				<input type="hidden" name="sales_flow_suid" value="{{$v}}" />
+			{{/foreach}}
+		</div>
+	</div>
+	{{foreach $result.sales_user_flow as $item}}
+		<table class="table table_style" style="border: 1px solid;">
+			<caption><span style="color: #000000;">流入销售：{{$item.name}}&nbsp;&nbsp;
+				SUID：{{$item.suid}}&nbsp;&nbsp;
+				共：{{$item.customer_num}}个客户
+			</span></caption>
+	    	<thead>
+			    <tr>
+			      <th style="width:10%;">客户Cid</th>
+			      <th style="width:30%;">客户</th>
+			      <th style="width:20%;">销售SUID</th>
+			      <th style="width:20%;">销售</th>
+			      <th style="width:20%;">转入时间</th>
+			    </tr>
+	    	</thead>
+	    	<tbody>
+			{{foreach $item.data as $val}}
+		    	<tr>
+		      		<td>{{$val.cid}}</td>
+		      		<td>{{$val.name}}</td>
+		      		<td>{{$item.suid}}</td>
+		      		<td>{{$item.name}}</td>
+		      		<td>{{$result.date}}</td>
+		    	</tr>
+			{{/foreach}}
+			</tbody>
+		</table>
+	{{/foreach }}
+  {{else}}
+  	<h3>销售：{{$result.sales_user.name}}&nbsp;&nbsp;
+			SUID：{{$result.sales_user.suid}}&nbsp;&nbsp;
+			共转出：{{$result.sales_user.customer_num}}个客户&nbsp;&nbsp;
+			时间：{{$result.date}}
+	</h3>
+  {{/if}}
+</div>
+<script>
+	$(function (){
+		$("#btn_commit").click(function (){
+			/* 确认转出 */
+			var res = confirm("确认要转出吗？");
+			if (res) {
+				/* 用于提交转移后取消提交按钮 */
+				$(this).remove();
+				var sales_suid = $("input[name='sales_suid']").val();
+				var sales_flow_suid = Array();
+				var update_date = $("input[name='update_date']").val();
+				$.each($("#sales_flow_suid input"), function (){
+					sales_flow_suid.push(Number($(this).val()));
+				});
+				console.log(sales_suid+"-----"+sales_flow_suid+"-----"+update_date);
+				/* 执行转出 */
+				K.post("/crm2/ajax/sales_customer_flow_execute.php", {sales_suid : sales_suid, sales_flow_suid : sales_flow_suid, update_date : update_date } , function (res) {
+					console.log(res);
+					if (res.code == 0) {
+						alert("转出成功共转出" + res.flow_num + "位客户");
+					} else {
+						alert("转出失败！");
+					}
+				});
+			} else {
+				return false;
+			}
+		});
+	});
+</script>

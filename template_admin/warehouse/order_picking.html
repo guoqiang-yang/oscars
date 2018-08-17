@@ -1,0 +1,104 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">拣    货</h1>
+	<form class="form-horizontal" role="form">
+		<div class="placeholder">
+		  <div class="form-group">
+			<label class="col-sm-2 control-label">分  类：</label>
+
+			<div class="col-sm-10">
+			  <ul class="nav nav-pills">
+				{{foreach $cate1_list as $id => $item}}
+				<li {{if $cate1 == $id}}class="active"{{/if}}><a href="?cate1={{$id}}&oid={{$currOid}}">{{$item.name}}</a></li>
+				{{/foreach}}
+			  </ul>
+			</div>
+		  </div>
+		</div>
+		<div class="placeholder">
+		  <div class="form-group">
+			  <label class="col-sm-2 control-label">查找订单：</label>
+			  <input class="col-sm-2 form-control" type="text" name="oid" value="{{$currOid}}" placeholder="请输入订单号" style="width:auto;margin-right: 20px;">
+			  <button type="submit" class="btn btn-primary" id="_j_query_order">查询</button>
+	      </div>
+		</div>
+	</form>
+	<hr>
+	{{if !empty($orderInfo)}}
+	<div class="panel panel-default">
+		<div class="panel-heading">订单详情</div>
+		<div class="panel-body form-horizontal">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">订单ID：</label>
+				<span class="col-sm-1">{{$orderInfo.oid}}</span>
+				<label class="col-sm-2 control-label">备注</label>
+				<span class="col-sm-6">{{$orderInfo.note}}</span>		
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">联系人信息：</label>
+				<span class="col-sm-1">{{$orderInfo.contact_name}}</span>
+				<span class="col-sm-1">{{$orderInfo.contact_phone}}</span>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">订单状态：</label>
+				<span class="col-sm-1" style="font-size: 20px;color: red;">{{$order_status_list[$orderInfo.step]}}</span>
+			</div>
+		</div>		
+		<table class="table table-bordered" width="100%">
+			<thead>
+				<tr>
+					<td>商品名称</td>
+					<td>单位</td>
+					<td>数量</td>
+					<td>单价</td>
+					<td>金额</td>
+					<td>备注</td>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td colspan="7" class="text-center" style="color: red;">分类名称：{{$cate1_list[$cate1]['name']}}</td>
+				</tr>
+				{{if !empty($picking_plist)}}
+				{{foreach $picking_plist as $picking}}
+				<tr style="color:red;">
+					<td>{{$picking.title}}</td>
+					<td>{{$picking.unit}}</td>
+					<td>{{$picking.num}}</td>
+					<td>￥{{$picking.price/100}}</td>
+					<td>￥{{$picking.price*$picking.num/100}}</td>
+					<td>{{$picking.note}}</td>
+				</tr>
+				{{/foreach}}
+				{{else}}
+				<tr><td colspan="7" class="text-right" style="color: red;">无需拣货</td></tr>
+				{{/if}}
+
+				{{foreach $other_plist as $_cate1 => $pinfos}}
+				<tr>
+					<td colspan="7" class="text-center" style="color:#D7DEA5;">分类名称：{{$cate1_list[$_cate1]['name']}}</td>
+				</tr>
+				{{foreach $pinfos as $pinfo}}
+				<tr style="color:#B9B5B5">
+					<td>{{$pinfo.title}}</td>
+					<td>{{$pinfo.unit}}</td>
+					<td>{{$pinfo.num}}</td>
+					<td>￥{{$pinfo.price/100}}</td>
+					<td>￥{{$pinfo.price*$picking.num/100}}</td>
+					<td>{{$pinfo.note}}</td>
+				</tr>
+				{{/foreach}}
+				{{/foreach}}
+			</tbody>
+		</table>
+
+		<nav>
+			<ul class="pager">
+				<li {{if $preOid==0}} class="disabled" {{/if}}><a href="?cate1={{$cate1}}&oid={{$preOid}}">上一个</a></li>
+				<li {{if $sufOid==0}} class="disabled" {{/if}}><a href="?cate1={{$cate1}}&oid={{$sufOid}}">下一个</a></li>
+			</ul>
+		</nav>
+	</div>
+	{{else}}
+		今天订单已经全部出库！
+	{{/if}}
+</div>

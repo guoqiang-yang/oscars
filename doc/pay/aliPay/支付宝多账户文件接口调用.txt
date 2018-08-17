@@ -1,0 +1,19 @@
+网页端调用位置
+	入口文件：htdocs_client_h5/order/do_pay.php
+	调用接口：Alipay_Api::mobilePayNew();	
+
+	入口文件：htdocs_client_h5/order/alipay.php
+	调用接口：Alipay_Api::mobilePayNew();
+
+	回调文件：htdocs_client_h5/paycallback/alipay_notily_url.php
+	调用接口：Alipay_Func::verifyNotifyNew();
+
+	回调文件：htdocs_client_h5/paycallback/alipay_return_url.php
+	调用接口：Alipay_Func::verifyReturnNew();
+
+App端调用位置
+	入口文件：htdocs_app_api/order/alipay_prepay.php
+	调用接口：Alipay_Api::appPayNew();
+
+	回调文件：htdocs_app_api/order/pay_callback_alipay.php
+	调用接口：Alipay_Func::verifyNotifyNew();

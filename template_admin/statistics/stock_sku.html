@@ -1,0 +1,76 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        库存sku排行
+        {{if !empty($_permissions['hc_download_stock_sku'])}}
+        <a style="margin-left: 50px;" href="?cate1={{$cate1}}&wid={{$wid}}&download=1" class="btn btn-success">下载</a>
+        {{/if}}
+    </h1>
+
+    <form class="form-horizontal" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">大类：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        <li {{if $cate1 == 0}}class="active" {{/if}}>
+                        <a href="?cate1=0&wid={{$wid}}">全部</a>
+                        </li>
+                        {{foreach $cate1_list as $id => $item}}
+                        <li {{if $cate1 == $id}}class="active" {{/if}}>
+                            <a href="?cate1={{$id}}&wid={{$wid}}">{{$item.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">仓库：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        <li {{if empty($wid) }}class="active" {{/if}}>
+                            <a href="?cate1={{$cate1}}&wid=0">全部</a>
+                        </li>
+                        {{foreach $warehouse_list as $_wid => $_wname}}
+                        {{if in_array($_wid, $wids)}}
+                        <li {{if $_wid == $wid }}class="active" {{/if}}>
+                            <a href="?cate1={{$cate1}}&wid={{$_wid}}">{{$_wname}}</a>
+                        </li>
+                        {{/if}}
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-bordered">
+        <tr>
+            <th>sid</th>
+            <th>sku</th>
+            <th>库存</th>
+            <th>成本（个）</th>
+            <th>库存金额</th>
+        </tr>
+        {{foreach $data as $sid => $info}}
+            <tr>
+                <td>{{$info.sku.sid}}</td>
+                <td><a href="/shop/edit_sku.php?sid={{$info.sku.sid}}">{{$info.sku.title}}</a></td>
+                <td>{{$info.num}}</td>
+                <td>{{$info.cost / 100}}元</td>
+                <td><a href="/warehouse/stock_search.php?keyword={{$info.sku.sid}}">{{$info.sum / 100}}元</a></td>
+            </tr>
+        {{/foreach}}
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+</div>

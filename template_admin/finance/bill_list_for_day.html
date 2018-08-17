@@ -1,0 +1,176 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">每日账单明细（客户）</h1>
+	
+	<form class="form-inline" role="form" action="/finance/bill_list_for_day.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>日期：</label>
+				<input class="form-control" type="text" name="start_date" value="{{$search.start_date}}" >
+                <span> -- </span>
+				<input class="form-control" type="text" name="end_date" value="{{$search.end_date}}" placeholder="结束时间（选填）">
+			</div>
+            <div class="form-group" style="margin-right:50px;">
+				<label>城市：</label>
+				<select class="form-control" name="city_id">
+				  <option value="0" {{if empty($search.city_id)}}selected="selected"{{/if}}>全部</option>
+				  {{foreach $cities as $_cityid=>$_city_name}}
+				  <option value="{{$_cityid}}" {{if $search.city_id==$_cityid}}selected="selected"{{/if}}>{{$_city_name}}</option>
+				  {{/foreach}}
+				</select>
+			</div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:50px;">
+				<label>结算方式：</label>
+				<select class="form-control" name="payment_type">
+				  <option value="0" {{if empty($search.payment_type)}}selected="selected"{{/if}}>请选择</option>
+				  {{foreach $payment_types as $_key=>$_type}}
+				  <option value="{{$_key}}" {{if $search.payment_type==$_key}}selected="selected"{{/if}}>{{$_type}}</option>
+				  {{/foreach}}
+				</select>
+			</div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>财务专员：</label>
+				<select class="form-control" name="suid">
+				  <option value="0" {{if empty($search.suid)}}selected="selected"{{/if}}>请选择</option>
+				  {{foreach $staff_list as $man}}
+				  <option value="{{$man.suid}}" {{if $search.suid==$man.suid}}selected="selected"{{/if}}>{{$man.name}}</option>
+				  {{/foreach}}
+				</select>
+			</div>
+            <div class="form-group" style="margin-right:50px;">
+              <label>单据类型：</label>
+              <select class="form-control" name="type">
+                <option value="0" {{if $search.type==0}} selected="selected"{{/if}}>请选择</option>
+                <option value="2" {{if $search.type==2}} selected="selected"{{/if}}>财务收款</option>
+                <option value="3" {{if $search.type==3}} selected="selected"{{/if}}>财务调账</option>
+              </select>
+            </div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+	
+	<hr>
+  
+  <h4 style="margin-left: 30px;">财务汇总</h4>
+  <table class="table" style="margin-left: 50px; width: 90%;">
+    <thead>
+      <tr>
+        <th>单据类型</th>
+        <th>结算方式</th>
+        <th>仓库</th>
+        <th>收款人</th>
+        <th>金额</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{*财务收款*}}
+      {{foreach $summary_bills as $bill}}
+      <tr>
+        <td>{{$types_desc[$bill.type]}}{{if $bill.type==4}}【支】{{else}}【收】{{/if}}</td>
+        <td>{{if array_key_exists($bill['payment_type'], $payment_types)}}{{$payment_types[$bill['payment_type']]}}{{else}} -- {{/if}}</td>
+        <td>{{$bill['wid']}}</td>
+        <td>{{$staff_list[$bill['suid']]['name']}} - {{$bill['suid']}}</td>
+        <td>￥{{$bill['sum(price)']/100}} 元</td>
+      </tr>
+      {{/foreach}}
+      
+      {{*财务付款*}}
+      {{foreach $moneyout_bills as $bill}}
+      <tr>
+        <td>{{$coopworker_fee_types[$bill['type']]}}【支】</td>
+        <td>{{if array_key_exists($bill['payment_type'], $payment_types)}}{{$payment_types[$bill['payment_type']]}}{{else}} -- {{/if}}</td>
+        <td>{{$bill['wid']}}</td>
+        <td>{{$staff_list[$bill['suid']]['name']}} - {{$bill['suid']}}</td>
+        <td>￥{{$bill['sum(price)']/100}} 元</td>
+      </tr>
+      {{/foreach}}
+      
+      {{*客户余额*}}
+      {{foreach $balance_bills as $bill}}
+        {{if $bill.type==1||$bill.type==5||$bill.type==7}}
+        <tr>
+          <td>{{$customer_amount_types[$bill.type]}}{{if $bill.type==1}}【收】{{elseif $bill.type==5}}【支】{{/if}}</td>
+          <td>{{if array_key_exists($bill['payment_type'], $payment_types)}}{{$payment_types[$bill['payment_type']]}}{{else}} -- {{/if}}</td>
+          <td>0</td>
+          <td>{{$staff_list[$bill['suid']]['name']}} - {{$bill['suid']}}</td>
+          <td>￥{{0-$bill['sum(price)']/100}} 元</td>
+        </tr>
+        {{/if}}
+      {{/foreach}}
+    </tbody>
+  </table>
+  
+  <hr>
+  <h4 style="margin-left: 30px;">结余</h4>
+  <table class="table" style="margin-left: 50px; width: 90%;">
+		<thead>
+		<tr>
+            <th>操作员</th>
+            {{foreach $payment_types as $_type_name}}
+            <th>{{$_type_name}}</th>
+            {{/foreach}}
+            <th>其他</th>
+		</tr>
+		</thead>
+        <tbody>
+          {{foreach $remain_balance as $_suid => $_balances}}
+          <tr>
+            <td>{{$staff_list[$_suid]['name']}}</td>
+            {{foreach $payment_types as $_type=>$_type_name}}
+            <td>{{if isset($_balances[$_type])}}{{$_balances[$_type]/100}}{{else}}0{{/if}}</td>
+            {{/foreach}}
+            <td>{{if isset($_balances[0])}}{{$_balances[0]/100}}{{else}}0{{/if}}</td>
+          </tr>
+          {{/foreach}}
+        </tbody>
+  </table>
+  
+  
+  <hr>
+  <h4 style="margin-left: 30px;">账单明细 
+    <a href="{{$coopworker_bill_list}}" style="margin-left: 25px;" target="_blank">（支出明细）</a>
+  </h4>
+	
+	<table class="table" style="margin-left: 50px; width: 90%;">
+		<thead>
+		<tr>
+		  <th>id</th>
+		  <th>仓库ID</th>
+          <th>客户id</th>
+		  <th>单据类型</th>
+		  <th>金额/数量</th>
+		  <th>收款方式</th>
+		  <th>日期</th>
+      <th style="width: 16%">备注</th>
+		  <th>执行人</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $bill_list as $one}}
+		<tr data-oid="{{$one.objid}}">
+			<td>{{$one.id}}</td>
+			<td>{{$one.wid}}</td>
+            <td>{{$one.cid}}</td>
+			<td>
+                {{$types_desc[$one.type]}}/
+                <a href="/finance/customer_bill_list.php?cid={{$one.cid}}&from_date={{$search.start_date}}&end_date={{if !empty($search.end_date)}}{{$search.end_date}}{{else}}{{$search.start_date}}{{/if}}">【明细】</a>
+			</td>
+            <td>{{$one.total_price/100}} / {{$one.total_order}}</td>
+			<td class="payment_name">{{$payment_types[$one['payment_type']]}}</td>
+			<td>{{$one.ctime}}</td>
+			<td>{{$one.note}}</td>
+			<td>{{$staff_list[$one['suid']]['name']}}</td>
+		</tr>
+		{{/foreach}}
+		</tbody>	
+	</table>
+	
+	<nav style="margin-left: 50px; width: 90%;">
+		<ul class="pagination">
+		  {{$pageHtml nofilter}}
+		  <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+</div>

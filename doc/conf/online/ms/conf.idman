@@ -1,0 +1,13 @@
+#
+# ./IdMand --kxi.conf=conf.idman
+#
+
+IdMan.Endpoints = @tcp::12114
+
+IdMan.DBSetting = mysql://haocai_dev:f4sqe7wKzDT3eQpYkCZdMfd6O@rds5c731ofzh61zsoh32.mysql.rds.aliyuncs.com:3306/dev_config
+
+kxi.PThreadPool.Server.Size = 4
+kxi.PThreadPool.Server.SizeMax = 16
+
+kxi.sample.server = 1
+

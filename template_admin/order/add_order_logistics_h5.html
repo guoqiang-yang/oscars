@@ -1,0 +1,170 @@
+<style>
+    .table tbody tr td {border: none;}
+	.nav-sidebar {display: none;}
+	td.title {width: 25%;}
+</style>
+<input type="hidden" id="city_id" value="{{$city_id}}" />
+<input type="hidden" id="oid" value="{{$oid}}" />
+{{if empty($uid)}}
+	<input type="hidden" name="uid" value="{{$order.uid}}">
+	<input type="hidden" name="cid" value="{{$order.cid}}">
+{{else}}
+	<input type="hidden" id="cid" name="cid" value="{{$cid}}">
+	<input type="hidden" id="uid" name="uid" value="{{$uid}}">
+{{/if}}
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <table class="table">
+        <tr>
+            <td class="title">
+                用户cid：
+            </td>
+            <td>
+                <input id="cid" type="text" class="form-control" readonly="true" value="{{$user.customer.cid}}" />
+            </td>
+        </tr>
+        <tr>
+            <td class="title">
+                手机号码：
+            </td>
+            <td>
+                <input type="text" class="form-control" readonly="true" value="{{$user.user.mobile}}" />
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="title">
+                送货方式：
+            </td>
+            <td>
+                {{foreach $delivery_types as $_dkey=>$_dvalue}}
+                	<label class="radio-inline">
+                		{{if empty($delivery_type)}}
+                			<input type="radio" name="delivery_type" class="_j_chg_delivery_type" value="{{$_dkey}}" {{if (empty($order.delivery_type) && $_dkey==1) || $order.delivery_type==$_dkey}}checked="checked"{{/if}} {{if $order.step>4}}disabled="true"{{/if}}> {{$_dvalue}} 
+                		{{else}}
+                			<input type="radio" name="delivery_type" class="_j_chg_delivery_type" value="{{$_dkey}}" {{if (empty($delivery_type) && $_dkey==1) || $delivery_type==$_dkey}}checked="checked"{{/if}} {{if $order.step>4}}disabled="true"{{/if}}> {{$_dvalue}} 
+                		{{/if}}
+                	</label>
+                {{/foreach}}
+            </td>
+        </tr>
+        <tr class="delivery_common delivery_quickly">
+            <td class="title">
+                配送地址：
+            </td>
+            <td id="select_address" style="color: #695e5e;">
+            	{{if !empty($contact_name) || !empty($order.community_id)}}
+            		{{if empty($contact_name)}}
+            			<p>{{$order.contact_name}}&nbsp;{{$order.contact_phone}}</p>
+            			<p>{{$order.address}}</p>
+            			<input type="hidden" id="community_id" name="community_id" value="{{$order.community_id}}" />
+            			<input type="hidden" id="community_address" name="community_address" value="{{$order.address}}" />
+            			<input type="hidden" id="contact_name" name="contact_name" value="{{$order.contact_name}}" />
+            			<input type="hidden" id="contact_phone" name="contact_phone" value="{{$order.contact_phone}}" />
+            		{{else}}
+            			<p>{{$contact_name}}&nbsp;{{$contact_phone}}</p>
+            			<p>{{$full_address}}</p>
+            			<input type="hidden" id="community_id" name="community_id" value="{{$community_id}}" />
+            			<input type="hidden" id="community_address" name="community_address" value="{{$full_address}}" />
+            			<input type="hidden" id="contact_name" name="contact_name" value="{{$contact_name}}" />
+            			<input type="hidden" id="contact_phone" name="contact_phone" value="{{$contact_phone}}" />
+            		{{/if}}
+            	{{else}}
+            		<p>点击选择地址</p>
+            	{{/if}}
+            </td>
+            <input type="hidden" id="address_id" name="address_id" value="{{$address_id}}" />
+        </tr>
+        
+        <tr class="delivery_self">
+        	<td class="title">
+        		自提人：
+        	</td>
+        	<td>
+        		<input type="text" class="form-control" id="self_contact_name" value="{{$order.contact_name}}" />
+        	</td>
+        </tr>
+        <tr class="delivery_self">
+        	<td class="title">
+        		联系方式：
+        	</td>
+        	<td>
+        		<input type="text" class="form-control" id="self_contact_phone" value="{{$order.contact_phone}}" />
+        	</td>
+        </tr>
+        
+        <tr class="delivery_common">
+            <td class="title">
+                送货日期：
+            </td>
+            <td>
+                <select id="select_delivery_date" class="form-control" name="delivery_time">
+                    <option value="0">请选择</option>
+                    {{foreach $delivery_date as $date}}
+                    <option value="{{$date}}" {{if $delivery_date_soon==$date}}selected="selected"{{/if}}>{{$date}}</option>
+                    {{/foreach}}
+                </select>
+            </td>
+        </tr>
+        <tr class="delivery_common">
+            <td class="title">
+                送货时间：
+            </td>
+            <td>
+                <select style="margin-right:10%; display: inline-block;" id="select_delivery_time" class="form-control" name="delivery_time">
+                    <option value="0">请选择</option>
+                    {{foreach $delivery_time as $hour}}
+                    <option value="{{$hour.start}}-{{$hour.end}}" {{if $order._delivery_time_start==$hour.start}}selected="selected"{{/if}}>{{$hour.desc}}</option>
+                    {{/foreach}}
+                </select>
+            </td>
+        </tr>
+        
+        <tr class="delivery_self">
+            <td class="title">
+                取货日期：
+            </td>
+            <td>
+                <select id="select_zidi_date" class="form-control" name="delivery_time">
+                    <option value="0">请选择</option>
+                    {{foreach $delivery_date as $date}}
+                    <option value="{{$date}}" {{if $delivery_date_soon==$date}}selected="selected"{{/if}}>{{$date}}</option>
+                    {{/foreach}}
+                </select>
+            </td>
+        </tr>
+        <tr class="delivery_self">
+            <td class="title">
+                取货时间：
+            </td>
+            <td>
+                <select style="margin-right:10%; display: inline-block;" id="select_ziti_delivery_time" class="form-control" name="delivery_time">
+                    <option value="0">请选择</option>
+                    {{foreach $delivery_time as $hour}}
+                    <option value="{{$hour.start}}-{{$hour.end}}" {{if $order._delivery_time_start==$hour.start}}selected="selected"{{/if}}>{{$hour.desc}}</option>
+                    {{/foreach}}
+                </select>
+            </td>
+        </tr>
+        <tr class="title">
+            <td>
+                仓库位置：
+            </td>
+            <td>
+                <select id="wid" class="form-control" name="wid" autocomplete="off">
+                    {{if count($warehouses) > 1}}
+                    <option data-city="0" value="0" {{if $order.wid==0}}selected="selected" {{/if}}>请选择</option>
+                    {{/if}}
+                    {{foreach $warehouses as $_wid => $name}}
+                    <option value="{{$_wid}}" {{if $order.wid==$_wid}}selected="selected" {{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <a id="confirm_step_1" href="javascript:;" style="width: 100%;" class="btn btn-danger">下一步</a>
+            </td>
+        </tr>
+    </table>
+</div>

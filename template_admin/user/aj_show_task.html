@@ -1,0 +1,128 @@
+{{if $dev_type=='pc'}}
+<input type="hidden" name="all_staffs" value="{{$staff_grouped}}">
+<input type="hidden" name="all_short_descs" value="{{$show_desc_of_objtype}}">
+<div class="modal fade _j_dialog" id="_j_dislog_createAdminTask" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">创建新任务</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-3 control-label">执行人：</label>
+            <div class="col-sm-7">
+              <select id="_adtask_change_role" name="exec_role" class="form-control" style="width:45%; margin-right:5px; display:inline;">
+                <option value="0">请选择角色</option>
+                {{foreach $staff_roles as $_role=>$_desc}}
+                <option value="{{$_role}}">{{$_desc}}</option>
+                {{/foreach}}
+              </select>
+              
+              <select name="exec_suid" class="form-control" style="width:45%; display:inline;">
+                <option value="0"> -- </option>
+              </select>
+              
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label">类别：</label>
+            <div class="col-sm-7">
+              <select id="_adtask_change_objtype" class="form-control" name="objtype" style="width:45%; margin-right:5px; display:inline;">
+                <option value="0">请选择分类</option>
+                {{foreach $objtypes as $_objtype=>$_desc}}
+                <option value="{{$_objtype}}" {{if $_objtype==$objtype}} selected="selected"{{/if}}>{{$_desc}}</option>
+                {{/foreach}}
+              </select>
+              
+              <select name="short_desc" class="form-control" style="width:45%; display:inline;">
+                <option> -- </option>
+              </select>
+              
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label">标题：</label>
+            <div class="col-sm-7">
+              <input class="form-control" type="text" name="title">
+              <div class="word_counter">
+                <span>字数：</span>
+                <span class="_j_counter" style="">0</span>/
+                <span class="_j_maxLength">30</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label">内容：</label>
+            <div class="col-sm-7">
+              <textarea class="form-control" rows="3" name="content"></textarea>
+              
+              <div class="word_counter">
+                <span>字数：</span>
+                <span class="_j_counter" style="">0</span>/
+                <span class="_j_maxLength">200</span>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" id="_j_create_adminTask" class="btn btn-primary" data-objid="{{$objid}}">添加任务</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{elseif $dev_type=='h5'}}
+
+<div class="modal fade _j_dialog" id="_j_dislog_createAdminTask" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-sm" role="document" style="width:300px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">创建新任务</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-3 control-label">类别：</label>
+            <div class="col-sm-7">
+              <select class="form-control" name="short_desc" style="width:45%; margin-right:5px; display:inline;">
+                <option value="0">选择问题</option>
+                {{foreach $short_descs as $_id=>$_desc}}
+                <option value="{{$_id}}">{{$_desc}}</option>
+                {{/foreach}}
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-3 control-label">内容：</label>
+            <div class="col-sm-7">
+              <textarea class="form-control" rows="3" name="content"></textarea>
+              
+              <div class="word_counter">
+                <span>字数：</span>
+                <span class="_j_counter" style="">0</span>/
+                <span class="_j_maxLength">200</span>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" id="_j_create_adminTask" class="btn btn-primary" data-objid="{{$objid}}" data-objtype="{{$objtype}}">添加任务</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{/if}}

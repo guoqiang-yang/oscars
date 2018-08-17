@@ -1,0 +1,53 @@
+{{if !empty($sku_list)}}
+<table class="table">
+    <thead>
+    <tr>
+        <th>sku_id</th>
+        <th>图片</th>
+        <th style="width: 16%;">名称</th>
+        <th style="width: 10%;">类别</th>
+        <th>单位</th>
+        <th>采购价</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $sku_list as $productItem}}
+    <tr class="_j_product" data-sid="{{$productItem.sid}}">
+        <td>{{$productItem.sid}}</td>
+        <td><img src="{{$productItem._pic.small}}"></td>
+        <td>{{$productItem.title}}</a></td>
+        <td>{{$cate1_list[$productItem.cate1]['name']}}-{{$cate2_list[$productItem.cate1][$productItem.cate2]['name']}}</td>
+        <td>{{$productItem.unit|default:'个'}}</td>
+        <td>
+            {{if $productItem.selected}}
+            <span>{{$productItem.purchase_price/10/10}} 元</span>
+            {{else}}
+            <input class="form-control" type="text" name="purchase_price" value="" style="width:35%; display:inline-block;"> 元
+            {{/if}}
+        </td>
+        <td>
+            {{if $productItem.selected}}
+            <span style="color:red;">已添加</span>
+            {{else}}
+            <div><a href="javascript:;" class="add_sku_for_supplier">添加</a></div>
+            {{/if}}
+        </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>
+<nav>
+    <ul class="pagination">
+        {{$pageHtml nofilter}}
+        <li>
+            <a style="color:#555;">共{{$total|string_format:"%d"}}个
+            </a>
+        </li>
+    </ul>
+</nav>
+{{else}}
+<div style="padding:40px 380px;">
+    <span style="font-size: 20px;">暂无SKU！！</span>
+</div>
+{{/if}}

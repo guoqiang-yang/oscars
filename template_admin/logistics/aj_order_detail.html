@@ -1,0 +1,197 @@
+    {{if $type=='summary'}}
+    <div class="order_summary_info well center-block" style="max-width: 600px; margin-top:5px;" data-oid="{{$order_info.oid}}" data-priority="{{$order_info.priority}}">
+        <div>
+            <span>{{if $order_info.line_id!=0}}线路{{$order_info.line_id}}{{else}}未排线{{/if}}：</span>
+            <span style="float:right; {{if $order_info.priority>0}}color:red;{{/if}}">【{{$order_info.priority_desc}}】</span>
+        </div>
+        <div style="margin-top:5px; margin-left:15px;">
+            <p>单&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;号：{{$order_info.oid}}</p>
+            <p>仓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;库：{{$warehouses[$order_info.wid]}}</p>
+            <p class="time" data-time="{{$order_info.show_delivery_time}}">送货时间：{{$order_info.show_delivery_date}}</p>
+            <p class="community" data-community="{{$order_info.cm_name}}">送货小区：{{$order_info.cm_name}}</p>
+            
+            {{if !empty($order_freight) && !empty($order_freight.distance)}}
+            <p>距&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;离：{{$order_freight.distance}}公里</p>
+            {{foreach $order_freight.fee_list as $o}}
+            <p style="margin-left:35px;">{{$o._model}}：{{$o.freight/100}}元</p>
+            {{/foreach}}
+            {{else}}
+             <p>距离：暂无</p>
+            {{/if}}
+            
+            <p>货品摘要：</p>
+            {{foreach $summary as $one}}
+            <p style="margin-left:35px;">{{$one.name}}：{{$one.num}}</p>
+            {{/foreach}}
+        </div>
+        <div>
+            <button class="btn btn-default close_order_summary_info" style="margin-right:20px;">移除</button>
+            <button class="btn btn-default show_order_detail_info" style="margin-right:20px;">订单详情</button>
+        </div>
+    </div>
+
+    {{elseif $type='detail'}}
+    <form class="form-horizontal" role="form">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">订单：</label>
+        <div class="col-sm-10">
+            <span class="text-value" style="margin-right:10px;">{{$order_info.oid}}</span>
+            <span class="text-value" style="margin-right:10px; {{if $order_info.priority!=0}} color:red;{{/if}}">【{{$order_info.priority_desc}}】</span>
+            <span class="text-value" style="margin-right:10px;">{{if $order_info.line_id!=0}}线路{{$order_info.line_id}}{{else}}未排线{{/if}}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">类型：</label>
+        <div class="col-sm-10">
+            <span class="text-value" style="margin-right:10px;{{if $order_info.aftersale_type == 2}}color: #ff0000{{/if}}">{{if empty($order_info.aftersale_type)}}普通订单{{else}}{{$aftersale_types[$order_info.aftersale_type]}}{{/if}}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">仓库：</label>
+        <div class="col-sm-10">
+            <span class="text-value" style="margin-right:10px;">{{$warehouses[$order_info.wid]}}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">客户：</label>
+        <div class="col-sm-10">
+            <span class="text-value" style="margin-right:10px;">{{$order_info.contact_name}}</span>
+            <span class="text-value" style="margin-right:10px;">{{$order_info.contact_phone}}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">配送：</label>
+        <div class="col-sm-10">
+            <span class="text-value" style="margin-right:10px;">
+                {{$order_info.cm_name}}
+                <span style="margin-left:10px;color:gray;">（{{$order_info.cm_address}}）</span>
+            </span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label"></label>
+        <div class="col-sm-10">
+            <span class="text-value" style="margin-right:10px;">{{$order_info.show_delivery_date}}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">是否搬运：</label>
+        <div class="col-sm-10">
+            <span class="text-value">
+                {{if $order_info.service == 1}}
+                电梯上楼
+                {{elseif $order_info.service == 2}}
+                楼梯上楼 （{{$order_info.floor_num}}层）
+                {{else}}
+                不需要搬运
+                {{/if}}
+            </span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">运费：</label>
+        <div class="col-sm-10">
+            {{if !empty($order_freight) && !empty($order_freight.distance)}}
+            <span class="text-value" style="margin-right:10px;">距离：{{$order_freight.distance}}公里</span>
+            {{foreach $order_freight.fee_list as $o}}
+            <span class="text-value" style="margin-right:10px;">{{$o._model}}：{{$o.freight/100}}元</span>
+            {{/foreach}}
+            {{else}}
+             <span class="text-value" style="margin-right:10px;">暂无</span>
+            {{/if}}
+        </div>
+    </div>
+    {{if !empty($order_info.note)}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">内部备注：</label>
+        <div class="col-sm-10">
+            <span class="text-value" style="margin-right:10px;">
+                {{if $order_info.aftersale_type==3}}
+                <a href="/order/edit_traps.php?tid={{$order_info.aftersale_id}}" target='_blank'>补漏单{{$order_info.aftersale_id}}</a>的补单,
+                {{/if}}
+                {{$order_info.note}}
+            </span>
+        </div>
+    </div>
+    {{/if}}
+    
+    {{if !empty($order_info.customer_note)}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">打印备注：</label>
+        <div class="col-sm-10">
+            <span class="text-value" style="margin-right:10px;">{{$order_info.customer_note}}</span>
+        </div>
+    </div>
+    {{/if}}
+    
+    <div class="form-group">
+        <label class="col-sm-2 control-label">商品：</label>
+        <div class="col-sm-10">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th style="width:8%;">pid</th>
+                    <th style="width: 40%;">名称</th>
+                    <th style="width: 10%;">数量</th>
+                    <th style="width: 20%;">备注</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{if $order_info['aftersale_type'] == 2}}
+                    {{$product_info = $order_products.refund_products}}
+                {{else}}
+                    {{$product_info = $order_products.products}}
+                {{/if}}
+                {{foreach $product_info as $p}}
+                <tr class="_j_product">
+                    <td>{{$p.pid}}</td>
+                    <td>
+                        {{$p.sku_info.title}}
+                        {{if !empty($p.sku_info.alias)}}<br><span style="color:gray">{{$p.sku_info.alias}}</span>{{/if}}
+                    </td>
+                    <td>{{$p.num}} {{$p.sku_info.unit|default:'个'}}</td>
+                    <td>{{$p.note}}</td>
+                </tr>
+                {{/foreach}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{if !empty($refund.refund_products)}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">退货商品：</label>
+        <div class="col-sm-10">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th style="width:8%;">pid</th>
+                    <th style="width: 40%;">名称</th>
+                    <th style="width: 10%;">数量</th>
+                    <th style="width: 20%;">备注</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{foreach $refund.refund_products as $rp}}
+                <tr class="_j_product">
+                    <td>{{$rp.pid}}</td>
+                    <td>
+                        {{$rp.sku_info.title}}
+                        {{if !empty($rp.sku_info.alias)}}<br><span style="color:gray">{{$rp.sku_info.alias}}</span>{{/if}}
+                    </td>
+                    <td>{{$rp.num}} {{$rp.sku_info.unit|default:'个'}}</td>
+                    <td>{{$rp.note}}</td>
+                </tr>
+                {{/foreach}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{/if}}
+    </form>
+    
+    {{else}}
+    <div style="font-size:20px;color:red;">
+        <span>获取数据非法！！</span>
+    </div>
+    {{/if}}

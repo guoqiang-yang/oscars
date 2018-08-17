@@ -1,0 +1,84 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">品牌管理</h1>
+
+    <form class="form-horizontal" role="form" action="/shop/brand_list.php">
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">大类：</label>
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        {{foreach $cate1_list as $id => $item}}
+                        <li {{if $cur_cate1== $id}}class="active" {{/if}}>
+                            <a href="?cate1={{$id}}">{{$item.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">小类：</label>
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        {{foreach $cate2_list as $id => $item}}
+                        <li {{if $cur_cate2== $id}}class="active" {{/if}}>
+                            <a href="?cate1={{$cur_cate1}}&cate2={{$id}}">{{$item.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </form>
+
+<hr>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>名称</th>
+        <th>排序</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $brands as $brand}}
+    <tr data-bid="{{$brand.bid}}" data-cate2="{{$cur_cate2}}" data-cate3="{{$cur_cate3}}">
+        <td>{{$brand.bid}}</td>
+        <td>{{$brand.name}}</td>
+        <td>
+            <form action="/shop/edit_sortby.php">
+                <input style="width: 50px; text-align: center;" type="text" name="sortby" value="{{$brand.sortby}}"/>
+                <input type="hidden" name="sid" value="{{$brand.bid}}"/>
+                <input type="hidden" name="type" value="brand"/> <br/>
+                {{if !empty($_permissions["/shop/edit_sortby"])}}
+                    <input style="width: 50px; margin-top: 5px;" type="submit" name="submit" value="更改"/>
+                {{/if}}
+            </form>
+        </td>
+        <td>
+            {{if !empty($_permissions["/shop/edit_brand"])}}
+                <a href="/shop/edit_brand.php?bid={{$brand.bid}}&cate1={{$cur_cate1}}&cate2={{$cur_cate2}}&cate3={{$cur_cate3}}">编辑</a>
+            {{/if}}
+            {{if !empty($_permissions["/shop/ajax/delete_brand"])}}
+                <a href="javascript:void(0);" class="_j_delete_brand" style="margin-left:15px;">删除</a>
+            {{/if}}
+        </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>
+
+<hr>
+
+<form class="form-inline" role="form" data-cate1="{{$cur_cate1}}" data-cate2="{{$cur_cate2}}" data-cate3="{{$cur_cate3}}">
+    <div class="form-group" style="margin-right:50px;">
+        <label>名称：</label> <input type="text" class="form-control" name="name" value="">
+    </div>
+    <button type="button" class="btn btn-primary" id="btn_new_brand">添加</button>
+</form>
+
+</div>

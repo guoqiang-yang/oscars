@@ -1,0 +1,141 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">经销商流水列表</h1>
+
+    <form class="form-inline" role="form" action="/finance/agent_flow_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>经销商ID：</label>
+                <input type="text" class="form-control" name="aid" value="{{$search_conf.aid}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>经销商名：</label>
+                <input type="text" class="form-control" name="title" value="{{$search_conf.title}}" style="width:80px;">
+            </div>
+            <div class="form-group" style="margin-right:10px;">
+                <label>单据类型：</label>
+                <select class="form-control" name="objtype">
+                    <option value="127" {{if 127==$type}}selected="selected"{{/if}}>全部</option>
+                    {{foreach $all_types as $_id => $_desc}}
+                    <option value="{{$_id}}" {{if $_id==$search_conf.objtype}}selected="selected"{{/if}}>{{$_desc.desc}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>日期：</label>
+				<input type="date" class="form-control" name="from_date" value="{{if $search_conf.from_date}}{{$search_conf.from_date}}{{/if}}" style="width: 160px;">
+				<span> - </span>
+				<input type="date" class="form-control" name="end_date" value="{{if $search_conf.end_date}}{{$search_conf.end_date}}{{/if}}" style="width: 160px;">
+			</div>
+            <button style="margin-left: 50px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+    </form>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width:10%;">ID</th>
+            <th style="width:20%;">经销商</th>
+            <th style="width:8%;">时间</th>
+            <th style="width:8%;">余额</th>
+            <th style="width:10%;">余额增加</th>
+            <th style="width:8%;">余额减少</th>
+            <th style="width: 10%;">操作人</th>
+            <th style="width:8%;">途径</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $history_list as $item}}
+        <tr>
+            <td>{{$item.id}}</td>
+            <td>{{$item.agent_name}} - {{$item.aid}}</td>
+            <td>{{$item.ctime}}</td>
+            <td>{{$item.amount/100}}</td>
+            <td>{{if $item.price >= 0}}{{$item.price/100}}{{/if}}</td>
+            <td>{{if $item.price < 0}}{{abs($item.price)/100}}{{/if}}</td>
+            <td>{{$item._suid_name}}</td>
+            <td>{{$item._desc}}{{if $item.objid>0}}: <a href="{{$item._desc_url}}" target="_blank">{{$item.objid}}</a>{{/if}}</td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    {{if $search_conf.aid > 0 && !empty($_permissions['/finance/ajax/save_agent_amount'])}}
+    <div class="placeholder">
+        <button type="button" class="btn btn-primary" id="add_agent_amount" data-aid="{{$search_conf.aid}}">预存</button>&emsp;
+        <button type="button" class="btn btn-primary" id="withdraw_agent_amount" data-aid="{{$search_conf.aid}}">提现</button>
+    </div>
+    {{/if}}
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>
+<!-- Modal -->
+<div class="modal fade _j_dialog" id="addAgentAmountModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">预存</h4>
+            </div>
+            <div class="modal-body">
+                <table width="90%">
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">预存方式：</td>
+                        <td>
+                            <select name="type" class="from-control">
+                                {{foreach $pay_types as $key => $name}}
+                                <option value="{{$key}}">{{$name}}</option>
+                                {{/foreach}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">预存金额：</td>
+                        <td><input type="text" class="form-control" name="price"><input type="hidden" name="aid" value=""></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_add_agent_amount">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade _j_dialog" id="withdrawAgentAmountModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">提现</h4>
+            </div>
+            <div class="modal-body">
+                <table width="90%">
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">提现方式：</td>
+                        <td>
+                            <select name="type" class="from-control">
+                                {{foreach $pay_types as $key => $name}}
+                                <option value="{{$key}}">{{$name}}</option>
+                                {{/foreach}}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; padding: 10px;">提现金额：</td>
+                        <td><input type="text" class="form-control" name="price"><input type="hidden" name="aid" value=""></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_withdraw_agent_amount">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

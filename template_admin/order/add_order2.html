@@ -1,0 +1,52 @@
+<input type="hidden" id="pre_date" value="{{$privilege.pre_date}}"/>
+<input type="hidden" id="pre_date_privilege" value="{{$privilege.pre_date_privilege}}"/>
+<input type="hidden" id="cur_date" value="{{$date}}"/>
+<input type="hidden" id="cur_hour" value="{{$hour}}"/>
+<input type="hidden" id="pre_order_set" value="{{$privilege.pre_order_set}}"/>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">{{if $order.oid && !$copy}}编辑{{else}}新建{{/if}}订单</h1>
+
+    <form class="form-horizontal" role="form" data-oid="{{$order.oid}}" data-cid="{{$order.cid}}">
+        <div class="form-group">
+            {{if $order.step < 2 }}
+            <button id="add_product" type="button" class="btn btn-default" data-toggle="modal" data-target="#dlgAddProduct" style="margin-left: 15px;">添加商品</button>
+            {{/if}}
+        </div>
+        {{include "order/product_list.html"}}
+        {{include "order/block_edit_order_info.html"}}
+        <div id="freight_alert" class="form-group" style="display: none;">
+            <label class="col-sm-2 control-label">提示：</label>
+            <div class="col-sm-4" style="font-weight: bold;  width:50%; color: red;">
+                六环外的运费需人工计算，填写之后方可保存订单！！！！！！！
+            </div>
+        </div>
+        <!-- 操作按钮开始 -->
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-primary" id="_j_btn_save_order_edit" style="margin-right:20px;">保存</button>
+                {{if $order.paid == 0 && $order.step >= 2 && $order.step < 5 && ($_isCS || $_isAdmin)}}
+                <a href="javascript:void(0);" class="btn btn-primary _j_back_order_step" style="margin-right:20px;">修改商品</a>
+                {{/if}}
+                <a href="/order/order_detail.php?oid={{$order.oid}}" target="_blank" class="btn btn-default" style="margin-right:20px;">查看详情</a>
+            </div>
+        </div>
+        <!-- 操作按钮结束 -->
+    </form>
+
+    <!-- Modal -->
+    <div class="modal fade" id="dlgAddProduct" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div id="product_list_container">
+                    {{include "order/dlg_product_list.html"}}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="_j_btn_save_products" data-oid="{{$order.oid}}">确认选择</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

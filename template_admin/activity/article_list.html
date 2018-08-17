@@ -1,0 +1,47 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        文章列表
+    </h1>
+    {{if !empty($_permissions["/activity/add_article"])}}
+    <a href="/activity/add_article.php" class="btn btn-primary">写新文章</a>
+    {{/if}}
+</div>
+<div class="col-sm-9 col-sm-offset-2 col-md-10 main">
+    <table class="table table-bordered " style="background: white; text-align: center;">
+        <thead style="background-color: #898989;color: white;font-size: 16px;">
+        <tr style="text-align: center">
+            <th style="text-align: center">序号</th>
+            <th style="text-align: center">生成时间</th>
+            <th style="text-align: center">标题</th>
+            <th style="text-align: center">类型</th>
+            <th style="text-align: center">城市</th>
+            <th style="text-align: center">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $id => $item}}
+        <tr>
+            <td style="vertical-align: middle;">{{$item.aid}}</td>
+            <td style="vertical-align: middle;">{{$item.ctime}}</td>
+            <td style="vertical-align: middle;">{{$item.title}}</td>
+            <td style="vertical-align: middle;">{{$policy_type[$item.article_type]}}</td>
+            <td style="vertical-align: middle;">{{$item.city_ids}}</td>
+            <td style="vertical-align: middle;">
+                {{if !empty($_permissions["/activity/article_detail"])}}
+                <a href="/activity/article_detail.php?aid={{$item.aid}}">查看文章</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+        </ul>
+    </nav>
+
+</div>

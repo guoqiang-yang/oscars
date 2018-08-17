@@ -1,0 +1,77 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">管理员操作日志</h1>
+
+  <form class="form-inline" role="form" action="/admin/admin_log_list.php">
+    <div class="placeholder">
+      <div class="form-group">
+        <label>操作者：</label>
+        <select class="form-control" name="admin_id" style="margin-right: 20px;">
+          <option value="0" {{if empty($search_conf.admin_id)}}selected="selected"{{/if}}>请选择</option>
+          {{foreach $admin_list as $man}}
+          <option value="{{$man.suid}}" {{if $search_conf.admin_id==$man.suid}}selected="selected"{{/if}}>{{$man.name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>操作类型：</label>
+        <select class="form-control" name="action_type" style="margin-right: 20px;">
+          <option value="0" {{if empty($search_conf.action_type)}}selected="selected"{{/if}}>请选择</option>
+          {{foreach $action_type_list as $key => $action}}
+          <option value="{{$key}}" {{if $search_conf.action_type==$key}}selected="selected"{{/if}}>{{$action}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+    </div>
+  </form>
+
+  <hr>
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>id</th>
+      <th>操作者id</th>
+      <th>操作者名</th>
+      <th>操作类型</th>
+      <th>描述</th>
+      <th>操作时间</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $list as $action}}
+    <tr>
+      <td>
+        {{$action.lid}}
+      </td>
+      <td>
+        {{$action.admin_id}}
+      </td>
+      <td>
+        {{$action.admin_name}}
+      </td>
+      <td>
+        {{$action.action}}
+      </td>
+      <td>
+        {{$action.desc}}
+      </td>
+      <td>
+        {{$action.mtime}}
+      </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

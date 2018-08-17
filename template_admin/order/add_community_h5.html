@@ -1,0 +1,85 @@
+<style>
+    .table tbody tr td {border: none;}
+	.nav-sidebar {display: none;}
+</style>
+<div style="display: none;" id="city-json">
+    {{$city}}
+</div>
+<div style="display: none;" id="distinct-json">
+    {{$distinct}}
+</div>
+<div style="display: none;" id="area-json">
+    {{$area}}
+</div>
+
+<input type="hidden" id="city_id" value="{{$city_id}}" />
+<input type="hidden" id="oid" value="{{$oid}}" />
+<!-- 用户信息，用于添加完小区地址后跳转订单编辑页传参 -->
+<input type="hidden" id="cid" value="{{$cid}}" />
+<input type="hidden" id="uid" value="{{$uid}}" />
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <table class="table">
+        <tr>
+            <td>
+                城市：
+            </td>
+            <td>
+                <select id="select-city" class="form-control" name="city_id" data-id="{{$search.city_id}}"></select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                城区：
+            </td>
+            <td>
+                <select id="select-district" class="form-control" name="district_id" data-id="{{$search.district_id}}"></select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                区域：
+            </td>
+            <td>
+                <select id="select-area" class="form-control" name="ring_road" data-id="{{$search.ring_road}}"></select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                小区名称：
+            </td>
+            <td>
+                <input type="text" class="form-control" id="community_name" value="" />
+                <input type="hidden" id="lat" value="" />
+                <input type="hidden" id="lng" value="" />
+                <section class="select_area address_results">
+					<ul id="suggest_4_address" class="address_list" style="display:none;"></ul>
+				</section>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                小区别名：
+            </td>
+            <td>
+                <input type="text" class="form-control" id="community_alias_name" value="" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                详细地址：
+            </td>
+            <td>
+                <input type="text" class="form-control" id="address" value="" />
+            </td>
+        </tr>
+    </table>
+    <div style="margin-bottom: 20px;">
+    	<a href="javascript:history.go(-1)" style="width: 45%;" class="btn btn-warning">取消</a>
+        <a id="add_btn" href="javascript:;" style="width: 45%; margin-left: 10%;" class="btn btn-danger">添加</a>
+    </div>
+    <div id="allmap" style="height:300px;"></div>
+    <section id="map_4_address" class="select_area">
+		<ul id="map_search_result" class="address_list address_results"></ul>
+	</section>
+</div>

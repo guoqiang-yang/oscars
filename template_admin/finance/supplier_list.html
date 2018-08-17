@@ -1,0 +1,81 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">供应商应付列表</h1>
+	
+	<form class="form-inline" role="form" action="/finance/supplier_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:30px;">
+				<label>手机：</label>
+				<input class="form-control" type="text" name="mobile" value="{{$mobile}}" >
+			</div>
+			<div class="form-group" style="margin-right:30px;">
+				<label>名称：</label>
+				<input type="text" class="form-control" name="general_name" value="{{$general_name}}">
+			</div>
+
+			<div class="form-group" style="margin-right:30px;">
+				<label>供应商ID：</label>
+				<input type="text" class="form-control" name="sid" value="{{$sid}}">
+			</div>
+			<div class="form-group" style="margin-right:30px;">
+				<label>城市：</label>
+				<select class="form-control" name="city">
+				  <option value="0" {{if empty($city)}}selected="selected"{{/if}}>全部</option>
+				  {{foreach $city_list as $id => $cityName}}
+				  <option value="{{$id}}" {{if $city==$id}}selected="selected"{{/if}}>{{$cityName}}</option>
+				  {{/foreach}}
+				</select>
+			</div>
+			<div class="form-group" style="margin-right:30px;">
+				<label>一级分类：</label>
+				<select class="form-control" name="cate1">
+				  <option value="0" {{if empty($cate1)}}selected="selected"{{/if}}>全部</option>
+				  {{foreach $all_cate1 as $id => $cv}}
+				  <option value="{{$id}}" {{if $cate1==$id}}selected="selected"{{/if}}>{{$cv.name}}</option>
+				  {{/foreach}}
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+	
+	<hr>
+	
+	<table class="table">
+		<thead>
+			<tr>
+			  	<th>id</th>
+				<th>名称/联系人</th>
+			  	<th>门店地址、电话</th>
+				<th style="width: 12%;">账户余额</th>
+			  	<th style="width: 12%;">应付金额</th>
+			  	<th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{foreach $supplier_list as $supplier}}
+			<tr data-sid="{{$supplier.sid}}">
+				<td>{{$supplier.sid}}</td>
+				<td>{{$supplier.name}}<br/>{{if $supplier.name <> $supplier.contact_name}}{{$supplier.contact_name}}{{/if}}</td>
+				<td>
+				  {{$supplier.address}}
+				  {{if $supplier.phone}}<br/>{{/if}}{{$supplier.phone}}
+				</td>
+				<td>￥{{$supplier.amount/100}}</td>
+        <td style="color:red;">￥{{$supplier.account_balance/100}}</td>
+				<td>
+					<a href="/finance/supplier_bill_list.php?sid={{$supplier.sid}}">应付明细</a>
+				</td>
+			</tr>
+			{{/foreach}}
+		</tbody>
+	</table>
+	
+	<nav>
+		<ul class="pagination">
+		  {{$pageHtml nofilter}}
+		  <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+			<li><a style="color:#555;">共{{$sum}}元</a></li>
+		</ul>
+	</nav>
+</div>

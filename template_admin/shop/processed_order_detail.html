@@ -1,0 +1,192 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+        {{if $detail.type==1}}组合售卖单详情{{else}}整转零售单详情{{/if}}
+	</h1>
+    
+    <form class="form-inline" role="form">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:30px;">
+                <label>单号：</label>
+                <span class="text-value">{{$detail.id}}</span>
+            </div>
+            
+            <div class="form-group" style="margin-right:30px;">
+                <label>仓库：</label>
+                <span class="text-value">{{$warehouses[$detail.wid]}}</span>
+            </div>
+            
+            <div class="form-group" style="margin-right:30px;">
+                <label>操作人：</label>
+                <span class="text-value">{{$detail.create_suid_info.name}}</span>
+            </div>
+            
+            <div class="form-group" style="margin-right:30px;">
+                <label>日期：</label>
+                <span class="text-value">{{$detail.ctime}}</span>
+            </div>
+            
+        </div>
+    </form>
+    
+    <hr>
+    
+    <div style="margin-left: 50px;">
+    {{if $detail.type==1}}
+        <div style="margin-bottom: 10px;">
+            <span style="font-size:18px;">已组合商品</span>
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width:15%;">sid</th>
+                    <th style="width:30%;">名称</th>
+                    <th style="width:8%;">单位</th>
+                    <th>上架货位</th>
+                    <th>上架数量</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{foreach $sku_list as $one}}
+                {{if $one.type == 1}}
+                <tr class="_j_product">
+                    <td>{{$one.sid}}</td>
+                    <td>{{$one._sku.title}}</td>
+                    <td>{{$one._sku.unit|default:'个'}}</td>
+                    <td>
+                        {{foreach $one._location as $l}}
+                        <p>{{$l.loc}}</p>
+                        {{/foreach}}
+                    </td>
+                    <td>
+                        {{foreach $one._location as $l}}
+                        <p>{{$l.num}}</p>
+                        {{/foreach}}
+                    </td>
+                </tr>
+                {{/if}}
+                {{/foreach}}
+            </tbody>
+        </table>
+
+        <hr>
+
+        <div style="margin-bottom: 10px;">
+            <span style="font-size:18px;">配件信息</span>
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width:15%;">sid</th>
+                    <th style="width:30%;">名称</th>
+                    <th style="width:8%;">单位</th>
+                    <th>货位</th>
+                    <th>消耗数量</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{foreach $sku_list as $one}}
+                {{if $one.type == 2}}
+                <tr class="_j_product">
+                    <td>{{$one.sid}}</td>
+                    <td>{{$one._sku.title}}</td>
+                    <td>{{$one._sku.unit|default:'个'}}</td>
+                    <td>
+                        {{foreach $one._location as $l}}
+                        <p>{{$l.loc}}</p>
+                        {{/foreach}}
+                    </td>
+                    <td>
+                        {{foreach $one._location as $l}}
+                        <p>{{$l.num}}</p>
+                        {{/foreach}}
+                    </td>
+                </tr>
+                {{/if}}
+                {{/foreach}}
+            </tbody>
+        </table>
+    {{else}}
+    <div style="margin-bottom: 10px;">
+            <span style="font-size:18px;">已转换商品</span>
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width:15%;">sid</th>
+                    <th style="width:30%;">名称</th>
+                    <th style="width:8%;">单位</th>
+                    <th>货位</th>
+                    <th>消耗数量</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{foreach $sku_list as $one}}
+                {{if $one.type == 1}}
+                <tr class="_j_product">
+                    <td>{{$one.sid}}</td>
+                    <td>{{$one._sku.title}}</td>
+                    <td>{{$one._sku.unit|default:'个'}}</td>
+                    <td>
+                        {{foreach $one._location as $l}}
+                        <p>{{$l.loc}}</p>
+                        {{/foreach}}
+                    </td>
+                    <td>
+                        {{foreach $one._location as $l}}
+                        <p>{{$l.num}}</p>
+                        {{/foreach}}
+                    </td>
+                </tr>
+                {{/if}}
+                {{/foreach}}
+            </tbody>
+        </table>
+
+        <hr>
+
+        <div style="margin-bottom: 10px;">
+            <span style="font-size:18px;">增加配件信息</span>
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width:15%;">sid</th>
+                    <th style="width:30%;">名称</th>
+                    <th style="width:8%;">单位</th>
+                    <th>上架货位</th>
+                    <th>上架数量</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{foreach $sku_list as $one}}
+                {{if $one.type == 2}}
+                <tr class="_j_product">
+                    <td>{{$one.sid}}</td>
+                    <td>{{$one._sku.title}}</td>
+                    <td>{{$one._sku.unit|default:'个'}}</td>
+                    <td>
+                        {{foreach $one._location as $l}}
+                        <p>{{$l.loc}}</p>
+                        {{/foreach}}
+                    </td>
+                    <td>
+                        {{foreach $one._location as $l}}
+                        <p>{{$l.num}}</p>
+                        {{/foreach}}
+                    </td>
+                </tr>
+                {{/if}}
+                {{/foreach}}
+            </tbody>
+        </table>
+    {{/if}}
+    </div>
+    <div class="noprint">
+        <div style="margin-top:30px;">
+            <a href="javascript:window.print();"><input type="button" value="打印" style="font-size: 25px;padding: 5px 15px;"></a>
+        </div>
+    </div>
+</div>

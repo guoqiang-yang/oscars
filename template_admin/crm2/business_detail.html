@@ -1,0 +1,172 @@
+<style>
+  .form-group {
+    margin-bottom: 6px;
+  }
+
+  .detail_item {
+    width: 45%;
+    float: left;
+    min-width: 350px;
+  }
+  .area-bottom{
+    border-bottom:1px dashed #eee;
+    margin:20px;
+  }
+</style>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">企业号详情{{if $business.status!=0}}<span style="color:red;"> - 企业号已经被删除</span>{{/if}}</h1>
+  
+    <form class="form-horizontal" role="form" data-cid="{{$business.bid}}">
+    
+        <div class="form-group" style="margin-left:20px;">
+          <div class="detail_item">
+            <label class="">企业名称：</label>
+            <span class="text-value">{{$business.bname}}（ID: {{$business.bid}}）</span>
+          </div>
+
+          <div class="detail_item">
+            <label class="">开发日期：</label>
+            <span class="text-value">{{$business.ctime}}</span>
+          </div>
+
+          <div class="detail_item">
+            <label class="">企业地址：</label>
+            <span class="text-value">{{if empty($business.full_addr)}}-{{else}}{{$business.full_addr}}{{/if}}</span>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+          <div class="detail_item">
+            <label class="">销售专员：</label>
+            <span class="text-value">{{if empty($business.sales_suid)}} -- {{else}}{{$business._sales_suid.name}}（ID：{{$business._sales_suid.suid}}）{{/if}}</span>
+          </div>
+
+          <div class="detail_item">
+            <label class="">录入专员：</label>
+            <span class="text-value">{{if empty($business.record_suid)}} -- {{else}}{{$business._record_suid.name}}（ID：{{$business._record_suid.suid}}）{{/if}}</span>
+          </div>
+
+        </div>
+
+        <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+          <div class="detail_item">
+            <label class="">备注信息：</label>
+            <span class="text-value">{{if empty($business.note)}}暂无{{else}}{{$business.note}}{{/if}}</span>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+          <div class="detail_item">
+            <label class="">经营范围：</label>
+            <span class="text-value">{{if empty($business.products)}}暂无{{else}}{{$business.products}}{{/if}}</span>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+          <div class="detail_item">
+            <label class="">企业类别：</label>
+            <span class="text-value">
+            	{{foreach $sys_levels as $l=>$desc}}
+					{{if $l == $business.level_for_sys}}
+						{{$desc}}
+					{{/if}}
+				{{/foreach}}
+            </span>
+          </div>
+        </div>
+        
+        {{if $business.contract_etime !== '0000-00-00'}}
+        <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+          <div class="detail_item">
+            <label class="">合同起止时间：</label>
+            <span class="text-value">{{$business.contract_btime}} - {{$business.contract_etime}}</span>
+          </div>
+        </div>
+        {{/if}}
+        
+        <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+          <div class="detail_item">
+            <label class="">折扣比例：</label>
+            <span class="text-value">{{$business.discount_ratio}}%</span>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+          <div class="detail_item">
+            <label class="">账期：</label>
+            <span class="text-value">{{$business.payment_days}}天</span>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+          <div class="detail_item">
+            <label class="">帐额：</label>
+            <span class="text-value">{{$business.payment_amount}}元</span>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+          <div class="detail_item">
+            <label class="">含税：</label>
+            <span class="text-value">{{if $business.has_duty == '1'}}含税企业{{else}}不含税企业{{/if}}</span>
+          </div>
+        </div>
+    
+        <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+          <div class="detail_item">
+            <label class="" style="font-size:18px; color:red;">绑定的客户：{{$customer_num}}个</label>
+          </div>
+        </div>
+        
+        {{if $customer_num}}
+        <div class="form-group">
+            <label class="col-sm-1 control-label"></label>
+
+            <div class="col-sm-9">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>CID</th>
+                        <th>姓名</th>
+                        <th>电话</th>
+                        <th>订单数</th>
+                        <th>最后下单日期</th>
+                        <th>销售专员</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {{foreach $customer_list as $customer}}
+                        <tr data-cid="{{$customer.cid}}">
+                            <td>{{$customer.cid}}</td>
+                            <td>{{$customer.name}}</td>
+                            <td>{{$customer.all_user_mobiles}}</td>
+                            <td>{{$customer.order_num}}</td>
+                            <td>{{if $customer.order_num}}{{$customer.last_order_date}}{{else}}无{{/if}}</td>
+                            <td>{{if !empty($customer._sales_suid)}}{{$customer._sales_suid.name}}{{else}}无{{/if}}</td>
+                            <td>
+                                <a href="/crm2/customer_detail.php?cid={{$customer.cid}}" target="_blank" style="margin-right:10px;">客户详情</a>
+                            </td>
+                        </tr>
+                        {{/foreach}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{else}}
+        <div style="text-align:center; margin: 20px 0px 50px 0px;">
+            <span style="font-size:25px;">暂无客户！</span>
+        </div>
+        {{/if}}
+
+    </form>
+  
+</div>
+
+<div id="_j_position_customer_tracking" data-cid="{{$business.cid}}"></div>
+
+
+{{include file="crm2/block/coupon_dialog.html"}}

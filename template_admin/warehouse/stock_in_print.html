@@ -1,0 +1,120 @@
+<style>
+  h1 {font-family: STKaiti;}
+  table {font-size:12px; border-spacing: 0;border-collapse: collapse; }
+  table td {padding:2px 5px;}
+  table.border td {border:1px solid #333;}
+</style>
+<style type="text/css" media=print>
+  .noprint{display : none }
+</style>
+{{$products = $stock_in.products}}
+{{$id = $stock_in.info.id}}
+<div>
+  <!--begin-->
+  <div style="text-align: center;">
+  <h1 style="text-align: center;display: inline-block;">
+    {{if $type == 1}}
+    好材建材收货单
+    {{else}}
+    好材WMS上架单
+    {{/if}}
+  </h1>
+  </div>
+  <table width="100%">
+    <tbody>
+      <tr>
+        <td width="33%">收货时间：{{$stock_in.info.ctime}}</td>
+        <td width="33%">单据编号：{{$stock_in.info.id}}</td>
+        <td width="33%">作业仓库：{{$order.info._warehouse_name}}</td>
+      </tr>
+      <tr>
+        <td width="33%">供 应 商：{{$stock_in.customer.name}}</td>
+        <td width="33%">联 系 人：{{if $order.info.contact_name}}{{$order.info.contact_name}}{{/if}}</td>
+        <td width="33%">联系电话：{{if $order.info.contact_phone}}{{$order.info.contact_phone}}{{/if}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="border" width="100%">
+    <thead>
+      <tr>
+        <td>行号</td>
+        <td>sku_id</td>
+        <td>商品全称</td>
+        {{if $type!=1}}
+        <td>条码</td>
+        {{/if}}
+        <td>单位</td>
+        <td>{{if $type == 1}}实收{{else}}上架{{/if}}数量</td>
+        {{if $type!=1}}
+        <td>货架</td>
+        {{/if}}
+        <td width="15%">备注</td>
+      </tr>
+    </thead>
+    <tbody>
+    {{foreach $products as $product}}
+
+     <tr>
+       {{$row_index = $product@index + 1}}
+       <td>{{$product@index + 1}}</td>
+       <td>{{$product.sid}}</td>
+       <td>{{$product.sku.title}}</td>
+       {{if $type!=1}}
+       <td>01-{{$id}}-{{$product.sid}}</td>
+       {{/if}}
+       <td>{{if $product.sku.unit}}{{$product.sku.unit}}{{else}}个{{/if}}</td>
+       <td>{{$product.num}}</td>
+       {{if $type!=1}}
+       <td>{{$product.location}}</td>
+       {{/if}}
+       <td>　</td>
+     </tr>
+    {{$lastCate1 = $product.sku.cate1}}
+    {{/foreach}}
+
+    <tr>
+      <td>备注</td>
+      <td colspan="7">
+          <span style="margin-left:10px; font-size: 14px;">{{$order.customer_note}}</span>
+      </td>
+    </tr>
+
+    </tbody>
+  </table>
+  {{if $type == 1}}
+  <table width="100%">
+    <tbody>
+    <tr>
+      <td>客服热线：400-058-5788</td>
+      <td>采购电话：18515325992</td>
+      <td>打印时间：{{$smarty.now|date_format:'%Y-%m-%d %H:%M:%S'}}</td>
+    </tr>
+    </tbody>
+  </table>
+  <table width="100%">
+    <tbody>
+    <tr>
+      <td colspan="2">请仔细核对商品，签字即视为同意接受</td>
+    </tr>
+    <tr>
+      <td style="font-size:16px;">
+        司机签字：
+      </td>
+      <td style="font-size:16px;">
+        收货签字：
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  {{/if}}
+  <div class="noprint">
+    <div style="margin-top:30px;">
+      <input type="button" onclick="javascript:window.print();" value="打印" style="font-size: 25px;padding: 5px 15px;">
+    </div>
+  </div>
+
+
+</div>
+
+

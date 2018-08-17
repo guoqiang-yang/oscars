@@ -1,0 +1,95 @@
+
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">自营&联营统计</h1>
+
+	<form class="form-inline" role="form" action="">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>经营模式：</label>
+				<select class="form-control" name="type">
+					<option value="0" {{if $type == 0}}selected="selected" {{/if}}>全部</option>
+					<option value="1" {{if $type == 1}}selected="selected" {{/if}}>自营</option>
+					<option value="2" {{if $type == 2}}selected="selected" {{/if}}>联营</option>
+				</select>
+			</div>
+			<div class="form-group" style="margin-right: 20px;">
+				<label>时间：</label>
+				<input type="date" class="form-control" name="start_time" value="{{$start_time}}" style="display: inline-block;width: 170px;"> — <input max="{{$yesterday}}" type="date" class="form-control" name="end_time" value="{{$end_time}}" style="display: inline-block;width: 170px;">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+
+	<hr>
+
+	<table class="table table-bordered">
+		<thead>
+			<tr>
+				<th>仓库</th>
+				<th>平台流水额</th>
+				<th>退款额</th>
+				<th>成本</th>
+				<th>退款成本</th>
+				<th>毛利</th>
+				<th>毛利率</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{foreach $warehouse_list as $item}}
+			{{if $item.order_amount <>0 || $item.refund_amount<>0 || $item.order_cost_amount<>0 || $item.profit_amount<>0 || $item.profit_rate<>0}}
+			<tr>
+				<td>{{$item.name}}</td>
+				<td>{{$item.order_amount/100}}元</td>
+				<td>{{$item.refund_amount/100}}元</td>
+				<td>{{$item.order_cost_amount/100}}元</td>
+				<td>{{$item.refund_cost_amount/100}}元</td>
+				<td>{{$item.profit_amount/100}}元</td>
+				<td>{{$item.profit_rate}}%</td>
+			</tr>
+			{{/if}}
+			{{/foreach}}
+		</tbody>
+	</table>
+
+	<hr>
+
+	<table class="table table-bordered">
+		<thead>
+			<tr>
+				<th>品类</th>
+				<th>平台流水额</th>
+				<th>退款额</th>
+				<th>成本</th>
+				<th>退款成本</th>
+				<th>毛利</th>
+				<th>毛利率</th>
+				<th>SKU数量</th>
+				<th>品牌数量</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{foreach $cate_list as $item}}
+			<tr>
+				<td>{{$item.name}}</td>
+				<td>{{$item.order_amount/100}}元</td>
+				<td>{{$item.refund_amount/100}}元</td>
+				<td>{{$item.order_cost_amount/100}}元</td>
+				<td>{{$item.refund_cost_amount/100}}元</td>
+				<td>{{$item.profit_amount/100}}元</td>
+				<td>{{$item.profit_rate}}%</td>
+				<td>{{$item.sku_num}}</td>
+				<td>{{$item.brand_num}}</td>
+			</tr>
+			{{/foreach}}
+		</tbody>
+	</table>
+
+</div>
+
+<script>
+  $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+</script>

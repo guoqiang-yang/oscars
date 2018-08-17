@@ -1,0 +1,50 @@
+    <input type="hidden" name="id" value="{{$stock_in.info.id}}">
+    <input type="hidden" name="oid" value="{{$order.info.oid}}">
+    <input type="hidden" name="sid" value="{{$order.info.sid}}">
+		<input type="hidden" name="payment_type" value="{{$order.info.payment_type}}">
+    <div class="form-group">
+      <label class="col-sm-2 control-label">供应商ID：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="sid" value="{{if $stock_in.info.sid}}{{$stock_in.info.sid}}{{else}}{{$order.info.sid}}{{/if}}" disabled="true">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">联系人：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="contact_name" value="{{if $order.info.contact_name}}{{$order.info.contact_name}}{{/if}}" disabled="true">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">联系电话：</label>
+
+      <div class="col-sm-8">
+        <input type="text" class="form-control" name="contact_phone" value="{{if $order.info.contact_phone}}{{$order.info.contact_phone}}{{/if}}" style="width:450px;display:inline-block;" disabled="true">
+      </div>
+    </div>
+		<div class="form-group">
+      <label class="col-sm-2 control-label">仓库：</label>
+
+      <div class="col-sm-8">
+        <input type="text" class="form-control" name="wid" value="{{$order.info._warehouse_name}}" data-wid="{{$order.info.wid}}" style="color:red;width:450px;display:inline-block;" disabled="true">
+      </div>
+    </div>
+        {{*
+    <div class="form-group">
+      <label class="col-sm-2 control-label">送货日期：</label>
+
+      <div class="col-sm-2">
+        <input type="text" class="form-control" name="delivery_date" value="{{if $order.info.delivery_date}}{{$order.info.delivery_date}}{{/if}}" disabled="true">
+        <input type="text" class="form-control" name="delivery_date" value="{{if $order.info.delivery_date}}{{$order.info.delivery_date}}{{/if}}" disabled="true">
+      </div>
+    </div>
+        *}}
+    <div class="form-group">
+      <label class="col-sm-2 control-label">备注信息：</label>
+
+      <div class="col-sm-8">
+        <textarea class="form-control" rows="2" name="note">{{if !empty($stock_in)}}{{$stock_in.info.note nofilter}}{{else}}{{$order.info.note nofilter}}{{/if}}</textarea>
+      </div>
+    </div>
+

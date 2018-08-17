@@ -1,0 +1,187 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">活动详情</h1>
+	<table class="table">
+		<thead>
+		<tr>
+			<td style="width: 300px;text-align: right;">活动id：</td>
+            <td>{{$info.id}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">活动名称：</td>
+            <td>{{$info.title}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">活动类型：</td>
+            <td>{{$type_list[$info.activity_type]}}{{if $info.m_type == 1}}-平台折扣{{/if}}{{if $info.m_type == 2}}指定用户折扣{{/if}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">是否共享：</td>
+            <td>
+                {{if empty($info.type_ids)}}
+                不共享
+                {{else}}
+                {{foreach $info.type_ids as $type_id}}
+                {{$type_list[$type_id]}}、
+                {{/foreach}}
+                {{/if}}
+            </td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">起止时间：</td>
+            <td>
+                [始]{{$info.stime}}<br>[终]{{$info.etime}}
+            </td>
+        </tr>
+        {{if $info.m_type != 2}}
+        <tr>
+			<td style="width: 300px;text-align: right;">额度配置：</td>
+            <td>
+                {{if $info.m_type == 1}}
+                {{if $info.conf.amount}}满{{$info.conf.amount}}元打{{/if}}{{$info.conf.rate}}折
+                {{elseif $info.m_type == 2}}
+                {{elseif $info.activity_type==1}}
+                {{foreach $info.conf as $privilege}}
+                满{{$privilege['amount']}}元 立减 {{$privilege['privilege']}}元<br />
+                {{/foreach}}
+                {{elseif $info.activity_type==2}}
+                {{foreach $info.conf as $privilege}}
+                满{{$privilege['amount']}}元 送券 [id]{{$privilege['coupon_id']}} ；数量：{{$privilege['num']}} <br />
+                {{/foreach}}
+                {{elseif $info.activity_type==3}}
+                {{foreach $info.conf as $privilege}}
+                满{{$privilege['amount']}}元 立减 {{$privilege['privilege']}}元；送券[id]{{$privilege['coupon_id']}}，数量：{{$privilege['num']}}<br />
+                {{/foreach}}
+                {{elseif $info.activity_type==5}}
+                {{foreach $info.conf as $privilege}}
+                满{{$privilege['amount']}}元 赠送 [sid]{{$privilege['sid']}}；数量：{{$privilege['num']}}<br />
+                {{/foreach}}
+                {{elseif $info.activity_type==6}}
+                {{foreach $info.conf as $privilege}}
+                满{{$privilege['amount']}}元 特价购 [sid]{{$privilege['sid']}}； 价格：{{$privilege['price']}}；数量：{{$privilege['num']}}<br />
+                {{/foreach}}
+                {{/if}}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">活动城市：</td>
+            <td>
+                {{foreach $info.city_ids as $city_id}}
+                {{$city_list[$city_id]}},
+                {{/foreach}}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">参与用户：</td>
+            <td>
+                {{if $info.user_type == 0}}
+                全部
+                {{else}}
+                {{foreach $info.user_type_extand as $type_name}}
+                {{$user_list[$type_name]}}
+                {{/foreach}}
+                {{/if}}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">用户参与次数：</td>
+            <td>{{$info.user_count}}&emsp;(每个用户可以参与本活动的最大次数，为0表示不限制。)</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">用户白名单：</td>
+            <td style="word-break: break-all;">{{$info.user_whitelist}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">用户黑名单：</td>
+            <td style="word-break: break-all;">{{$info.user_blacklist}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">是否包含砂石/砖/水泥：</td>
+            <td>{{$str_list[$info.goods_is_sand]}}</td>
+        </tr>
+        <tr>
+			<td style="width: 300px;text-align: right;">是否包含美巢产品：</td>
+            <td>{{$str_list[$info.goods_is_meichao]}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">是否包含特价商品：</td>
+            <td>{{$str_list[$info.goods_is_special]}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">是否包含热卖商品：</td>
+            <td>{{$str_list[$info.goods_is_hot]}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">商品分类：</td>
+            <td>
+                {{if $info.goods_type == 0}}
+                不限
+                {{elseif $info.goods_type == 1}}
+                部分（
+                {{foreach $info.goods_cate_ids as $cate_id}}
+                {{$cate_list[$cate_id]['name']}}、
+                {{/foreach}}
+                ）
+                {{else}}
+                全不
+                {{/if}}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">商品品牌：</td>
+            <td>
+                {{if empty($info.goods_brand_ids)}}
+                不限
+                {{else}}
+                    {{foreach $info.goods_brand_ids as $bid}}
+                    {{$brand_list[$bid]['name']}}、
+                    {{/foreach}}
+                {{/if}}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">商品白名单：</td>
+            <td style="word-break: break-all;">{{$info.goods_whitelist}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">商品黑名单：</td>
+            <td style="word-break: break-all;">{{$info.goods_blacklist}}</td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">下单方式：</td>
+            <td>
+                {{if $info.order_mode == 1}}
+                仅自助下单
+                {{else}}
+                不限
+                {{/if}}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right;">付款方式：</td>
+            <td>
+                {{if $info.pay_mode == 1}}
+                仅在线
+                {{else}}
+                不限
+                {{/if}}
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 300px; text-align: right;">配送时间：</td>
+            <td>
+                {{if $info.delivery_time_type == 0}}
+                无要求
+                {{else}}
+                有要求，下单后第{{$info.delivery_after_day}}天起，{{$info.delivery_stime}}〜{{$info.delivery_etime}}送货
+                {{/if}}
+            </td>
+        </tr>
+        {{/if}}
+        <tr>
+			<td style="width: 300px;text-align: right;">活动说明：</td>
+            <td>{{$info.coupon_content}}</td>
+		</tr>
+		</thead>
+	</table>
+</div>
+<div id="show_hccommon_admin_log" data-objid="{{$info.id}}" data-objtype="13"></div>

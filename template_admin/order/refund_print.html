@@ -1,0 +1,165 @@
+<style>
+  h1 {font-family: STKaiti;}
+  table {font-size:12px; border-spacing: 0;border-collapse: collapse; }
+  table td {padding:5px 10px;}
+  table.border td {border:1px solid #333;}
+</style>
+<style type="text/css" media=print>
+  .noprint{display : none }
+</style>
+{{*<script type="text/javascript" src="/js/apps/print.js"></script>*}}
+
+<div class="">
+  <!--begin-->
+
+  <h1 style="text-align: center;">北京好材装修建材退货单</h1>
+
+  <table width="100%">
+    <tbody>
+      <tr>
+        <td width="33%">送货日期：{{$refund.order.delivery_date}}</td>
+        <td width="33%">单据编号：HC-{{$smarty.now|date_format:'%Y-%m-%d'}}-{{$refund.info.oid}}-{{$refund.info.rid}}</td>
+        <td width="33%">退货仓库：{{$refund.info._warehouse_name}}</td>
+      </tr>
+      <tr>
+        <td width="33%">客户单位：{{$refund.info._customer.name}}</td>
+        <td width="33%">联 系 人：{{$refund.order.contact_name}}</td>
+        <td width="33%">客户电话：{{$refund.order.contact_phone}}{{if $refund.order.contact_phone2}} , {{$refund.order.contact_phone2}}{{/if}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="border" width="100%">
+    <thead>
+      <tr>
+        <td>行号</td>
+        <td>商品全称</td>
+        <td>单位</td>
+        <td>数量</td>
+        <td>单价</td>
+        <td>金额</td>
+        <td width="15%">备注</td>
+      </tr>
+    </thead>
+    <tbody>
+    {{foreach $refund.products as $product}}
+
+    {{if !empty($lastCate1) && $lastCate1 != $product.sku.cate1 }}
+    <tr>
+      <td colspan="7"></td>
+    </tr>
+    {{/if}}
+
+     <tr>
+       <td>{{$product@index + 1}}</td>
+       <td>{{$product.sku.title}}</td>
+       <td>{{if $product.sku.unit}}{{$product.sku.unit}}{{else}}个{{/if}}</td>
+       <td>{{$product.num}}</td>
+       <td>￥{{$product.ori_price / 100}}</td>
+       <td>￥-{{$product.ori_price * $product.num / 100}}</td>
+       <td>{{$product.note}}</td>
+     </tr>
+    {{$lastCate1 = $product.sku.cate1}}
+    {{/foreach}}
+
+    <tr>
+      <td colspan="7"></td>
+    </tr>
+    {{if $price != $refund.info.price}}
+    <tr>
+      <td>价格调整</td>
+      <td colspan="4"></td>
+      <td>￥{{($price-$refund.info.price)/100}}</td>
+      <td></td>
+    </tr>
+    {{/if}}
+    {{if $product_privilege > 0}}
+    <tr>
+        <td>工装优惠退款</td>
+        <td colspan="4"></td>
+        <td>￥{{$product_privilege/100}}</td>
+        <td></td>
+    </tr>
+    {{/if}}
+    <tr>
+      <td>应退款合计</td>
+      <td colspan="4">金额大写　　{{$chineseTotal}}</td>
+      <td>￥-{{($price)/100}}</td>
+      <td></td>
+    </tr>
+
+    {{if $refund.info.note}}
+    <tr>
+      <td>备注</td>
+      <td colspan="6">{{$refund.info.note}}</td>
+    </tr>
+    {{/if}}
+
+    </tbody>
+  </table>
+
+  <table width="100%">
+    <tbody>
+    <tr>
+      <td>制单人：{{$refund.info.suid_info.name}}</td>
+      {{if !empty($refund.info.received_suid_info)}}
+      <td>入库人：{{$refund.info.received_suid_info.name}}</td>
+      {{/if}}
+      <td>单据日期：{{$smarty.now|date_format:'%Y-%m-%d %H:%M:%S'}}</td>
+    </tr>
+    </tbody>
+  </table>
+  {{*
+  <table width="100%">
+    <tbody>
+    <tr>
+      <td>注：收货后如发现有破损、差错，请务必在三日内通知，以保证退换货顺利进行</td>
+      <td>白联记账　粉联客户　蓝联库房　黄联存根</td>
+    </tr>
+    </tbody>
+  </table>
+  <table width="100%">
+    <tbody>
+    <tr>
+      <td style="font-size:16px;">库房签字：</td>
+      <td style="font-size:16px;">司机签字：</td>
+      <td style="font-size:16px;">客户签字：</td>
+      <td style="font-size:16px;">财务签字：</td>
+    </tr>
+    </tbody>
+  </table>
+  *}}
+  <br>
+  
+  <table width="100%">
+    <tbody>
+    <tr>
+      <td style="font-size:16px;">司机签字：</td>
+      <td style="font-size:16px;">外场签字：</td>
+    </tr>
+    </tbody>
+  </table>
+  <br>
+  <br>
+  <table width="100%">
+    <tbody>
+    <tr>
+      <td style="font-size:16px;">仓库签字（A区）：</td>
+      <td style="font-size:16px;">仓库签字（B区）：</td>
+      <td style="font-size:16px;">仓库签字（C区）：</td>
+      <td style="font-size:16px;">仓库签字（D区）：</td>
+    </tr>
+    </tbody>
+  </table>
+  <!--end-->
+  <div class="noprint">
+    <div style="margin-top:30px;">
+      {{*<input type="button" value="打印" onclick="javascript:printOrder();" >*}}
+      <input type="button" value="打印" onclick="javascript:window.print();" style="font-size: 25px;padding: 5px 15px;">
+    </div>
+  </div>
+
+
+</div>
+
+

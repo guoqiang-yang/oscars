@@ -1,0 +1,1662 @@
+<style>
+	.form-group {
+		margin-bottom: 6px;
+	}
+
+	.order-bottom {
+		border-bottom: 1px dashed #eee;
+		margin: 20px;
+	}
+
+	.coopworker-list {
+		padding: 6px 12px;
+	}
+    .btn-selected {
+        color: #fff;
+        background-color: #E22121;
+        border-color: #2e6da4;
+    }
+    #button_area a {
+        float: left;
+        margin-right: 20px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<input type="hidden" id="oid" value="{{$order.oid}}" />
+<input type="hidden" id="today" value="{{$today}}" />
+<input type="hidden" id="delivery_date" value="{{$delivery_date}}" />
+<input type="hidden" id="carry_fee" value="{{$carry_fee}}" />
+<input type="hidden" id="freight" value="{{$freight}}" />
+<input type="hidden" id="cur_carry_fee" value="{{$cur_carry_fee}}" />
+<input type="hidden" id="cur_freight" value="{{$cur_freight}}" />
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		订单详情-单号:{{$order.oid}}
+		{{if $order.is_virtual}}<span style="color:red;">[虚拟订单]</span>{{/if}}
+		{{if $is_first_order}}
+		<span style="color: red; margin-left: 50px;">[首单]</span>
+		{{/if}}
+        {{if $order.is_guaranteed==1}}
+        <span style="color: red; margin-left: 50px;">[已担保]</span>
+        {{/if}}
+		{{if $has_96_privilege}}
+		<span style="color: red; margin-left: 50px;">24小时享优惠！</span>
+		{{/if}}
+        {{if $order.is_community_warehouse}}
+        <span style="color: red; margin-left: 50px;">社区店</span>
+        {{/if}}
+        {{if $order.is_franchiess}}
+        <span style="color: red; margin-left: 50px;">加盟商订单</span>
+        {{/if}}
+        <img src="{{$pay_img_src}}" style="width: 200px;height: 200px;position: absolute;right: 20px;top: 20px;z-index: 99;" />
+	</h1>
+
+	<form class="form-horizontal" role="form" data-oid="{{$order.oid}}">
+		{{if $customer.level_for_sys==1 && $order.paid==0}}
+		<h3 style="color:red;text-align:center;">该客户是黑名单客户，请先收款再配送！</h3>
+		{{/if}}
+
+		{{*基本信息*}}
+		<div class="order-bottom" style="background: #F2F2F2;">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">客户信息：</label>
+
+				<div class="col-sm-10">
+					<span class="text-value">
+					【收货人】{{$order.contact_name}} {{if !$_isSales || ($_isSales && $_isCommunityCS) || ($_isSales && $_isCS) || $order.saler_suid==$_uid||$_uid<=1004}} {{$order.contact_phone}}{{/if}}
+					(
+						客户id:
+						{{if !empty($_permissions['hc_order_check_customer'])}}
+                        <a href="/order/customer_list_cs.php?mobile={{$user.mobile}}">
+                        {{/if}}
+						{{$customer.cid}}
+                        {{if !empty($_permissions['hc_order_check_customer'])}}</a>{{/if}})
+                        {{if $is_certificate==3}}
+                        <b style="color:#11E8C8;">【已认证】</b>
+                        {{else}}
+                        <b style="color:#F10408;">【未认证】需先付款后确认订单</b>
+                        {{/if}}
+					</span>
+                    {{if $order.source == 1001}}
+                    <span style="color:red;font-size:18px;font-weight:bold;">新浪抢工长订单</span>
+                    {{else if $order.source == 10007}}
+                    <span style="color:red;font-size:18px;font-weight:bold;">京东订单</span>
+                    {{/if}}
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label"></label>
+				<div class="col-sm-10">
+					<span class="text-value">【收货地址】{{$order._district}}  {{$order.address}}</span>
+				</div>
+			</div>
+			{{if $customer.account_amount > 0}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label"></label>
+				<div class="col-sm-10" style=" color: red;">
+					<span class="text-value">【用户余额】￥{{$customer.account_amount / 100}}元</span>
+				</div>
+			</div>
+			{{/if}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label"></label>
+				<div class="col-sm-10">
+				<span class="text-value">
+					【销售人员】{{if !empty($order.saler_suid)}}{{$order._saler.name}}（id: {{$order._saler.suid}}，电话:{{$order._saler.mobile}}）{{else}} 无 {{/if}}
+				</span>
+                    {{if !empty($_permissions['/order/ajax/chg_saler'])}}
+					<a class="btn btn-default" href="javascript:;" style="margin-left:50px;" data-toggle="modal" data-target="#editSaler">修改</a>
+                    {{/if}}
+                    {{if !empty($_permissions['/order/ajax/guaranteed_order'])}}
+                    <a class="btn btn-primary" href="javascript:;" style="margin-left:50px;" data-toggle="modal" data-target="#guaranteedOrder">
+                        {{if $order.is_guaranteed!=1}}担保{{else}}取消担保{{/if}}
+                    </a>
+                    {{/if}}
+				</div>
+			</div>
+			{{if $order.has_duty == 1}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label"></label>
+				<div class="col-sm-10" style=" color: #69EE11;">
+					<span class="text-value">【含税账户】</span>
+				</div>
+			</div>
+			{{/if}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label">配送信息：</label>
+				<div class="col-sm-10">
+					<span class="text-value col-sm-5 show_delivery_times">【日期】{{$order._delivery_date}}</span>
+					<span class="text-value">【仓库】{{$order._warehouse_name}}</span>
+					<input type="hidden" name="now_wid" value="{{$order.wid}}">
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label"></label>
+				<div class="col-sm-10">
+					<div class="text-value col-sm-5">
+						【配送方式】
+						<span style="color:red;">{{$delivery_types[$order.delivery_type]}}</span>
+					</div>
+					<div class="text-value">
+						【是否搬运】
+						<span style="color:red;">{{if $order.service == 0}}否{{else if $order.service == 1}}电梯{{else}}楼梯（{{$order.floor_num}}层）{{/if}}</span>
+						{{if $order.step >= 2  && $order.city_id !=500 && !empty($_permissions['/order/ajax/save_service'])}}
+						<a class="btn btn-default" href="javascript:;" style="margin-left:50px;" data-toggle="modal" data-target="#editService">修改</a>
+						{{/if}}
+					</div>
+				</div>
+			</div>
+			{{if $order.customer_note}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label">客户备注：</label>
+				<div class="col-sm-10">
+					<span class="text-value" style="color:red;">
+						{{$order.customer_note nofilter}}&nbsp;&nbsp;
+					</span>
+				</div>
+			</div>
+			{{/if}}
+		</div>
+		{{*调度模块*}}
+		<div class="order-bottom" id="_j_coopworker_area">
+			{{if $order.delivery_type != 2 && $order.community_id > 0}}
+			<div class="form-group">
+				<label style="color: red;" class="col-sm-2 control-label">距离及建议运费：</label>
+				<div id="distance_fee_content" class="col-sm-10">
+					数据读取中……
+				</div>
+			</div>
+			{{/if}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label">司机信息：</label>
+				{{if $order.delivery_type != 2 && $order.city_id !=500 && !empty($_permissions['hc_order_add_driver'])}}
+					<a href="javascript:void(0);" class="btn btn-primary select_driver_carrier" data-role="driver">[+] 司机</a>
+				{{/if}}
+				<div class="col-sm-8">
+                {{if !empty($order.driver_list)}}
+                    {{foreach $order.driver_list as $_driver}}
+                    <div class="col-sm-12 coopworker_info" style="margin:2px;" data-id="{{$_driver.id}}" data-usertype="{{$_driver.user_type}}" data-type="1" data-cuid="{{$_driver.cuid}}" data-price="{{$_driver.price}}" data-decline-price="{{$decline_fee[$_driver.car_model]['decline_fee']}}" data-car-model="{{$_driver.car_model}}" data-car-model-name="{{$car_models[$_driver.car_model]}}" data-base-price="{{$base_prices[$_driver.car_model]}}" data-times="{{$_driver.times}}" data-money-note="{{$order_driver_list[$_driver.cuid]['money_note']}}" data-other-price="{{$order_driver_list[$_driver.cuid]['other_price_json']}}">
+                        <span class="col-sm-3 name">{{$_driver.name}}</span>
+                        <span class="col-sm-2 phone">{{$_driver.phone}}</span>
+                        <span class="col-sm-2 price" style="color:red;" data-price="{{$_driver.price}}">￥{{$_driver.price}}元</span>
+                        {{if $order.city_id != 1310 && $order.city_id != 120}}
+                        <div class="btn-group" style="margin-right:5px;">
+                            <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                费用明细<span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                {{if $base_prices[$_driver.car_model]}}
+                                <li><a href="#">
+                                        基础运费：<span style="color: #ff0000;">{{$base_prices[$_driver.car_model]/100}}</span>元
+                                        <span style="color:grey;">（{{if isset($order_driver_list[$_driver['cuid']])}}{{$order_driver_list[$_driver['cuid']]['times']}}{{else}}1{{/if}}趟）</span>
+                                    </a>
+                                </li>
+                                {{/if}}
+                                {{if !empty($order_driver_list[$_driver['cuid']]['other_price'])}}
+                                    {{foreach $order_driver_list[$_driver['cuid']]['other_price'] as $type => $other_price}}
+                                    <li><a href="#">{{$driver_fee_types[$type]}}:<span style="color: #ff0000;;">{{$other_price/100}}</span>元</a></li>
+                                    {{/foreach}}
+                                {{/if}}
+                            </ul>
+                        </div>
+                        {{/if}}
+                        {{if $_driver.paid==0}}
+                        <span>
+                            {{if !empty($_permissions['hc_order_edit_coopworker'])}}
+                            {{*<a href="javascript:;" class="_j_edit_coopworker" data-city-id="{{$order.city_id}}">编辑 </a>*}}
+                            <a href="javascript:;" class="edit_coopworker_price">编辑 </a>
+                            {{/if}}
+                            {{if empty($_driver.statement_id) && !empty($_permissions['hc_order_del_driver'])}}
+                            |<a href="javascript:;" class="_j_del_coopworker"> 删除 </a>
+                            {{/if}}
+                            {{if $order.step==7 && empty($_driver.statement_id) && !empty($_permissions['hc_order_paid_coopworker'])}}
+                            <a href="javascript:void(0);" class="btn btn-primary show_paid_for_coopworker" data-utype="{{$_driver.user_type}}" style="margin-left:14px;padding:1px 6px;">支付运费</a>
+                            {{/if}}
+                        </span>
+                        {{else}}
+                            <span>【已支付】| </span>
+                        {{/if}}
+                    </div>
+                    {{/foreach}}
+                {{else}}
+                    <span class="text-value no_driver">无司机信息</span>
+                {{/if}}
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">搬运工信息：</label>
+				{{if $order.delivery_type != 2 && !empty($_permissions['hc_order_add_del_carrier'])}}
+					<a href="javascript:void(0);" class="btn btn-primary select_driver_carrier" data-role="carrier">[+] 搬运工</a>
+				{{/if}}
+				<div class="carrier-list col-sm-8">
+                {{if !empty($order.carrier_list)}}
+                    {{foreach $order.carrier_list as $_carrier}}
+                    <div class="col-sm-12 coopworker_info" style="margin:2px;" data-max-carrier-fee="{{$max_carrier_fee}}" data-id="{{$_carrier.id}}" data-usertype="{{$_carrier.user_type}}" data-type="2" data-cuid="{{$_carrier.cuid}}" data-price="{{$_carrier.price}}" data-base-price="{{$order_carrier_list[$_carrier.cuid]['base_price']}}" data-money-note="{{$order_carrier_list[$_carrier.cuid]['money_note']}}" data-other-price="{{$order_carrier_list[$_carrier.cuid]['other_price_json']}}" data-car-model-name="{{$car_models[$_carrier.car_model]}}" data-referral-price="{{$lf_carrier_car_model_fees[$_carrier.car_model]}}">
+                        <span class="col-sm-3 name">{{$_carrier.name}}{{if $_carrier.user_type==1}}【司机】{{/if}}</span> 
+                        <span class="col-sm-2 phone">{{$_carrier.phone}}</span> 
+                        <span class="col-sm-2 price" style="color:red;" data-price="{{$_carrier.price}}">￥{{$_carrier.price}}元</span>
+                        {{if $order.city_id != 1310}}
+                        <div class="btn-group" style="margin-right:5px;">
+                            <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                费用明细<span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">
+                                    应得运费：<span style="color: #ff0000;">{{$order_carrier_list[$_carrier['cuid']]['base_price']/100}}</span>元
+                                </a>
+                                </li>
+                                {{if !empty($order_carrier_list[$_carrier['cuid']]['other_price'])}}
+                                {{foreach $order_carrier_list[$_carrier['cuid']]['other_price'] as $type => $other_price}}
+                                <li><a href="#">{{$driver_fee_types[$type]}}:<span style="color: #ff0000;;">{{$other_price/100}}</span>元</a></li>
+                                {{/foreach}}
+                                {{/if}}
+                            </ul>
+                        </div>
+                        {{/if}}
+                        {{if $_carrier.paid==0}}
+                        <span>
+                            {{if !empty($_permissions['hc_order_edit_coopworker'])}}
+                            {{*<a href="javascript:;" class="_j_edit_coopworker" data-city-id="{{$order.city_id}}">编辑 </a>*}}
+                            <a href="javascript:;" class="edit_coopworker_price">编辑 </a>
+                            {{/if}}
+                            {{if empty($_carrier.statement_id) && !empty($_permissions['hc_order_add_del_carrier'])}}
+                            |<a href="javascript:;" class="_j_del_coopworker"> 删除 </a>
+                            {{/if}}
+                            {{if $order.step>=5 && empty($_driver.statement_id) && !empty($_permissions['hc_order_paid_coopworker'])}}
+                            <a href="javascript:void(0);" class="btn btn-primary show_paid_for_coopworker" data-utype="{{$_carrier.user_type}}" style="margin-left:14px;padding:1px 6px;">支付搬运费</a>
+                            {{/if}}
+                        </span>
+                        {{else}}
+                            <span>【已支付】| </span>
+                        {{/if}}
+                    </div>
+                    {{/foreach}}
+                {{else}}
+                    <span class="text-value no_driver">无搬运工信息</span>
+                {{/if}}
+				</div>
+			</div>
+
+            {{*if !empty($picking_groups)}}
+            <div class="form-group">
+				<label class="col-sm-2 control-label">拣货小组：</label>
+                
+                {{if $order.step>2}}
+                <div class="carrier-list col-sm-8">
+                    {{foreach $picking_groups as $group=>$ginfo}}
+                    <a class="btn change_picking_group {{if $group==$order._picking_group.group}}btn-selected{{else}}btn-default{{/if}}" data-group="{{$group}}" style="margin-right:30px;">
+                        {{$group}}组:{{$ginfo.sname}}
+                    </a>
+                    {{/foreach}}
+                    
+                    {{if !empty($order.picking_group)}}
+                    <span style="color:red;">(选定{{$order._picking_group.group}}组)</span>
+                    {{else}}
+                    <span>(未选配送组)</span>
+                    {{/if}}
+                    
+                </div>
+                {{else}}
+                <div class="carrier-list col-sm-8"><span class="text-value">等待客服确认订单！！</span></div>
+                {{/if}}
+            </div>
+            {{/if*}}
+            {{if !empty($driver_infos)}}
+            <div class="form-group">
+                <label class="col-sm-2 control-label">配送信息：</label>
+                
+                <div class="col-sm-8">
+                    {{foreach $driver_infos as $done}}
+                    <div class="text-value">
+                        <span style="margin-right:5px;">【司】{{$done.info.name}}</span>
+                        <span style="margin-right:5px;">【领】{{if $done.confirm_time!='0000-00-00 00:00:00'}}{{$done.confirm_time}}{{else}}无{{/if}}</span>
+                        <span style="margin-right:5px;">【发】{{if $done.delivery_time!='0000-00-00 00:00:00'}}{{$done.delivery_time}}{{else}}无{{/if}}</span>
+                        <span style="margin-right:5px;">【达】{{if $done.arrival_time!='0000-00-00 00:00:00'}}{{$done.arrival_time}}{{else}}无{{/if}}</span>
+                    </div>
+                    {{/foreach}}
+                </div>
+            </div>
+            {{/if}}
+            
+            <div class="form-group">
+                <label class="col-sm-2 control-label" style="color:red;font-weight:bold;">线路信息：</label>
+                
+                <div class="col-sm-8">
+                {{if !empty($line_info)}}
+                    <a class="text-value" id="line_id" href="/logistics/order_line_list.php?id={{$order.line_id}}" data-line-id="{{$order.line_id}}" data-line-info="{{json_encode($line_info.merge_order)}}" data-source-oid="{{$order.source_oid}}" target="_blank">线路id：{{$order.line_id}}</a>
+                    {{if !empty($line_info.merge_order)}}
+                    <span class="text-value" style="color:red;">【拼车订单】</span>
+                    {{foreach $line_info.merge_order as $merge_oid}}
+                    <a class="text-value" href="/order/order_detail.php?oid={{$merge_oid}}" target="_blank" style="margin-right:5px;">拼单ID：{{$merge_oid}} {{if in_array($merge_oid, $order.add_order)}}<span style="color: #ff0000;"> (补单) 主/补同线，补单无运费！</span>{{/if}}</a>
+                    {{/foreach}}
+                    {{else}}
+                    <span class="text-value" style="color:red;">【未拼车订单】</span>
+                    {{/if}}
+                    {{else}}
+                    <span class="text-value">暂无排线</span>
+                {{/if}}
+                </div>
+            </div>
+            
+			{{*老数据的显示*}}
+			{{if empty($order.driver_list) && empty($order.carrier_list) && $order.delivery_type!=2 && (!empty($order.driver_name) ||!empty($order.driver_money) || !empty($order.carrier_name) ||!empty($order.carrier_money))}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label">司机搬运工(旧版数据)：</label>
+				<div class="carrier-list">
+					<div class="col-sm-10">
+						{{if !empty($order.driver_name) ||!empty($order.driver_money)}}
+							<span class="text-value">司机：</span>
+							<span class="text-value">{{$order.driver_name}}</span>
+							<span class="text-value">{{$order.driver_phone}}</span>
+							<span class="text-value">￥{{$order.driver_money/100}}</span>
+							{{if $order.step==7 && $order.driver_money>0}}
+								{{if ($_isFinance || $_isAdmin) && $order.driver_money_paid==0}}
+								{{else if $order.driver_money_paid==0}}
+									<span>【未支付】</span>
+								{{else}}
+									<span>【已支付】</span>
+								{{/if}}
+							{{else if $order.step==7}}
+								<span>【无费用】</span>
+							{{/if}}
+							<br>
+						{{/if}}
+						{{if !empty($order.carrier_name) ||!empty($order.carrier_money)}}
+							<span class="text-value">搬运工：</span>
+							<span class="text-value">{{$order.carrier_name}}</span>
+							<span class="text-value">{{$order.carrier_phone}}</span>
+							<span class="text-value">￥{{$order.carrier_money/100}}</span>
+							{{if $order.step>=5 && $order.carrier_money>0}}
+								{{if ($_isFinance || $_isAdmin) && $order.carrier_money_paid==0}}
+								{{else if $order.carrier_money_paid==0}}
+									<span>【未支付】</span>
+								{{else}}
+									<span>【已支付】</span>
+								{{/if}}
+							{{else if $order.step>=5}}
+								<span class="text-value">【无费用】</span>
+							{{/if}}
+						{{/if}}
+					</div>
+				</div>
+			</div>
+			{{/if}}
+		</div>
+
+		{{*财务模块*}}
+		<div class="order-bottom" style="background: #F2F2F2;">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">[客户] 订单金额：</label>
+
+				<div class="col-sm-10">
+					<span class="text-value" style="margin-left:10px;">+ {{$order.price/100}}元（货款）</span>
+					<span class="text-value" style="margin-left:10px;">+ {{$order.freight/100}}元（运费）</span>
+					<span class="text-value" style="margin-left:10px;">+ {{$order.customer_carriage/100}}元（搬运费）</span>
+					<span class="text-value" style="margin-left:10px;">- {{$order.privilege/100}}元（优惠）</span>
+					<span class="text-value" style="margin-left:10px;">- {{$order.refund/100}}元（退款）</span>
+				</div>
+			</div>
+            
+			{{if !empty($_permissions['hc_order_check_cost'])}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label">商品成本价：</label>
+
+				<div class="col-sm-10">
+					<span class="text-value" style="margin-left:10px;">{{$originPriceTotal/100}} 元</span>
+				</div>
+			</div>
+			{{/if}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label">应收货款：</label>
+				<div class="col-sm-10">
+					<div class="text-value col-sm-5">
+						【应收】
+						<span style="color:red;">{{$order.total_order_price/100}} 元</span>
+					</div>
+					<span class="text-value col-sm-5"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">实收货款：</label>
+				<div class="col-sm-10">
+					<div class="text-value col-sm-5">
+						【实收】
+						<span style="color:red;">{{$order.real_amount/100}} 元</span>
+						<span style="margin-left:30px;">{{$payment_types[$order.payment_type]}}</span>
+					</div>
+				</div>
+			</div>
+            {{if $order.step >= 2 && !empty($_permissions['hc_check_profit'])}}
+            <div class="form-group">
+                <label class="col-sm-2 control-label">毛利毛收入：</label>
+                <div class="col-sm-10">
+                    <div class="text-value col-sm-5">
+                        【毛收入】
+                        <span style="color:green;">{{$profit.gross_income}} 元</span>
+                        【毛利】
+                        <span style="color:green;">{{$profit.gross_rate}}%</span>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+			{{if $order.step >= 5}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label">出库前费用及优惠：</label>
+				<div class="col-sm-10">
+					<div class="text-value col-sm-5">
+						运费：<span style="color:green;margin-right: 20px;">{{$order._op_note.ffee/100}}元</span>
+						搬运费：<span style="color:green;margin-right: 20px;">{{$order._op_note.cfee/100}}元</span>
+						总优惠：<span style="color:green;margin-right: 20px;">{{$order._op_note.prfee/100}}元</span>
+					</div>
+				</div>
+			</div>
+			{{/if}}
+		</div>
+
+		<div class="order-bottom">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">总优惠：</label>
+				<div class="col-sm-10">
+					<div class="text-value col-sm-2">{{$order.privilege / 100}}元</div>
+					<span class="text-value col-sm-8">{{if $order.privilege_note}}【优惠原因】{{$order.privilege_note}}{{/if}}</span>
+				</div>
+			</div>
+			{{if !empty($privilege)}}
+				{{foreach $privilege as $item}}
+				<div class="form-group">
+					<label class="col-sm-2 control-label">{{$item._type}}：</label>
+					<div class="col-sm-10">
+						<div class="text-value col-sm-2">{{$item.amount / 100}}元</div>
+						<span class="text-value col-sm-8">{{if $item.privilege_url}}<a href="{{$item.privilege_url}}" target="_blank">{{$item.info}}</a>{{else}}{{$item.info}}{{/if}}</span>
+					</div>
+				</div>
+				{{/foreach}}
+			{{/if}}
+            {{if !empty($order.sale_privilege)}}
+            <div class="form-group">
+                <label class="col-sm-2 control-label">销售优惠：</label>
+                <div class="col-sm-10">
+                    <div class="text-value col-sm-2">{{$order.sale_privilege / 100}}元</div>
+                    <span class="text-value col-sm-8">&emsp;<span style="color: red;">如有增减商品，请联系相关销售调整优惠</span></span>
+                </div>
+            </div>
+            {{/if}}
+		</div>
+
+		<div class="order-bottom" style="background: #F2F2F2;">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">订单状态：</label>
+				<div class="col-sm-8">
+                    {{if $order.status == 0}}
+					<span class="text-value" style="color:red;font-size: 16px;">{{$order_steps[$order.step]}}</span>
+					{{if $order.paid==0}}
+						<span style="margin-left:10px;color:red;">【未收款】</span>
+					{{elseif $order.paid==1}}
+						<span style="margin-left:10px;color:green;">【完成收款】</span>
+					{{elseif $order.paid==2}}
+						<span style="margin-left:10px;color:red;">【部分收款】</span>
+					{{/if}}
+                    {{else if $order.status == 3}}
+                    <span class="text-value" style="color:red;font-size: 16px;">【已取消】{{if !empty($reason)}}（{{$reason}}）{{/if}}</span>
+                    {{else if $order.status == 1}}
+                    <span class="text-value" style="color:red;font-size: 16px;">【已删除】</span>
+                    {{/if}}
+					{{if $order.aftersale_type == 1}}
+					<span {{if $order.has_print<=0 }}class="redline"{{/if}}>【<a href="/order/edit_exchanged.php?eid={{$order.aftersale_id}}">换货单{{$order.aftersale_id}} 的补单</a>】{{if $order._exchanged_info.info.need_storage == 1}}需要减库存({{$warehouse_list[$order._exchanged_info.info.wid]}}){{else}}不需要减库存{{/if}}</span>
+					{{elseif $order.aftersale_type == 2}}
+					<span {{if $order.has_print<=0 }}class="redline"{{/if}}>【<a href="/order/edit_refund_new.php?rid={{$order.aftersale_id}}">退货单{{$order.aftersale_id}} 的补单</a>】</span>
+					{{elseif $order.aftersale_type == 3}}
+					<span {{if $order.has_print<=0 }}class="redline"{{/if}}>【<a href="/order/edit_traps.php?tid={{$order.aftersale_id}}">补漏单{{$order.aftersale_id}} 的补单</a>】{{if $order._traps_info.info.need_storage == 1}}需要减库存({{$warehouse_list[$order._traps_info.info.wid]}}){{else}}不需要减库存{{/if}}</span>
+					{{/if}}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-2 control-label">内部备注：</label>
+				<div class="col-sm-8">
+					<span class="text-value">
+						{{if $order.note}}
+							{{if $order.aftersale_type==3}}
+						<a href="/order/edit_traps.php?tid={{$order.aftersale_id}}" target='_blank'>补漏单{{$order.aftersale_id}}</a>的补单,
+							{{/if}}
+							{{$order.note nofilter}}&nbsp;&nbsp;
+						{{/if}}
+                        {{if !empty($_permissions['hc_edit_order_note'])}}
+						<a href="javascript:void(0);" data-toggle="modal" data-target="#editNoteModal">编辑</a>
+                        {{/if}}
+					</span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-2 control-label" style="color:red;">是否打印价格：</label>
+				<div class="col-sm-8">
+					<span class="text-value">
+						{{if $order._op_note.nopprice == 1}}否{{else}}是{{/if}}
+					</span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-2 control-label">打印备注：</label>
+				<div class="col-sm-8">
+					<span class="text-value">
+						{{if $order.customer_note}}
+							{{$order.customer_note nofilter}}&nbsp;&nbsp;
+						{{/if}}
+                        {{if !empty($_permissions['hc_edit_order_note'])}}
+						<a href="javascript:void(0);" data-toggle="modal" data-target="#editCustomerNoteModal">编辑</a>
+                        {{/if}}
+					</span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-2 control-label">下单时间：</label>
+				<div class="col-sm-3">
+					<span class="text-value">
+						{{if $order.ctime > 0}}
+							{{$order.ctime}}
+						{{else}}
+							--
+						{{/if}}
+					</span>
+				</div>
+				<label class="col-sm-2 control-label">确认时间：</label>
+				<div class="col-sm-3">
+					<span class="text-value">
+						{{if $order.sure_time > 0}}
+							{{$order.sure_time}}
+						{{else}}
+							--
+						{{/if}}
+					</span>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">出库时间：</label>
+				<div class="col-sm-3">
+					<span class="text-value">
+						{{if $order.ship_time > 0}}
+							{{$order.ship_time}}
+						{{else}}
+							--
+						{{/if}}
+					</span>
+				</div>
+				<label class="col-sm-2 control-label">回单时间：</label>
+				<div class="col-sm-3">
+					<span class="text-value">
+						{{if $order.back_time > 0}}
+							{{$order.back_time}}
+						{{else}}
+							--
+						{{/if}}
+					</span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-2 control-label">支付时间：</label>
+				<div class="col-sm-8">
+					<span class="text-value">
+						{{if $order.pay_time > 0}}
+							{{$order.pay_time}}
+						{{else}}
+							--
+						{{/if}}
+					</span>
+				</div>
+			</div>
+
+            {{if !empty($comment)}}
+            <div class="form-group">
+                <label class="col-sm-2 control-label">客户评价：</label>
+                <div class="col-sm-8">
+                    {{if $comment.comment_all != 0 || $comment.comment_delivery != 0 || $comment.comment_carry != 0}}
+                    <span class="text-value" style="color:red;font-size: 16px;">整体评价：{{$comment.comment_all}}星</span>
+                    <span class="text-value" style="color:red;font-size: 16px;">配送评价：{{$comment.comment_delivery}}星</span>
+                    <span class="text-value" style="color:red;font-size: 16px;">搬运评价：{{$comment.comment_carry}}星</span>
+                    {{else}}
+                        <span class="text-value" style="color:red;font-size: 16px;">{{$comment.level}}</span>
+                        {{if !empty($comment.tags)}}
+                        {{foreach $comment.tags as $tag}}
+                        <span style="margin-left:10px;">{{$tag}}</span>
+                        {{/foreach}}
+                        {{/if}}
+                    {{/if}}
+                    {{if !empty($comment.note)}}
+                    <br />{{$comment.note}}
+                    {{/if}}
+                </div>
+            </div>
+            {{/if}}
+		</div>
+
+		<div class="form-group" style="margin-left: 10px; width:99%">
+            <div class="col-sm-12">
+                <label style="display: block; margin-top: 8px;">销售清单：<a href="javascript:void(0);" class="btn btn-primary pull-right _j_order_product_warehouse">库存明细</a></label>
+                <ul class="nav nav-tabs" role="tablist">
+
+                    <li role="presentation" class="active"><a href="#add_time" aria-controls="add_time" role="tab" data-toggle="tab">按添加顺序</a></li>
+                    <li role="presentation"><a href="#cate1" aria-controls="cate1" role="tab" data-toggle="tab">按类别排序</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="add_time">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>商品id</th>
+                                <th>skuid</th>
+                                <th>名称</th>
+                                <th>类别</th>
+                                <th>单位</th>
+                                <th>规格</th>
+                                <th>重量</th>
+                                <th>总数</th>
+                                <th>单价/总价</th>
+                                {{if $order.service}}
+                                <th>上楼费{{if 2 == $order.service}}/层{{/if}}</th>
+                                {{/if}}
+                                <th>库存/占用/残损&预盘亏</th>
+                                <th>备注</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{$carrier_fee_total=0}}
+                            {{foreach $origin_order_products as $productItem}}
+							{{if $productItem.num > 0}}
+                            <tr>
+                            <td>
+                                {{$productItem.product.pid}}
+                            </td>
+                            <td>
+                                {{$productItem.product.sid}}
+                            </td>
+                            <td>
+                                {{if !$_isYunniao}}<a href="/shop/edit_product.php?pid={{$productItem.product.pid}}" target="_blank">{{/if}}
+                                {{$productItem.sku.title}}
+                                {{if !$_isYunniao}}</a>{{/if}}
+                                {{if $productItem.product.sales_type == 1}}
+                                <span style="color:red;margin-left:5px;">[特价]</span>
+                                {{/if}}
+								<br/>{{$managing_modes[$productItem.managing_mode]}}
+                            </td>
+                            <td>
+                                {{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}
+                            </td>
+                            <td>
+                                {{if $productItem.sku.unit}}{{$productItem.sku.unit}}{{else}}个{{/if}}
+                            </td>
+                            <td>
+                                {{if !empty($productItem.sku.length) || !empty($productItem.sku.width) || !empty($productItem.sku.height)}}
+                                {{$productItem.sku.length / 100}}m*{{$productItem.sku.width / 100}}m*{{$productItem.sku.height / 100}}m
+                                {{else}}
+                                --
+                                {{/if}}
+                            </td>
+                            <td>
+                                {{if !empty($productItem.sku.weight)}}
+                                {{$productItem.sku.weight / 1000}}kg
+                                {{else}}
+                                --
+                                {{/if}}
+                            </td>
+                            <td>
+                                {{$productItem.num}}
+                            </td>
+                            <td>￥{{$productItem.price/100}}/￥{{$productItem.num * $productItem.price / 100}}<br><span style="color:gray;font-size:12px;">pr: ￥{{$productItem.privilege/100}}</span></td>
+                            {{if $order.service}}
+                            <td>
+                                {{if 1 == $order.service}}
+                                {{$carrier_fee = $productItem.product.carrier_fee_ele}}
+                                {{else}}
+                                {{$carrier_fee = $productItem.product.carrier_fee}}
+                                {{/if}}
+                                {{if $carrier_fee}}
+                                ￥{{$carrier_fee * $productItem.num/100}}
+                                {{$carrier_fee_total = $carrier_fee_total + $carrier_fee * $productItem.num / 100}}
+                                {{else}}
+                                -
+                                {{/if}}
+                            </td>
+                            {{/if}}
+                            <td>
+                                {{if isset($stocks_list[$productItem.product.sid])}}
+                                {{$stock=$stocks_list[$productItem.product.sid]}}
+                                {{if $stock.num<1 || $stock.occupied<0 || ($stock.num-$stock.occupied)<$productItem.num}}
+                                <span style="color: red;">{{$stocks_list[$productItem.product.sid].num}}&nbsp;/&nbsp;{{$stocks_list[$productItem.product.sid].occupied}} /&nbsp;{{$stocks_list[$productItem.product.sid].damaged_num}}</span>
+                                {{else}}
+                                <span>{{$stocks_list[$productItem.product.sid].num}}&nbsp;/&nbsp;{{$stocks_list[$productItem.product.sid].occupied}} /&nbsp;{{$stocks_list[$productItem.product.sid].damaged_num}}</span>
+                                {{/if}}
+                                {{else}}
+                                <span style="color: red;">0&nbsp;/&nbsp;0</span>
+                                {{/if}}
+                                {{if $productItem.product.buy_type == 2}}
+                                <br/><span>临采</span>
+                                {{/if}}
+                                {{if !empty($_permissions['/warehouse/ajax/clear_err_occupied']) && $stock.occupied < 0}}
+                                <br><a href="javascript:;" class="clear_err_occupied" data-wid="{{$stock.wid}}" data-sid="{{$stock.sid}}">清错占用</a>
+                                {{/if}}
+                            </td>
+                            <td>
+                                {{if $productItem.vnum}}k#{{$productItem.vnum}}　{{/if}}{{$productItem.note}}
+                            </td>
+                            </tr>
+							{{/if}}
+                            {{/foreach}}
+                            {{if count($order_products)>0}}
+                            <tr>
+                                <td>汇总</td>
+                                <td colspan="2">商品总价: ￥{{($order.price-$activity_products_amount)/100}}</td>
+                                <td style="color: #9B0D62;" colspan="2">砂石类：￥{{$sand_price}}</td>
+                                <td style="color: #062784;" colspan="2">非砂石类：￥{{$no_sand_price}}</td>
+                                <td style="color: #D52B4D;" colspan="2">总重量：{{$total_weight / 1000}}kg</td>
+                                <td colspan="3">
+                                    {{if $order.service}} 上楼费:   {{if 1 == $order.service}} ￥{{$carrier_fee_total}} {{elseif 2 == $order.service}} ￥{{$carrier_fee_total*$order.floor_num}} {{if $order.floor_num > 1}} 　(￥{{$carrier_fee_total}}/层，共{{$order.floor_num}}层) {{/if}} {{/if}} {{/if}}
+                                </td>
+                            </tr>
+                            {{/if}}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="cate1">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>商品id</th>
+                                <th>skuid</th>
+                                <th>名称</th>
+                                <th>类别</th>
+                                <th>单位</th>
+                                <th>规格</th>
+                                <th>重量</th>
+                                <th>总数</th>
+                                <th>单价/总价</th>
+                                {{if $order.service}}
+                                <th>上楼费{{if 2 == $order.service}}/层{{/if}}</th>
+                                {{/if}}
+                                <th>库存/占用/残损&预盘亏</th>
+                                <th>备注</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{$carrier_fee_total=0}}
+                            {{foreach $order_products as $productItem}}
+                            <tr {{if $color_order[$productItem.cate1] % 2 == 1}}style="background-color: #F2F2F2"{{/if}}>
+                            <td>
+                                {{$productItem.product.pid}}
+                            </td>
+                            <td>
+                                {{$productItem.product.sid}}
+                            </td>
+                            <td>
+                                {{if !$_isYunniao}}<a href="/shop/edit_product.php?pid={{$productItem.product.pid}}" target="_blank">{{/if}}
+                                {{$productItem.sku.title}}
+                                {{if !$_isYunniao}}</a>{{/if}}
+                                {{if $productItem.product.sales_type == 1}}
+                                <span style="color:red;margin-left:5px;">[特价]</span>
+                                {{/if}}
+                                <br/>{{$managing_modes[$productItem.managing_mode]}}
+                            </td>
+                            <td>
+                                {{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}
+                            </td>
+                            <td>
+                                {{if $productItem.sku.unit}}{{$productItem.sku.unit}}{{else}}个{{/if}}
+                            </td>
+                            <td>
+                                {{if !empty($productItem.sku.length) || !empty($productItem.sku.width) || !empty($productItem.sku.height)}}
+                                {{$productItem.sku.length / 100}}m*{{$productItem.sku.width / 100}}m*{{$productItem.sku.height / 100}}m
+                                {{else}}
+                                --
+                                {{/if}}
+                            </td>
+                            <td>
+                                {{if !empty($productItem.sku.weight)}}
+                                {{$productItem.sku.weight / 1000}}kg
+                                {{else}}
+                                --
+                                {{/if}}
+                            </td>
+                            <td>
+                                {{$productItem.num}}
+                            </td>
+                            <td>￥{{$productItem.price/100}}/￥{{$productItem.num * $productItem.price / 100}}<br><span style="color:gray;font-size:12px;">pr: ￥{{$productItem.privilege/100}}</span></td>
+                            {{if $order.service}}
+                            <td>
+                                {{if 1 == $order.service}}
+                                {{$carrier_fee = $productItem.product.carrier_fee_ele}}
+                                {{else}}
+                                {{$carrier_fee = $productItem.product.carrier_fee}}
+                                {{/if}}
+                                {{if $carrier_fee}}
+                                ￥{{$carrier_fee * $productItem.num/100}}
+                                {{$carrier_fee_total = $carrier_fee_total + $carrier_fee * $productItem.num / 100}}
+                                {{else}}
+                                -
+                                {{/if}}
+                            </td>
+                            {{/if}}
+                            <td>
+                                {{if isset($stocks_list[$productItem.product.sid])}}
+                                {{$stock=$stocks_list[$productItem.product.sid]}}
+                                {{if $stock.num<1 || $stock.occupied<0 || ($stock.num-$stock.occupied)<$productItem.num}}
+                                <span style="color: red;">{{$stocks_list[$productItem.product.sid].num}}&nbsp;/&nbsp;{{$stocks_list[$productItem.product.sid].occupied}} /&nbsp;{{$stocks_list[$productItem.product.sid].damaged_num}}</span>
+                                {{else}}
+                                <span>{{$stocks_list[$productItem.product.sid].num}}&nbsp;/&nbsp;{{$stocks_list[$productItem.product.sid].occupied}} /&nbsp;{{$stocks_list[$productItem.product.sid].damaged_num}}</span>
+                                {{/if}}
+                                {{else}}
+                                <span style="color: red;">0&nbsp;/&nbsp;0</span>
+                                {{/if}}
+                                {{if $productItem.product.buy_type == 2}}
+                                <br/><span>临采</span>
+                                {{/if}}
+                            </td>
+                            <td>
+                                {{if $productItem.vnum}}k#{{$productItem.vnum}}　{{/if}}{{$productItem.note}}
+                            </td>
+                            </tr>
+                            {{/foreach}}
+                            {{if count($order_products)>0}}
+                            <tr>
+                                <td>汇总</td>
+                                <td colspan="2">商品总价: ￥{{$order.price/100}}</td>
+                                <td style="color: #9B0D62;" colspan="2">砂石类：￥{{$sand_price}}</td>
+                                <td style="color: #062784;" colspan="2">非砂石类：￥{{$no_sand_price}}</td>
+                                <td style="color: #D52B4D;" colspan="2">总重量：{{$total_weight / 1000}}kg</td>
+                                <td colspan="3">
+                                    {{if $order.service}} 上楼费:   {{if 1 == $order.service}} ￥{{$carrier_fee_total}} {{elseif 2 == $order.service}} ￥{{$carrier_fee_total*$order.floor_num}} {{if $order.floor_num > 1}} 　(￥{{$carrier_fee_total}}/层，共{{$order.floor_num}}层) {{/if}} {{/if}} {{/if}}
+                                </td>
+                            </tr>
+                            {{/if}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+			</div>
+		</div>
+
+		{{if !empty($refund_products)}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">退款清单：</label>
+			<div class="col-sm-9">
+				<table class="table">
+					<thead>
+					<tr>
+						<th>id</th>
+						<th>名称</th>
+						<th>类别</th>
+						<th>单位</th>
+                        <th>规格</th>
+                        <th>重量</th>
+						<th>总数</th>
+						<th>单价</th>
+						<th>总价</th>
+						<th>备注</th>
+					</tr>
+					</thead>
+					<tbody>
+					{{foreach $refund_products as $productItem}}
+						<tr>
+							<td>
+								{{$productItem.product.pid}}
+							</td>
+							<td>
+                {{if !$_isYunniao}}<a href="/shop/edit_product.php?pid={{$productItem.product.pid}}" target="_blank">{{/if}}
+                {{$productItem.sku.title}}
+                {{if !$_isYunniao}}</a>{{/if}}
+							</td>
+							<td>
+								{{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}
+							</td>
+							<td>
+								{{if $productItem.sku.unit}}{{$productItem.sku.unit}}{{else}}个{{/if}}
+							</td>
+                            <td>
+                                {{if !empty($productItem.sku.length) || !empty($productItem.sku.width) || !empty($productItem.sku.height)}}
+                                {{$productItem.sku.length / 100}}m*{{$productItem.sku.width / 100}}m*{{$productItem.sku.height / 100}}m
+                                {{else}}
+                                --
+                                {{/if}}
+                            </td>
+                            <td>
+                                {{if !empty($product.sku.weight)}}
+                                {{$product.sku.weight / 1000}}kg
+                                {{else}}
+                                --
+                                {{/if}}
+                            </td>
+							<td>
+								{{$productItem.num}}
+							</td>
+							<td>￥{{$productItem.price / 100}}</td>
+							<td>
+								￥{{$productItem.num * $productItem.price / 100}}
+							</td>
+							<td>
+								{{$productItem.note}}
+							</td>
+						</tr>
+					{{/foreach}}
+					{{if count($order_products)>0}}
+						<tr>
+							<td>价格汇总:</td>
+							<td colspan="9">
+								￥<span id="product_total_price">{{$order.refund/100}}</span> <a href="/aftersale/refund_list.php?oid={{$order.oid}}" style="margin-left: 20px;">查看退款单</a>
+							</td>
+						</tr>
+					{{/if}}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{{/if}}
+        {{if !empty($del_and_picked_products)}}
+        <div class="form-group">
+			<label class="col-sm-2 control-label"><span style="color:red;font-size:15px;">删除但已拣货</span>清单：</label>
+			<div class="col-sm-9" style="background: #F2F2F2; border:3px solid #F00">
+				<table class="table">
+					<thead>
+					<tr>
+						<th>pid/sid</th>
+						<th>名称</th>
+						<th>类别</th>
+						<th>单位</th>
+                        <th>货位</th>
+						<th>总数</th>
+						<th>备注</th>
+					</tr>
+					</thead>
+					<tbody>
+					{{foreach $del_and_picked_products as $productItem}}
+						<tr>
+							<td>{{$productItem.pid}}/{{$productItem.sid}}</td>
+							<td><a href="/shop/edit_product.php?pid={{$productItem.pid}}" target="_blank">{{$productItem.sku_info.title}}</a>
+							</td>
+							<td>
+								{{$cate1_list[$productItem.sku_info.cate1]['name']}} - {{$cate2_list_all[$productItem.sku_info.cate1][$productItem.sku_info.cate2]['name']}}
+							</td>
+							<td>{{$productItem.sku_info.unit|default:'个'}}</td>
+                            <td>{{$productItem.location|default:'--'}}</td>
+                            <td>{{$productItem.num}}</td>
+							<td>{{$productItem.note}}</td>
+						</tr>
+					{{/foreach}}
+					</tbody>
+				</table>
+			</div>
+		</div>
+        {{/if}}
+		{{if !empty($gift_products)}}
+		<div class="form-group">
+			<label class="col-sm-2 control-lable">赠品清单：</label>
+			<div class="col-sm-9">
+				<table class="table">
+					<thead>
+					<tr>
+						<th style="width: 80px;">商品id</th>
+						<th style="width: 80px;">skuid</th>
+						<th>名称</th>
+						<th style="width: 80px;">数量</th>
+						<th style="width: 80px;">活动ID</th>
+					</tr>
+					</thead>
+					<tbody>
+					{{foreach $gift_products as $item}}
+					<tr>
+						<td>{{$item.pid}}</td>
+						<td>{{$item.sid}}</td>
+						<td><a href="/shop/edit_product.php?pid={{$item.pid}}" target="_blank">{{$item.title}}</a></td>
+						<td>{{$item.num}}</td>
+						<td><a href="/activity/promotion_manjian_update.php?mode=show&id={{$item.activity_id}}" target="_blank">{{$item.activity_id}}</a></td>
+					</tr>
+					{{/foreach}}
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<hr />
+		{{/if}}
+		{{if !empty($discount_products)}}
+		{{$goods_amount = 0}}
+		<div class="form-group">
+			<label class="col-sm-2 control-lable">特价商品清单：</label>
+			<div class="col-sm-9">
+				<table class="table">
+					<thead>
+					<tr>
+						<th style="width: 80px;">商品id</th>
+						<th style="width: 80px;">skuid</th>
+						<th>名称</th>
+						<th style="width: 80px;">价格</th>
+						<th style="width: 80px;">数量</th>
+						<th style="width: 80px;">活动ID</th>
+					</tr>
+					</thead>
+					<tbody>
+					{{foreach $discount_products as $item}}
+					<tr>
+						<td>{{$item.pid}}</td>
+						<td>{{$item.sid}}</td>
+						<td><a href="/shop/edit_product.php?pid={{$item.pid}}" target="_blank">{{$item.title}}</a></td>
+						<td>{{$item.price/100}}</td>
+						<td>{{$item.num}}</td>
+						<td><a href="/activity/promotion_manjian_update.php?mode=show&id={{$item.activity_id}}" target="_blank">{{$item.activity_id}}</a></td>
+					</tr>
+					{{$goods_amount = $goods_amount + $item.price*$item.num}}
+					{{/foreach}}
+					<tr>
+						<td colspan="6">商品总价：{{$goods_amount/100}}</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		{{/if}}
+
+		{{if $order.area >= 6 || $order.area == 0}}
+			<div id="freight_alert" class="form-group">
+				<label class="col-sm-2 control-label">提示：</label>
+				<div class="col-sm-4" style="font-weight: bold;  width:50%; color: red;">
+					无环线信息或六环外的运费需人工计算，填写之后方可保存订单！！！！！！！
+				</div>
+			</div>
+		{{/if}}
+
+		{{if $customer.level_for_sys==1 && $order.paid==0}}
+			<h3 style="color:red;text-align:center;">该客户是黑名单客户，请先收款再配送！</h3>
+		{{/if}}
+		{{if $customer.payment_amount > 0 && $customer.account_balance > $customer.payment_amount}}
+        <h3 style="color:red;text-align:center;">账期客户：已超额，请与相关销售人员沟通</h3>
+        {{/if}}
+        {{if $customer.account_balance > 0 && $customer.payment_due_date >0 && $customer.payment_due_date < date('Y-m-d')}}
+        <h3 style="color:red;text-align:center;">账期客户：已经逾期，请与相关销售人员沟通</h3>
+        {{/if}}
+		<div class="form-group">
+			<div id="button_area" class="col-sm-12">
+                {{if $order.status == 0}}
+                    {{if !empty($order_products) && $order.step == 1 && (!empty($_permissions['hc_order_cs_confirm']))}}
+                        {{if ($order.is_community_warehouse && ($_isCommunityCS || $_isAdmin)) || (!$order.is_community_warehouse)}}
+                            <a href="javascript:void(0);" class="btn btn-primary _j_chg_order_step" data-next_step="2">客服确认</a>
+                        {{else}}
+                            {{if $_isSales}}
+                            {{if $order.suid == $_uid}}
+                            <a href="javascript:void(0);" class="btn btn-primary _j_chg_order_step" data-next_step="2">客服确认</a>
+                            {{/if}}
+                            {{/if}}
+                        {{/if}}
+                    {{/if}}
+                    {{if $order.step <  2 &&  $order.is_community_warehouse && ($_isCommunityCS || $_isAdmin)}}
+                    <a href="javascript:void(0);" class="btn btn-primary _j_not_local_order" data-next_step="5">非本地订单</a>
+                    {{/if}}
+                    {{if $order.step == 4 && !empty($_permissions['hc_order_delivred'])}}
+                        <a href="javascript:void(0);" class="btn btn-primary _j_chg_order_step" data-hadabnormalproducts="{{if !empty($del_and_picked_products)}}1{{else}}0{{/if}}" data-next_step="5">已出库</a>
+                    {{/if}}
+                    {{if $order.step == 5 && !empty($_permissions['hc_order_bill_back'])}}
+                        <a href="javascript:void(0);" class="btn btn-primary _j_chg_order_step" data-next_step="7">已回单</a>
+                    {{/if}}
+                    {{if $order.step >= 2 && $order.paid!=1 && $order.payment_type!=20 && !empty($_permissions['/finance/ajax/save_money_in'])}}
+                        <a href="javascript:void(0);" class="btn btn-primary" data-toggle="modal" data-target="#editFinanceModal">收款</a>
+                    {{/if}}
+
+				{{if !$timeArray.hasShipTime}}
+                    {{if ($order.step >= 2 && !empty($_permissions['/order/ajax/modify_by_finance'])) || $_uid==1029 ||$_uid==1254}}
+                        <a href="javascript:;" class="btn btn-default" data-toggle="modal" data-target="#financeModifyOrderModal">运营优惠调整</a>
+                    {{/if}}
+				{{/if}}
+
+
+				{{if ($order.step >= 2 && !empty($_permissions['/order/ajax/modify_by_operator'])) || $_uid==1029 ||$_uid==1254}}
+				<a href="javascript:;" class="btn btn-default" data-toggle="modal" data-target="#operatorModifyOrderModal">运/搬费调整</a>
+				{{/if}}
+
+
+				{{if (!$timeArray.hasShipTime || ($timeArray.hasShipTime && $timeArray.inOneDay)) && $timeArray.currMonthOrder}}
+
+				{{else}}
+					{{if $timeArray.hasShipTime}}
+					<!--<a class="btn btn-danger" href="/order/add_order2.php?cid={{$uinfo._customer.cid}}&uid={{$uinfo.uid}}&from_oid={{$order.oid}}&is_virtual=1">虚拟订单</a>-->
+					{{/if}}
+
+				{{/if}}
+
+
+				{{if !$timeArray.hasShipTime}}
+                    {{if $order.step >= 2 && !empty($_permissions['/order/ajax/save_order_sale_privilege'])  || $_uid==1029 ||$_uid==1254}}
+                    <a href="javascript:;" class="btn btn-default" data-toggle="modal" data-target="#dlgSalePreferentialAmountInOrder">销售优惠调整</a>
+                    {{/if}}
+				{{/if}}
+                    {{if !empty($_permissions['/finance/customer_bill_list'])}}
+                        <a href="/finance/customer_bill_list.php?cid={{$order.cid}}" class="btn btn-default">客户应收明细</a>
+                    {{/if}}
+                    {{if $is_upgrade_warehouse && !empty($_permissions['/order/picking_detail'])}}
+                    <a href="/order/picking_detail.php?oid={{$order.oid}}" target="_blank" class="btn btn-default">打印拣货单</a>
+                    {{/if}}
+
+                    {{if $order.step >= 2 && !empty($_permissions['/order/order_print'])}}
+                    <a href="/order/order_print.php?oid={{$order.oid}}" target="_blank" class="btn btn-default">打印</a>
+                    <a href="/order/order_print.php?oid={{$order.oid}}&hidden_money=1" target="_blank" class="btn btn-default">打印(无价格)</a>
+                    <a href="/order/order_print.php?oid={{$order.oid}}&hidden_privilege=1" target="_blank" class="btn btn-default">打印(无优惠)</a>
+                    {{/if}}
+                    {{if $order.step >= 2 && $order.step<5 && $order.source_oid ==0 && !empty($_permissions['/order/supplement_order'])}}
+                        <a href="/order/supplement_order.php?oid={{$order.oid}}" target="_blank" class="btn btn-default">补单</a>
+                    {{/if}}
+                    {{if $order.has_print>0 && !empty($_permissions['/order/ajax/set_order_print'])}}
+                        <a href="javascript:;" target="_blank" class="btn btn-default _j_notice_print" data-oid="{{$order.oid}}">通知库房打印</a>
+                    {{elseif $order.has_print==0}}
+                        <a href="javascript:;" class="btn btn-warning">尚未打印</a>
+                    {{/if}}
+
+                    {{if $order.paid == 1 && $order.user_need_to_pay > 0 && !empty($_permissions['/order/ajax/set_part_paid'])}}
+                    <a id="set_part_paid" href="javascript:void(0);" class="btn btn-primary">设置为部分收款</a>
+                    {{/if}}
+                    {{if $order.paid != 0 && $order.step < 2 && !empty($_permissions['/order/ajax/refund_and_delete'])}}
+                        {{if ($order.is_community_warehouse && ($_isCommunityCS || $_isAdmin)) || (!$order.is_community_warehouse)}}
+                        <a id="refund_and_delete" href="javascript:void(0);" class="btn btn-danger">退款并删除</a>
+                        {{/if}}
+                    {{/if}}
+
+                    {{if $order.step<2 && $order.paid==0 && !empty($_permissions['/order/ajax/delete_order'])}}
+                        {{if ($order.is_community_warehouse && ($_isCommunityCS || $_isAdmin)) || (!$order.is_community_warehouse)}}
+                        <a id="order_delete" href="javascript:void(0);" class="btn btn-danger">删除</a>
+                        {{/if}}
+                    {{/if}}
+
+                    {{if !$order.has_finish && !empty($_permissions['/order/edit_order'])}}
+                    <a href="/order/edit_order.php?oid={{$order.oid}}" class="btn btn-default">编辑</a>
+                    {{/if}}
+
+                    {{if $order.step >= 5 && !empty($_permissions['/order/edit_refund_new'])}}
+                    <a href="/order/edit_refund_new.php?oid={{$order.oid}}" target="_blank" class="btn btn-default">退货（新）</a>
+                    {{/if}}
+                    {{if $order.step >= 5 &&  !empty($_permissions['/order/edit_exchanged'])}}
+                    <a href="/order/edit_exchanged.php?oid={{$order.oid}}" target="_blank" class="btn btn-default">换货</a>
+                    {{/if}}
+                    {{if $order.step >= 5 && !empty($_permissions['/order/edit_traps'])}}
+                    <a href="/order/edit_traps.php?oid={{$order.oid}}" target="_blank" class="btn btn-default">补漏</a>
+                    {{/if}}
+                    {{if !empty($_permissions['/order/order_print'])}}
+                    <a href="/order/order_print.php?oid={{$order.oid}}&hidden_privilege=1&hidden_money=1" target="_blank" class="btn btn-default">打印(无价格无优惠)</a>
+                    {{/if}}
+
+                    {{if $order.step >=7 && !empty($_permissions['/order/ajax/transfer_amount_in_order'])}}
+                    <a href="javascript:;" id="transfer_amount_in_order" class="btn btn-warning">转余额</a>
+                    {{/if}}
+                {{/if}}
+			</div>
+		</div>
+	</form>
+
+	<!-- Modal -->
+	<div class="modal fade _j_dialog" id="editNoteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+		<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">编辑</h4>
+				</div>
+				<div class="modal-body">
+					<textarea class="form-control" rows="4" name="note">{{$order.note nofilter}}</textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary _j_save_order_note" data-oid="{{$order.oid}}">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade _j_dialog" id="editCustomerNoteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+		<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">编辑</h4>
+				</div>
+				<div class="modal-body">
+					<textarea class="form-control" rows="4" name="customer_note">{{$order.customer_note nofilter}}</textarea>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary _j_save_customer_order_note" data-oid="{{$order.oid}}">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade _j_dialog" id="editDriverModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+		<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">编辑司机 && 搬运工</h4>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal">
+						<div class="form-group">
+							<label class="col-sm-3 control-label">司机名称：</label>
+
+							<div class="col-sm-8">
+								<input type="text" class="form-control" name="driver_name" placeholder="司机姓名" value="{{$order.driver_name}}">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label">司机电话：</label>
+
+							<div class="col-sm-8">
+								<input type="text" class="form-control" name="driver_phone" placeholder="司机电话" value="{{$order.driver_phone}}">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" style="color:red;">司机运费：</label>
+
+							<div class="col-sm-8">
+								<input type="text" class="form-control" name="driver_money" placeholder="司机运费" value="{{$order.driver_money/100}}">
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label class="col-sm-3 control-label">搬运工名称：</label>
+
+							<div class="col-sm-8">
+								<input type="text" class="form-control" name="carrier_name" placeholder="搬运工名称" value="{{$order.carrier_name}}">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label">搬运工电话：</label>
+
+							<div class="col-sm-8">
+								<input type="text" class="form-control" name="carrier_phone" placeholder="搬运工电话" value="{{$order.carrier_phone}}">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" style="color:red;">搬运工费用：</label>
+
+							<div class="col-sm-8">
+								<input type="text" class="form-control" name="carrier_money" value="{{$order.carrier_money/100}}">
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary _j_save_order_driver" data-oid="{{$order.oid}}">确认安排司机</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade _j_dialog" id="addCoopworkerModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}" data-wid="{{$order.wid}}">
+		<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title"></h4>
+				</div>
+				<div class="modal-body">
+					<form class="form-horizontal">
+						<div class="form-group" style="margin-left:12px;">
+							<div class="col-sm-3" style="display:none;">
+								<select class="form-control coopworker_role" name="role" disabled="true">
+									{{foreach $coopworker_types as $_k => $_name}}
+										<option value="{{$_k}}">{{$_name}}</option>
+									{{/foreach}}
+								</select>
+							</div>
+							<div class="col-sm-6">
+								<input class="form-control" type="text" name="keyword" placeholder="姓名或电话">
+							</div>
+							<div>
+								<a class="btn btn-primary _j_search_driver_carrier">查询</a>
+							</div>
+						</div>
+						<div class="form-group" style="margin-left:12px;">
+							<div class="col-sm-4 driver_property">
+								<select class="form-control" name="car_model" style="height:30px;font-size: 12px;">
+									<option value="0">请选车型</option>
+									{{foreach $car_models as $_k => $_name}}
+										<option value="{{$_k}}">{{$_name}}</option>
+									{{/foreach}}
+								</select>
+							</div>
+							<div class="col-sm-4" style="margin-left:3px;">
+								<select class="form-control" name="wid" style="height:30px;font-size: 12px;">
+									<option value="0">请选择仓库</option>
+									{{foreach $warehouse_list as $_k => $_name}}
+										<option value="{{$_k}}" {{if $order.wid==$_k}} selected="selected" {{/if}}>{{$_name}}</option>
+									{{/foreach}}
+								</select>
+							</div>
+							<br>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label"></label>
+
+							<div id="show_coopworker_area" style="margin-left:30px;"></div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade _j_dialog" id="editCoopworker" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">修改费用</h4>
+				</div>
+				<div class="modal-body">
+					<div class="edit_coopworker_srcinfo" style="height: 30px; margin-left: -12px;"></div>
+                    <div id="edit_carrier_part" style="display: none;">
+                        <div style="width: 100%; height: 40px;">
+                            <div style="width: 20%; float: left; text-align: right">推荐上楼费：</div>
+                            <div style="width: 15%; float: left; text-align: left"><span id="max_arrier_fee" data-max-carrier-fee="0">0</span> 元</div>
+                            <span style="color: #ff0000;font-size: 12px;">*如果存在多个搬运工总应得搬运费不允许大于推荐费用</span>
+                        </div>
+                        <div style="width: 100%; height: 40px;">
+							<div style="width: 20%; float: left; text-align: right; padding-top: 8px;">应得搬运费：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<input class="form-control" name="base_carrier_price" value="" data-base-price="" placeholder="填写范围不得超过推荐上楼费" style="width:80%; display: inline;">
+							</div>
+						</div>
+                        <div style="width: 100%; height: 40px;">
+                            <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">奖励：</div>
+                            <div style="width: 80%; float: left; text-align: left">
+                                <input class="form-control" name="reward_price" value="" placeholder="请填写奖励金额（单位：元）" style="width:80%; display: inline;">
+                            </div>
+                        </div>
+						<div style="width: 100%; height: 40px;">
+							<div style="width: 20%; float: left; text-align: right; padding-top: 8px;">处罚：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<input class="form-control" name="fine_price" value="" placeholder="请填写处罚金额（单位：元）" style="width:80%; display: inline;">
+							</div>
+						</div>
+						<div style="width: 100%; height: 40px;">
+							<div style="width: 20%; float: left; text-align: right; padding-top: 8px;">其他费用：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<input class="form-control" name="other_price" value="" placeholder="请填写其他费用（单位：元）" style="width:80%; display: inline;">
+							</div>
+						</div>
+						<div style="width: 100%; height: 100px;">
+							<div style="width: 20%; float: left; text-align: right">备注：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<textarea name="money_note" class="form-control money_note" rows="4" placeholder="奖励、处罚、其他费用必填！"></textarea>
+							</div>
+						</div>
+                    </div>
+                    <div id="edit_driver_part" style="display: none;">
+						<div style="width: 100%; height: 40px;">
+							<div style="width: 20%; float: left; text-align: right">推荐运费：</div>
+							<div style="width: 30%; float: left; text-align: left"><span id="driver_base_price" data-base-price="0">0</span> 元</div>
+							<div style="width: 50%; float: left;">车型：<span class="car_model_name"></span></div>
+						</div>
+						<div style="width: 100%; height: 40px;">
+							<div style="width: 20%; float: left; text-align: right; padding-top: 8px;">趟数：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<select name="times" id="driver_times" class="form-control" style="width: 50%;" data-decline-price="">
+									{{for $i = 1 to 5}}
+									<option value="{{$i}}">{{$i}}</option>
+									{{/for}}
+								</select>
+							</div>
+						</div>
+						<div style="width: 100%; height: 40px;">
+							<div style="width: 20%; float: left; text-align: right; padding-top: 8px;">拉垃圾：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<input class="form-control" name="trash_price" value="" placeholder="填写金额范围在1元-245元（包含245元）" style="width:80%; display: inline;">
+							</div>
+						</div>
+						<div style="width: 100%; height: 40px;">
+							<div style="width: 20%; float: left; text-align: right; padding-top: 8px;">二环订单：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<input class="form-control" name="second_ring_road_price" value="" placeholder="填写金额范围在1元-20元（包含20元）"  style="width:80%; display: inline;">
+							</div>
+						</div>
+						<div style="width: 100%; height: 40px;">
+							<div style="width: 20%; float: left; text-align: right; padding-top: 8px;">奖励：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<input class="form-control" name="reward_price" value="" placeholder="请填写奖励金额（单位：元）" style="width:80%; display: inline;">
+							</div>
+						</div>
+						<div style="width: 100%; height: 40px;">
+							<div style="width: 20%; float: left; text-align: right; padding-top: 8px;">处罚：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<input class="form-control" name="fine_price" value="" placeholder="请填写处罚金额（单位：元）" style="width:80%; display: inline;">
+							</div>
+						</div>
+						<div style="width: 100%; height: 40px;">
+							<div style="width: 20%; float: left; text-align: right; padding-top: 8px;">其他车型：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<input class="form-control" name="other_price" value="" placeholder="请填写其他车型金额（单位：元）" style="width:80%; display: inline;">
+							</div>
+						</div>
+						<div style="width: 100%; height: 100px;">
+							<div style="width: 20%; float: left; text-align: right">备注：</div>
+							<div style="width: 80%; float: left; text-align: left">
+								<textarea name="money_note" class="form-control money_note" rows="4" placeholder="奖励、处罚、其他车型必填！"></textarea>
+							</div>
+						</div>
+                    </div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary _j_save_modify_Coopworker" data-city-id="{{$order.city_id}}">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade _j_dialog" id="editCoopworkerPrice" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog modal-sm" role="document" style="width:600px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">修改费用</h4>
+				</div>
+				<div class="modal-body">
+                    <form class="form-horizontal">
+                        <div id="edit_driver_price_area" style="display: none;">
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label"></label>
+                                <label class="col-sm-2 control-label">司机：</label>
+                                <div class="col-sm-3">
+                                    <span class="text-value driver_name"></span>
+                                </div>
+                                <label class="col-sm-3 control-label">车型：</label>
+                                <div class="col-sm-3">
+                                    <span class="text-value car_model"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label"></label>
+                                <label class="col-sm-2 control-label">距离：</label>
+                                <div class="col-sm-3">
+                                    <span class="text-value order_distance"></span>km
+                                </div>
+                                <label class="col-sm-3 control-label">推荐运费：</label>
+                                <div class="col-sm-3">
+                                    <span class="text-value referral_price"></span>元
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">运费：</label>
+                                <div class="col-sm-7">
+                                    <input class="form-control" type="text" name="price" value="">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">备注：</label>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control" rows="5" name="note"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="edit_carrier_price_area" style="display: none;">
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label"></label>
+                                <label class="col-sm-2 control-label">搬运工：</label>
+                                <div class="col-sm-3">
+                                    <span class="text-value carrier_name"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-1 control-label"></label>
+                                <label class="col-sm-2 control-label">车型：</label>
+                                <div class="col-sm-3">
+                                    <span class="text-value car_model"></span>
+                                </div>
+                                <label class="col-sm-3 control-label">推荐费用：</label>
+                                <div class="col-sm-3">
+                                    <span class="text-value referral_price"></span>元
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">搬运费：</label>
+                                <div class="col-sm-7">
+                                    <input class="form-control" type="text" name="price" value="">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">备注：</label>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control" rows="5" name="note"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary _j_save_modify_Coopworker" data-city-id="{{$order.city_id}}">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade _j_dialog" id="editSaler" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">修改销售</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group" style="margin-left:16px; width: 50%; margin:0 auto;">
+						<select class="form-control" name="modify_saler" style="height:30px;font-size: 12px;">
+							<option value="0" {{if empty($order.saler_suid)}} selected="selected" {{/if}}>无销售</option>
+							{{foreach $all_salers_on_the_job as $saler}}
+								<option value="{{$saler.suid}}" {{if $saler.suid==$order.saler_suid}} selected="selected" {{/if}}>{{$saler.name}}</option>
+							{{/foreach}}
+						</select>
+						<span style="color:red;">原销售：{{if !empty($order.saler_suid)}}{{$order._saler.name}}（Suid: {{$order._saler.suid}}）{{else}} 无 {{/if}}</span>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary _j_save_edit_saler" data-suid="{{$order.saler_suid}}" data-oid="{{$order.oid}}">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+    <div class="modal fade _j_dialog" id="guaranteedOrder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">担保订单</h4>
+				</div>
+				<div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">客户信息：</label>
+                            <div class="col-sm-7">
+                                <span class="text-value">{{$customer.name}}（{{$customer.cid}}）</span>
+                                <span class="text-value">{{$customer.all_user_mobiles|truncate:30:", ..."}}</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">销售专员：</label>
+                            <div class="col-sm-7">
+                                <span class="text-value">{{if isset($order._saler)}}{{$order._saler.name}}（{{$order._saler.mobile}}）{{else}}无{{/if}}</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">备注：</label>
+                            <div class="col-sm-7">
+                                <textarea class="form-control" rows="2" name="note"></textarea>
+                            </div>
+                        </div>
+                    </form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary _j_save_guaranteed_order" data-oid="{{$order.oid}}" data-guaranteed="{{$order.is_guaranteed}}">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+    <div class="modal fade _j_dialog" id="OrderProductsWarehouse" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">商品库存明细</h4>
+                </div>
+                <div class="modal-body" id="OrderProductsWarehouse_body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    
+	<div class="modal fade _j_dialog" id="editService" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog modal-sm" role="document" style="width:600px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">修改上楼方式（如有必要，通过“财务调整”调整搬运费！！）</h4>
+				</div>
+				<div class="modal-body">
+					<div class="form-group" style="">
+						<select class="form-control" id="service" style="width: 200px; display: inline-block; margin-right: 50px;">
+							<option value="0" {{if empty($order.service)}} selected="selected" {{/if}}>不上楼</option>
+							<option value="1" {{if $order.service == 1}} selected="selected" {{/if}}>电梯上楼</option>
+							<option value="2" {{if $order.service == 2}} selected="selected" {{/if}}>楼梯上楼</option>
+						</select>
+						<select id="floor_num" class="form-control" style="width: 200px; display: inline-block;">
+							{{foreach $floor as $f}}
+							<option {{if $order.floor_num== $f}}selected="selected" {{/if}} value="{{$f}}">{{$f}}层</option>
+							{{/foreach}}
+						</select>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" id="save_service" class="btn btn-primary" data-oid="{{$order.oid}}">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{{include file="finance/block_money_in.html" cid=$order.cid}}
+
+	{{if $customer.account_balance > 0 && !$_hide_useless}}
+	<div style="position: fixed; width: 500px; height: 50px; background-color: #999999; top: 60px; right: 10px; color: red; font-size: 26px; padding: 5px 10px;">
+		该用户有欠款{{$customer.account_balance / 100}}元！
+	</div>
+	{{/if}}
+</div>
+
+<div style="background: #F2F2F2;" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">操作日志</h1>
+	<div id="order_action_list"></div>
+</div>
+{{include 'common/block_edit_coopworker_modal.html'}}

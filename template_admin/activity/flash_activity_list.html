@@ -1,0 +1,77 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        活动列表
+    </h1>
+    {{if !empty($_permissions["/activity/add_activity_flash"])}}
+    <a href="/activity/add_activity_flash.php" class="btn btn-primary">添加活动</a>
+    {{/if}}
+</div>
+<div class="col-sm-9 col-sm-offset-2 col-md-10 main">
+    <table class="table table-bordered " style="background: white; text-align: center;">
+        <thead style="background-color: #898989;color: white;font-size: 16px;">
+        <tr style="text-align: center">
+            <th style="text-align: center">序号</th>
+            <th style="text-align: center">活动名称</th>
+            <th style="text-align: center">活动类型</th>
+            <th style="text-align: center">活动平台</th>
+            <th style="text-align: center">活动城市</th>
+            <th style="text-align: center">活动规则</th>
+            <th style="text-align: center">活动时间</th>
+            <th style="text-align: center">状态</th>
+            <th style="text-align: center">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $id => $item}}
+        <tr>
+            <td style="vertical-align: middle;">{{$item.fid}}</td>
+            <td style="vertical-align: middle;">{{$item.name}}</td>
+            <td style="vertical-align: middle;">{{$item._type}}</td>
+            <td style="vertical-align: middle;">{{$item._platform}}</td>
+            <td style="vertical-align: middle;">{{$item._city}}</td>
+            <td style="vertical-align: middle;">{{$item.rule}}</td>
+            <td style="vertical-align: middle;">{{$item.start_time}}~{{$item.end_time}}</td>
+            <td style="vertical-align: middle;">
+                {{if $item.online == 0}}
+                    {{if $item.start_time >= $date}}
+                        <span>未开始</span>
+                    {{else if $item.end_time <= $date}}
+                        <span style="color: #ff0000;">已结束</span>
+                    {{else if $item.start_time < $date && $item.end_time > $date}}
+                        <span style="color: #6ad346;">在线</span>
+                    {{/if}}
+                {{else if $item.online == 1}}
+                    <span style="color: #ff0000;">已下线</span>
+                {{/if}}
+            </td>
+            <!--<td style="vertical-align: middle;">
+                <input style="width: 50px; text-align: center;" type="text" id="data-{{$item.fid}}" value="{{$item.sort}}"/><br />
+                <button style="width: 50px; margin-top: 5px;" class="activity_sort" data-id="{{$item.fid}}">更改</button>
+            </td>-->
+            <td style="vertical-align: middle;">
+                {{if !empty($_permissions["/activity/add_activity_flash"])}}
+                    <a href="/activity/add_activity_flash.php?id={{$item.fid}}">编辑</a><br/>
+                    {{if $item.online == 1 && $item.end_time > $date}}
+                    <a class="activity_action" data-id="{{$item.fid}}" method="up" href="javascript:;">上线</a><br/>
+                    {{else if $item.online == 0 && $date < $item.end_time}}
+                    <a class="activity_action" data-id="{{$item.fid}}" method="down" href="javascript:;">下线</a><br/>
+                    {{/if}}
+                <a class="delete_btn" data-id="{{$item.fid}}" href="javascript:;">删除</a><br/>
+                {{/if}}
+                {{if !empty($_permissions["/activity/flash_sale_list"])}}
+                <a href="/activity/flash_sale_list.php?fid={{$item.fid}}">查看商品</a><br/>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+        </ul>
+    </nav>
+</div>

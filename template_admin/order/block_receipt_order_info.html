@@ -1,0 +1,40 @@
+<tr class="order_info_list" data-oid="{{$order.oid}}">
+    <td>
+        {{if $order.step == 5}}
+        <input type="checkbox" name="oid" data-oid="{{$order.oid}}">&nbsp;
+        {{/if}}
+        <a href="/order/order_detail.php?oid={{$order.oid}}" target="_blank">{{$order.oid}}</a>
+    </td>
+    <td>
+        {{$order.contact_name}}<br/>
+        {{$order.contact_phone}}
+    </td>
+    <td>{{$order.address}}</td>
+    <td>
+        {{$warehouse_list[$order.wid]}}<br/>
+        商品总价：{{$order.price/100}}<br/>
+        {{if $order.status}}
+        &nbsp;<span style="color: #ff0000;">已删除</span>
+        {{/if}}
+    </td>
+    <td>{{$step_list[$order.step]}}</td>
+    <td>
+        {{if $order.paid}}
+        已支付
+        {{else}}
+        未支付
+        {{/if}}</td>
+    <td>{{$order._delivery_date}}</td>
+    <td>{{$order.note}}</td>
+    <td>
+        {{if $order.step == 7}}
+        <span>已回单</span>
+        {{/if}}
+        &nbsp;
+        {{if $order.paid == 0}}
+        <a href="javascript: void(0);" class="payment_order_show" data-oid="{{$order.oid}}" data-type="payment_modal_show" data-toggle="modal" data-target="#editFinanceModal">收款</a>
+        {{/if}}
+        &nbsp;
+        <a href="javascript:void(0)" class="cancel_order_show">撤销</a>
+    </td>
+</tr>

@@ -1,0 +1,52 @@
+<div class="modal-dialog modal-sm analysis_info" role="document" style="width:600px;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">提现分析</h4>
+        </div>
+
+        <div class="modal-body">
+            <form class="form-horizontal">
+                {{if is_array($EmbodyAnalysisData)}}
+                <div class="form-group">
+                    <label style="margin-left: 180px">自 {{$presentTime}} ---->至今 数据分析</label>
+                </div>
+                {{/if}}
+
+                {{if is_array($EmbodyAnalysisData)}}
+                    {{foreach $EmbodyAnalysisData as $value}}
+                        {{if $value.money > 0}}
+                        <div class="form-group" style="margin-left: 150px">
+                            <label class="col-sm-3 control-label">{{$value.type}} : </label>
+                            <span class="control-label" style="color:red; line-height: 35px;">{{$value.money/100}}元</span>
+                        </div>
+                        {{/if}}
+                    {{/foreach}}
+
+                    {{foreach $EmbodyAnalysisData as $value}}
+                        {{if $value.money < 0}}
+                        <div class="form-group" style="margin-left: 150px">
+                            <label class="col-sm-3 control-label">{{$value.type}} : </label>
+                            <span class="control-label" style="color:red; line-height: 35px;">{{$value.money/100}}元</span>
+                        </div>
+                        {{/if}}
+
+                {{/foreach}}
+
+                {{else}}
+                    <div class="form-group">
+                        <label style="margin-left: 200px">{{$EmbodyAnalysisData}}</label>
+                    </div>
+                {{/if}}
+
+                <div class="form-group" style="margin-left: 150px">
+                    <label class="col-sm-3 control-label">可提现余额 : </label>
+                    <span class="control-label" style="color:red; line-height: 33px;">{{$balance/100}}元</span>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
+        </div>
+    </div>
+</div>

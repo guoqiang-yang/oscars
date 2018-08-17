@@ -1,0 +1,129 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        商品查询 <a href="/invalid_product/no_picture.php" style="margin-left: 20px; font-size: 18px;color: red;"> 可能有问题的商品（点击查看） </a>
+
+        <div style="float:right;font-size:16px;">
+            <form class="form-inline" action="/shop/product_search.php">
+                <div class="form-group" style="margin-right:10px;">
+                    <input type="text" class="form-control" name="keyword" value="">
+                </div>
+                {{if !empty($_permissions["/shop/product_search"])}}
+                    <button type="submit" class="btn btn-primary">搜索</button>
+                {{/if}}
+            </form>
+        </div>
+    </h1>
+
+    <form class="form-horizontal" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">大类：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        {{foreach $cate1_list as $id => $item}}
+                        <li {{if $search_conf.cate1== $id}}class="active" {{/if}}>
+                            <a href="?cate1={{$id}}&online=1">{{$item.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">小类：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        {{foreach $cate2_list as $id => $item}}
+                        <li {{if $search_conf.cate2== $id}}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$id}}&online=1">{{$item.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {{if !empty($cate3_list)}}
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">三级分类：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        {{foreach $cate3_list as $id => $item}}
+                        <li {{if $search_conf.cate3== $id}}class="active" {{/if}}>
+                        <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&cate3={{$id}}&online=1">{{$item.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">品牌：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        <li {{if empty($search_conf.bid) }}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&cate3={{$search_conf.cate3}}&mid={{$search_conf.mid}}&online=1">全部</a>
+                        </li>
+                        {{foreach $brands as $brand}}
+                        <li {{if $brand.bid== $search_conf.bid }}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&bid={{$brand.bid}}&cate3={{$search_conf.cate3}}&mid={{$search_conf.mid}}&online=1">{{$brand.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">型号：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        <li {{if empty($search_conf.mid) }}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&cate3={{$search_conf.cate3}}&bid={{$search_conf.bid}}&online=1">全部</a>
+                        </li>
+                        {{foreach $models as $model}}
+                        <li {{if $model.mid== $search_conf.mid }}class="active" {{/if}}>
+                            <a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&cate3={{$search_conf.cate3}}&mid={{$model.mid}}&bid={{$search_conf.bid}}&online=1">{{$model.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">状态：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        <li {{if $search_conf.online == 0 }}class="active" {{/if}}><a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&bid={{$search_conf.bid}}&cate3={{$search_conf.cate3}}&mid={{$search_conf.mid}}&online=0">全部</a></li>
+                        <li {{if $search_conf.online == 1 }}class="active" {{/if}}><a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&bid={{$search_conf.bid}}&cate3={{$search_conf.cate3}}&mid={{$search_conf.mid}}&online=1">上架</a></li>
+                        <li {{if $search_conf.online == 2 }}class="active" {{/if}}><a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&bid={{$search_conf.bid}}&cate3={{$search_conf.cate3}}&mid={{$search_conf.mid}}&online=2">下架</a></li>
+                        <li {{if $search_conf.online == 3 }}class="active" {{/if}}><a href="?cate1={{$search_conf.cate1}}&cate2={{$search_conf.cate2}}&bid={{$search_conf.bid}}&cate3={{$search_conf.cate3}}&mid={{$search_conf.mid}}&online=3">已删除</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <hr>
+    <div style="color: red; font-size: 24px;">库房打印条形码请使用sid</div>
+    <hr>
+    {{include "shop/block_product_list.html"}}
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

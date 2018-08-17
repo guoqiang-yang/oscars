@@ -1,0 +1,46 @@
+//鹰眼轨迹api
+
+//jsapi下载地址
+
+http://bbs.lbsyun.baidu.com/forum.php?mod=attachment&aid=MTM4MTZ8NWUwZTIzNGR8MTQ4MTAwODQ5Nnw4MTc3ODh8MTAyMjY1
+下载后解压直接使用，主要逻辑在/htdocs_admin/js/strack/demo.js里面
+/htdocs_admin/demo下有源码示例，index.html里面加载的css、js文件较多，移植时注意不要遗漏
+
+//service_id和ak
+service_id和ak为向百度后台发起请求的必要参数
+ak：即为相应应用的appkey，在百度控制台里面，注意app和jsapi是两个独立的ak，不能混用
+service_id：即为服务号，与安卓的service_id一致
+
+//鹰眼轨迹的移植
+
+鹰眼轨迹主要逻辑在demo.js里
+
+首先，将17，18行的Test_ak和ServiceId改为我们自己的ak和service_id
+
+而我们移植时，需要的逻辑是  加载事件的那段代码
+
+直接定位到/htdocs_admin/js/strack/demo.js 的894行
+加载每条轨迹需要entity_name,start_time,end_time三个参数，多条轨迹循环加载即可，改也只需要改这三个参数
+
+968行 trackModule.loadTrackHistory()方法，即为加载轨迹的入口，需要改动的参数是第五个和第六个，第五个为修正项，值为1时轨迹纠偏、去燥，第六个参数是一页显示多少个，以我们目前的需求
+使用默认就行，赋空值。
+
+轨迹的颜色是在数组 colors: ['#3A3AD4', '#808000', '#FF4500', '#7b68ee', '#4169E1', '#2F4F4F', '#1E90FF', '#2E8B57',
+                     '#32CD32', '#2BAE18', '#8F502C', '#006400', '#6B8E23', '#8B4513', '#B22222',
+                     '#48525A', '#65723F', '#4F8848', '#965A25', '#264095', '#E8EDF2'
+                 ]
+ 中依次调用的。
+
+//获取entity的当前位置
+
+获取司机当前位置的接口为  http://api.map.baidu.com/trace/v2/entity/list
+参数包括 ak，service_id，active_time，page_size
+ak和service_id跟之前一致，active_time为筛选条件，返回从该时间点之后仍有位置变动的entity；
+page_size最大值为1000，目前我们司机还没超过这个数，如果超过这个数了，就要分页查，同时配合page_index参数
+
+// 获取单个司机的历史轨迹点
+
+http://api.map.baidu.com/trace/v2/track/gethistory
+
+此接口可用来后台导入司机的历史轨迹点做数据分析
+必选参数为ak，service_id，start_time, end_time,entity_name，此外还有一些修正项，具体可参考文档 http://lbsyun.baidu.com/index.php?title=yingyan/api/track

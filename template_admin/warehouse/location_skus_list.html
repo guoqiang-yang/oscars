@@ -1,0 +1,54 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		单sku多货架
+	</h1>
+
+	<form class="form-inline" role="form" action="/warehouse/location_skus_list.php">
+		<div class="placeholder">
+			{{if !$_user.wid}}
+			<div class="form-group" style="margin-right:50px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+					{{foreach $allowed_warehouses as $_wid => $wid_name}}
+					<option value="{{$_wid}}" {{if $_wid== $wid}}selected="selected" {{/if}}>{{$wid_name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			{{/if}}
+		</div>
+		<button type="submit" class="btn btn-primary" id="btn_search" style="margin-right:30px;">查询</button>
+	</form>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>货位</th>
+			<th>sku列表</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $location_list as $loc}}
+		<tr class="dialog">
+			<td class="sid">
+				{{$loc.location}}
+			</td>
+			<td class="loc">
+				{{foreach $loc.locations as $location}}
+				[{{$location._skuInfo.sid}}]{{$location._skuInfo.title}}（{{$location.num}} / {{$location.occupied}}）<br />
+				{{/foreach}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+</div>

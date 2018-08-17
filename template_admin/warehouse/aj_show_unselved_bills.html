@@ -1,0 +1,41 @@
+
+<div class="form-group" style="margin-bottom: 100px;">
+    <div class="col-sm-12" style="font-size:14px;">
+        <span class="text-value">skuid：{{$sid}}</span>
+        <span class="text-value">名称：{{$title}}</span>
+    </div>
+    {{if empty($products)}}
+    <div class="col-sm-8" style="font-size:20px; color:red;">
+        <span class="text-value">暂无未上架的商品信息</span>
+    </div>
+    {{else}}
+    <div class="col-sm-8" style="font-size:18px; color:blue;">
+        <span class="text-value">最近15天未上架的单据</span>
+    </div>
+    {{/if}}
+    
+</div>
+
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>单号</th>
+        <th>单据类型</th>
+        <th>数量</th>
+        <th>入库时间</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $products as $p}}
+    <tr class="_j_product">
+        <td><a href="{{$p.link}}" target="_blank">{{$p.id}}</a></td>
+        <td>{{$p.desc}}</td>
+        <td>{{$p.num}}</td>
+        <td>{{$p.ctime}}</td>
+        <td><a href="{{$p.link}}" target="_blank">查看</a></td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>

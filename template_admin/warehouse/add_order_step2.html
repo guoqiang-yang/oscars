@@ -1,0 +1,86 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">添加采购订单</h1>
+
+  <form class="form-horizontal" role="form">
+    <input type="hidden" class="form-control" name="oid" value="{{$order.info.oid}}">
+
+    <div class="form-group">
+      <div class="col-sm-10">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>id</th>
+            <th>名称</th>
+            <th>类别</th>
+            <th>单价</th>
+            <th>数量</th>
+            <th>总价</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          {{*普采入口*}}
+          {{foreach $order.products[1] as $productItem}}
+          <tr data-sid="{{$productItem.sid}}">
+            <td>{{$productItem.sid}}</td>
+            <td>{{$productItem.sku.title}}</td>
+            <td>{{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}</td>
+            <td>￥{{$productItem.price / 100}}</td>
+            <td>{{$productItem.num}}</td>
+            <td>{{$productItem.num * $productItem.price / 100}}</td>
+            <td><a href="javascript:void(0);" class="_j_del_order_product" data-source="1" data-wid="{{$order.info.wid}}">删除</a></td>
+          </tr>
+          {{/foreach}}
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-10">
+        <a class="btn btn-primary" href="/warehouse/edit_in_order.php?oid={{$order.info.oid}}" style="margin-right:10px;">确定</a>
+        <button type="button" class="btn btn-default _j_select_product" data-toggle="modal">添加商品</button>
+        <button type="button" class="btn btn-default" data-toggle="modal" id="_j_supplier_history_products" data-oid="{{$order.info.oid}}" style="margin-left:16px;">历史采购商品</button>
+        
+      </div>
+    </div>
+
+  </form>
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="dlgAddProduct" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.info.oid}}">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">
+            选择商品
+            <div style="float:right;font-size:16px;margin-right:15px;">
+              <div class="form-inline _j_form">
+                <div class="form-group" style="margin-right:10px;">
+                  <input type="text" class="form-control" name="keyword" value="{{$keyword}}">
+                </div>
+                <button type="button" class="btn btn-primary _j_order_search_product">搜索</button>
+              </div>
+            </div>
+          </h4>
+        </div>
+        <div id="select_product_area">
+            
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" id="_j_btn_save_products" data-source="1" data-oid="{{$order.info.oid}}">确认选择</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+{{include "warehouse/block_get_supplier_history_products.html"}}

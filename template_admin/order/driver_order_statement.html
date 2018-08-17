@@ -1,0 +1,156 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        结算单列表
+    </h1>
+
+    <form class="form-inline" role="form" action="/logistics/driver_order_statement.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:10px;">
+                <label>创建时间：</label>
+                <input style="width: 180px;" type="date" class="form-control" name="start_ctime" value="{{$search_conf.start_ctime}}">
+                &nbsp; - &nbsp;
+                <input style="width: 180px;" type="date" class="form-control" name="end_ctime" value="{{$search_conf.end_ctime}}">
+            </div>
+            <!--<div class="form-group" style="margin-right:10px;">-->
+                <!--<label>结算时间：</label>-->
+                <!--<input style="width: 180px;" type="date" class="form-control" name="start_pay_time" value="{{$search_conf.start_pay_time}}">-->
+                <!--&nbsp; - &nbsp;-->
+                <!--<input style="width: 180px;" type="date" class="form-control" name="end_pay_time" value="{{$search_conf.end_pay_time}}">-->
+            <!--</div>-->
+        </div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>结算单号：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="id" value="{{$search_conf.id}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>工人ID：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="cuid" value="{{$search_conf.cuid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>工人类型：</label>
+                <select class="form-control" name="user_type" {{if $_user['user_type']}}disabled="true"{{/if}}>
+                {{foreach $user_types as $id => $type}}
+                <option value="{{$id}}" {{if $search_conf.user_type==$id}}selected="selected"{{/if}}>{{$type}}</option>
+                {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>仓库：</label>
+                <select class="form-control" name="wid" {{if $_user['wid']}}disabled="true"{{/if}}>
+                    <option value="0">请选择</option>
+                    {{foreach $warehouse_list as $wid => $name}}
+                    <option value="{{$wid}}" {{if $search_conf.wid==$wid}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>结算状态：</label>
+                <select class="form-control" name="step">
+                    {{foreach $step_list as $step => $name}}
+                    <option value="{{$step}}" {{if $search_conf.step==$step}}selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:20px;">查询</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <table class="table" style="text-align: center">
+        <thead>
+            <tr>
+                <th style="width:8%; text-align: center">结算单号</th>
+                <th style="width:8%; text-align: center">状态</th>
+                <th style="width:10%; text-align: center">仓库</th>
+                <th style="width:10%; text-align: center">创建人</th>
+                <th style="width:10%; text-align: center">确认人</th>
+                <th style="width:20%; text-align: center">工人信息</th>
+                <th style="width:15%; text-align: center">操作</th>
+            </tr>
+        </thead>
+        <tbody id="statement_area">
+            {{foreach $statement_list as $statement}}
+                <tr>
+                    <td>{{$statement.id}}</td>
+                    <td>{{$step_list[$statement['step']]}}</td>
+                    <td>{{$warehouse_list[$statement.wid]}}</td>
+                    <td>{{$staff_list[$statement['suid']]}}</td>
+                    <td>{{$staff_list[$statement['sure_suid']]}}</td>
+                    {{if $statement['user_type'] == 1}}
+                    <td>
+                        {{$driver_list[$statement['cuid']]['name']}}<br/>
+                        (ID:{{$statement.cuid}})<br/>
+                        {{$driver_list[$statement['cuid']]['mobile']}}<br/>
+                        来源: {{$source_list[$driver_list[$statement['cuid']]['source']]}}
+                    </td>
+                    {{elseif $statement['user_type'] == 2}}
+                    <td>
+                        {{$carrier_list[$statement['cuid']]['name']}}<br/>
+                        (ID:{{$statement.cuid}})<br/>
+                    </td>
+                    {{/if}}
+                    <td>
+                        {{if $statement.step == 1 && $search_conf.step == 1}}
+                        {{if !empty($_permissions['/order/ajax/sure_statement'])}}
+                        <a href="javascript:void(0)" class="sure_statement" data-id="{{$statement.id}}">确认</a>&nbsp;
+                        {{/if}}
+                        {{/if}}
+                        {{if !empty($_permissions['/order/statement_detail'])}}
+                        <a href="/finance/statement_detail.php?statement_id={{$statement.id}}&user_type={{$statement.user_type}}" target="_blank">详情</a>&nbsp;
+                        {{/if}}
+                        {{if !empty($_permissions['/order/coopworker_order_print'])}}
+                        <a href="javascript:void(0)" class="print_statement" data-id="{{$statement.id}}">打印</a>&nbsp;
+                        {{/if}}
+                        {{if $statement.step == 1}}
+                        {{if !empty($_permissions['/order/ajax/cancel_statement'])}}
+                        <a href="javascript:void(0)" class="cancel_statement" data-id="{{$statement.id}}">撤销</a>
+                        {{/if}}
+                        {{/if}}
+                        {{if $statement.step == 2 && ($statement.wid==5001 || $statement.wid==51) && !empty($_permissions['hc_order_paid_coopworker_franchisee'])}}
+                        {{if $statement['user_type'] == 1}}
+                        <a href="javascript:;" data-toggle="modal" data-price="{{$statement.price/100}}" data-id="{{$statement.id}}" data-target="#settlement" data-name="{{$driver_list[$statement['cuid']]['name']}}" data-mobile="{{$driver_list[$statement['cuid']]['mobile']}}" class="_j_settlement">结算</a>
+                        {{elseif  $statement['user_type'] == 2}}
+                        <a href="javascript:;" data-toggle="modal" data-price="{{$statement.price/100}}" data-id="{{$statement.id}}" data-target="#settlement" data-name="{{$carrier_list[$statement['cuid']]['name']}}" data-mobile="" class="_j_settlement">结算</a>
+                        {{/if}}
+                        {{/if}}
+                    </td>
+                </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+</div>
+<div class="modal fade _j_dialog" id="settlement" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.oid}}">
+    <div class="modal-dialog modal-sm" role="document" style="width:400px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">工人结算</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-right:20px;">
+                    <label>工人：</label>
+                    <span class="settlement_coopworker"></span>
+                </div>
+                <div class="form-group" style="margin-right:20px;">
+                    <label>结算单号：</label>
+                    <span class="settlement_id"></span>
+                </div>
+                <div class="form-group" style="margin-right:20px;">
+                    <label>支付金额：</label>
+                    <span class="settlement_price" style="color:red;"></span>
+                </div>
+                <div class="form-group" style="margin-right:20px;">
+                    <label>支付类型：</label>
+                    <input type="text" class="form-control payment_type" style="width: 120px;display: inline" value="加盟商支付" data-payment-type="98" disabled>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_confirm_pay_statement">确认支付</button>
+            </div>
+        </div>
+    </div>
+</div>

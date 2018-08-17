@@ -1,0 +1,81 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        添加商品
+    </h1>
+    <input type="hidden" id="fid" value="{{$fid}}">
+    <input type="hidden" id="type" value="{{$type}}">
+    <input type="hidden" id="position" value="{{$position}}">
+    <input type="hidden" id="search_url" value="{{$url}}">
+    <div class="col-lg-10" style="margin-left: -15px;">
+        <div class="input-group">
+            <span class="input-group-btn">
+                <button class="btn btn-default " type="button">商品名称：</button>
+            </span>
+            <input type="text" class="form-control" placeholder="请输入添加的商品名称" value="{{$keyword}}" id="search_product">
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button" id="search">Go!</button>
+            </span>
+        </div>
+    </div>
+    {{if $products !== null}}
+    <div >
+        <hr style="margin-top: 80px;"/>
+        <table class="table">
+            {{if $products !== array()}}
+            <thead>
+            <tr>
+                <th>pid</th>
+                <th>图片</th>
+                <th>商品信息</th>
+                <th>费用</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{foreach $products as $product}}
+            <tr data-pid="{{$product.product.pid}}" class="_j_product">
+                <td>{{$product.product.pid}}</td>
+                <td><img width="120" src="{{if $product.sku._pic}}{{$product.sku._pic.small}}{{else}}/i/nopic100.jpg{{/if}}"></td>
+                <td>
+                    【名称】{{$product.sku.title}}<br/>
+                    {{if !empty($product.sku.alias)}}<span style="color:gray;">【俗称】{{$product.sku.alias}}</span><br />{{/if}}
+                    {{if !empty($product.sku.unit)}}<span style="color:#2222F1;">【单位】{{$product.sku.unit}}</span><br />{{/if}}
+                    {{if !empty($product.sku.package)}}<span style="color:#0B8E1B;">【规格】{{$product.sku.package}}</span><br />{{/if}}
+                    {{if !empty($product.sku.bid)}}<span style="color:#912A08;">【品牌】{{foreach $brands as $brand}}{{if $brand.bid == $product.sku.bid}}{{$brand.name}}{{/if}}{{/foreach}}</span><br />{{/if}}
+                    {{if !empty($product.sku.mids)}}<span style="color:#DACC07;">【型号】{{foreach $models as $model}}{{if $product.sku.mids|strpos:$model.mid !== false}}{{$model.name}}  {{/if}}{{/foreach}}</span><br />{{/if}}
+                    <span style="color:#EB2705;">【城市】{{$city_list[$product.product.city_id]}}</span>
+                </td>
+                <td>
+                    {{if $product.product.ori_price > 0}}
+                    <span style="color: #DADB80">【原价】￥{{$product.product.ori_price / 100}}元</span><br />
+                    【促销价】￥{{$product.product.price / 100}}元<br />
+                    {{else}}
+                    【价格】￥{{$product.product.price / 100}}元<br />
+                    {{/if}}
+                    {{if $_isAdmin || $_isBuyer || $_isCityAdmin}}<span style="color:#2222F1;">【成本】￥{{$product.product.cost / 100}}元</span><br />{{/if}}
+                    <span style="color:#0B8E1B;">【电梯】￥{{$product.product.carrier_fee_ele / 100}}元</span><br />
+                    <span style="color:#912A08;">【楼梯】￥{{$product.product.carrier_fee / 100}}元</span>
+                </td>
+                <td>
+                    {{if $product.product.status > 0}}<span style="color:red;">(下架)</span>{{else}}上架{{/if}}<br/>
+                </td>
+                <td>
+                    <a href="{{$url}}?&pid={{$product.product.pid}}&fid={{$fid}}&type={{$type}}&position={{$position}}&sid={{$sid}}">添加</a><br/>
+                </td>
+            </tr>
+            {{/foreach}}
+            </tbody>
+            {{else}}
+            <span style="font-size: 18px;">没有找到商品</span>
+            {{/if}}
+        </table>
+        <nav>
+            <ul class="pagination">
+                {{$pageHtml nofilter}}
+                <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+            </ul>
+        </nav>
+    </div>
+    {{/if}}
+</div>

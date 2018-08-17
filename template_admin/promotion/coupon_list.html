@@ -1,0 +1,121 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+        优惠券&现金券列表
+	</h1>
+
+	<form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px;">
+                <label>券ID：</label>
+                <input type="number" class="form-control" name="a_id" value="{{$conf.a_id}}" />
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>券名：</label>
+                <input type="text" class="form-control" name="a_title" value="{{$conf.a_title}}" />
+            </div>
+			<div class="form-group" style="margin:0 20px;">
+				<label>类型：</label>
+				<select class="form-control" name="a_type" style="width: 100px;">
+					<option value="0" {{if $conf.a_type == 0}}selected="selected"{{/if}}>全部</option>
+					{{foreach $type_list as $key=>$type}}
+					<option value="{{$key}}" {{if $conf.a_type == $key}}selected="selected"{{/if}}>{{$type}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+
+    {{if !empty($_permissions["/activity/coupon_update"])}}
+    <div style="border-bottom: 1px inset #DDDDDD; clear: both; position: relative; height:25px;margin-bottom: 20px;">
+        <label style="float: right; margin-top: -15px;"><a href="/activity/coupon_update.php"><button type="button" class="btn btn-primary">新建优惠券</button></a></label>
+    </div>
+    {{/if}}
+
+	{{if count($list) > 0}}
+	<table class="table table-bordered" id="receivable_table">
+		<thead>
+		<tr>
+			<th width="60px">券ID</th>
+			<th width="300px">券名</th>
+			<th width="100px">类型</th>
+			<th width="180px">使用时间</th>
+			<th width="180px">额度</th>
+            <th width="80px">创建人</th>
+            <th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+		<tr>
+			<td align="center">{{$item.id}}</td>
+			<td>{{$item.title}}</td>
+			<td>{{$type_list[$item.coupon_type]}}</td>
+            <td>
+                {{if $item.validity_type == 1}}
+                [始]{{$item.validity_stime}}<br>[终]{{$item.validity_etime}}
+                {{else}}
+                {{$item.validity_extand}}日之内可用
+                {{/if}}
+            </td>
+			<td>
+                {{if $item.coupon_type !=3}}
+                {{foreach $item.conf as $key => $value}}
+                满{{$key}}元 减 {{$value}}元
+                {{/foreach}}
+                {{else}}
+                最高减{{$item.conf}}元
+                {{/if}}
+            </td>
+            <td>{{$item.create_suser}}</td>
+            <td align="center">
+                {{if !empty($_permissions["/activity/coupon_update"])}}
+                    <a style="margin-right: 20px;" href="/activity/coupon_update.php?mode=show&id={{$item.id}}">详情</a><br>
+                    {{if $item.m_status<4 }}<a style="margin-right: 20px;" href="/activity/coupon_update.php?id={{$item.id}}">修改</a><br>{{/if}}
+                    {{if $item.m_status==1}}
+                    <a style="margin-right: 20px;" href="javascript:;" class="del_activity" data-id="{{$item.id}}">删除</a><br />
+                    {{/if}}
+                {{/if}}
+                {{if !empty($_permissions["/activity/coupon_order_list"])}}
+                <a style="margin-right: 20px;" href="/activity/coupon_order_list.php?tid={{$item.id}}">订单</a><br />
+                {{/if}}
+                {{if !empty($_permissions["/activity/coupon_customer_list"])}}
+                <a style="margin-right: 20px;" href="/activity/coupon_customer_list.php?tid={{$item.id}}">发放记录</a>
+                {{/if}}
+            </td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+        </ul>
+    </nav>
+	{{else}}
+	暂无记录
+	{{/if}}
+</div>
+<script>
+	$(function () {
+        function onSaveSucc(data)
+        {
+            alert(data);
+            window.location.href = '/activity/coupon_list.php';
+        }
+
+        function onSaveFail(data)
+        {
+            alert(data.errmsg);
+            is_submit = false;
+        }
+	    $('.del_activity').on('click',function (){
+            if(confirm("确定要删除该活动吗？")){
+                var data = 'id='+$(this).attr('data-id')+'&action_type=delete';
+                K.post('/activity/ajax/save_coupon.php', data, onSaveSucc('删除成功'), onSaveFail);
+            }
+        });
+	});
+</script>

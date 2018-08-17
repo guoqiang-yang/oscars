@@ -1,0 +1,141 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">查看发票（ID：{{$info.id}}）</h1>
+    <div class="form-horizontal">
+        <div class="form-group">
+			<label class="col-sm-2 control-label">客户ID：</label>
+			<div class="col-sm-4">
+				{{$info.cid}}({{$info.customer_name}})
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">合同编号：</label>
+			<div class="col-sm-4">
+				{{$info.contract_number}}
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">开票城市：</label>
+			<div class="col-sm-4">
+				{{$city_list[$info.city_id]}}
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">发票类型：</label>
+            <div class="col-sm-4">
+                {{$invoice_types[$info.invoice_type]}}
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">开票名称：</label>
+			<div class="col-sm-4">
+				{{$info.title}}
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">付款单位：</label>
+            <div class="col-sm-4">
+                {{$info.pay_company}}
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">开票订单：</label>
+            <div class="col-sm-8">
+                <table class="table" style="border: solid 1px #ccc;">
+                    <tr style="background-color: #d8d6d6;">
+                        <th>订单ID</th>
+                        <th>付款方式</th>
+                        <th>付款时间</th>
+                        <th>实付金额</th>
+                    </tr>
+                    <tbody id="bill_ids">
+                    {{foreach $info['bill_orders'] as $item}}
+                    <tr id="bill_{{$item.oid}}">
+                        <td><input type="hidden" name="bill_ids" value="{{$item.oid}}">订单ID：<a href="/order/order_detail.php?oid={{$item.oid}}" target="_blank">{{$item.oid}}</a></td>
+                        <td>{{$item.payment_type}}</td>
+                        <td>{{$item.pay_time}}</td>
+                        <td>{{$item.real_amount/100}}</td>
+                    </tr>
+                    {{/foreach}}
+                    </tbody>
+                </table>
+                <div><span style="color: red; float: right;">价格汇总：¥&emsp;<span id="show_order_amount">{{if $info.real_amount > 0}}{{$info.real_amount}}{{else}}0.00{{/if}}</span></span></div>
+            </div>
+        </div>
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label">开票金额：</label>
+			<div class="col-sm-4">
+				{{$info.invoice_amount}}
+			</div>
+		</div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">服务费：</label>
+            <div class="col-sm-4">
+                {{if $info.service_type == 1}}
+                不开票
+                {{else}}
+                开票
+                {{/if}}
+                &emsp;¥&nbsp;{{$info.service_amount}}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">开票日期：</label>
+            <div class="col-sm-4">
+                {{$info.invoice_day}}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">批次：</label>
+            <div class="col-sm-4">
+                {{$info.batch}}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">票号：</label>
+            <div class="col-sm-4">
+                {{$info.number}}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">商品清单：</label>
+            <div class="col-sm-8">
+                <table class="table">
+                    <tr>
+                        <th>财务商品ID</th>
+                        <th>商品名</th>
+                        <th>分类</th>
+                        <th>采购单价</th>
+                        <th>开票单价</th>
+                        <th>开票数量</th>
+                        <th>总金额</th>
+                    </tr>
+                    <tbody>
+                    {{foreach $info.products as $product}}
+                    <tr>
+                        <td>{{$product.pid}}</td>
+                        <td>{{$product.title}}</td>
+                        <td>{{$product._cate1}}</td>
+                        <td>{{$product.cost/100}}</td>
+                        <td>¥{{$product.price/100}}</td>
+                        <td>{{$product.num}}</td>
+                        <td>{{$product.amount/100}}</td>
+                    </tr>
+                    {{/foreach}}
+                    {{if isset($info.products_amount)}}
+                    <tr>
+                        <td colspan="7" style="color: red; text-align: right;">价格总汇：¥&nbsp;{{$info.products_amount/100}}</td>
+                    </tr>
+                    {{/if}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

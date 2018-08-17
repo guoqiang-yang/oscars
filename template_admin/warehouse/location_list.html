@@ -1,0 +1,475 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		货位库存
+		<a target="_blank" href="/warehouse/sku_locations_list.php?wid={{$search.wid}}" style="margin-left:50px;">单sku多货架</a>
+		<a target="_blank" href="/warehouse/location_skus_list.php?wid={{$search.wid}}" style="margin-left:50px;">单货架多sku</a>
+	</h1>
+
+	<form class="form-inline" role="form" action="/warehouse/location_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:50px;">
+				<label>是否使用：</label>
+				<select class="form-control" name="is_used">
+					<option value="0" {{if $search.is_used==0}} selected="selected" {{/if}}>全部</option>
+					<option value="1" {{if $search.is_used==1}} selected="selected" {{/if}}>已使用</option>
+					<option value="2" {{if $search.is_used==2}} selected="selected" {{/if}}>未使用</option>
+				</select>
+			</div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>Sku_ID：</label>
+				<input type="text" class="form-control" name="sid" value="{{$search.sid}}" style="width:100px;">
+			</div>
+            <div class="form-group" style="margin-right:50px;">
+				<label>Sku名称：</label>
+				<input type="text" class="form-control" name="title" value="{{$search.title}}" style="width:100px;">
+			</div>
+
+			{{if count($_allowed_warehouses)>1}}
+			<div class="form-group" style="margin-right:50px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+					{{foreach $_allowed_warehouses as $wid => $wid_name}}
+					<option value="{{$wid}}" {{if $search.wid== $wid}}selected="selected" {{/if}}>{{$wid_name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			{{/if}}
+		</div>
+
+		<div class="placeholder">
+			<div class="form-group">
+				<label>按位置查找：</label>
+				<input class="form-control" type="text" value="{{$search.area}}" style="margin-right:5px; width: 80px;" name="area" placeholder="区域"> <span style="margin-right:5px;">-</span>
+				<input class="form-control" type="text" value="{{if !empty($search.shelf)}}{{$search.shelf}}{{/if}}" style="margin-right:5px; width: 80px;" name="shelf" placeholder="货架"> <span style="margin-right:5px;">-</span>
+				<input class="form-control" type="text" value="{{if !empty($search.layer)}}{{$search.layer}}{{/if}}" style="margin-right:50px; width: 80px;" name="layer" placeholder="架层">
+			</div>
+
+			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-right:30px;">查询</button>
+			<a href="/warehouse/location_list.php?wid={{$search.wid}}&un_shelved=1" class="btn btn-danger" style="margin-right:30px;">查询未上架</a>
+            {{if !empty($_permissions['/warehouse/ajax/add_location'])}}
+            <a href="javascript:;" class="btn btn-default" data-toggle="modal" data-target="#addWLocation" style="background-color:chocolate;">添加货位</a>
+            {{/if}}
+		</div>
+	</form>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>sid</th>
+			<th>SKU信息</th>
+            <th>仓库</th>
+			<th>货位</th>
+			<th>库存数量/占用</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $location_list as $loc}}
+		<tr class="dialog" data-id="{{$loc.id}}">
+			<td class="sid" data-sid="{{$loc.sid}}">
+				{{$loc.sid}}<br> {{if $loc.sid==0}}<span style="color:red;">未使用</span>{{/if}}
+			</td>
+			<td class="title">
+				{{if !empty($loc._skuInfo)}} <span>{{$loc._skuInfo.title}}</span> {{else}} -- {{/if}}
+			</td>
+            <td>
+                {{$_all_warehouses[$loc.wid]}}
+            </td>
+			<td class="loc" data-loc="{{$loc.location}}">
+				{{$loc.location}}
+                {{if $loc.is_virtual}}
+                <span style="color:red;">【虚拟货位】</span><br>
+                <span style="color:blue;">（{{$loc.virtual_type}}）</span>
+                {{/if}}
+			</td>
+			<td class="num" data-num="{{$loc.num}}" data-occupied="{{$loc.occupied}}">
+				{{$loc.num}} / {{$loc.occupied}}
+			</td>
+			<td>
+
+                {{if !$loc.is_virtual}}
+                    {{if !empty($_permissions['hc_inventory_profit'])}}
+                    <a href="javascript:;" class="chk_location_stock" data-toggle="modal" data-sid="{{$loc.sid}}" data-num="{{$loc.num}}" data-inventory-type="profit" data-target="#_j_select_inventory_profit" style="margin-right:10px;">盘盈</a>
+                    {{/if}}
+                {{/if}}
+                {{if !$loc.is_virtual || in_array($loc.location, $can_inventory_VFLoc)}}
+                    {{if !empty($_permissions['hc_inventory_loss'])}}
+                    <a href="javascript:;" class="chk_location_stock" data-toggle="modal" data-sid="{{$loc.sid}}" data-num="{{$loc.num}}" data-inventory-type="loss" data-target="#_j_select_inventory_loss" style="margin-right:10px;">盘亏</a>
+                    {{/if}}
+                {{/if}}
+                {{if !$loc.is_virtual || in_array($loc.location, $can_shift_VFLoc)}}
+                    {{if !empty($_permissions['/warehouse/ajax/save_shift_location_stock'])}}
+                    <a href="javascript:;" class="shift_location_stock" data-toggle="modal" data-target="#_j_shift_location_stock" style="margin-right:10px;">移架</a>
+                    {{/if}}
+                {{/if}}
+                {{if !$loc.is_virtual}}
+                    <br>
+                    {{if !empty($_permissions['/warehouse/stock_history'])}}
+                    <a href="/warehouse/stock_history.php?wid={{$search.wid}}&type=-1&sid={{$loc.sid}}" target="_blank" style="margin-right:10px;">历史</a>
+                    {{/if}}
+                    {{if $loc.num==0 && !empty($_permissions['/warehouse/ajax/del_sku_location'])}}
+                    <a href="javascript:;" class="del_sku_location" data-id="{{$loc.id}}"  data-sid="{{$loc.sid}}" data-loc="{{$loc.location}}" data-num="{{$loc.num}}" style="color:red; margin-right:10px;">删除</a>
+                    {{/if}}
+                    
+                    <a href="javascript:;" class="get_occupied_products" data-wid="{{$search.wid}}" style="color:gray; margin-right:10px;">查占用</a>
+                    <a href="javascript:;" class="refresh_occupied_products" data-wid="{{$search.wid}}" style="color:gray;">刷占用</a>
+                {{else}}
+                    <br>
+                    {{if !empty($_permissions['/warehouse/ajax/search_unshelved_bills'])}}
+                    <a href="javascript:;" class="search_un_shelved_bills" data-wid="{{$search.wid}}" data-vloc="{{$loc.location}}">查看未上架</a>
+                    {{/if}}
+                {{/if}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>
+
+
+<div class="modal fade _j_dialog" id="addWLocation" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">创建货位</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label" style="color:red;">货位-货区：</label>
+
+						<div class="col-sm-8">
+							<input type="text" class="form-control" name="area" placeholder="区域" style="display:inline-block;width:100px;"> <span> 【必填】英文字母：A B C...</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label" style="color:red;">货位-货架：</label>
+
+						<div class="col-sm-8">
+							<input type="text" class="form-control" name="shelf" placeholder="货架" style="display:inline-block;width:100px;"> <span> 【必填】数字：1 - 99</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">货位-架层：</label>
+
+						<div class="col-sm-8">
+							<input type="text" class="form-control" name="layer" placeholder="架层" style="display:inline-block;width:100px;"> <span> 【选填】数字：1 - 99</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">货位-层位：</label>
+
+						<div class="col-sm-8">
+							<input type="text" class="form-control" name="pos" placeholder="层位" style="display:inline-block;width:100px;"> <span> 【选填】数字：1 - 99</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label" style="color:red;">仓库：</label>
+
+						<div class="col-sm-8">
+							<select class="form-control" name="wid" style="width:50%;">
+								{{foreach $_allowed_warehouses as $wid => $wid_name}}
+								<option value="{{$wid}}" {{if $wid==$search.wid}} selected="selected" {{/if}}>{{$wid_name}}</option>
+								{{/foreach}}
+							</select>
+						</div>
+					</div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">SKU_ID：</label>
+
+						<div class="col-sm-8">
+							<input type="text" class="form-control" name="sid" placeholder="sku-id" style="display:inline-block;width:100px;"><span> 【必填】</span>
+						</div>
+                    </div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+
+						<div class="col-sm-8">
+							<span class="text-value" style="color:blue;">每次只能添加一个货位【暂行】！</span>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="_j_add_warehouse_location">保存</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog _j_check_location_stock" id="_j_select_inventory_profit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">货位库存-盘赢</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">名称：</label>
+                        <div class="col-sm-8">
+                            <span class="text-value chk_sku_title"></span>
+                        </div>
+                    </div>
+                    {{*
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">类型：</label>
+
+                        <div class="col-sm-8">
+                            <div class="radio" style="display:inline-block; margin-right:20px;">
+                              <label>
+                                <input type="radio" name="type" value="3"> 盘盈(增加)
+                              </label>
+                            </div>
+
+                            <div class="radio" style="display:inline-block;">
+                              <label>
+                                <input type="radio" name="type" value="2"> 盘亏(减少)
+                              </label>
+                            </div>
+                        </div>
+                    </div>
+                    *}}
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">数量：</label>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="text" name="num" style="width:40%; display:inline-block;">
+                            <span style="margin-left:5px;color:red;font-weight:bold;font-size:15px;">请填写实际库存数量</span><br>
+                            （货位数量：<span class="show_curr_num"></span>）
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">仓库：</label>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="text" name="wid" data-wid="{{$search.wid}}" value="{{$_allowed_warehouses[$search.wid]}}" style="width: 70%;" disabled="true">
+                        </div>
+                    </div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">盈亏原因：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="reason" style="width: 70%;display:inline-block;">
+								<option value="">全部</option>
+								{{foreach $reasons as $reason => $reason_desc}}
+								<option value="{{$reason}}">{{$reason_desc}}</option>
+								{{/foreach}}
+							</select>
+							<span style="margin-left:5px;color:red;font-weight:bold;font-size:15px;display:inline-block">* 必选项</span>
+						</div>
+					</div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">备注：</label>
+                        <div class="col-sm-8">
+                            <textarea class="form-control" name="note" row="2" style="width:290px;"></textarea>
+                            <span style="color:red;">(最多100个字)</span>
+                        </div>
+                    </div>
+                </form>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_save_chk_location_stock" data-inventory-type="profit">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade _j_dialog _j_check_location_stock" id="_j_select_inventory_loss" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">货位库存-盘亏</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">名称：</label>
+                        <div class="col-sm-8">
+                            <span class="text-value chk_sku_title"></span>
+                        </div>
+                    </div>
+                    {{*
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">类型：</label>
+
+                        <div class="col-sm-8">
+                            <div class="radio" style="display:inline-block; margin-right:20px;">
+                                <label>
+                                    <input type="radio" name="type" value="3"> 盘盈(增加)
+                                </label>
+                            </div>
+
+                            <div class="radio" style="display:inline-block;">
+                                <label>
+                                    <input type="radio" name="type" value="2"> 盘亏(减少)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    *}}
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">数量：</label>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="text" name="num" style="width:40%; display:inline-block;">
+                            <span style="margin-left:5px;color:red;font-weight:bold;font-size:15px;">请填写实际库存数量</span><br>
+                            （货位数量：<span class="show_curr_num"></span>）
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">仓库：</label>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="text" name="wid" data-wid="{{$search.wid}}" value="{{$_allowed_warehouses[$search.wid]}}" style="width: 70%;" disabled="true">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">盈亏原因：</label>
+                        <div class="col-sm-7">
+                            <select class="form-control" name="reason" style="width: 70%;display:inline-block;">
+                                <option value="">全部</option>
+                                {{foreach $reasons as $reason => $reason_desc}}
+                                <option value="{{$reason}}">{{$reason_desc}}</option>
+                                {{/foreach}}
+                            </select>
+                            <span style="margin-left:5px;color:red;font-weight:bold;font-size:15px;display:inline-block">* 必选项</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">备注：</label>
+                        <div class="col-sm-8">
+                            <textarea class="form-control" name="note" row="2" style="width:290px;"></textarea>
+                            <span style="color:red;">(最多100个字)</span>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_save_chk_location_stock" data-inventory-type="loss">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade _j_dialog" id="_j_shift_location_stock" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">货位库存-移架</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">名称：</label>
+
+						<div class="col-sm-8">
+							<span class="text-value chk_sku_title"></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">原货架：</label>
+
+						<div class="col-sm-7">
+							<input class="form-control" type="text" name="src_loc" style="width:40%;" disabled="true">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">移架类型：</label>
+
+						<div class="col-sm-7">
+
+							<select name="shift_type" id="change_shift_type" class="form-control" style="width:40%">
+								{{foreach $shift_types as $_type => $_conf}}
+								<option value="{{$_type}}" data-loc="{{$_conf['loc']}}" data-clock="{{$_conf['clock']}}">{{$_conf['name']}}</option>
+								{{/foreach}}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">目标货架：</label>
+
+						<div class="col-sm-7">
+							<input class="form-control" type="text" name="des_loc" style="width:40%;">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">数量：</label>
+
+						<div class="col-sm-7">
+							<input class="form-control" type="text" name="num" style="width:40%;"> （货架库存：<span id="show_loc_stock" style="color:red;font-weight:bold;"></span>）
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">仓库：</label>
+
+						<div class="col-sm-7">
+							<input class="form-control" type="text" name="wid" data-wid="{{$search.wid}}" value="{{$_allowed_warehouses[$search.wid]}}" style="width: 70%;" disabled="true">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+
+						<div class="col-sm-8">
+							<textarea class="form-control" name="note" row="2" style="width:290px;"></textarea> <span style="color:red;">(最多30个字)</span>
+						</div>
+					</div>
+				</form>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="_j_save_shift_location_stock">保存</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="show_un_shelved_bills" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:600px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">未上架订单</h4>
+            </div>
+            <div class="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade _j_dialog" id="show_occupied_products" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog modal-sm" role="document" style="width:600px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">查看占用</h4>
+				</div>
+				<div class="modal-body">
+					
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>

@@ -1,0 +1,67 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">
+    复购数据
+  </h1>
+
+  <form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+    <div class="placeholder">
+      <div class="form-group _j_date_selecter" style="margin-right: 20px;">
+        <label>下单时间：</label>
+        <select class="form-control" name="from_month">
+          {{foreach $month_list as $month}}
+          <option value="{{$month}}" {{if $from_month == $month}}selected="selected"{{/if}}>{{$month}}</option>
+          {{/foreach}}
+        </select>
+        To
+        <select class="form-control" name="end_month">
+          {{foreach $month_list as $month}}
+          <option value="{{$month}}" {{if $end_month == $month}}selected="selected"{{/if}}>{{$month}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+      <div class="form-group" style="margin-right:20px;">
+        <label>用户来源：</label>
+        <select class="form-control" name="user_type">
+          <option value="all" {{if $user_type == "all"}}selected="selected"{{/if}}>全部</option>
+          <option value="self" {{if $user_type == "self"}}selected="selected"{{/if}}>自行注册</option>
+          <option value="sales" {{if $user_type == "sales"}}selected="selected"{{/if}}>销售注册</option>
+        </select>
+      </div>
+	    <div class="form-group" style="float:right;">
+		    <button type="submit" name="action" value="download" class="btn btn-success">导出当前数据</button>
+	    </div>
+      <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+    </div>
+  </form>
+
+  {{if count($header_list) > 0}}
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        {{foreach $header_list as $header}}
+        <th>{{$header}}</th>
+        {{/foreach}}
+      </tr>
+    </thead>
+    <tbody>
+    {{foreach $data_list as $col_list}}
+    <tr>
+      {{foreach $col_list as $col}}
+      <td>{{$col}}</td>
+      {{/foreach}}
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+  {{else}}
+    没有数据
+  {{/if}}
+
+</div>
+
+<script>
+$(function () {
+
+})
+</script>

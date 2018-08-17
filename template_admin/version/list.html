@@ -1,0 +1,110 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">APP版本管理</h1>
+	<form class="form-inline" role="form" action="/activity/version_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:50px;">
+				<label>选择应用：</label>
+				<select class="form-control" name="cate" style="margin-right: 20px;">
+					<option value="0" {{if empty($search_conf.cate)}}selected="selected" {{/if}}>全部</option>
+					{{foreach $cate_list as $cate => $cname}}
+					<option value="{{$cate}}" {{if $search_conf.cate==$cate}}selected="selected"{{/if}}>{{$cname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+            <div class="form-group" style="margin-right:50px;">
+                <label>选择平台：</label>
+                <select class="form-control" name="platform" style="margin-right: 20px;">
+                    <option value="0" {{if empty($search_conf.platform)}}selected="selected" {{/if}}>全部</option>
+                    <option value="1" {{if $search_conf.cate==1}}selected="selected"{{/if}}>安卓</option>
+                    <option value="2" {{if $search_conf.cate==2}}selected="selected"{{/if}}>iOS</option>
+                </select>
+            </div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>选择环境：</label>
+				<select class="form-control" name="dev" style="margin-right: 20px;">
+					<option value="0" {{if empty($search_conf.dev)}}selected="selected" {{/if}}>全部</option>
+					{{foreach $dev_list as $dev => $dname}}
+					<option value="{{$dev}}" {{if $search_conf.dev==$dev}}selected="selected"{{/if}}>{{$dname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>渠道：</label>
+				<input type="text" class="form-control" name="channel" value="{{$search_conf.channel}}">
+			</div>
+			<div class="form-group" style="margin-right:50px;">
+				<label>版本号：</label>
+				<input style="max-width:120px;" type="text" class="form-control" name="version" value="{{$search_conf.version}}">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+		</div>
+	</form>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>ID</th>
+            <th>平台</th>
+			<th>应用</th>
+			<th>渠道</th>
+			<th>Version</th>
+			<th>是否强制升级</th>
+			<th>下载链接</th>
+			<th>发布者</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+		<tr>
+			<td>
+				{{$item.id}}
+			</td>
+            <td>
+                {{if $item.platform == 1}}
+                安卓
+                {{else}}
+                iOS
+                {{/if}}
+            </td>
+			<td>
+				应用：{{$item.cate_name}}<br />
+				环境：{{$item.dev_name}}
+			</td>
+			<td>
+				{{$item.channel}}
+			</td>
+			<td>
+				VersionCode：{{$item.version_code}}<br />
+				Version: {{$item.version}}
+			</td>
+            <td>
+                {{if $item.is_force}}是{{else}}否{{/if}}
+            </td>
+			<td>
+				{{$item.url}}<br />
+				<a href="{{$item.url}}" >下载</a>
+			</td>
+			<td>
+				{{$item.suid_info.name}}
+			</td>
+			<td>
+				<a onclick="return confirm('确定要删除该条记录吗？');" href="/version/delete.php?id={{$item.id}}">删除</a><br />
+				<a target="_blank" href="http://cli.im/url">去生成二维码</a><br />
+				<a target="_blank" href="http://dwz.wailian.work/">去生成短链接</a>
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+
+</div>

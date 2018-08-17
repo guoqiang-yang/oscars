@@ -1,0 +1,152 @@
+{{if !empty($stockRefundList)}}
+<h4 style="color: red;">退货单：</h4>
+<table class="table">
+    <thead>
+    <th style="width: 10%">退货单ID</th>
+    <th style="width: 10%">入库单ID</th>
+    <th style="width: 10%">供应商</th>
+    <th style="width: 10%">仓库</th>
+    <th style="width: 10%">退货金额</th>
+    <th style="width: 12%">退货时间</th>
+    <th style="width: 10%">操作</th>
+    <th style="width: 10%"><input type="checkbox" checked data-price="0" class="all_select">全选</th>
+    </thead>
+    <tbody class="son">
+    {{foreach $stockRefundList as $stockRefund}}
+        <tr>
+            <td>{{$stockRefund.srid}}</td>
+            <td>{{$stockRefund.stockin_id}}</td>
+            <td>{{$supplier.name}}</td>
+            <td>{{$warehouse[$stockRefund.wid]}}</td>
+            <td>￥{{$stockRefund.price/100}}</td>
+            <td>{{$stockRefund.ctime}}</td>
+            <td><a href="/warehouse/stockin_refund_detail.php?srid={{$stockRefund.srid}}" target="_blank">查看</a></td>
+            <td><input type="checkbox" price="{{$stockRefund.price/100}}" value="{{$stockRefund.srid}}" class="single_select"></td>
+        </tr>
+    {{/foreach}}
+    </tbody>
+</table>
+{{/if}}
+
+<h4 style="color: red;">入库单：</h4>
+{{if !empty($stockinList)}}
+<table class="table">
+    <thead>
+        <th style="width: 10%">入库单ID</th>
+        <th style="width: 10%">采购单ID</th>
+        <th style="width: 10%">仓库</th>
+        <th style="width: 10%">类型</th>
+        <th style="width: 10%">金额</th>
+        <th style="width: 12%">入库时间</th>
+        <th style="width: 10%">操作</th>
+    </thead>
+    <tbody>
+    {{foreach $stockinList as $stock}}
+    <tr>
+        <td class="stockin_id" data-stockin-id="{{$stock.id}}">{{$stock.id}}</td>
+        <td>{{$stock.oid}}</td>
+        <td>{{$warehouse[$stock.wid]}}</td>
+        <td>{{$purchase[$stock.source]}}</td>
+        <td class="stockin_price" data-price="{{$stock.price/100}}">￥{{$stock.price/100}}</td>
+        <td>{{$stock.ctime}}</td>
+        <td><a href="javascript:;" class="recall">撤回</a></td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>
+{{/if}}
+<hr>
+总计应付：<span style="color: red;" class="total_pay">￥ {{$totalPay}}</span><br>
+
+<span style="color: red;">*应付金额小于0时无法生成结算单</span>
+<button type="button" class="btn btn-primary _j_generate_statement" {{if $totalPay<0}} disabled{{/if}} style="float:right;">生成结算单</button>
+<script>
+    /*撤回*/
+    $('.recall').on('click', function () {
+        $(this).parent().parent().remove();
+        calFee();
+    });
+
+    $(document).ready(function () {
+        var flag = $('.all_select').prop('checked');
+        $('.single_select').each(function (i) {
+            $('.single_select').eq(i).prop('checked', flag);
+        });
+    });
+
+    /*全选*/
+    $('.all_select').on('change', function () {
+        var flag = $(this).prop('checked');
+
+        $('.single_select').each(function (i) {
+            $('.single_select').eq(i).prop('checked', flag);
+        });
+        calFee();
+    });
+
+    /*单选*/
+    $('.single_select').on('click', function () {
+        calFee();
+    });
+
+    /*算费*/
+    function calFee()
+    {
+        var refundPrice = 0;
+        $('.son input:checked').each(function (i) {
+            refundPrice += parseInt($(this).attr('price'));
+        });
+
+        var stockinPrice = 0;
+        $('.stockin_price').each(function (i) {
+            stockinPrice += parseInt($(this).data('price'));
+        });
+
+        var totalPay = stockinPrice - refundPrice;
+        $('.total_pay').html('￥ ' + totalPay);
+
+        if (totalPay < 0)
+        {
+            $('._j_generate_statement').attr('disabled', true);
+        } else {
+            $('._j_generate_statement').attr('disabled', false);
+        }
+    }
+
+    /*生成结算单*/
+    $('._j_generate_statement').on('click', function () {
+        /*获取入库单ID*/
+        var stockIns = [];
+        $('.stockin_id').each(function () {
+            stockIns.push($(this).data('stockin-id'));
+        });
+        /*获取退货单ID*/
+        var refundIds = [];
+        $('.son input:checked').each(function () {
+            refundIds.push($(this).val());
+        });
+
+        var para = {
+            stockinIds: stockIns,
+            refundIds: refundIds
+        };
+
+        if (stockIns.length > 0)
+        {
+            K.post('/warehouse/ajax/create_stockin_statements.php', para,
+                function (ret) {
+                    alert('操作已成功');
+                    window.location.reload();
+                },
+                function (err) {
+                    alert(err.errmsg);
+                    $('._j_generate_statement').attr("disabled",false);
+                }
+            );
+        } else {
+            alert('请选择需要结算的入库单!');
+            $(this).attr("disabled", true);
+        }
+
+    });
+</script>

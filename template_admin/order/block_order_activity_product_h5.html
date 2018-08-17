@@ -1,0 +1,73 @@
+{{if !empty($privilege['show_gift_products'])}}
+<!-- 赠品start -->
+<h5 style="padding: 5px 10px;">赠品</h5>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 activity_gift_products" style="border-top: 1px solid #ccc; padding: 10px 20px;">
+	{{foreach $privilege['show_gift_products'] as $item}}
+	<div style="overflow: auto; border-bottom: 1px solid #ccc; margin-bottom: 10px;">
+		<input type="checkbox" style="float: left; margin: 15% 3% 0 0;"
+			 	{{if in_array($item.pid, array_keys($privilege['gift_products'][$item['activity_id']]))}} checked="checked"{{/if}} 
+			 	id="gift_checkbox_{{$item.pid}}"
+				class="gift_checkbox"
+				data-pid="{{$item.pid}}"
+				data-price = "{{$item.price}}"
+				data-gift-num = "{{$item.num}}"
+			 	value="{{$item.pid}}" />
+	    <div style="float: left; position: relative; width: 30%;">
+	    <img style="width: 100%;" src="{{if $item.image}}{{$item.image}}{{else}}/i/nopic100.jpg{{/if}}" />
+	    </div>
+	    <div style="float: right; position: relative; width: 60%;">
+	        <p style="font-size: 16px;">{{$item.title}}</p>
+	        <p style="font-size: 15px;">￥{{$item.price / 100}}元/{{$item.unit}}</p>
+	        <div class="edit_gift_product">
+	        	<a data-pid="{{$item.pid}}" class="btn btn-sm btn-danger disabled edit_product_num" href="javascript:;">-</a>
+	            <input id="product_num_{{$item.pid}}" 
+	            data-product-id="{{$item.pid}}" 
+	            readonly="true" 
+	            class="product_list" 
+	            type="number" style="width: 60px;border: 1px solid #999; margin: 0 10px; height: 30px; line-height: 30px;text-align: center;" 
+	            value="{{$item.num}}" />
+	            <a data-pid="{{$item.pid}}" class="btn btn-sm btn-danger disabled edit_product_num" href="javascript:;">+</a>
+	        </div>
+	    </div>
+	</div>
+	{{/foreach}}
+</div>
+<!-- 赠品end -->
+{{/if}}
+{{if !empty($privilege['show_special_price_products'])}}
+<!-- 特价商品start -->
+<h5 style="padding: 5px 10px;">特价商品</h5>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 activity_special_products" style="border-top: 1px solid #ccc; padding: 10px 20px;">
+	{{foreach $privilege['show_special_price_products'] as $item}}
+	<div style="overflow: auto; border-bottom: 1px solid #ccc; margin-bottom: 10px;">
+		<input type="checkbox" style="float: left; margin: 15% 3% 0 0;" 
+		id="special_checkbox_{{$item.pid}}"
+		class="special_checkbox"
+		data-pid="{{$item.pid}}"
+		data-price = "{{$item.price}}"
+		data-special-num = "{{if $privilege['special_price_products'][$item['activity_id']][$item.pid]['num'] > 0}}{{$privilege['special_price_products'][$item['activity_id']][$item.pid]['num']}}{{else}}1{{/if}}"
+		value="{{$item.pid}}" 
+		{{if in_array($item.pid, array_keys($privilege['special_price_products'][$item['activity_id']]))}} checked="checked"{{/if}} />
+	    <div style="float: left; position: relative; width: 30%;">
+	    <img style="width: 100%;" src="{{if $item.image}}{{$item.image}}{{else}}/i/nopic100.jpg{{/if}}" />
+	    </div>
+	    <div style="float: right; position: relative; width: 60%;">
+	        <p style="font-size: 16px;">{{$item.title}}</p>
+	        <p style="font-size: 15px;">￥{{$item.price/100}}元/{{$item.unit}}&nbsp;<span style="color: #d43f3a;">(限购数量{{$item.num}})</span></p>
+	        <div class="edit_dis_product">
+	        	<a data-pid="{{$item.pid}}" class="btn btn-sm btn-danger edit_product_num minus_special_num" href="javascript:;">-</a>
+	            <input id="special_num_{{$item.pid}}" 
+	            data-special-id="{{$item.pid}}" 
+	            class="product_list" 
+	            type="number" 
+	            style="width: 60px;border: 1px solid #999; margin: 0 10px; height: 30px; line-height: 30px;text-align: center;" 
+	            value="{{if $privilege['special_price_products'][$item['activity_id']][$item.pid]['num'] > 0}}{{$privilege['special_price_products'][$item['activity_id']][$item.pid]['num']}}{{else}}1{{/if}}" 
+	            data-max-num="{{$item.num}}" />
+	            <a data-pid="{{$item.pid}}" class="btn btn-sm btn-danger edit_product_num plus_special_num" href="javascript:;">+</a>
+	        </div>
+	    </div>
+	</div>
+	{{/foreach}}
+</div>
+<!-- 特价商品end -->
+{{/if}}

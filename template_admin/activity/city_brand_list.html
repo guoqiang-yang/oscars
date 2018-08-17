@@ -1,0 +1,145 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		城市推荐品牌列表
+	</h1>
+    {{if !empty($_permissions['/activity/ajax/save_city_brand'])}}
+	<a href="javascript:;" class="btn btn-primary edit_city_brand" data-id="0">新增城市推荐品牌</a>
+    {{/if}}
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>id</th>
+			<th>城市</th>
+			<th>水</th>
+			<th>电</th>
+			<th>木</th>
+			<th>瓦</th>
+			<th>油</th>
+			<th>工具</th>
+			<th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+			<tr>
+				<td>
+					{{$item.id}}
+				</td>
+				<td>
+					{{$city_list[$item.city_id]}}
+				</td>
+				<td>
+                    {{foreach $item._water_1 as $bid}}
+					{{$brand_list[$bid].name}}<br>
+                    {{/foreach}}
+				</td>
+				<td>
+                    {{foreach $item._electric_2 as $bid}}
+                    {{$brand_list[$bid].name}}<br>
+                    {{/foreach}}
+				</td>
+				<td>
+                    {{foreach $item._wood_3 as $bid}}
+                    {{$brand_list[$bid].name}}<br>
+                    {{/foreach}}
+				</td>
+				<td>
+                    {{foreach $item._tile_4 as $bid}}
+                    {{$brand_list[$bid].name}}<br>
+                    {{/foreach}}
+				</td>
+				<td>
+                    {{foreach $item._oil_5 as $bid}}
+                    {{$brand_list[$bid].name}}<br>
+                    {{/foreach}}
+				</td>
+				<td>
+                    {{foreach $item._tools_6 as $bid}}
+                    {{$brand_list[$bid].name}}<br>
+                    {{/foreach}}
+				</td>
+				<td>
+                    {{if !empty($_permissions['/activity/ajax/save_city_brand'])}}
+					<a style="margin-right: 20px;" href="javascript:;" class="edit_city_brand" data-id="{{$item.id}}" data-city="{{$item.city_id}}" data-1="{{$item.water_1}}" data-2="{{$item.electric_2}}" data-3="{{$item.wood_3}}" data-4="{{$item.tile_4}}" data-5="{{$item.oil_5}}" data-6="{{$item.tools_6}}">修改</a>
+                    {{/if}}
+				</td>
+			</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li>
+				<a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+			</li>
+		</ul>
+	</nav>
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" id="edit_city_brand">
+	<div class="modal-dialog" role="document" style="width: 680px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title"></h4>
+			</div>
+			<div class="modal-body form-horizontal">
+				<div class="form-group">
+                    <label class="col-sm-3 control-label">选择城市:</label>
+                    <div class="col-sm-4">
+                        <select name="city_id" class="form-control">
+                            {{foreach $city_list as $city_id => $city_name}}
+                            <option value="{{$city_id}}">{{$city_name}}</option>
+                            {{/foreach}}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">水:</label>
+                    <div class="col-sm-6">
+                        <input name="water_1" value="" class="form-control" placeholder="请输入品牌ID,逗号分隔">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">电:</label>
+                    <div class="col-sm-6">
+                        <input name="electric_2" value="" class="form-control" placeholder="请输入品牌ID,逗号分隔">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">木:</label>
+                    <div class="col-sm-6">
+                        <input name="wood_3" value="" class="form-control" placeholder="请输入品牌ID,逗号分隔">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">瓦:</label>
+                    <div class="col-sm-6">
+                        <input name="tile_4" value="" class="form-control" placeholder="请输入品牌ID,逗号分隔">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">油:</label>
+                    <div class="col-sm-6">
+                        <input name="oil_5" value="" class="form-control" placeholder="请输入品牌ID,逗号分隔">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">工具:</label>
+                    <div class="col-sm-6">
+                        <input name="tools_6" value="" class="form-control" placeholder="请输入品牌ID,逗号分隔">
+                    </div>
+                </div>
+				<input type="hidden" value="" name="id">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary save_city_brand">保存</button>
+			</div>
+		</div>
+	</div>
+</div>

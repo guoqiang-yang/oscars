@@ -1,0 +1,143 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">成本队列（FIFO） </h1>
+    
+    <form class="form-inline" role="form" action="/shop/cost_queue.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>SKU ID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="sid" value="{{$sid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>仓库：</label>
+                <select class="form-control" name="wid">
+					{{foreach $allow_worehouses as $_wid=>$_wname}}
+					<option value="{{$_wid}}" {{if $wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+					{{/foreach}}
+				</select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+    <hr>
+    <div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:30px;">
+                <label>SKU详情：</label>
+                <span class="text-value">{{$skuinfo.title}}</span>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <div style="overflow: auto;">
+        <h4>成本队列</h4>
+        <div style="padding-left: 5%;">
+            {{if !empty($fifo_cost_list)}}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>成本（元）</th>
+                        <th>数量</th>
+                        <th>进队</th>
+                        <th width="10%">时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{foreach $fifo_cost_list as $item}}
+                    <tr>
+                        <td>{{$item['id']}}</td>
+                        <td>{{$item['cost']/100}}</td>
+                        <td>{{$item['num']}}</td>
+                        <td>
+                            {{if !empty($item['_in_href'])}}
+                            <a href="{{$item['_in_href']}}" target="_blank">{{$item['_in_desc']}}-{{$item['in_id']}}</a>
+                            {{else}}
+                            <span>{{$item['_in_desc']}}-{{$item['in_id']}}</span>
+                            {{/if}}
+                        </td>
+                        <td>{{$item['ctime']}}</td>
+                    </tr>
+                    {{/foreach}}
+                </tbody>
+            </table>
+            {{else}}
+            <p style="color:red;"><strong>暂无数据！</strong></p>
+            {{/if}}
+        </div>
+    </div>
+    
+    <hr>
+    
+    <div id="fifoCostArea" style="overflow: auto;">
+        <h4>成本历史</h4>
+        <div style="padding-left: 5%;">
+            {{if !empty($fifo_history)}}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>成本（元）</th>
+                        <th>数量</th>
+                        <th>出队</th>
+                        <th>进队</th>
+                        <th width="10%">时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{foreach $fifo_history as $item}}
+                    <tr>
+                        <td>{{$item['id']}}</td>
+                        <td>{{$item['cost']/100}}</td>
+                        <td>{{$item['num']}}</td>
+                        <td>
+                            {{if !empty($item['_out_href'])}}
+                            <a href="{{$item['_out_href']}}" target="_blank">{{$item['_out_desc']}}-{{$item['out_id']}}</a>
+                            {{else}}
+                            <span>{{$item['_out_desc']}}-{{$item['out_id']}}</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{if !empty($item['_in_href'])}}
+                            <a href="{{$item['_in_href']}}" target="_blank">{{$item['_in_desc']}}-{{$item['in_id']}}</a>
+                            {{else}}
+                            <span>{{$item['_in_desc']}}-{{$item['in_id']}}</span>
+                            {{/if}}
+                        </td>
+                        <td>{{$item['ctime']}}</td>
+                    </tr>
+                    {{/foreach}}
+                </tbody>
+            </table>
+            {{else}}
+            <p style="color:red;"><strong>暂无数据！</strong></p>
+            {{/if}}
+        </div>
+        <nav>
+            <ul class="pagination">
+                {{$page_html nofilter}}
+                <li><a style="color:#555;">共{{$history_total|string_format:"%d"}}个</a></li>
+            </ul>
+        </nav>
+    </div>
+        
+</div>
+
+
+<script>
+    $('#fifoCostArea').on('click', function(evt){
+        if ($(evt.target).hasClass('fifo_history_list'))
+        {
+            var para = {
+                sid: $('form').find('input[name=sid]').val(),
+                wid: $('form').find('select[name=wid]').val(),
+                start: $(evt.target).attr('data-start')
+            };
+            K.post('/shop/ajax/cost_history_queue.php', para, function(ret){
+                $('#fifoCostArea').html(ret.html);
+            });
+        }
+    });
+</script>
+

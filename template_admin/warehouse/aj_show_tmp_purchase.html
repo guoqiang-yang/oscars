@@ -1,0 +1,39 @@
+<table class="table">
+    <thead>
+    <tr>
+        <th width="16%;">商品名称</th>
+        <th>应采购数量</th>
+        <th width="18%;">实际采购数量</th>
+        <th width="18%;">采购单价</th>
+        <th>订单信息</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $products as $sid=>$p}}
+    <tr class="_j_product" data-sid="{{$sid}}" data-pid="{{$p.pid}}">
+        <td>{{$p.title}}<br>{{$p.sid}}</td>
+        <td>
+            <span>虚采数量：{{$p.vnum}}</span><br>
+            <span>已购数量：<span class="had_buy">{{$p.vnum}}</span></span><br>
+            <span>采购差值：<span class="diff_num">{{$p.vnum_diff}}</span></span>
+        </td>
+        <td>
+            <input class="form-control" type="text" name="real_purchase" value="{{$p.vnum}}" data-vnum="{{$p.vnum}}" style="width: 60%; display:inline;">{{$p.unit|default:'个'}}
+            <br>
+            <span style="color:red;font-size:14px;">修改后，<a class="save_real_purchase" href="javascript:;">点击保存</a></span>
+        </td>
+        <td>
+            <input class="form-control" type="text" name="price" value="{{$p.price/100}}" style="width: 60%; display:inline;">元
+        </td>
+        <td>
+            {{foreach $p.orders as $o}}
+            <div class="order_info" style="margin-bottom:4px;" data-oid="{{$o.oid}}" data-vnum="{{$o.vnum}}">
+                <span>订单ID：{{$o.oid}}</span><br>
+                <span>虚采数：{{$o.vnum}}</span>
+            </div>
+            {{/foreach}}
+        </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>

@@ -1,0 +1,272 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">
+		工单详情:{{$order.oid}}
+	</h1>
+	<h3 style="margin-left:20px;color:#5d5d5d;">投诉概况</h3>
+	<form class="form-horizontal" role="form" data-oid="{{$order.oid}}">
+		<div class="order-bottom" style="background: #F2F2F2;">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">投诉人：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale.contact_name}}
+					</span>
+				</div>
+				<label class="col-sm-2 control-label">投诉人ID：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+                         {{if $aftersale.fb_type == 1}}
+                            {{if $aftersale.type == 2 && $aftersale.typeid==1}}
+                            【客户ID】<a target="_blank" href="/order/customer_list_cs.php?cid={{$aftersale.fb_uid}}&asid={{$aftersale.id}}">{{$aftersale.fb_uid}}</a><br />
+                            {{else}}
+                            【客户ID】<a target="_blank" href="/crm2/customer_detail.php?cid={{$aftersale.fb_uid}}">{{$aftersale.fb_uid}}</a><br />
+                            {{/if}}
+                         {{else if $aftersale.fb_type == 2}}
+                        【司机】<a target="_blank" href="/logistics/driver.php?id={{$aftersale.fb_uid}}">{{$aftersale.fb_uid}}</a><br />
+                         {{else if $aftersale.fb_type == 3}}
+                        【搬运工】<a target="_blank" href="/logistics/carrier.php?id={{$aftersale.fb_uid}}">{{$aftersale.fb_uid}}</a><br />
+                         {{else}}
+                        【工作人员】<a target="_blank" href="/admin/staff_list.php?name={{$aftersale.contact_name}}&mobile={{$aftersale.contact_mobile}}">{{$aftersale.fb_uid}}</a><br />
+                         {{/if}}
+					</span>
+				</div>
+				<label class="col-sm-2 control-label">投诉类型：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale._re_type}}
+					</span>
+				</div>
+				<label class="col-sm-2 control-label">投诉人类型：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale._fb_type}}
+					</span>
+				</div>
+				<label class="col-sm-2 control-label">电话：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale.contact_mobile}}
+					</span>
+				</div>
+				{{if $aftersale.contact_way}}
+				<label class="col-sm-2 control-label">其他联系方式：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale.contact_way}}
+					</span>
+				</div>
+				{{/if}}
+				<label class="col-sm-2 control-label">问题描述：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale.content}}
+					</span>
+				</div>
+				{{if !empty($aftersale.pic_ids)}}
+				<label class="col-sm-2 control-label">图片：</label>
+				<div class="col-sm-10">
+					{{foreach $aftersale.pic_urls as $pic}}
+					<div style="display:inline-block; margin-right:20px;">
+						<div><img style="max-width:550px;" src="{{$pic}}"></div>
+						<div style="margin-top:15px;">
+							<a style="" type="button" class="btn btn-default" href="{{$pic}}" target="_blank">查看原图</a>
+						</div>
+					</div>
+					{{/foreach}}
+				</div>
+				{{/if}}
+			</div>
+		</div>
+	</form>
+	{{if !empty($orders)}}
+	<h3 style="margin-left:20px;color:#5d5d5d;">订单信息</h3>
+	<form class="form-horizontal" role="form" data-oid="{{$key}}">
+		<div class="order-bottom" style="background: #F2F2F2;">
+			{{foreach $orders as $key => $order}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label" style="font-size: 17px;">订单ID：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+						<a href="/order/order_detail.php?oid={{$key}}" target="_blank" >{{$key}}</a>
+					</span>
+				</div>
+				<label class="col-sm-2 control-label">收货地址：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+						{{$order.address}}
+					</span>
+				</div>
+
+				<div class="col-sm-8">
+					<table class="table table-bordered col-sm-8 col-sm-offset-1" style="background: white; text-align: center;margin-left: 80px;">
+						<thead>
+						<tr>
+							<th class="col-sm-1" style="text-align: center;">商品ID</th>
+							<th class="col-sm-3" style="text-align: center;">商品名</th>
+							<th class="col-sm-3" style="text-align: center;">单价</th>
+							<th class="col-sm-1" style="text-align: center;">数量</th>
+						</tr>
+						</thead>
+						<tbody>
+						{{foreach $order.products as $product}}
+						<tr>
+							<td>{{$product.pid}}</td>
+							<td>{{$product.sku.title}}</td>
+
+							<td>&yen;{{$product.price/100}}</td>
+							<td>{{$product.num}}</td>
+						</tr>
+						{{/foreach}}
+						</tbody>
+					</table>
+				</div>
+
+			</div>
+			{{/foreach}}
+			{{if $aftersale.type < 4}}
+			{{foreach $r_orders as $rid=>$r_order}}
+			<div class="form-group">
+				<label class="col-sm-2 control-label" style="font-size: 17px;">{{$aftersale.re_type}}ID：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+						{{$rid}}
+					</span>
+				</div>
+				<label class="col-sm-2 control-label">收货地址：</label>
+				<div class="col-sm-10">
+					<span class="text-value">
+						{{$r_order.address}}
+					</span>
+				</div>
+				<div class="col-sm-8">
+					<table class="table table-bordered col-sm-8 col-sm-offset-1" style="background: white; text-align: center;margin-left: 80px;">
+						<thead>
+						<tr>
+							<th class="col-sm-1" style="text-align: center;">商品ID</th>
+							<th class="col-sm-3" style="text-align: center;">商品名</th>
+							<th class="col-sm-3" style="text-align: center;">单价</th>
+							<th class="col-sm-1" style="text-align: center;">数量</th>
+						</tr>
+						</thead>
+						<tbody>
+						{{foreach $r_order.products as $product}}
+						<tr>
+							<td>{{$product.pid}}</td>
+							<td>{{$product.sku.title}}</td>
+							<td>&yen;{{$product.price/100}}</td>
+							<td>{{$product.num}}</td>
+						</tr>
+						{{/foreach}}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			{{/foreach}}
+			{{/if}}
+		</div>
+	</form>
+	{{/if}}
+	<h3 style="margin-left:20px;color:#5d5d5d;">工单流转&&处理</h3>
+	<div class="order-bottom" style="background: #F2F2F2;">
+		<div class="form-group">
+			<div class="col-sm-8" style="margin-top: 25px;">
+				<table class="table table-bordered col-sm-10 col-sm-offset-1" style="background: white; text-align: center;margin-left: 80px;width:800px;">
+					<thead style="background:#b6b6b6">
+					<tr>
+						<th style="text-align: center;width:10%;">受理部门</th>
+						<th style="text-align: center;width:10%;;">受理人</th>
+						<th style="text-align: center;width:10%;">操作</th>
+						<th style="text-align: center;width:35%;">处理方案</th>
+						<th style="text-align: center;width:15%;">操作后状态</th>
+						<th style="text-align: center;width:20%;">处理时间</th>
+					</tr>
+					</thead>
+					<tbody>
+					{{foreach $log as $item}}
+					<tr>
+						<td>{{$item.exec_department}}</td>
+						<td>{{$item.username}}</td>
+						<td>{{$item.action}}</td>
+						<td>{{$item.content}}</td>
+						<td>{{$item.after_step}}</td>
+						<td>{{$item.mtime}}</td>
+					</tr>
+					{{/foreach}}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">工单处理</h1>
+	<input type="hidden" name="all_staffs" value="{{$staff_grouped}}">
+	<form class="form-horizontal" role="form">
+		<input type="hidden" class="form-control" id="id" value="{{$id}}">
+		<div class="form-group">
+			<label class="col-sm-2 control-label">当前状态：</label>
+			<label class="col-sm-2 control-label" style="text-align:left;color:red;margin-left: -7px;">【{{$status[$exec_result]}}】</label>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">处理方式：</label>
+			<div class="col-sm-2">
+				<select class="form-control" id="deal_method" >
+					<option value="0" {{if !$info.duty_department}} selected="selected" {{/if}}>请选择</option>
+					{{foreach $deal_method as $_did => $_dname}}
+					<option value="{{$_did}}">{{$_dname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group" id="deal_done">
+			<label class="col-sm-2 control-label">处理方案：</label>
+			<div class="col-sm-4">
+				<textarea class="form-control" id="exec_result" maxlength="200"></textarea>
+			</div>
+			<label style="color:red;text-align:left;" class="col-sm-2 control-label">*200字以内</label>
+		</div>
+		<div class="form-group"  id="deal_assign">
+			<label class="col-sm-2 control-label">指派给：</label>
+			<div class="radio col-sm-6">
+				<label style="margin-right:10px;" class="col-sm-3">
+					<input type="radio" value="1" name="deal_assign">其他工作组
+				</label><label style="margin-right:10px;" class="col-sm-3">
+					<input type="radio" value="2" name="deal_assign">本组内其他人
+				</label><label style="margin-right:10px;" class="col-sm-3">
+					<input type="radio" value="3" name="deal_assign">不指派
+				</label>
+			</div>
+		</div>
+		<div class="form-group" id="deal_assign_container">
+			<div class="col-sm-4 col-sm-offset-2"  id="deal_assign_own" >
+				<select class="form-control" id="deal_member" >
+					<option value="0">请选择</option>
+					{{foreach $work_group as $user}}
+					{{if $uid!= $user['suid']}}
+					<option value="{{$user['suid']}}">{{$user['name']}}</option>
+					{{/if}}
+					{{/foreach}}
+				</select>
+			</div>
+			<div class="col-sm-4 col-sm-offset-2" id="deal_assign_other">
+				<select id="_adtask_change_role" name="exec_role" class="form-control" style="width:45%; margin-right:5px; display:inline;">
+					<option value="0">请选择部门</option>
+					{{foreach $staff_roles as $_role=>$_desc}}
+					<option value="{{$_role}}">{{$_desc}}</option>
+					{{/foreach}}
+				</select>
+
+				<select name="exec_suid" id="exec_suid" class="form-control" style="width:45%; display:inline;">
+					<option value="0"> -- </option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="button" class="btn btn-primary" id="btn_deal_save" style="margin-right:20px;">提交</button>
+			</div>
+		</div>
+	</form>
+</div>

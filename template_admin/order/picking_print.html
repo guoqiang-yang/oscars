@@ -1,0 +1,164 @@
+<style>
+  h1 {font-family: STKaiti;}
+  table {font-size:12px; border-spacing: 0;border-collapse: collapse; }
+  table td {padding:2px 5px;}
+  table.border td {border:1px solid #333;}
+</style>
+<style type="text/css" media=print>
+  .noprint{display : none }
+</style>
+<div>
+  <!--begin-->
+  <div style="text-align: center;">
+      {{if $is_ya_che}}
+      <h1 style="border: 2px solid #222;padding: 3px 8px 0;display: inline-block;margin-right: 20px;font-size: 28px;">押车</h1>
+      {{/if}}
+        {{if $is_first_order}}
+        <h1 style="border: 2px solid #222;padding: 3px 8px 0;display: inline-block;margin-right: 20px;font-size: 28px;">首单</h1>
+        {{elseif $is_paid}}
+        <h1 style="border: 2px solid #222;padding: 3px 8px 0;display: inline-block;margin-right: 20px;font-size: 28px;">已支付</h1>
+        {{elseif $is_vip}}
+        <h1 style="border: 2px solid #222;padding: 3px 8px 0;display: inline-block;margin-right: 20px;font-size: 28px;">VIP</h1>
+        {{/if}}
+        <h1 style="text-align: center;display: inline-block; font-size:28px;">
+	      {{if $order.source_oid > 0 && $order.aftersale_type == 1}}
+	      好材拣货单（补）【原单:{{$order.source_oid}}】
+	      {{else if $order.source_oid <= 0 && $order.aftersale_type == 0}}
+	      好材拣货单
+          {{else if $order.aftersale_type == 2}}
+          好材退货费用单
+          {{/if}}
+        </h1>
+	<img style="width: 200px; height: 38px;" src="/common/barcode.php?text={{$order.oid}}#&size=50" />
+  </div>
+  <table width="100%" style="font-size:12px;">
+    <tbody>
+    <tr>
+      <td width="33%">送货日期：{{$order._delivery_date|mb_substr:5}}</td>
+      <td width="33%">单据编号：{{$order.oid}}</td>
+      <td width="33%">发货仓库：{{$order._warehouse_name}}</td>
+    </tr>
+    <tr>
+      <td width="33%">客户单位：{{$customer.name}}</td>
+      <td width="33%">收 货 人：{{$order.contact_name}}</td>
+      <td width="33%">收货电话：{{$order.contact_phone}}{{if $order.contact_phone2}} , {{$order.contact_phone2}}{{/if}}</td>
+    </tr>
+    <tr>
+      <td colspan="3">送货地址：{{$order.print_address}}</td>
+      <td><!--{{if $order.contact_phone != $customer._user.mobile}}客户电话：{{$customer._user.mobile}}{{/if}}--></td>
+    </tr>
+    </tbody>
+  </table>
+
+  {{$row_index=1}}
+  <table class="border" width="100%" style="font-size:12px;">
+    <thead>
+      <tr>
+        <td width="5%">行号</td>
+        <td>商品全称</td>
+        <td>条码</td>
+        <td width="12%">货架</td>
+        <td>单位</td>
+        <td>总数</td>
+        <td>可拣</td>
+        <td>缺货</td>
+        <td width="15%">备注</td>
+      </tr>
+    </thead>
+    <tbody>
+    {{foreach $products as $area => $_products}}
+    {{foreach $_products as $product}}
+    {{if $product.sku.type == 3}}
+    {{$row_num = count($product.sku._rel_sku)}}
+    {{$row_num = $row_num+1}}
+    {{else}}
+    {{$row_num = 1}}
+    {{/if}}
+    <tr data-area="{{$area}}" {{if "空采"==$area}} style="background-color:#E0E0E0;"{{/if}} style="font-size:9px;">
+        <td rowspan="{{$row_num}}">{{$row_index}}</td>
+        <td>{{$product.sku.title}}</td>
+        <td>{{$product.sid}}</td>
+        <td>{{if "空采"==$area}}临采{{else}}{{$product.location}}{{/if}}</td>
+        <td>{{if $product.sku.unit}}{{$product.sku.unit}}{{else}}个{{/if}}</td>
+        <td>{{$product.num}}</td>
+        <td>{{$product.num-$product.vnum}}</td>
+        <td>{{$product.vnum}}</td>
+        <td>{{if $product.vnum>0 && $product.show_buy_type==1}}（缺货）　{{elseif $product.vnum>0&&$product.show_buy_type==2}}（临采） {{/if}}{{$product.note}}</td>
+    </tr>
+    {{if $product.sku.type == 3}}
+    {{foreach $product.sku._rel_sku as $_product}}
+    <tr data-area="{{$area}}" {{if "空采"==$area}} style="background-color:#E0E0E0;"{{/if}}  style="font-size:9px;">
+        <td>&emsp;&emsp;--{{$_product.title}}</td>
+        <td>{{$_product.sid}}</td>
+        <td></td>
+        <td>{{$_product.unit}}</td>
+        <td></td>
+        <td>{{if "空采"!=$area}}{{($product.num-$product.vnum) * $_product.num}}{{/if}}</td>
+        <td>{{if "空采"==$area}}{{$product.vnum * $_product.num}}{{/if}}</td>
+        <td></td>
+    </tr>
+    {{/foreach}}
+    {{/if}}
+
+    {{$row_index=$row_index+1}}
+    {{/foreach}}
+    <tr>
+      <td colspan="8"></td>
+    </tr>
+    {{/foreach}}
+
+    {{if $order.service > 0}}
+    <tr style="font-size:12px;">
+      <td>上楼</td>
+      <td colspan="8">
+        {{if $order.service == 1}}
+        电梯上楼
+        {{else}}
+        楼梯上楼（{{$order.floor_num}}层）
+        {{/if}}
+      </td>
+    </tr>
+    {{/if}}
+
+
+
+    <tr style="font-size:12px;">
+      <td>备注</td>
+      <td colspan="8">
+          <span style="margin-left:10px; font-size: 14px;">{{$order.customer_note}}</span>
+        {{if 3==$order.payment_type}}
+        <span style="margin-left:10px; font-size: 16px;"><b>（POS机刷卡）</b></span>
+        {{/if}}
+	      {{if $has_weixing_product}}
+	      <span style="margin-left:10px; font-size: 16px;"><b>（送伟星打压卡）</b></span>
+	      {{/if}}
+      </td>
+    </tr>
+
+    </tbody>
+  </table>
+
+  <table width="100%">
+    <tbody>
+    <tr style="vertical-align:top;">
+      {{if $saler}}
+      <td style="padding:10px 10px 0;">销售专员：{{$saler.name}} {{$saler.mobile}}</td>
+      {{else}}
+      <td style="padding:10px 10px 0;">销售电话：15201683357</td>
+      {{/if}}
+      <td style="padding:10px 10px 0;" colspan="1">司　　机：{{$order.driver_names}}</td>
+
+    <tr/>
+    </tbody>
+  </table>
+
+  <div class="noprint">
+    <div style="margin-top:30px;">
+      <input id="print-order" type="button" value="打印" data-oid="{{$order.oid}}" style="font-size: 25px;padding: 5px 15px;">
+    </div>
+  </div>
+
+
+</div>
+
+

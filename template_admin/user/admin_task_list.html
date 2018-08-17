@@ -1,0 +1,126 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+
+  <h1 class="page-header">
+    <span>任务列表</span>
+    <span style="float:right;font-size:16px;">
+      <a href="javascript:;" class="btn btn-primary _j_show_admin_task" data-objid="0" data-objtype="0">添加新任务</a>
+    </span>
+  </h1>
+
+  <form class="form-inline" role="form" action="/user/admin_task_list.php">
+    
+    <div class="placeholder">
+      
+      <div class="form-group" style="margin-right:30px;">
+        <label>HC员工：</label>
+        
+        <select class="form-control customer_kind" name="suid" {{if !$_isAdmin}} disabled="true"{{/if}}>
+          <option value="0">全部</option>
+          {{foreach $all_staffs as $oner}}
+          <option value="{{$oner.suid}}" {{if $search_conf.suid==$oner.suid}}selected="selected"{{/if}}>{{$oner.name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+      
+      <div class="form-group" style="margin-right:30px;">
+        <label>状态：</label>
+        
+        <select class="form-control" name="exec_status" >
+          <option value="0" {{if $search_conf.exec_status==0}}selected="selected"{{/if}}>全部</option>
+          {{foreach $all_exec_status as $_id => $status_name}}
+          <option value="{{$_id}}" {{if $search_conf.exec_status==$_id}}selected="selected"{{/if}}>{{$status_name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+      
+      <div class="form-group" style="margin-right:30px;">
+        <label>类型：</label>
+        
+        <select class="form-control" name="objtype" >
+          <option value="0" {{if $search_conf.objtype==0}} selected="selected"{{/if}}>全部</option>
+          {{foreach $all_objtype as $_id => $desc}}
+          <option value="{{$_id}}" {{if $search_conf.objtype==$_id}}selected="selected"{{/if}}>{{$desc}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+      
+      <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+    </div>
+    
+  </form>
+
+  <hr>
+  {{if $total > 0}}
+  <table class="table">
+    <thead>
+    <tr>
+      <th style="width:6%;">任务ID</th>
+      <th style="width:6%;">创建人</th>
+      <th style="width:10%;">执行人</th>
+      <th style="width:25%;">简介</th>
+      <th style="width:10%;">任务对象</th>
+      <th style="width:8%;">创建时间</th>
+      <th style="width:8%;">状态</th>
+      <th style="width:18%;">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $taskList as $task}}
+    <tr class="task_area" data-tid="{{$task.tid}}">
+      <td>{{$task.tid}}</td>
+      <td>{{$task._create_suid.name}}({{$task.create_suid}})</td>
+      <td>
+          {{if !empty($task.exec_suid)}}
+            {{$task._exec_suid.name}}({{$task.exec_suid}})
+          {{else}}
+            <span style="font-weight:bold;font-size:16px;">[{{$_all_roles[$task.exec_role]}}]</span>任务
+          {{/if}}
+      </td>
+      <td>
+        [{{$all_objtype[$task.objtype]}}] - [{{$all_short_desc[$task.objtype][$task.short_desc]}}] - {{$task.title}}
+      </td>
+      <td><a href="{{$task._objtype.link}}" target="_blank">{{$task._objtype.alias}}</td>
+      <td>{{$task.ctime}}</td>
+      <td>{{$all_exec_status[$task.exec_status]}}</td>
+      
+      {{if !empty($task.exec_suid) || $_isAdmin}}
+      <td>
+        <a href="/user/admin_task_detail.php?tid={{$task.tid}}" style="margin-right: 5px;">详情</a>
+        {{if empty($task.exec_suid)}}
+        <a href="javascript:;" class="get_task_tome" data-tid="{{$task.tid}}">认领</a>
+        {{/if}}
+        <br>
+        {{if ($_isAdmin || $task.exec_suid==$_uid) && $task.exec_status==2}}
+        <a href="javascript:;" class="modify_task_status" data-exec_status="3" data-tid="{{$task.tid}}" style="margin-right: 5px;">完成</a>
+        {{/if}}
+        {{if $_isAdmin || ($task.create_suid==$_uid && $task.create_suid==$task.exec_suid)}}
+          {{if $task.exec_status!=4 && $task.exec_status!=10}}
+          <a href="javascript:;" class="modify_task_status" data-exec_status="4" data-tid="{{$task.tid}}" style="margin-right: 5px;">关闭</a>
+          {{/if}}
+          {{if $task.exec_status!=10}}
+          <a href="javascript:;" class="modify_task_status" data-exec_status="10" data-tid="{{$task.tid}}" style="margin-right: 5px;">删除</a>
+          {{/if}}
+        {{/if}}
+      </td>
+      {{else}}
+      <td>
+          <a href="javascript:;" class="get_task_tome" data-tid="{{$task.tid}}">认领</a>
+      </td>
+      {{/if}}
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+  {{else}}  
+    无任务！
+  {{/if}}
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

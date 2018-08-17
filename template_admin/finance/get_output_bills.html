@@ -1,0 +1,30 @@
+<table class="table" id="bill_in_list">
+    <tr>
+        <th style="width: 60px;"><input type="checkbox" id="checkAll" />全选</th>
+        <th style="width: 80px;">oid</th>
+        <th style="width: 100px;">实付</th>
+        <th>运／搬／优</th>
+        <th style="width: 160px;">下单时间</th>
+        <th style="width: 160px;">送货时间</th>
+    </tr>
+    {{if !empty($bill_ids)}}
+    {{foreach $bill_ids as $item}}
+    <tr>
+        <td><input type="checkbox" onclick="checkAllOrder()" class="select" name="account_bill" value="{{$item.oid}}" data-payment-type="{{$item.payment_type}}" data-amount="{{$item.real_amount/100}}" data-time="{{$item.pay_time}}" data-price="{{$item.price/100}}" data-customer_carriage="{{$item.customer_carriage/100 + $item.freight/100}}"/></td>
+        <td>{{$item.oid}}</td>
+        <td>¥{{$item.real_amount/100}}</td>
+        <td>¥{{$item.freight/100}}／¥{{$item.customer_carriage/100}}／¥{{$item.privilege/100}}</td>
+        <td>{{$item.ctime}}</td>
+        <td>{{$item.delivery_date}}</td>
+    </tr>
+    {{/foreach}}
+    {{else}}
+    <tr><td colspan="6">暂无符合条件的订单</td></tr>
+    {{/if}}
+</table>
+<nav>
+    <ul class="pagination">
+        {{$pageHtml nofilter}}
+        <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+</nav>

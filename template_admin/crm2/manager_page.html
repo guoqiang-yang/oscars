@@ -1,0 +1,195 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">我的管理台</h1>
+  
+    <form class="form-inline" role="form" action="/crm2/manager_page.php">
+        
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:15px;">
+                <label>查看日期：</label>
+                <input type="date" class="form-control" name="from_date" value="{{$from_date}}" placeholder="YYYY-MM-DD">
+                <span> -- </span>
+                <input type="date" class="form-control" name="end_date" value="{{$end_date}}" placeholder="YYYY-MM-DD">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="search_manager" style="margin-left:40px;">查询</button>
+        </div>
+        
+        <div class="placeholder saler_groups">
+             <div class="form-group" style="margin-right:15px;">
+                 <label>销售小组：</label>
+             </div>
+            <div class="form-group" style="margin-right:15px;">
+                <div class="checkbox" style="font-size: 18px;">
+                    <label>
+                      <input id="selectAllSaler" type="checkbox" {{if $is_select_all}}checked="checked"{{/if}}> 全选
+                    </label>
+                </div>
+            </div>
+            {{foreach $saler_groups as $leader_id => $leader_name}}
+            <div class="form-group" style="margin-right:15px;">
+                <div class="checkbox" style="font-size: 18px;">
+                    <label>
+                      <input class="saler_leader" type="checkbox" name="saler_leader" value="{{$leader_id}}" {{if in_array($leader_id ,$saler_leaders)}}checked="checked"{{/if}}> {{$leader_name}}
+                    </label>
+                </div>
+            </div>
+            {{/foreach}}
+        </div>
+        
+    </form>
+  
+    <hr>
+    {{if empty($performance_list)}}
+    <font style="color:red;">暂无销售数据！</font>
+    {{else}}
+    
+    {{$totol_order = 0}}
+    {{$total_spending_amount_all = 0}}
+    {{$total_spending_amount_debt = 0}}
+    {{$total_refund_num = 0}}
+    {{$total_refund_price = 0}}
+    {{$total_private_customer = 0}}
+    {{$total_order_customer = 0}}
+    {{$total_record_customer = 0}}
+    {{$total_new_order_customer = 0}}
+    {{$total_after_sale = 0}}
+    {{$total_visit_scene = 0}}
+    {{$total_visit_unscene = 0}}
+    {{$total_schedules = 0}}
+    
+    <table class="table">
+        <thead>
+            <tr>
+              <th>销售名</th>
+              <th>订单量</th>
+              <th>业绩/欠款</th>
+              <th>退单量</th>
+              <th>退款额</th>
+              {{*<th>毛利率</th>*}}
+              <th>私海/下单客户</th>
+              <th>录入/下单新客</th>
+              <th>售后单</th>
+              <th>现场/远程拜访</th>
+              <th>待办日程</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{foreach $performance_list as $suid => $sinfo}}
+            <tr data-suid="{{$suid}}">
+                <td><a href="/crm2/sales_homepage.php?suid={{$suid}}" target="_blank">{{$sinfo._suser.name}}</a></td>
+                <td>{{$sinfo.order}}</td>
+                <td>
+                    <a href="/order/order_list.php" target="_blank">￥{{$sinfo.spending_amount.all}}</a><br>
+                    <span style="color:red;">（￥{{$sinfo.spending_amount.debt}}）</span>
+                </td>
+                <td><a href="/aftersale/refund_list.php" target="_blank">{{$sinfo.refund_stat.num}}</a></td>
+                <td>
+                    ￥{{$sinfo.refund}}
+                    <br>{{if $sinfo.spending_amount.all>0}}（{{($sinfo.refund/$sinfo.spending_amount.all*100)|string_format:"%.2f"}}%）{{else}}0.00%{{/if}}
+                </td>
+                {{*<td>--</td>*}}
+                <td><a href="/crm2/customer_list.php" target="_blank">{{$sinfo.total_customer}}/{{$sinfo.total_order_customer.all}}</a></td>
+                <td><a href="/crm2/customer_list.php" target="_blank">{{$sinfo.input}}/{{$sinfo.new_order_customer.all}}</a></td>
+                <td><a href="/aftersale/list.php" target="_blank">{{$sinfo.after_sales}}</a></td>
+                <td><a href="/crm2/customer_visit_list.php" target="_blank">{{$sinfo.visits.scene}}/{{$sinfo.visits.un_scene}}</a></td>
+                <td><a href="/crm2/sale_schedule_list.php" target="_blank">{{$sinfo.schedules}}</a></td>
+            </tr>
+            
+            {{$totol_order = $totol_order+$sinfo.order}}
+            {{$total_spending_amount_all = $total_spending_amount_all+$sinfo.spending_amount.all}}
+            {{$total_spending_amount_debt = $total_spending_amount_debt+$sinfo.spending_amount.debt}}
+            {{$total_refund_num = $total_refund_num+$sinfo.refund_stat.num}}
+            {{$total_refund_price = $total_refund_price+$sinfo.refund}}
+            {{$total_private_customer = $total_private_customer+$sinfo.total_customer}}
+            {{$total_order_customer = $total_order_customer+$sinfo.total_order_customer.all}}
+            {{$total_record_customer = $total_record_customer+$sinfo.input}}
+            {{$total_new_order_customer = $total_new_order_customer+$sinfo.new_order_customer.all}}
+            {{$total_after_sale = $total_after_sale+$sinfo.after_sales}}
+            {{$total_visit_scene = $total_visit_scene+$sinfo.visits.scene}}
+            {{$total_visit_unscene = $total_visit_unscene+$sinfo.visits.un_scene}}
+            {{$total_schedules = $total_schedules+$sinfo.schedules}}
+            
+            {{/foreach}}
+            <tr style="font-size:16px;background:yellowgreen;">
+                <td>汇总</td>
+                <td>{{$totol_order}}</td>
+                <td>
+                    ￥{{$total_spending_amount_all}}<br>
+                    <span style="color:red;">（￥{{$total_spending_amount_debt}}）</span>
+                </td>
+                <td>{{$total_refund_num}}</td>
+                <td>
+                    ￥{{$total_refund_price}}
+                    <br>{{if $total_spending_amount_all>0}}（{{($total_refund_price/$total_spending_amount_all*100)|string_format:"%.2f"}}%）{{else}}（0.00%）{{/if}}
+                </td>
+                {{*<td>--</td>*}}
+                <td>{{$total_private_customer}}/{{$total_order_customer}}</td>
+                <td>{{$total_record_customer}}/{{$total_new_order_customer}}</td>
+                <td>{{$total_after_sale}}</td>
+                <td>{{$total_visit_scene}}/{{$total_visit_unscene}}</td>
+                <td>{{$total_schedules}}</td>
+            </tr>
+        </tbody>
+    </table>
+    {{/if}}
+</div>
+
+<script>
+    
+    (function(){
+        
+        $('#selectAllSaler').on('click', function(){
+            if ($(this).is(':checked')) {
+                $('.saler_groups').find('input[name=saler_leader]').each(function(){
+                    this.checked = true;
+                });
+            } else {
+                $('.saler_groups').find('input[name=saler_leader]').each(function(){
+                    this.checked = false;
+                });
+            }
+        });
+        
+        $('.saler_leader').on('click', function(){
+            if ($(this).is(':checked')) {
+                var isSelectAll = true;
+                $('.saler_groups').find('input[name=saler_leader]').each(function(){
+                    if (!$(this).is(':checked')){
+                        isSelectAll = false;
+                        return;
+                    }
+                });
+                
+                if (isSelectAll){
+                    $('#selectAllSaler')[0].checked = true;
+                }
+                
+            } else {
+                $('#selectAllSaler').attr('checked', false);
+            }
+        });
+        
+        $('#search_manager').on('click', function(ev){
+            ev.preventDefault();
+            
+            var url = window.location.pathname;
+            
+            var leader = [];
+            $('.saler_groups').find('input[name=saler_leader]').each(function(){
+                if ($(this).is(':checked')) {
+                    leader.push($(this).val());
+                }
+            });
+            
+            var from_date = $('form').find('input[name=from_date]').val(),
+                end_date = $('form').find('input[name=end_date]').val(),
+                saler_leaders = leader.join(',');
+            
+            window.location.href = url+'?from_date='+from_date
+                                     +'&end_date='+end_date
+                                     +'&saler_leaders='+saler_leaders;
+        });
+        
+    })();
+</script>

@@ -1,0 +1,262 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">客户 - 账户余额明细</h1>
+
+	<form class="form-inline" role="form" action="/finance/customer_amount_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>客户ID：</label> <input class="form-control" type="text" name="cid" value="{{if $search.cid}}{{$search.cid}}{{/if}}" style="margin-right: 20px;" placeholder="请输入客户id">
+			</div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>单据类型：</label>
+                <select class="form-control" name="type">
+                    <option value="0" {{if 0==$search.type}}selected="selected"{{/if}}>全部</option>
+                    {{foreach $type_descs as $_tpid => $_desc}}
+                    <option value="{{$_tpid}}" {{if $_tpid==$search.type}}selected="selected"{{/if}}>{{$_desc}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+				<label>日期 (YYYY-MM-DD)：</label>
+				<input type="date" class="form-control" name="btime" value="{{if $search.btime}}{{$search.btime}}{{/if}}" style="width: 150px;">
+				<span> - </span>
+				<input type="date" class="form-control" name="etime" value="{{if $search.etime}}{{$search.etime}}{{/if}}" style="width: 150px;">
+			</div>
+            
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+
+	<hr>
+
+	{{if !empty($amount_list)}}
+	<table class="table">
+		<thead>
+		<tr>
+			<th>id</th>
+			<th>单据类型</th>
+			<th style="width:10%;">客户</th>
+			<th>余额减少</th>
+			<th>余额增加</th>
+			<th>余额汇总</th>
+			<th>收款方式</th>
+			<th style="width:10%;">日期</th>
+			<th style="width:14%;">备注</th>
+			<th>执行人</th>
+			<th>编辑</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $amount_list as $one}}
+		<tr>
+			<td>{{$one.id}}</td>
+			<td>
+				{{if !empty($one.objUrl)}}
+				<a href="{{$one.objUrl}}" target="_blank">{{$type_descs[$one.type]}}</a>
+				{{else}}
+				{{$type_descs[$one.type]}}
+				{{/if}}
+				{{if $one.objid}}
+				&nbsp;-&nbsp;{{$one.objid}}
+				{{/if}}
+                <br>
+                {{if !empty($one.city_name)}}<span style="color:gray;font-size:12px;">{{$one.city_name}}</span>{{/if}}
+			</td>
+			<td>
+				<a href="?cid={{$one.cid}}">{{$one._customer.name}}</a>&nbsp;
+				<a href="/crm2/customer_detail.php?cid={{$one.cid}}" style="color:gray;" target="_blank">(客户信息)</a>
+			</td>
+			<td>{{if $one.price<0}}￥{{$one.price/100}}{{/if}}</td>
+			<td>
+                {{if $one.price>0}}￥{{$one.price/100}}{{/if}}
+                {{if $one.type==1}}<br>（{{if isset($one._saler)}}{{$one._saler.name}}{{else}}无{{/if}}）{{/if}}
+            </td>
+			<td><span style="color:red;">￥{{$one.amount/100}}</span></td>
+			<td class="payment_name">{{$one.payment_name}}</td>
+			<td>{{$one.ctime}}</td>
+			<td>{{$one.note}}</td>
+			<td data-suid="{{$one._staff.suid}}">{{$one._staff.name}}</td>
+			<td>
+				{{if $one.type == 1 && !empty($_permissions['/finance/ajax/save_customer_payment_type'])}}
+				<a href="javascript:;" data-type="{{$one.type}}" data-id="{{$one.id}}" class="_j_modify_single_amount">修改</a>
+				{{else}}
+				<span>--</span>
+				{{/if}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+	<nav style="display: inline;">
+		<ul class="pagination" style="margin:0;">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+		</ul>
+
+	</nav>
+	{{else}} <span>无账务清单！！</span> {{/if}}
+
+	{{if !empty($search.cid) && !empty($_permissions['/finance/ajax/save_customer_amount'])}}
+	<a href="javascript:void(0);" class="btn btn-primary" data-toggle="modal" data-target="#FinanceOperationModal" style="margin-right:20px;float:left;">财务操作</a>
+	<a href="javascript:void(0);" class="btn btn-primary EmbodimentAnalysis" id="_j_show_embodiment_analysis" data-toggle="modal" data-target="#EmbodimentAnalysisModal" style="margin-right:20px;float:left;">提现分析</a>
+	{{/if}}
+</div>
+
+<div class="modal fade _j_dialog" id="FinanceOperationModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog modal-sm" role="document" style="width:600px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">财务操作</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">类型：</label>
+						<div class="col-sm-8">
+							<div>
+								<label class="radio-inline" style="width: 30%;">
+									<input type="radio" name="type" class="_j_chg_obj_type" value="1">
+									<span style="margin-right: 5%;">客户预付</span>
+								</label>
+                                <label class="radio-inline" style="width: 30%;">
+									<input type="radio" name="type" class="_j_chg_obj_type" value="10">
+									<span style="margin-right: 5%;">合同返点</span>
+								</label>
+								<label class="radio-inline" style="width: 30%;">
+									<input type="radio" name="type" class="_j_chg_obj_type" value="11">
+									<span style="margin-right: 5%;">支付税金</span>
+								</label>
+							</div>
+							<div>
+								<label class="radio-inline" style="width: 30%;">
+									<input type="radio" name="type" class="_j_chg_obj_type" value="5">
+									<span>客户提现</span>
+								</label>
+								<label class="radio-inline" style="width: 30%;">
+									<input type="radio" name="type" class="_j_chg_obj_type" value="8">
+									<span>客户补偿</span>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">金额：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="price" placeholder="金额" value="" style="display:inline-block;width:100px;">元
+						</div>
+					</div>
+                    {{*
+					<div class="form-group">
+						<label class="col-sm-3 control-label">返点基数：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="cash_rate" placeholder="返点基数" value="{{$cashback_rate|default:0}}" style="width: 100px;">
+							<span style="color:red;">客户预付返点（如：返3个点填写 3；不返点写0）；</span>
+							<span style="color:red;">返点不再返入余额，而是以VIP现金券的形式发放；</span>
+						</div>
+					</div>
+                    *}}
+					<div class="form-group payment_type">
+						<label class="col-sm-3 control-label">付款方式：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+								<option value="0">请选择</option>
+								{{foreach $payment_types as $type_id => $type_name}}
+								{{if $type_id != 8 &&  $type_id != 99}}<option value="{{$type_id}}">{{$type_name}}</option>{{/if}}
+								{{/foreach}}
+							</select>
+						</div>
+					</div>
+					<div class="form-group payment_type_amount" style="display: none;">
+						<label class="col-sm-3 control-label">付款方式：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+								<option value="8" selected>余额支付</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group payment_type_pay_back" style="display: none;">
+						<label class="col-sm-3 control-label">付款方式：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+								<option value="99" selected>补偿专用</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group" id="select-city">
+						<label class="col-sm-3 control-label">城市：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="city_id" style="display:inline-block;width:150px;">
+								<option value="0">请选择</option>
+								<option value="101" {{if $customer.city_id == 101}} selected {{/if}}>北京</option>
+								<option value="120" {{if $customer.city_id == 120}} selected {{/if}}>天津</option>
+								<option value="1310" {{if $customer.city_id == 1310}} selected {{/if}}>廊坊</option>
+								<option value="500" {{if $customer.city_id == 500}} selected {{/if}}>重庆</option>
+								<option value="5101" {{if $customer.city_id == 5101}} selected {{/if}}>成都</option>
+
+							</select>
+						</div>
+					</div>
+					<div class="form-group pay_tax" style="display: none;">
+						<label class="col-sm-3 control-label">支付税金：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="tax" placeholder="金额" value="" style="display:inline-block;width:100px;">元
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+						<div class="col-sm-7">
+							<textarea class="form-control" rows="2" name="note"></textarea>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary _j_finance_op_confirm" data-cid="{{$search.cid}}" data-type="3">确认调账</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="modal fade _j_dialog EmbodimentAnalysisModal" tabindex="-1" role="dialog" id="EmbodimentAnalysisModal" aria-labelledby="myModalLabel">
+
+</div>
+<div class="modal fade _j_dialog" id="modifyCustomerPaymentType" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">财务修改</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">支付情况：</label>
+						<div class="col-sm-7">
+							{{foreach $amount_list as $one}}
+							<span id="_j_pay_detail_{{$one.id}}" data-id="{{$one.id}}" class="payment_type" style="line-height:30px; font-size:16px;display: none;">原：{{$payment_types[$one.payment_type]}}</span>
+							{{/foreach}}
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">款项来源：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="paid_source" style="display:inline-block;width:150px;">
+								<option value="0">无</option>
+								{{foreach $payment_types as $src_id => $src_name}}
+								<option value="{{$src_id}}">{{$src_name}}</option>
+								{{/foreach}}
+							</select>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="_j_confirm_modify_payment_type">确认修改</button>
+			</div>
+		</div>
+	</div>
+</div>

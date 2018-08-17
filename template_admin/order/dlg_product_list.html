@@ -1,0 +1,99 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">
+        选择商品
+        <div style="float:right;font-size:16px;margin-right:15px;">
+            <div class="form-inline _j_form">
+                <div class="form-group" style="margin-right:10px;">
+                    <input type="text" class="form-control" name="keyword" value="{{$keyword}}">
+                </div>
+                <button type="button" class="btn btn-primary _j_order_search_product">搜索</button>
+            </div>
+        </div>
+    </h4>
+</div>
+{{if !empty($keyword)}}
+	<div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="_j_btn_save_products2" data-oid="{{$order.oid}}">确认选择</button>
+    </div>
+{{/if}}
+<div class="modal-body">
+	{{if empty($keyword)}}
+		请搜索商品
+	{{else}}
+		{{if empty($search_products)}}
+	    	暂无商品
+	    {{else}}
+	    <table class="table">
+	        <thead>
+	        <tr>
+	            <th>商品编号</th>
+	            <th>图片</th>
+	            <th>商品信息</th>
+	            <th>价格</th>
+	            <th>数量</th>
+	            <th>备注</th>
+	        </tr>
+	        </thead>
+	        <tbody>
+	        {{foreach $search_products as $product}}
+	        <tr class="_j_product_item" data-pid="{{$product.product.pid}}">
+	            <td>{{$product.product.pid}}</td>
+	            <td>
+	                <img width="100" src="{{if $product.sku._pic}}{{$product.sku._pic.small}}{{else}}/i/nopic100.jpg{{/if}}">
+	            </td>
+	            <td>
+	                <span id="product_name_{{$product.product.pid}}"><a href="/shop/product_search.php?keyword={{$product.product.pid}}" target="_blank">{{$product.sku.title}}</a></span><br/>
+	                {{if $product.sku.unit}}
+	                <br/>　单位：{{$product.sku.unit}}<br/>
+	                {{/if}}
+	                {{if $product.sku.package}}　
+	                包装：{{$product.sku.package}}<br/>
+	                {{/if}}
+	            </td>
+	            <td id="product_price_{{$product.product.pid}}" data-price="{{$product.product.price}}">
+	
+	                {{if $product.product.sale_price>0}}
+	                <del>原价：￥{{$product.product.price/100}}</del>
+	                <br />
+	                特价：￥{{$product.product.sale_price / 100}}
+	                {{else if $product.product.ori_price > 0}}
+	                <del>原价：￥{{$product.product.ori_price/100}}</del>
+	                <br />
+	                现价：￥{{$product.product.price / 100}}
+	                {{else}}
+	                ￥{{$product.product.price/100}}
+	                {{/if}}<br/>
+	            </td>
+	            <td class="col-sm-1">
+	                <input type="text" class="form-control" name="num" value="{{if !empty($order_products[$product.product.pid])}}{{$order_products[$product.product.pid].num}}{{else}}0{{/if}}">
+	            </td>
+	            <td style="display:none;" id="product_cate_{{$product.product.pid}}">
+	                {{$cate1_list[$product.sku.cate1]['name']}} - {{$cate2_list[$product.sku.cate2]['name']}}
+	            </td>
+	            <td style="display:none;" id="carrier_fee_{{$product.product.pid}}">
+	                {{$product.product.carrier_fee}}
+	            </td>
+	            <td style="display:none;" id="carrier_fee_ele_{{$product.product.pid}}">
+	                {{$product.product.carrier_fee_ele}}
+	            </td>
+	            <td class="col-sm-3">
+	                <input type="text" name="note" class="form-control" value="{{if !empty($order_products[$product.product.pid])}}{{$order_products[$product.product.pid].note}}{{/if}}">
+	            </td>
+	        </tr>
+	        {{/foreach}}
+	        </tbody>
+	    </table>
+	    {{/if}}
+	{{/if}}
+</div>
+<!-- 添加分页 -->
+{{if !empty($search_products)}}
+<nav>
+    <ul class="pagination">
+        {{$pageHtml nofilter}}
+        <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+</nav>
+{{/if}}

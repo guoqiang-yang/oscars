@@ -1,0 +1,111 @@
+
+#复制【新】
+/usr/lib64/php/modules/sphinx.so
+/usr/lib64/libsphinxclient-0.0.1.so 
+
+			//【旧，已失效：begin】
+			//安装sphinx
+			yum install sphinx -y
+			
+			//安装php扩展
+			yum install php-pecl-sphinx.x86_64 -y
+			yum install sphinx-php -y
+			service httpd restart
+			//【旧，已失效：end】
+
+
+//安装coreseek（包括mmseg3和csft）
+cd /root
+wget http://files.opstool.com/man/coreseek-4.1-beta.tar.gz
+tar zxvf coreseek-4.1-beta.tar.gz
+cd /root/coreseek-4.1-beta/mmseg-3.2.14
+./bootstrap
+./configure --prefix=/usr/local/mmseg3
+make && make install
+
+cd /root/coreseek-4.1-beta/csft-4.1
+sh buildconf.sh
+./configure --prefix=/usr/local/coreseek  --without-unixodbc --with-mmseg --with-mmseg-includes=/usr/local/mmseg3/include/mmseg/ --with-mmseg-libs=/usr/local/mmseg3/lib/ --with-mysql --with-unixodbc=no
+make && make install
+
+//配置
+vi /usr/local/coreseek/etc/csft_mysql.conf
+
+//运行
+/usr/local/coreseek/bin/searchd -c /usr/local/coreseek/etc/csft_mysql.conf
+
+//执行索引
+/usr/local/coreseek/bin/indexer -c /usr/local/coreseek/etc/csft_mysql.conf --all --rotate
+
+//测试
+/usr/local/coreseek/bin/search -c /usr/local/coreseek/etc/csft_mysql.conf  水管
+
+//php调用例子
+$s = new SphinxClient;
+$s->setServer("localhost", 9312);
+$s->setArrayResult(true);
+$s->setMatchMode(SPH_MATCH_ALL);
+$result = $s->query($keyword, 'test1');  //test1是csft_mysql.conf中使用的index名字
+
+
+foreach ($result['matches'] as $match)
+{
+   echo $match['weight']     //权重
+   echo $match['sid']        //sid
+}
+
+
+/********************csft_mysql.conf**********************/
+source main
+{
+    type = mysql
+    sql_host    = rds5c731ofzh61zsoh32.mysql.rds.aliyuncs.com
+    sql_user    = haocai
+    sql_pass    = haocaishidai0707
+    sql_db  = haocai
+    sql_port    = 3306
+    sql_query_pre   = SET NAMES utf8
+    sql_query   = SELECT sid, title, alias, FROM_UNIXTIME(mtime) AS add_time FROM t_sku     //这里要注意了，只搜相关字段，不要全搜
+    sql_attr_uint   = sid
+    sql_attr_uint   = add_time
+    sql_field_string    = title
+    sql_field_string    = alias
+
+    sql_query_info_pre  = SET NAMES utf8
+    sql_query_info  = SELECT sid,title,alias,FROM_UNIXTIME(mtime) AS add_time FROM t_sku WHERE sid=$id
+}
+
+index test1
+{
+    source  = main
+    path    = /usr/local/coreseek/var/data/test1
+    docinfo = extern
+    mlock   = 0
+    morphology  = none
+    min_word_len    = 1
+    html_strip  = 0
+
+    charset_dictpath    = /usr/local/mmseg3/etc/
+    charset_type    = zh_cn.utf-8
+}
+
+indexer
+{
+    mem_limit   = 128M
+}
+
+#searchd服务定义
+searchd
+{
+    listen  = 9312
+    read_timeout    = 5
+    max_children    = 30
+    max_matches = 1000
+    seamless_rotate = 0
+    preopen_indexes = 0
+    unlink_old  = 1
+    pid_file    = /usr/local/coreseek/var/log/searchd.pid
+    log = /usr/local/coreseek/var/log/searchd_mysql.log
+    query_log   = /usr/local/coreseek/var/log/query_mysql.log
+    binlog_path =
+}

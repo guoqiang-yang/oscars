@@ -1,0 +1,100 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">入库退货单列表</h1>
+
+  <form class="form-inline" role="form" action="/warehouse/stockin_refund_list.php">
+    <div class="placeholder">
+      <div class="form-group" style="margin-right:20px;">
+        <label>入库单ID：</label>
+        <input type="text" class="form-control" name="stockin_id" value="{{$searchConf.stockin_id}}" style="width:80px;">
+      </div>
+      <div class="form-group" style="margin-right:20px;">
+        <label>创建人：</label>
+        <input type="text" class="form-control" name="name" value="{{$searchConf.name}}" style="width:80px;">
+      </div>
+      <div class="form-group" style="margin-right:20px;">
+        <label>供应商ID：</label>
+        <input type="text" class="form-control" name="supplier_id" value="{{$searchConf.supplier_id}}" style="width:80px;">
+      </div>
+      <div class="form-group" style="margin-right:20px;">
+        <label>状态：</label>
+        <select class="form-control" name="step">
+            <option value="">全部</option>
+            {{foreach $refund_descs as $_step=>$_sname}}
+            <option value="{{$_step}}" {{if $searchConf.step==$_step}} selected="selected"{{/if}}>{{$_sname}}</option>
+            {{/foreach}}
+        </select>
+      </div>
+      {{if count($_allowed_warehouses)>1}}
+        <div class="form-group" style="margin-right:50px;">
+            <label>仓库：</label>
+            <select class="form-control" name="wid">
+                {{if !$_user.wid}}
+                <option value="0" {{if !$searchConf.wid}} selected="selected"{{/if}}>全部</option>
+                {{/if}}
+                
+                {{foreach $_allowed_warehouses as $_wid=>$_wname}}
+                <option value="{{$_wid}}" {{if $searchConf.wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+                {{/foreach}}
+            </select>
+        </div>
+      {{/if}}
+      <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+    </div>
+  </form>
+
+  <hr>
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>退后单id</th>
+      <th>入库单id</th>
+      <th>供应商</th>
+			<th style="width:10%;">仓库</th>
+      <th>总金额</th>
+      <th>退货时间</th>
+      <th>状态</th>
+      <th>操作人</th>
+      <th width="9%">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $refund_list as $oner}}
+    <tr data-id="{{$oner.srid}}">
+      <td>{{$oner.srid}}</a></td>
+      <td><a href="/warehouse/edit_stock_in.php?id={{$oner.stockin_id}}">{{$oner.stockin_id}}</a></td>
+      <td><a href="/warehouse/edit_supplier.php?sid={{$oner.supplier_id}}">{{$oner._supplier.name}}<a/></td>
+			<td>{{$_all_warehouses[$oner.wid]}}</td>
+      <td>￥{{$oner.price/100}}</td>
+      <td>
+          【创】{{$oner.ctime}}<br>
+          【出】{{$oner.stockout_time}}
+      </td>
+      <td>
+        <span {{if $oner.step==1}} style="color:red;"{{/if}}>{{$refund_descs[$oner.step]}}</span>
+      </td>
+      <td>{{if !empty($oner._admin)}}{{$oner._admin.name}}{{else}} -- {{/if}}</td>
+      
+      <td>
+        <a href="/warehouse/stockin_refund_print.php?srid={{$oner.srid}}" target="_blank">打印</a>&nbsp;
+        <a href="/warehouse/stockin_refund_detail.php?srid={{$oner.srid}}">查看</a>&nbsp;
+        {{if $oner.step == 1}}
+        {{if !empty($_permissions['/warehouse/ajax/del_stockin_refund'])}}
+        <a href="javascript:void(0)" class="del_stockin_refund" data-srid="{{$oner.srid}}">删除</a>
+        {{/if}}
+        {{/if}}
+      </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

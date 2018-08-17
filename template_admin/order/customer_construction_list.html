@@ -1,0 +1,154 @@
+<div style="display: none;" id="area-json">
+    {{$area}}
+</div>
+<div style="display: none;" id="city-json">
+    {{$city}}
+</div>
+<div style="display: none;" id="distinct-json">
+    {{$distinct}}
+</div>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">
+        客户地址列表
+    </h1>
+	
+	<form class="form-inline" role="form" action="/order/customer_construction_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:30px;">
+				<label>客户ID：</label>
+				<input style="width:100px;" class="form-control" type="text" name="full_keyword" value="{{$search.cid}}" >
+			</div>
+            <div class="form-group" style="margin-right:30px;">
+                <label>是否处理：</label>
+                <select class="form-control" name="is_chk">
+                    <option value="0" {{if $search.is_chk==0}} selected="selected"{{/if}}>全部</option>
+                    <option value="1" {{if $search.is_chk==1}} selected="selected"{{/if}}>是</option>
+                    <option value="2" {{if $search.is_chk==2}} selected="selected"{{/if}}>否</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+	
+	<hr>
+	
+    <table class="table">
+        <thead>
+            <tr>
+              <th>ID</th>
+              <th style="width:12%;">客户信息</th>
+              <th style="width:15%;">地址位置</th>
+              <th style="width:23%;">具体地址</th>
+              <th>所属小区</th>
+              <th style="width:10%;">创建时间</th>
+              <th>操作员</th>
+              <th>操作</th>
+            </tr>
+		</thead>
+		<tbody>
+            {{foreach $constructions as $one}}
+            <tr class="dialog" data-id="{{$one.id}}">
+                <td>{{$one.id}}</td>
+                <td>
+                    <a href="/crm2/customer_detail.php?cid={{$one.cid}}" target="_blank">{{$one._customer.name}} </a><br>
+                    <span>ID: {{$one.cid}}</span>
+                </td>
+                <td class="position">
+                    {{$one.city_name}} -- {{$one.district_name}} {{if !empty($one.area)}}-- {{$one.area}}{{/if}}
+                </td>
+                <td>
+                    <span class="addr">{{$one._address}}</span>
+                    {{if !empty($one.community_name)}}
+                    <br>
+                    <span class="community_name" style="color:grey;">{{$one.community_name}}</span>
+                    {{/if}}
+                </td>
+                <td>
+                    {{if $one.community_id}}
+                    <a href="/order/delivery_community.php?cmid={{$one.community_id}}" target="_blank">{{$one.community_id}}</a>
+                    {{else}}暂无{{/if}}
+                </td>
+                <td>{{$one.ctime}}</td>
+                <td>{{if $one.suid}}{{$one.suid}}{{else}} -- {{/if}}</td>
+                <td>
+                    <a href="#" class="modify_custoemr_construction" style="margin-right:10px;" data-toggle="modal">修改</a>
+                    <a href="#" class="del_customer_construction" style="margin-right:10px;">删除</a>
+                </td>
+            </tr>
+			{{/foreach}}
+		</tbody>
+	</table>
+	
+	<nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+		</ul>
+	</nav>
+</div>
+
+
+<div class="modal fade _j_dialog" id="matchCommunity" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">匹配小区</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+                    <div class="form-group">
+						<label class="col-sm-3 control-label">工地地址：</label>
+						<div class="col-sm-7 text-value">
+                            <input type="text" class="form-control" name="address">
+						</div>
+					</div>
+                    <div class="form-group">
+						<label class="col-sm-3 control-label">工地位置：</label>
+						<div class="col-sm-7 text-value">
+                            <span class="position" style="color:gray;"></span>
+						</div>
+					</div>
+                    <div class="form-group" style="margin-bottom: 30px;">
+                        <label class="col-sm-3 control-label">小区名称：</label>
+						<div class="col-sm-7 text-value">
+                            <input type="text" id="auto_suggest_position" class="form-control" name="community_name" placeholder="请输入小区、写字楼等名称">
+                            <input type="hidden" name="community_id">
+                            <span style="font-size:10px;color:red;">支持拼音，空格分隔每个字的拼音</span>
+						</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">城市：</label>
+                        <div class="col-sm-7 text-value">
+                            <select style="width: 150px;" id="select-city" class="form-control" name="city" disabled="true">
+                                <option value="0">自动选择</option>
+                            </select>
+						</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">区县：</label>
+                        <div class="col-sm-7 text-value">
+                            <select style="width: 150px;" id="select-district" class="form-control" name="district"  disabled="true">
+                                <option value="0">自动选择</option>
+                            </select>
+						</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">环线：</label>
+                        <div class="col-sm-7 text-value">
+                            <select style="width: 150px;" id="select-area" class="form-control" name="area" disabled="true">
+                                <option value="0">自动选择</option>
+                            </select>
+						</div>
+                    </div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="confirm_save_construction">修改</button>
+			</div>
+		</div>
+	</div>
+</div>

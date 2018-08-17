@@ -1,0 +1,202 @@
+<style>
+    .area-bottom{
+      border-bottom:1px dashed #eee;
+      margin:20px;
+    }
+</style>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">任务详情</h1>
+
+  <form class="form-horizontal" role="form">
+    
+    <div class="area-bottom">
+      <div class="form-group">
+        <label class="col-sm-2 control-label">任务简介：</label>
+        <div class="col-sm-4">
+            <span class="text-value">
+              [{{$all_objtype[$task_detail.objtype]}}] - [{{$all_short_desc[$task_detail.objtype][$task_detail.short_desc]}}]
+            </span>
+            {{if !empty($task_detail.title)}}
+            <span class="text-value" style="font-size:20px; font-weight: blod;">- {{$task_detail.title}}</span>
+            {{/if}}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">创建人：</label>
+        <div class="col-sm-4">
+          <span class="text-value">{{$task_detail._create_suid.name}}({{$task_detail.create_suid}})</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">执行人：</label>
+        <div class="col-sm-4">
+          <span class="text-value">{{$task_detail._exec_suid.name}}({{$task_detail.exec_suid}})</span>
+          {{if $task_detail.exec_status==2&&($_isAdmin||$task_detail.exec_suid==$_uid||$task_detail.create_suid==$_uid)}}
+          <a href="javascript:;" class="btn btn-primary"  data-toggle="modal" data-target="#editExecSuid" style="margin-left:10px;">修改</a>
+          {{/if}}
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="col-sm-2 control-label">任务对象：</label>
+
+        <div class="col-sm-8">
+          <a class="text-value" href="{{$task_detail._objtype.link}}" target="_blank">{{$task_detail._objtype.alias}}</a>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="col-sm-2 control-label">详细内容：</label>
+
+        <div class="col-sm-8">
+          <span class="text-value">{{$task_detail.s_content}}</span>
+            
+          {{*foreach $contents as $_c}}
+          <span class="text-value">{{$_c}}</span><br>
+          {{/foreach*}}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">任务状态：</label>
+        <div class="col-sm-6">
+          <span class="text-value" style="color:red; font-size: 20px;">{{$all_exec_status[$task_detail.exec_status]}}</span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="col-sm-2 control-label">添加备注：</label>
+        <div class="col-sm-6">
+          <textarea class="form-control" name="note" rows="3" style="width:80%; display: inline;"></textarea>
+          <a href="javascript:;" class="btn btn-primary save_note" data-tid="{{$task_detail.tid}}" style="margin-left:5px;">保存备注</a>
+        </div>
+      </div>
+        
+      {{if !empty($task_detail.pic_ids)}}
+      <div class="form-group" style="margin-top:20px;">
+        <label class="col-sm-2 control-label">图片：</label>
+        <div class="col-sm-6">
+            {{foreach $task_detail.pic_urls as $pic}}
+            <div style="display:inline-block; margin-right:20px;">
+                <div><img style="width:150px;" src="{{$pic}}"></div>
+                <div style="margin-top:15px;">
+                    <a style="" type="button" class="btn btn-default" href="{{$pic}}" target="_blank">查看原图</a>
+                </div>
+            </div>
+            {{/foreach}}
+        </div>
+      </div>
+      {{/if}}
+      
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label"></label>
+        <div class="col-sm-6">
+          {{if ($_isAdmin || $task_detail.exec_suid==$_uid) && $task_detail.exec_status==2}}
+          <a href="javascript:;" class="btn btn-default modify_task_status" data-exec_status="3" data-tid="{{$task_detail.tid}}" style="margin-right: 25px;">完成</a>
+          {{/if}}
+          
+          {{if $_isAdmin || ($task_detail.create_suid==$_uid && $task_detail.create_suid==$task_detail.exec_suid)}}
+            {{if $task_detail.exec_status!=4 && $task_detail.exec_status!=10}}
+            <a href="javascript:;" class="btn btn-default modify_task_status" data-exec_status="4" data-tid="{{$task_detail.tid}}" style="margin-right: 25px;">关闭</a>
+            {{/if}}
+            {{if $task_detail.exec_status!=10}}
+            <a href="javascript:;" class="btn btn-default modify_task_status" data-exec_status="10" data-tid="{{$task_detail.tid}}" style="margin-right: 25px;">删除</a>
+            {{/if}}
+          {{/if}}
+          
+          {{if ($_isAdmin||$task_detail.exec_suid==$_uid)&&($task_detail.exec_status==3||$task_detail.exec_status==4||$task_detail.exec_status==10)}}
+          <a href="javascript:;" class="btn btn-default modify_task_status" data-exec_status="2" data-tid="{{$task_detail.tid}}" style="margin-right: 25px;">重新打开</a>
+          {{/if}}
+        </div>
+      </div>
+  </form>
+
+</div>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+  <h2 class="page-header">操作记录</h2>
+
+  {{if !empty($task_history)}}
+  <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>执行人</th>
+          <th>原状态</th>
+          <th>新状态</th>
+          <th style="width:50%;">备注</th>
+          <th>修改时间</th>
+          <th>操作人</th>
+        </tr>
+      </thead>
+      <tbody>
+      {{foreach $task_history as $history}}
+      <tr>
+        <td>
+          {{$history._exec_suid.name}}({{$history.exec_suid}})
+        </td>
+        <td>
+          {{$all_exec_status[$history.old_exec_status]}}
+        </td>
+        <td>
+          {{$all_exec_status[$history.new_exec_status]}}
+        </td>
+        <td>{{$history.note}}</td>
+        <td>{{$history.ctime}}</td>
+        <td>
+          {{$history._suid.name}}({{$history.suid}})
+        </td>
+      </tr>
+      {{/foreach}}
+      </tbody>
+    </table>
+
+  </div>
+  {{else}}
+  <div style="text-align:center">
+    <span style=" margin-right: 10px; font-size: 20px; color:red;">无记录！</span>
+  </div>
+  {{/if}}
+</div>
+
+<div class="modal fade _j_dialog" id="editExecSuid" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">修改执行人</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-3 control-label">执行人：</label>
+            <div class="col-sm-6">
+              <select class="form-control" name="exec_suid" style="height:30px;font-size: 16px;">
+                {{foreach $all_staffs as $oner}}
+                <option value="{{$oner.suid}}" {{if $oner.suid==$task_detail.exec_suid}} selected="selected"{{/if}}>{{$oner.name}}</option>
+                {{/foreach}}
+              </select>
+              <span style="color:red;">原执行人：{{$task_detail._exec_suid.name}}({{$task_detail.exec_suid}})</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label">备注：</label>
+            <div class="col-sm-6">
+              <textarea class="form-control" name="note" rows="3"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary _j_modify_exec_suid" data-tid="{{$task_detail.tid}}">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+  

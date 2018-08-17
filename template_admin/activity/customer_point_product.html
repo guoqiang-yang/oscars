@@ -1,0 +1,115 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        兑换商品管理
+    </h1>
+
+    <form class="form-inline" role="form" action="/activity/customer_point_product.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>商品ID：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="pid" value="{{$search_conf.pid}}">
+            </div>
+            <div class="form-group" style="margin-right:50px;">
+                <label>商品名：</label>
+                <input style="width: 100px;" type="text" class="form-control" name="title" value="{{$search_conf.title}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>分类：</label>
+                <select class="form-control" name="cate1">
+                    <option value="0" {{if !$search_conf.cate1}} selected="selected" {{/if}}>全部</option>
+                    {{foreach $cate_list as  $key => $cate}}
+                    <option value="{{$key}}" {{if $search_conf.cate1==$key}} selected="selected" {{/if}}>{{$cate}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+    <div style="border-bottom: 1px inset #DDDDDD; clear: both; position: relative; height:25px;margin-bottom: 20px;">
+        <a href="{{$step_url}}&status=127"><span {{if $search_conf.status == 127}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>全部</span></a>
+        <a href="{{$step_url}}&status=0"><span {{if $search_conf.status == 0}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>上架</span></a>
+        <a href="{{$step_url}}&status=4"><span {{if $search_conf.status == 4}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>下架</span></a>
+        <a href="{{$step_url}}&status=1"><span {{if $search_conf.status == 1}} style="margin: 5px 20px; padding: 5px 20px; border-top: 5px inset #337AB7; border-left: 1px inset #DDDDDD; border-right: 1px inset #DDDDDD;" {{else}} style="margin: 5px 20px;" {{/if}}>删除</span></a>
+        {{if !empty($_permissions['/activity/edit_customer_point_product'])}}
+        <a class="btn btn-primary" href="/activity/edit_customer_point_product.php" style="float: right; margin-top: -15px;">添加商品</a>
+        {{/if}}
+    </div>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>商品ID</th>
+            <th>图片</th>
+            <th>商品名</th>
+            <th>分类</th>
+            <th>市场价</th>
+            <th>成本价</th>
+            <th>兑换积分</th>
+            <th>库存／已兑换</th>
+            <th>兑换日期</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $item}}
+        <tr data-id="{{$item.pid}}" class="_j_pic">
+            <td>
+                {{$item.pid}}
+            </td>
+            <td>
+                {{if isset($item._pics_urls[0])}}<a href="{{$item._pics_urls[0]['big']}}"><img src={{$item._pics_urls[0]['small']}} alt=""></a>{{/if}}
+            </td>
+            <td>
+                {{$item.title}}
+            </td>
+            <td>
+                {{$cate_list[$item['cate1']]}}
+            </td>
+            <td>
+               ¥ {{$item['price']/100}}
+            </td>
+            <td>
+               ¥ {{$item['cost']/100}}
+            </td>
+            <td>
+                {{$item['point']}}
+            </td>
+            <td>
+                {{$item['stock_num']}}/{{$item['exchg_num']}}
+            </td>
+            <td>
+                {{$item.stime}}
+                <br/>
+                至 {{$item.etime}}
+            </td>
+            <td>
+                {{$item['_status']}}
+            </td>
+            <td>
+                {{if !empty($_permissions["/activity/edit_customer_point_product"])}}
+                    <div>
+                        <a href="/activity/edit_customer_point_product.php?pid={{$item.pid}}">编辑</a>
+                    </div>
+                {{/if}}
+                {{if !empty($_permissions["/activity/show_customer_point_product"])}}
+                <div>
+                    <a href="/activity/show_customer_point_product.php?pid={{$item.pid}}">查看</a>
+                </div>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+        </ul>
+    </nav>
+</div>

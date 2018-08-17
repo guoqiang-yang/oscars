@@ -1,0 +1,38 @@
+brew install autoconf
+sudo ln -s /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/usr/include /usr/include
+
+curl -O ftp://ftp.imagemagick.org/pub/ImageMagick/releases/ImageMagick-6.8.5-10.tar.xz
+tar xvJf ImageMagick-6.8.5-10.tar.xz
+./configure --prefix=/usr/local/ImageMagick --enable-shared --enable-lzw --without-perl --with-modules
+make
+make install
+
+curl -O http://pecl.php.net/get/imagick-3.1.2.tgz
+tar -zxf imagick-3.1.2.tgz
+cd imagick-3.1.2
+phpize
+export PKG_CONFIG_PATH=/usr/local/ImageMagick/lib/pkgconfig
+
+
+MACOSX_DEPLOYMENT_TARGET=10.10
+CFLAGS="-arch i386 -arch x86_64 -g -Os -pipe -no-cpp-precomp"
+CCFLAGS="-arch i386 -arch x86_64 -g -Os -pipe"
+CXXFLAGS="-arch i386 -arch x86_64 -g -Os -pipe"
+LDFLAGS="-arch i386 -arch x86_64 -bind_at_load"
+export CFLAGS CXXFLAGS LDFLAGS CCFLAGS MACOSX_DEPLOYMENT_TARGET
+echo $CFLAGS
+
+./configure --with-php-config=/usr/bin/php-config --with-imagick=/usr/local/ImageMagick --enable-shared
+
+
+ln -s /usr/local/ImageMagick/include/ImageMagick-6 /usr/local/ImageMagick/include/ImageMagick
+make
+make install
+
+
+#坑：
+1. ln -s /usr/local/ImageMagick/include/ImageMagick-6 /usr/local/ImageMagick/include/ImageMagick
+2. --enable-shared
+3. Makefile中需要手工加一项
+
+

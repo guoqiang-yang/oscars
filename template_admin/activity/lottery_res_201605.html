@@ -1,0 +1,83 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		抽奖结果列表
+	</h1>
+
+	<form id="search_form" class="form-inline" role="form" action="">
+		<div class="placeholder">
+			<div id="h5-deliver-date" class="form-group" style="margin-right: 20px;">
+				<label>中奖时间：</label>
+				<input type="date" class="form-control" name="start_time" value="{{if $searchConf.start_time}}{{$searchConf.start_time}}{{/if}}" style="width: 160px;"> —
+				<input type="date" class="form-control" name="end_time" value="{{if $searchConf.end_time}}{{$searchConf.end_time}}{{/if}}" style="width: 160px;">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>客户ID：</label>
+				<input style="width: 120px;" type="text" class="form-control" name="cid" value="{{$searchConf.cid}}">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>奖项：</label>
+				<select class="form-control" name="prize">
+					<option value="0" {{if !$searchConf.prize}} selected="selected" {{/if}}>全部</option>
+					{{foreach $prize_list as $prize}}
+					<option value="{{$prize.id}}" {{if $searchConf.prize==$prize.id}} selected="selected" {{/if}}>{{$prize.prize}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>id</th>
+			<th>cid</th>
+			<th>cname</th>
+			<th>uid</th>
+			<th>uanme</th>
+			<th>奖项</th>
+			<th>中奖时间</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $item}}
+			<tr>
+				<td>
+					{{$item.id}}
+				</td>
+				<td>
+					<a href="/crm2/customer_detail.php?cid={{$item.cid}}">{{$item.cid}}</a>
+
+				</td>
+				<td>
+					{{$item._customer.name}}
+				</td>
+                <td>
+                    {{$item.uid}}
+                </td>
+                <td>
+                    {{$item._user.name}}({{$item._user.mobile}})
+                </td>
+				<td>
+					{{$prize_list[$item.prize]['prize']}}
+				</td>
+				<td>
+					{{$item.ctime}}
+				</td>
+			</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li>
+				<a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+			</li>
+		</ul>
+	</nav>
+</div>

@@ -1,0 +1,113 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        城市优惠
+    </h1>
+
+    <form class="form-inline" role="form" action="/order/city_privilege.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>查询月份：</label>
+                <select class="form-control" name="month">
+                    {{foreach $month_list as $item}}
+                    <option value="{{$item.month}}" {{if $item.month == $month}} selected{{/if}}>{{$item.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left: 30px;">查询</button>
+        </div>
+    </form>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>姓名</th>
+            <th>级别</th>
+            <th>总优惠金额</th>
+            <th>剩于优惠金额</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $item}}
+        <tr>
+            <td>
+                {{$item.id}}
+            </td>
+            <td>
+                {{$item.send_name}}[{{$item.suid}}]
+            </td>
+            <td style="width: 300px; height: 50px;overflow: hidden;">
+            {{foreach $item.roles as $value}}
+                {{$value.role}},
+            {{/foreach}}
+            </td>
+            <td>
+                {{$item.total_amount/100}}元
+            </td>
+            <td>
+                {{$item.available_amount/100}}元
+            </td>
+            <td>
+                <a href="/order/city_privilege_show.php?month={{$month}}&suid={{$item.suid}}" target="_blank">查看详情</a><br/>
+                {{if $month == date('Ym') && $item.suid != $city_suid && !empty($_permissions['/order/ajax/change_city_privilege'])}}
+                <a href="javascript:;" class="city_privilege" data-name="{{$item.send_name}}"
+                   data-suid="{{$item.suid}}" data-total="{{$item.total_amount/100}}" data-available="{{$item.available_amount/100}}">修改额度</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li>
+                <a style="color:#555;">共{{$total|string_format:"%d"}}个</a>
+            </li>
+            <li>
+                {{if $total_privilege > 0}} <a style="color:#555;">总优惠：{{$total_privilege}}元</a>{{/if}}
+            </li>
+        </ul>
+    </nav>
+</div>
+<div id="show_hccommon_admin_log" data-objid="999" data-objtype="15"></div>
+<!-- Modal -->
+<div class="modal fade _j_dialog" id="saleModifyPrivilegeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-amount="{{$city_amount/100}}">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">优惠额度修改</h4>
+            </div>
+            <div class="modal-body form-horizontal">
+                <input type="hidden" name="sale_suid" value="" />
+                <input type="hidden" name="city_saler" value="{{$city_suid}}" />
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">原总优惠金额：</label>
+                    <div class="col-sm-6" id="sale_old_amount"></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">本月已用：</label>
+                    <div class="col-sm-6" id="sale_used_amount"></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">可分配额度：</label>
+                    <div class="col-sm-6" id="sale_can_amount"></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">新总优惠金额：</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" name="privilege" value="" style="display:inline-block;width:100px;"> 元
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_save_sale_city_privilege">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

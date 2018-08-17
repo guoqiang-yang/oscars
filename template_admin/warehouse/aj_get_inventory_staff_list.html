@@ -1,0 +1,22 @@
+<table class="table">
+    <thead>
+    <tr>
+        <th>姓名</th>
+        <th>已分配数</th>
+        <th>已完成数</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $staff_list as $_user}}
+    <tr data-tid="{{$tid}}" data-suid="{{$_user['suid']}}">
+        <td>{{$_user['name']}}</td>
+        <td>{{$_user['alloc_num']}}</td>
+        <td>{{$_user['finish_num']}}</td>
+        <td>
+            <a class="alloc_inventory_task" href="javascript: void(0)" style="margin-right: 10px;">分配</a>
+        </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>

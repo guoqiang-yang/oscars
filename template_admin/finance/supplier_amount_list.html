@@ -1,0 +1,133 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">供应商余额明细</h1>
+    <form class="form-inline" role="form">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>供应商ID：</label> <input class="form-control" type="text" name="sid" value="{{if $search.sid}}{{$search.sid}}{{/if}}" style="margin-right: 20px;" placeholder="请输入供应商id">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>单据类型：</label>
+                <select class="form-control" name="type">
+                    <option value="0" {{if 0==$search.type}}selected="selected"{{/if}}>全部</option>
+                    {{foreach $bill_type as $_type => $_desc}}
+                    <option value="{{$_type}}" {{if $_type==$search.type}}selected="selected"{{/if}}>{{$_desc}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right: 20px;">
+                <label>日期 (YYYY-MM-DD)：</label>
+                <input type="date" class="form-control" name="btime" value="{{if $search.btime}}{{$search.btime}}{{/if}}" style="width: 150px;">
+                <span> - </span>
+                <input type="date" class="form-control" name="etime" value="{{if $search.etime}}{{$search.etime}}{{/if}}" style="width: 150px;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+    </form>
+    {{if !empty($supplier)}}
+    <div style="margin-bottom: 30px; font-size: 20px;"><span>供应商：{{$supplier.name}}({{$supplier.sid}})</span> <span style="color: red;">余额：￥{{$supplier.amount/100}}</span>
+        {{if !empty($_permissions['/finance/ajax/add_supplier_prepay'])}}<button type="button" class="btn btn-info" style="float:right;" id="supplier_prepay">预付</button>{{/if}}
+    </div>
+    {{/if}}
+
+    {{if !empty($amountList)}}
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width: 5%">ID</th>
+            <th style="width: 13%">单据类型</th>
+            <th style="width:10%;">供应商</th>
+            <th style="width: 10%">余额减少</th>
+            <th style="width: 10%">余额增加</th>
+            <th style="width: 10%">余额汇总</th>
+            <th style="width: 14%;">日期</th>
+            <th style="width: 8%">执行人</th>
+            <th style="width:14%;">备注</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $amountList as $list}}
+            <tr>
+                <td>{{$list.id}}</td>
+                <td>
+                    {{$bill_type[$list.type]}} {{if !empty($list.objid)}}-{{$list.objid}}{{/if}}<br>
+                    <span style="color: silver;font-size: 12px;">{{$city_list[$list.city_id]}}</span>
+                </td>
+                <td><a href="/finance/supplier_amount_list.php?sid={{$list._supplier.sid}}">{{$list._supplier.name}}</a></td>
+                <td>{{if $list.price <= 0}} <span style="color: red;">￥{{$list.price/100}}</span><br>{{if $list.payment_type!=0}}<span style="color: #0B8E1B;">【{{$payment_types[$list.payment_type]}}】</span>{{/if}}{{/if}}</td>
+                <td>{{if $list.price > 0}} <span style="color: red;">￥{{$list.price/100}}</span><br>{{if $list.payment_type!=0}}<span style="color: #0B8E1B;">【{{$payment_types[$list.payment_type]}}】</span>{{/if}}{{/if}}</td>
+                <td><span>￥ {{$list.amount/100}}</span></td>
+                <td>{{$list.ctime}}</td>
+                <td>{{$staffList[$list.suid].name}}</td>
+                <td>{{$list.note}}</td>
+            </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    {{else}}
+    暂无！！！
+    {{/if}}
+
+
+    <nav>
+        <ul class="pagination" style="margin:0;">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+        </ul>
+    </nav>
+
+</div>
+
+<div class="modal fade _j_dialog" id="add_prepay" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">新增预付 - {{$supplier.name}}</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <input type="hidden" name="sid" value="{{$supplier.sid}}">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">预付金额：</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" value="" name="price" required>
+                        </div><span style="font-size: 17px;color:red;line-height: 30px;">元</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">城市：</label>
+                        <div class="col-sm-7">
+                            <select class="form-control pay_city" name="pay_city">
+                                {{if count($user_city)>1}}<option value="0">-请选择城市-</option>{{/if}}
+                                {{foreach $user_city as $cityId}}
+                                <option value="{{$cityId}}">{{$city_list[$cityId]}}</option>
+                                {{/foreach}}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">支付方式：</label>
+                        <div class="col-sm-7">
+                            <select class="form-control payment_type" name="payment_type" style="display:inline-block;width:150px;">
+                                {{foreach $payment_types as $src_id => $src_name}}
+                                <option value="{{$src_id}}">{{$src_name}}</option>
+                                {{/foreach}}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">备注：</label>
+                        <div class="col-sm-7">
+                            <textarea name="note" cols="34" rows="5"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary _j_add_supplier_prepay">新增</button>
+            </div>
+        </div>
+    </div>
+</div>

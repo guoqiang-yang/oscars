@@ -1,0 +1,97 @@
+<!-- 各项金额开始 -->
+<div>
+    <div style="background: #eee; padding: 10px 0; margin: 10px 0;">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">客户运费：</label>
+            {{if $order.step >= 2}}
+            <div style="width: 100px;" class="col-sm-5">
+                <input disabled="true" id="freight" type="text" class="form-control" name="freight" value="{{$order.freight/100}}" style="width:50px;display:inline-block;">
+            </div>
+            {{else}}
+            <div style="width: 100px;" class="col-sm-5">
+                <input id="freight" type="text" class="form-control" name="freight" value="{{$order.freight/100}}" style="width:50px;display:inline-block;">
+            </div>
+            <div style="width: 300px;" id="cal_freight" class="col-sm-3">
+	            {{if $order.source_oid > 0}}
+	            <b style="color: red;">【补单需手动计算运费】</b>
+	            {{elseif !empty($_permissions['/order/edit_order'])}}
+                <button data-oid="{{$order.oid}}" id="_j_cal_freight" type="button" class="btn btn-primary " style="margin-right:20px;">计算运费</button>
+	            {{/if}}
+	            <b id="freight_desc" style="color: red; display: none; width: 300px;">六环外的运费需人工计算之后填写！</b>
+            </div>
+            {{/if}}
+        </div>
+        <div class="form-group" style="color:red;">
+            <label class="col-sm-2 control-label">推荐运费：</label>
+            <div class="col-sm-8">
+                <div>
+                    <span class="text-value" style="margin-right:5px;">重量：{{$carriage_fee_rel.weight}}吨</span>
+                    <span class="text-value" style="margin-right:5px;">体积：{{$carriage_fee_rel.volume}}立方米</span>
+                    <span class="text-value" style="margin-right:5px;">车次：{{$carriage_fee_rel.times}}车</span>
+                    <span style="color:blue;">（3吨 或 2.6立方米 一车）</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">是否上楼：</label>
+            {{if $order.step >= 2}}
+            <div class="col-sm-8">
+                <select disabled="true" id="service" style="display: inline-block; width: 150px; margin-right: 20px;" class="form-control" name="service">
+                    <option {{if $order.service== 0}}selected="selected" {{/if}} value="0">不上楼</option>
+                    <option {{if $order.service== 1}}selected="selected" {{/if}} value="1">电梯上楼</option>
+                    <option {{if $order.service== 2}}selected="selected" {{/if}} value="2">楼梯上楼</option>
+                </select>
+                <select disabled="true" id="floor-num" style="width: 150px; margin-right: 20px;{{if $order.service == 2}}display:inline-block;{{else}}display: none; {{/if}}" class="form-control" name="floor-num">
+                    <option {{if $order.floor_num== 1}}selected="selected" {{/if}} value="1">1层</option>
+                    <option {{if $order.floor_num== 2}}selected="selected" {{/if}} value="2">2层</option>
+                    <option {{if $order.floor_num== 3}}selected="selected" {{/if}} value="3">3层</option>
+                    <option {{if $order.floor_num== 4}}selected="selected" {{/if}} value="4">4层</option>
+                    <option {{if $order.floor_num== 5}}selected="selected" {{/if}} value="5">5层</option>
+                    <option {{if $order.floor_num== 6}}selected="selected" {{/if}} value="6">6层</option>
+                </select>
+                <input disabled="true" id="carry_fee" type="text" class="form-control" name="customer_carriage" value="{{$order.customer_carriage/100}}" style="width:50px;display:inline-block;"> 元（客户支付搬运费）
+            </div>
+            {{else}}
+            <div class="col-sm-8">
+                <select id="service" style="display: inline-block; width: 150px; margin-right: 20px;" class="form-control" name="service">
+	                <option {{if $order.service == -1}}selected="selected" {{/if}} value="-1">请选择</option>
+                    <option {{if $order.service == 0}}selected="selected" {{/if}} value="0">不上楼</option>
+                    <option {{if $order.service == 1}}selected="selected" {{/if}} value="1">电梯上楼</option>
+                    <option {{if $order.service == 2}}selected="selected" {{/if}} value="2">楼梯上楼</option>
+                </select>
+                <select id="floor-num" {{if $order.service == 2}}style="width: 150px; margin-right: 20px;display:inline-block;"{{else}}style="width: 150px; margin-right: 20px;display: none;" {{/if}} class="form-control" name="floor-num">
+                    {{foreach $floor as $f}}
+                    <option {{if $order.floor_num== $f}}selected="selected" {{/if}} value="{{$f}}">{{$f}}层</option>
+                    {{/foreach}}
+                </select>
+              <input id="carry_fee" type="text" class="form-control" name="customer_carriage" value="{{$order.customer_carriage/100}}" style="width:50px;display:inline-block;"> 元（客户支付搬运费）
+	            {{if $order.source_oid > 0}}
+	            <b style="color: red;">【补单需手动计算运费】</b>
+	            {{elseif !empty($_permissions['/order/edit_order'])}}
+	            <button data-oid="{{$order.oid}}" id="_j_cal_carry_fee" type="button" class="btn btn-primary " style="margin-right:20px;">计算搬运费</button>
+	            {{/if}}
+            </div>
+            {{/if}}
+        </div>
+        <div class="form-group">
+            <label style="color:red;" class="col-sm-2 control-label">搬运费说明：</label>
+
+            <div class="col-sm-10" style="color:red;">
+                <span class="text-value">
+                    {{if $order.city_id == 1310}}
+                    1、商品满1500元电梯免搬运费，楼梯免费放一层；2、商品低于1500元按实际发生收费；3、砂石砖水泥类不参与
+                    {{else if $order.city_id == 500}}
+                    1、商品金额满1500元，电梯上楼和楼梯一层上楼免费；2、砂石砖不参与该优惠
+                    {{else if $order.city_id == 3702}}
+                    1、电梯上楼，商品总额满1500免除搬运费；2、沙石砖类不参与该优惠；
+                    {{else if $order.city_id == 5101}}
+                    1、电梯上楼，商品总额满1500免除搬运费；2、楼梯上楼，商品总额满1500免楼梯一层搬运费；3、砂石砖类及板材不参与该优惠。
+                    {{else}}
+                    1、电梯上楼，商品总额满1500免除搬运费；2、楼梯上楼，商品总额满3000免除搬运费；3、沙石砖类不参与该优惠；
+                    {{/if}}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 各项金额结束 -->

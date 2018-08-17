@@ -1,0 +1,494 @@
+<style>
+  .important {font-weight: bold;}
+  .minor{font-weight: normal;color:gray;font-style: italic;}
+  .table>tbody>tr>td{padding:4px;}
+</style>
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header" data-cate1="{{$cate1}}">
+    库存日报
+  </h1>
+
+  <nav class="nav navbar-default" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      {{if $date_mode == 'today'}}
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav" name="{{$search.status}}">
+          <li class="active">
+          <a href="?date_mode=today&tab=&unit=num" style="padding-right: 30px;padding-left: 30px;">
+            今日实时数据
+          </a>
+          </li>
+          <li>
+          <a href="?date_mode=old&tab=" style="padding-right: 30px;padding-left: 30px;">
+            以往数据
+          </a>
+          </li>
+        </ul>
+      </div>
+      {{else}}
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav" name="{{$search.status}}">
+          <li>
+            <a href="?date_mode=today&tab=&unit=num" style="padding-right: 30px;padding-left: 30px;">
+              今日实时数据
+            </a>
+          </li>
+          <li {{if 'cate1'==$tab}}class="active"{{/if}}>
+          <a href="?date_mode=old&tab=cate1&from_date={{$from_date}}&end_date={{$end_date}}" style="padding-right: 30px;padding-left: 30px;">
+            分类一
+          </a>
+          </li>
+          <li {{if 'cate2'==$tab}}class="active"{{/if}}>
+          <a href="?date_mode=old&tab=cate2&from_date={{$from_date}}&end_date={{$end_date}}" style="padding-right: 30px;padding-left: 30px;">
+            分类二
+          </a>
+          </li>
+          <li {{if 'brand'==$tab}}class="active"{{/if}}>
+          <a href="?date_mode=old&tab=brand&from_date={{$from_date}}&end_date={{$end_date}}" style="padding-right: 30px;padding-left: 30px;">
+            品牌
+          </a>
+          </li>
+          <li {{if 'sku'==$tab}}class="active"{{/if}}>
+          <a href="?date_mode=old&tab=sku&unit=num&from_date={{$from_date}}&end_date={{$end_date}}" style="padding-right: 30px;padding-left: 30px;">
+            sku明细
+          </a>
+          </li>
+        </ul>
+      </div>
+      {{/if}}
+    </div>
+  </nav>
+  <br/>
+
+  <form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+
+    <input type="hidden" name="tab" value="{{$tab}}">
+    <input type="hidden" name="date_mode" value="{{$date_mode}}">
+
+    <div class="placeholder">
+      {{if $date_mode != 'today'}}
+      <div class="form-group _j_date_selecter" style="margin-right: 20px;{{if $view_mode == 'month'}}display: none;{{/if}}">
+        <label></label>
+        <input type="date" class="form-control" name="from_date" value="{{$from_date}}" style="display: inline-block;width: 155px;">
+        To
+        <input type="date" class="form-control" name="end_date" value="{{$end_date}}" style="display: inline-block;width: 155px;">
+      </div>
+      {{/if}}
+
+      {{if $date_mode == 'today' || 'cate2' == $tab || 'sku' == $tab}}
+      <div class="form-group" style="margin-right:20px;">
+        <label></label>
+        <select class="form-control" name="cate1" id="select-cate1" data-id="{{$cate1}}" style="margin-right:20px;">
+          <option value="0">1级分类</option>
+        </select>
+        <select class="form-control" name="cate2" id="select-cate2" data-id="{{$cate2}}">
+          <option value="0">2级分类</option>
+        </select>
+      </div>
+      {{/if}}
+      {{if 'sku' == $tab}}
+      <div class="form-group" style="margin-right:20px;display:none;">
+        <label>品牌：</label>
+        <input class="form-control" type="text" name="brand_name" value="{{$brand_name}}">
+      </div>
+      {{/if}}
+
+      <select class="form-control" name="city" id="select-city" data-id="{{$cur_city}}" style="margin-right:20px;">
+        <option value="0">城市</option>
+      </select>
+      <select class="form-control" name="wid" id="select-warehouse" data-id="{{$cur_wid}}" style="margin-right:20px;">
+        <option value="0">库房</option>
+      </select>
+      {{if 'sku' == $tab}}
+      <div class="form-group" style="margin-right:20px;">
+        <label>搜索：</label>
+        <input class="form-control" type="text" name="keyword" value="{{$keyword}}">
+      </div>
+      {{/if}}
+      <input type="hidden" name="unit" value="num">
+      <button type="submit" class="btn btn-primary" id="btn_search">查询</button><br/>
+    </div>
+  </form>
+  {{if $date_mode == 'today' || 'sku' == $tab}}
+  <input type="radio" name="unit" value="num" {{if $unit=="num"}}checked="checked"{{/if}} >显示数量
+  <input type="radio" name="unit" value="money" style="margin-left:20px;" {{if $unit<>"num"}}checked="checked"{{/if}} >显示金额
+  {{/if}}
+  {{if count($data_list) > 0}}
+  <table {{if $date_mode == 'today' || 'sku' == $tab}}style="margin-top: 10px;"{{else}}style="margin-top: 40px;"{{/if}} class="table table-bordered">
+    <thead>
+      <tr data-wid="{{$cur_wid}}">
+        <th>ID</th>
+        <th>名称</th>
+        <th>期初</th>
+        {{if ($date_mode == 'today' || 'sku' == $tab) && 'num' == $unit}}
+        <th><a href="?date_mode={{$date_mode}}&order_by=bought_in_num&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&unit=num">进货</a></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=other_in_num&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&unit=num">调入<a/></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=refund_in_num&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&unit=num">退入</a></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=check_in_num&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&unit=num">盘盈</a></th>
+        <th><a href="?date_mode={{$date_mode}}&order_by=sales_out_num&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&unit=num">{{if ($date_mode == 'today' || 'sku' == $tab) && 'num' == $unit}}销售<br/>数量{{else}}销售<br/>成本{{/if}}</a></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=other_out_num&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&unit=num">调出</a></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=refund_out_num&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&unit=num">退出</a></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=check_out_num&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&unit=num">盘亏</a></th>
+        <th>期末</th>
+        {{if ($date_mode == 'today' || 'sku' == $tab) && $cur_wid>0 }}
+        <th>
+            安全<br/>库存
+            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="平均销售量*调整系数*（货期+最小库存天数）"></span>
+        </th>
+        {{/if}}
+        {{if $date_mode <> 'today'}}
+        <th>周转<br/>天数</th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=sales_out_num_tmp&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&unit=num">临采</a></th>
+        {{/if}}
+        {{else}}
+        <th><a href="?date_mode={{$date_mode}}&order_by=bought_in_cost&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">进货</a></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=other_in_cost&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">调入<a/></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=refund_in_cost&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">退入</a></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=check_in_cost&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">盘盈</a></th>
+        <th><a href="?date_mode={{$date_mode}}&order_by=sales_cost&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">{{if ($date_mode == 'today' || 'sku' == $tab)  && 'num' == $unit}}销售<br/>数量{{else}}销售<br/>成本{{/if}}</a></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=other_out_cost&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">调出</a></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=refund_out_cost&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">退出</a></th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=check_out_cost&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">盘亏</a></th>
+        <th>期末</th>
+        {{if ($date_mode == 'today' || 'sku' == $tab) && $cur_wid>0 }}
+        <th>
+            安全<br/>库存
+            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="平均销售量*调整系数*（货期+最小库存天数）"></span>
+        </th>
+        {{/if}}
+        {{if $date_mode <> 'today'}}
+        <th>周转<br/>天数</th>
+        <th class="minor"><a href="?date_mode={{$date_mode}}&order_by=sales_cost_tmp&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">临采</a></th>
+        {{/if}}
+        {{/if}}
+        {{if $date_mode <> 'today'}}
+        <th><a href="?date_mode={{$date_mode}}&order_by=sales_amount&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">总销售额</a></th>
+        <!--<th><a href="?order_by=pin_rate&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">动销率</a></th>-->
+        <!--<th><a href="?order_by=profit&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}">利润率</a></th>-->
+        <th><a href="?date_mode={{$date_mode}}&order_by=gross_profit&tab={{$tab}}&wid={{$wid}}&cate1={{$cate1}}&cate2={{$cate2}}&brand_name={{$brand_name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}">毛利率</a></th>
+        {{/if}}
+      </tr>
+    </thead>
+    <tbody>
+    {{$total_record_num = 0}}
+    {{$total_begin_stock = 0}}
+    {{$total_bought_in_num = 0}}
+    {{$total_other_in_num = 0}}
+    {{$total_refund_in_num = 0}}
+    {{$total_check_in_num = 0}}
+    {{$total_sales_out_num = 0}}
+    {{$total_other_out_num = 0}}
+    {{$total_refund_out_num = 0}}
+    {{$total_check_out_num = 0}}
+    {{$total_end_stock = 0}}
+    {{$total_sales_num_tmp = 0}}
+
+    {{$total_begin_stock_cost = 0}}
+    {{$total_bought_in_cost = 0}}
+    {{$total_other_in_cost = 0}}
+    {{$total_refund_in_cost = 0}}
+    {{$total_check_in_cost = 0}}
+    {{$total_sales_cost = 0}}
+    {{$total_other_out_cost = 0}}
+    {{$total_refund_out_cost = 0}}
+    {{$total_check_out_cost = 0}}
+    {{$total_end_stock_cost = 0}}
+    {{$total_sales_cost_tmp = 0}}
+    {{$total_sales_amount = 0}}
+    {{$total_sales_amount_tmp = 0}}
+
+    {{foreach $data_list as $id=>$item}}
+    <tr>
+      {{$total_record_num = $total_record_num + 1}}
+      {{$end_stock_cost = ($item.begin_stock_cost + $item.bought_in_cost + $item.check_in_cost + $item.refund_in_cost + $item.other_in_cost - $item.sales_cost - $item.check_out_cost - $item.refund_out_cost - $item.other_out_cost)}}
+      {{$total_begin_stock_cost = $total_begin_stock_cost + $item.begin_stock_cost }}
+      {{$total_bought_in_cost = $total_bought_in_cost + $item.bought_in_cost }}
+      {{$total_other_in_cost = $total_other_in_cost + $item.other_in_cost }}
+      {{$total_refund_in_cost = $total_refund_in_cost + $item.refund_in_cost }}
+      {{$total_check_in_cost = $total_check_in_cost + $item.check_in_cost }}
+      {{$total_sales_cost = $total_sales_cost + $item.sales_cost }}
+      {{$total_other_out_cost = $total_other_out_cost + $item.other_out_cost }}
+      {{$total_refund_out_cost = $total_refund_out_cost + $item.refund_out_cost }}
+      {{$total_check_out_cost = $total_check_out_cost + $item.check_out_cost }}
+      {{$total_end_stock_cost = $total_end_stock_cost + $end_stock_cost}}
+      {{$total_sales_cost_tmp = $total_sales_cost_tmp + $item.sales_cost_tmp }}
+      {{$total_sales_amount = $total_sales_amount + $item.sales_amount}}
+      {{$total_sales_amount_tmp = $total_sales_amount_tmp + $item.sales_amount_tmp }}
+
+      {{$end_stock = ($item.begin_stock + $item.bought_in_num + $item.check_in_num + $item.refund_in_num + $item.other_in_num - $item.sales_out_num - $item.check_out_num - $item.refund_out_num - $item.other_out_num)}}
+      {{$total_begin_stock = $total_begin_stock + $item.begin_stock }}
+      {{$total_bought_in_num = $total_bought_in_num + $item.bought_in_num }}
+      {{$total_other_in_num = $total_other_in_num + $item.other_in_num }}
+      {{$total_refund_in_num = $total_refund_in_num + $item.refund_in_num }}
+      {{$total_check_in_num = $total_check_in_num + $item.check_in_num }}
+      {{$total_sales_out_num = $total_sales_out_num + $item.sales_out_num }}
+      {{$total_other_out_num = $total_other_out_num + $item.other_out_num }}
+      {{$total_refund_out_num = $total_refund_out_num + $item.refund_out_num }}
+      {{$total_check_out_num = $total_check_out_num + $item.check_out_num }}
+      {{$total_end_stock = $total_end_stock + $end_stock}}
+      {{$total_sales_num_tmp = $total_sales_num_tmp + $item.sales_out_num_tmp }}
+      {{$turnover = 0}}
+
+      <td>{{$item.id}}</td>
+      {{if 'cate1' == $tab}}
+      <td><a href="?date_mode=old&tab=cate2&cate1={{$item.id}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&keyword={{$keyword}}">{{$item.name}}</a></td>
+      {{elseif 'cate2' == $tab}}
+      <td><a href="?date_mode=old&tab=sku&cate2={{$item.id}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&keyword={{$keyword}}&unit=num">{{$item.name}}</a></td>
+      {{elseif 'brand' == $tab}}
+      <td><a href="?date_mode=old&tab=sku&brand_name={{$item.name}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&keyword={{$keyword}}">{{$item.name}}</a></td>
+      {{elseif 'sku' == $tab}}
+      <td><a href="/warehouse/stock_search.php?keyword={{$item.id}}" target="_blank">{{$item.name}}</a></td>
+      {{else}}
+      <td>{{$item.name}}</td>
+      {{/if}}
+
+      {{if ($date_mode == 'today' || 'sku' == $tab) && 'num' == $unit}}
+      {{$sku_end_stock = ($item.begin_stock + $item.bought_in_num + $item.check_in_num + $item.refund_in_num + $item.other_in_num - $item.sales_out_num - $item.check_out_num - $item.refund_out_num - $item.other_out_num)}}
+      {{if $item.sales_out_num}}{{$turnover = $days_num*($item.begin_stock+$sku_end_stock)/2/$item.sales_out_num}}{{/if}}
+      <td class="important">{{$item.begin_stock|number_format}}</td>
+      <td class="important"><a href="/warehouse/stock_history.php?wid={{$cur_wid}}&type=0&sid={{$item.id}}&bdate={{$from_date}}&edate={{$end_date}}" target="_blank">{{$item.bought_in_num|number_format}}</a></td>
+      <td class="minor"><a href="/warehouse/stock_history.php?wid={{$cur_wid}}&type=5&sid={{$item.id}}&bdate={{$from_date}}&edate={{$end_date}}" target="_blank">{{$item.other_in_num|number_format}}</a></td>
+      <td class="minor"><a href="/warehouse/stock_history.php?wid={{$cur_wid}}&type=4&sid={{$item.id}}&bdate={{$from_date}}&edate={{$end_date}}" target="_blank">{{$item.refund_in_num|number_format}}</a></td>
+      <td class="minor"><a href="/warehouse/stock_history.php?wid={{$cur_wid}}&type=3&sid={{$item.id}}&bdate={{$from_date}}&edate={{$end_date}}" target="_blank">{{$item.check_in_num|number_format}}</a></td>
+      <td class="important"><a href="/warehouse/stock_history.php?wid={{$cur_wid}}&type=1&sid={{$item.id}}&bdate={{$from_date}}&edate={{$end_date}}" target="_blank">{{$item.sales_out_num|number_format}}</a></td>
+      <td class="minor"><a href="/warehouse/stock_history.php?wid={{$cur_wid}}&type=6&sid={{$item.id}}&bdate={{$from_date}}&edate={{$end_date}}" target="_blank">{{$item.other_out_num|number_format}}</a></td>
+      <td class="minor"><a href="/warehouse/stock_history.php?wid={{$cur_wid}}&type=8&sid={{$item.id}}&bdate={{$from_date}}&edate={{$end_date}}" target="_blank">{{$item.refund_out_num|number_format}}</a></td>
+      <td class="minor"><a href="/warehouse/stock_history.php?wid={{$cur_wid}}&type=2&sid={{$item.id}}&bdate={{$from_date}}&edate={{$end_date}}" target="_blank">{{$item.check_out_num|number_format}}</a></td>
+      <td class="important">{{$sku_end_stock}}</td>
+      {{if ($date_mode == 'today' || 'sku' == $tab) && $cur_wid>0 }}
+      <td>
+          {{$item.order_point|number_format}}
+          <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="{{$item.security_cal_formula}}"></span>
+      </td>
+      {{/if}}
+      {{if $date_mode <> 'today'}}
+      <td class="important">{{if $turnover>0}}{{$turnover|number_format}}{{else}}-{{/if}}</td>
+      <td class="minor">{{$item.sales_out_num_tmp|number_format}}</td>
+      {{/if}}
+      {{else}}
+      {{if $item.sales_cost}}{{$turnover = $days_num*($item.begin_stock_cost+$end_stock_cost)/2/$item.sales_cost}}{{/if}}
+      <td class="important">￥{{($item.begin_stock_cost/100)|number_format}}</td>
+      <td class="important">￥{{($item.bought_in_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($item.other_in_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($item.refund_in_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($item.check_in_cost/100)|number_format}}</td>
+      <td class="important">￥{{($item.sales_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($item.other_out_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($item.refund_out_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($item.check_out_cost/100)|number_format}}</td>
+      <td class="important">￥{{($end_stock_cost/100)|number_format}}</td>
+      {{if ($date_mode == 'today' || 'sku' == $tab) && $cur_wid>0 }}
+      <td>
+          {{$item.order_point|number_format}}
+          <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="{{$item.security_cal_formula}}"></span>
+      </td>
+      {{/if}}
+      {{if $date_mode <> 'today'}}
+      <td class="important">{{if $turnover>0}}{{$turnover|number_format}}{{else}}-{{/if}}</td>
+      <td class="minor">￥{{($item.sales_cost_tmp/100)|number_format}}</td>
+      {{/if}}
+      {{/if}}
+
+      {{if $date_mode <> 'today'}}
+      <td>￥{{(($item.sales_amount+$item.sales_amount_tmp)/100)|number_format}}</td>
+      <!--<td>{{($item.pin_rate*100)|string_format:"%.1f"}}%</td>-->
+      <!--<td>{{($item.profit*100)|string_format:"%.1f"}}%</td>-->
+      <td>{{($item.gross_profit*100)|string_format:"%.1f"}}%</td>
+      {{/if}}
+    </tr>
+    {{/foreach}}
+    <tr>
+      <td colspan="2" style="text-align: center">汇总（{{$total_record_num}}条）</td>
+      {{if ($date_mode == 'today' || 'sku' == $tab) && $unit=='num'}}
+      {{if $total_sales_out_num}}{{$turnover = $days_num*($total_begin_stock+$total_end_stock)/2/$total_sales_out_num}}{{/if}}
+      <td class="important">{{($total_begin_stock)|number_format}}</td>
+      <td class="important">{{($total_bought_in_num)|number_format}}</td>
+      <td class="minor">{{($total_other_in_num)|number_format}}</td>
+      <td class="minor">{{($total_refund_in_num)|number_format}}</td>
+      <td class="minor">{{($total_check_in_num)|number_format}}</td>
+      <td class="important">{{($total_sales_out_num)|number_format}}</td>
+      <td class="minor">{{($total_other_out_num)|number_format}}</td>
+      <td class="minor">{{($total_refund_out_num)|number_format}}</td>
+      <td class="minor">{{($total_check_out_num)|number_format}}</td>
+      <td class="important">{{$total_end_stock|number_format}}</td>
+      {{if ($date_mode == 'today' || 'sku' == $tab) && $cur_wid>0 }}<td>-</td>{{/if}}
+      {{if $date_mode <> 'today'}}
+      <td class="important">{{if $turnover>0}}{{$turnover|number_format}}{{else}}-{{/if}}</td>
+      <td class="minor">{{($total_sales_num_tmp)|number_format}}</td>
+      {{/if}}
+      {{else}}
+      {{if $total_sales_cost}}{{$turnover = $days_num*($total_begin_stock_cost+$total_end_stock_cost)/2/$total_sales_cost}}{{/if}}
+      <td class="important">￥{{($total_begin_stock_cost/100)|number_format}}</td>
+      <td class="important">￥{{($total_bought_in_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($total_other_in_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($total_refund_in_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($total_check_in_cost/100)|number_format}}</td>
+      <td class="important">￥{{($total_sales_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($total_other_out_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($total_refund_out_cost/100)|number_format}}</td>
+      <td class="minor">￥{{($total_check_out_cost/100)|number_format}}</td>
+      <td class="important">￥{{($total_end_stock_cost/100)|number_format}}</td>
+      {{if ($date_mode == 'today' || 'sku' == $tab) && $cur_wid>0 }}<td>-</td>{{/if}}
+      {{if $date_mode <> 'today'}}
+      <td class="important">{{if $turnover>0}}{{$turnover|number_format}}{{else}}-{{/if}}</td>
+      <td class="minor">￥{{($total_sales_cost_tmp/100)|number_format}}</td>
+      {{/if}}
+      {{/if}}
+      {{if $date_mode <> 'today'}}
+      <td>￥{{(($total_sales_amount + $total_sales_amount_tmp)/100)|number_format}}</td>
+      <!--<td>{{($item.pin_rate*100)|string_format:"%.1f"}}%</td>-->
+      <!--<td>{{($item.profit*100)|string_format:"%.1f"}}%</td>-->
+      <td>{{((($total_sales_amount + $total_sales_amount_tmp-$total_sales_cost-$total_sales_cost_tmp)/($total_sales_amount+$total_sales_amount_tmp))*100)|string_format:"%.1f"}}%</td>
+      {{/if}}
+    </tr>
+    </tbody>
+  </table>
+  {{else}}
+    暂无记录
+  {{/if}}
+
+  {{if $view_mode == "date"}}
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+    </ul>
+  </nav>
+  {{/if}}
+</div>
+
+<div style="display: none;" id="city-json">{{$cities_json}}</div>
+<div style="display: none;" id="warehouse-json">{{$warehouses_json}}</div>
+<div style="display: none;" id="cate1-json">{"1":"水","2":"电","3":"木","4":"瓦","5":"油","6":"工具"}</div>
+<div style="display: none;" id="cate2-json">{{$cate2_json}}</div>
+<script>
+(function () {
+    var city = eval('(' + $('#city-json').html() + ')');
+    var warehouse = eval('(' + $('#warehouse-json').html() + ')');
+    var cate1List = eval('(' + $('#cate1-json').html() + ')');
+    var cate2List = eval('(' + $('#cate2-json').html() + ')');
+
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    
+  function main() {
+      _initCityWarehouseSelect();
+      $('#select-city').change(_onChgCity);
+
+      _initCateSelect();
+      $('#select-cate1').change(_onChgCate);
+
+      $('input[name="unit"]').change(_onChgUnit);
+    }
+
+    function _onChgUnit(ev) {
+      var tgt = $(ev.currentTarget),
+          unit = tgt.val(),
+          url = "?date_mode={{$date_mode}}&tab={{$tab}}&cate1={{$cate1}}&cate2={{$cate2}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$cur_city}}&wid={{$cur_wid}}&keyword={{$keyword}}";
+      window.location.href = url + '&unit=' + unit;
+    }
+
+    function _initCityWarehouseSelect() {
+
+      $('#select-city').html('');
+      $('#select-city').append('<option value="0">城市</option>');
+
+      var curCity = $('#select-city').data('id');
+      for (var i in city) {
+        var option = '<option value="' + i + '">' + city[i] + '</option>';
+        if (curCity != 0 && curCity == i) {
+          option = '<option selected="selected" value="' + i + '">' + city[i] + '</option>';
+        }
+
+        $('#select-city').append(option);
+      }
+
+      var curWarehouse = $('#select-warehouse').data('id');
+      _initWarehouse(curCity,curWarehouse);
+    }
+
+    function _onChgCity() {
+      var curCity = $('#select-city').val();
+
+      if (warehouse.hasOwnProperty(curCity)) {
+        _initWarehouse(curCity);
+        $('#select-warehouse').css('display', 'inline-block');
+      } else {
+        $('#select-warehouse').html('<option value="0">库房</option>');
+      }
+    }
+
+    function _initWarehouse(curCity,curWarehouse)
+    {
+      var curWarehouse = $('#select-warehouse').data('id');
+      var warehouseList = warehouse[curCity];
+      $('#select-warehouse').html('');
+      $('#select-warehouse').append('<option value="0">库房</option>');
+
+      for (var j in warehouseList) {
+        var option = '<option value="' + j + '">' + warehouseList[j] + '</option>';
+        if (curWarehouse && curWarehouse == j) {
+          option = '<option selected="selected" value="' + j + '">' + warehouseList[j] + '</option>';
+        }
+        $('#select-warehouse').append(option);
+      }
+    }
+
+    function _initCateSelect() {
+
+      $('#select-cate1').html('');
+      $('#select-cate1').append('<option value="0">1级分类</option>');
+
+      var curCate1 = $('#select-cate1').data('id');
+      for (var i in cate1List) {
+        var option = '<option value="' + i + '">' + cate1List[i] + '</option>';
+        if (curCate1 != 0 && curCate1 == i) {
+          option = '<option selected="selected" value="' + i + '">' + cate1List[i] + '</option>';
+        }
+
+        $('#select-cate1').append(option);
+      }
+
+      var curCate2 = $('#select-cate2').data('id');
+      _initCate2(curCate1,curCate2);
+    }
+
+    function _onChgCate() {
+      var curCate1 = $('#select-cate1').val();
+
+      if (cate2List.hasOwnProperty(curCate1)) {
+        _initCate2(curCate1);
+        $('#select-cate2').css('display', 'inline-block');
+      } else {
+        $('#select-cate2').html('<option value="0">2级分类</option>');
+      }
+    }
+
+    function _initCate2(curCate1,curCate2)
+    {
+      var curCate2 = $('#select-cate2').data('id');
+      var cate2s = cate2List[curCate1];
+      $('#select-cate2').html('');
+      $('#select-cate2').append('<option value="0">2级分类</option>');
+
+      for (var j in cate2s) {
+        var option = '<option value="' + j + '">' + cate2s[j] + '</option>';
+        if (curCate2 && curCate2 == j) {
+          option = '<option selected="selected" value="' + j + '">' + cate2s[j] + '</option>';
+        }
+        $('#select-cate2').append(option);
+      }
+    }
+
+    main();
+  })();
+</script>

@@ -1,0 +1,49 @@
+<h4>成本历史</h4>
+<div style="padding-left: 5%;">
+    {{if !empty($fifo_history)}}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>序号</th>
+                <th>成本（元）</th>
+                <th>数量</th>
+                <th>出队</th>
+                <th>进队</th>
+                <th width="10%">时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{foreach $fifo_history as $item}}
+            <tr>
+                <td>{{$item['id']}}</td>
+                <td>{{$item['cost']/100}}</td>
+                <td>{{$item['num']}}</td>
+                <td>
+                    {{if !empty($item['_out_href'])}}
+                    <a href="{{$item['_out_href']}}" target="_blank">{{$item['_out_desc']}}-{{$item['out_id']}}</a>
+                    {{else}}
+                    <span>{{$item['_out_desc']}}-{{$item['out_id']}}</span>
+                    {{/if}}
+                </td>
+                <td>
+                    {{if !empty($item['_in_href'])}}
+                    <a href="{{$item['_in_href']}}" target="_blank">{{$item['_in_desc']}}-{{$item['in_id']}}</a>
+                    {{else}}
+                    <span>{{$item['_in_desc']}}-{{$item['in_id']}}</span>
+                    {{/if}}
+                </td>
+                <td>{{$item['ctime']}}</td>
+            </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+    {{else}}
+    <p style="color:red;"><strong>暂无数据！</strong></p>
+    {{/if}}
+</div>
+<nav>
+    <ul class="pagination">
+        {{$page_html nofilter}}
+        <li><a style="color:#555;">共{{$history_total|string_format:"%d"}}个</a></li>
+    </ul>
+</nav>

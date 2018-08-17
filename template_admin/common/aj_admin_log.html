@@ -1,0 +1,43 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+  <h3 class="page-header" style="color:gray;">后台操作日志</h3>
+  
+  {{if $total != 0}}
+  <div class="form-group" style="margin-left:20px; margin-top: 20px;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>日志ID</th>
+          <th>操作类型</th>
+          <th>城市/仓库</th>
+          <th>内容</th>
+          <th>时间</th>
+          <th>操作人</th>
+        </tr>
+      </thead>
+      <tbody>
+      {{foreach $logs as $log}}
+      <tr data-lid="{{$log.lid}}">
+        <td>{{$log.lid}}</td>
+        <td>{{$log.action_name}}</td>
+        <td>{{$log.city_name}}<br>{{$log.wid_name}}</td>
+        <td><div style="word-break: break-all; word-wrap:break-word; max-width: 600px;">{{$log.content}}</div></td>
+        <td>{{$log.mtime}}</td>
+        <td>{{$log._user.name}}</td>
+      </tr>
+      {{/foreach}}
+      </tbody>
+    </table>
+
+    <nav>
+      <ul class="pagination">
+        {{$pageHtml nofilter}}
+        <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+      </ul>
+    </nav>
+  </div>
+  {{else}}
+  <div style="text-align:center">
+    <span style=" margin-right: 10px; font-size: 20px; color:red;">暂无操作日志！</span>
+  </div>
+  {{/if}}
+</div>

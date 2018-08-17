@@ -1,0 +1,26 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">添加采购订单</h1>
+
+  <form class="form-horizontal _j_in_order_form" role="form">
+    {{include "warehouse/block_edit_order_info.html"}}
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="button" class="btn btn-primary" id="_j_btn_save_order_step1">保存</button>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- Modal -->
+  <div class="modal fade" id="dlgSupplierList" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        {{include "warehouse/dlg_supplier_list.html"}}
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

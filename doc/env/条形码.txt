@@ -1,0 +1,2 @@
+<img src="/common/barcode.php?text=1234-23876-376483&size=50" />
+文件在htdocs_admin下的common目录，所以只能在后台的页面这么引用

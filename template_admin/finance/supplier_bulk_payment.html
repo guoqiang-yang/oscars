@@ -1,0 +1,122 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        供应商批量结款
+    </h1>
+
+    <form class="form-inline" role="form" action="/finance/supplier_bulk_payment.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>供应商id：</label>
+                <input style="width: 80px;" type="text" class="form-control" name="sid" value="{{$sid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>起止日期：</label>
+                <input style="width: 37%;" type="date" class="form-control" name="btime" value="{{$search_conf.btime}}" placeholder="YYYY-MM-DD">
+                <span> - </span>
+                <input style="width: 37%;" type="date" class="form-control" name="etime" value="{{$search_conf.etime}}" placeholder="YYYY-MM-DD">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
+        </div>
+        
+    </form>
+
+    <hr>
+    {{if !empty($stock_list)}}
+    <form class="form-horizontal" role="form"> 
+        <div class="order-bottom">
+          <div class="form-group">
+            <label class="col-sm-2 control-label">供应商信息：</label>
+            <div class="col-sm-8">
+              <span class="text-value">【姓名】{{$supplier.name}}（{{$supplier.contact_name}}）</span>
+
+              <span class="text-value">【联系方式】{{$supplier.phone}}</span>
+            </div>
+          </div>
+            
+          <div class="form-group">
+            <label class="col-sm-2 control-label">应收款汇总：</label>
+            <div class="col-sm-8">
+              <span class="text-value">【总计】{{$prices.total/100}}元</span>
+              <span class="text-value" style="color:red;">【应付】{{$prices.final/100}}元</span>
+              <span class="text-value" style="color:blue">【退款】{{$prices.refund/100}}元</span>
+              <span class="text-value">【已付】{{$prices.had_paid/100}}元</span>
+            </div>
+          </div>
+        </div>
+        
+        <hr>
+        
+        <div class="form-group">
+            <label class="col-sm-2 control-label">入库单明细：</label>
+            
+            <div class="col-sm-10">
+                <table class="table">
+                  <thead>
+                  <tr>
+                    <th>入库单ID</th>
+                    <th>采购单ID</th>
+                    <th>仓库ID</th>
+                    <th>总货款</th>
+                    <th>已付货款</th>
+                    <th>退货款</th>
+                    <th style="width:10%;">送货日期</th>
+                    <th style="width:14%;">备注</th>
+                    <th>待支付金额</th>
+                    <th style="width:10%;"></th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {{foreach $stock_list as $one}}
+                  <tr class="stockin_info" data-id="{{$one.id}}">
+                    <td><a href="/warehouse/edit_stock_in.php?id={{$one.id}}" target="_blank">{{$one.id}}</a></td>
+                    <td><a href="/warehouse/detail_in_order.php?oid={{$one.oid}}" target="_blank">{{$one.oid}}</a></td>
+                    <td>{{$one.wid}}</td>
+                    <td>￥{{$one.price/100}}</td>
+                    <td>￥{{$one.real_amount/100}}</td>
+                    <td>
+                        ￥{{$one.refund_price/100}}
+                        {{if $one.refund_price!=0}}
+                        <br>
+                        <a href="/warehouse/stockin_refund_list.php?stockin_id={{$one.id}}" target="_blank">退单数量：{{$one.refund_num}}</a>
+                        {{/if}}
+                    </td>
+                    <td>{{$one.ctime}}</td>
+                    <td>{{$one.note}}</td>
+                    <td>
+                        <input class="form-control" type="text" value="{{$one.will_pay/100}}" name="will_pay" style="width:80px;display:inline-block;"> 元
+                    </td>
+                    <td>
+                        <div class="checkbox" style="font-size: 16px;">
+                            <label><input type="checkbox" name="bluk_pay" checked="checked">批量付</label>
+                        </div>
+                    </td>
+                  </tr>
+                  {{/foreach}}
+                  </tbody>	
+                </table>
+            </div>
+        </div>
+
+        {{if !empty($_permissions["/warehouse/ajax/bulk_paid"])}}
+        <div>
+            <a href="javascript:;" class="btn btn-primary" id="_j_confirm_bulk_paid" style="float:right;margin-left:20px;">批量支付</a>
+            <div style="width:20%; float:right;margin-left:20px;">
+                <select class="form-control" id="_j_bulk_paid_source">
+                    <option value="0">请选择支付类型</option>
+                    {{foreach $paid_sources as $payid=>$payname}}
+                    <option value="{{$payid}}">{{$payname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        {{/if}}
+        
+    </form>
+    {{else}}
+    <div>
+        <span style="color:red; font-size:20px;">请输入供应商id！或 无兑账未支付的入库单！</span>
+    </div>
+    {{/if}}
+</div>
+

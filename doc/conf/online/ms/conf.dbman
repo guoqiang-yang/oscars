@@ -1,0 +1,13 @@
+#
+# ./DbMand --kxi.conf=conf.dbman
+#
+
+DBMan.Endpoints = @tcp::12321
+
+DBMan.DBSetting = mysql://haocai_dev:f4sqe7wKzDT3eQpYkCZdMfd6O@rds5c731ofzh61zsoh32.mysql.rds.aliyuncs.com:3306/dev_config
+DBMan.DBConnection.MaxSize = 6
+
+kxi.PThreadPool.Server.Size = 20
+kxi.PThreadPool.Server.SizeMax = 100
+kxi.PThreadPool.Server.StackSize = 256ki
+

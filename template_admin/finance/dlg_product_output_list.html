@@ -1,0 +1,76 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">
+        选择商品
+        <div style="float:right;font-size:16px;margin-right:15px;">
+            <div class="form-inline _j_form">
+                <div class="form-group" style="margin-right:10px;">
+                    <input type="text" class="form-control" placeholder="请输入商品名称" name="keyword" value="{{$keyword}}">
+                </div>
+                <button type="button" class="btn btn-primary _j_invoice_search_product">搜索</button>
+            </div>
+        </div>
+    </h4>
+</div>
+<div class="modal-body">
+    {{if empty($keyword)}}
+    <form class="form-horizontal" role="form" action="#" data-cate1="{{$search_conf.cate1}}">
+        <div class="placeholder">
+            <div class="form-group">
+                <label class="col-sm-1 control-label">大类：</label>
+
+                <div class="col-sm-10">
+                    <ul class="nav nav-pills">
+                        {{foreach $cate1_list as $id => $item}}
+                        <li {{if $search_conf.cate1== $id}}class="active" {{/if}}>
+                            <a class="_j_invoice_select_product" href="?cate1={{$id}}">{{$item.name}}</a>
+                        </li>
+                        {{/foreach}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="_j_btn_save_products2" data-oid="{{$order.oid}}">确认选择</button>
+    </div>
+    <hr>
+    {{/if}}
+
+    {{if empty($search_products)}}暂无商品{{else}}
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width: 100px;">财务商品ID</th>
+            <th>商品名</th>
+            <th style="width: 60px;">分类</th>
+            <th style="width: 100px;">剩余数量</th>
+            <th style="width: 100px;">开票数量</th>
+            <th style="width: 100px;">采购单价</th>
+            <th style="width: 100px;">开票单价</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $search_products as $product}}
+        <tr class="_j_product_item" data-pid="{{$product.pid}}" data-num="{{$product.num-$product.occupy}}" data-num2="{{if !empty($invoice_products[$product.pid])}}{{$invoice_products[$product.pid].num}}{{else}}0{{/if}}" data-cost="{{{{$product.cost}}}}">
+            <td>{{$product.pid}}</td>
+            <td>{{$product.title}}</td>
+            <td>
+                {{$cate1_list[$product.cate1]['name']}}
+            </td>
+            <td>{{if $invoice.step > 2}}{{$product.num-$product.occupy+$invoice_products[$product.pid].num}}{{else}}{{$product.num-$product.occupy}}{{/if}}</td>
+            <td>
+                <input type="text" class="form-control" name="num" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" value="{{if !empty($invoice_products[$product.pid])}}{{$invoice_products[$product.pid].num}}{{else}}0{{/if}}">
+            </td>
+            <td>{{$product.cost/100}}</td>
+            <td>
+                <input type="text" class="form-control" name="price" onkeypress="if(!this.value.match(/^[\+\-]?\d*?\.?\d*?$/))this.value=this.t_value;else this.t_value=this.value;if(this.value.match(/^(?:[\+\-]?\d+(?:\.\d+)?)?$/))this.o_value=this.value" onkeyup="if(!this.value.match(/^[\+\-]?\d*?\.?\d*?$/))this.value=this.t_value;else
+ this.t_value=this.value;if(this.value.match(/^(?:[\+\-]?\d+(?:\.\d+)?)?$/))this.o_value=this.value" onblur="if(!this.value.match(/^(?:[\+\-]?\d+(?:\.\d+)?|\.\d*?)?$/))this.value=this.o_value;else{if(this.value.match(/^\.\d+$/))this.value=0+this.value;if(this.value.match(/^\.$/))this.value=0;this.o_value=this.value}" value="{{if !empty($invoice_products[$product.pid])}}{{$invoice_products[$product.pid].price/100}}{{else}}{{$product.cost*1.2/100}}{{/if}}">
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    {{/if}}
+</div>

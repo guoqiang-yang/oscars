@@ -1,0 +1,137 @@
+
+1. LAMP安装
+
+	-- mysql
+	yum install mysql mysql-server
+	chkconfig --levels 235 mysqld on
+	/etc/init.d/mysqld start
+	mysql_secure_installation
+
+	-- httpd
+	yum install httpd -y
+	chkconfig --levels 235 httpd on
+	/etc/init.d/httpd start
+	在 CentOS 中 Apache 的默认根目录是 /var/www/html，配置文件 /etc/httpd/conf/httpd.conf。其他配置存储在 /etc/httpd/conf.d/ 目录
+
+	-- php
+	yum install php -y
+	/etc/init.d/httpd restart
+	#php.ini add: date.timezone = Asia/Chongqing
+
+	-- httpd <- php
+	vi /etc/httpd/conf/httpd.conf
+	add:  LoadModule php5_module modules/libphp5.so
+	/etc/init.d/httpd restart
+
+	-- php <- mysql
+	yum search php
+	yum install php-mysql php-gd php-imap php-ldap php-odbc php-pear php-xml php-xmlrpc php-mbstring php-devel -y
+
+	-- mysql users
+	mysql -uroot -h127.0.0.1
+	create database haocai
+	grant select,insert,update,delete,create,drop on haocai.* to 'dev'@'localhost' identified by 'zhuoyue001';
+	mysql -udev -pzhuoyue001
+	use haocai
+
+	-- phpsh
+	cd /usr/local/
+	wget http://www.phpsh.org/phpsh-latest.tgz
+	tar zxvf phpsh-latest.tgz
+	cd phpsh/
+	sed -i "s#php -q#/usr/bin/php -q#g" phpsh
+	chmod +x phpsh
+	ln -s /usr/local/phpsh/phpsh /bin/phpsh
+
+	-- svn
+	yum install subversion -y
+	svnversion --version
+	svnadmin create /data0/svn/repos
+	vim /data0/svn/repos/conf/passwd
+	vim /data0/svn/repos/conf/authz
+	vim /data0/svn/repos/conf/svnserve.conf
+	svnserve -d -r /data0/svn/repos
+	svnserve -d -r /data0/svn/repos2 --listen-port 30250
+
+
+	-- casperjs
+	下载phantomjs http://phantomjs.org/
+	sudo ln -sf `pwd`/phantomjs/bin/phantomjs /usr/bin/phantomjs
+	下载casperjs http://casperjs.org/
+	sudo ln -sf `pwd`/n1k0-casperjs-a05a258/bin/casperjs /usr/bin/casperjs
+	yum install freetype-devel fontconfig-devel
+
+	-- sz rz
+	yum install lrzsz -y
+
+	-- zip
+	yum install zip php-pecl-zip  -y
+
+	-- imagick
+	yum install ImageMagick ImageMagick-devel
+	pecl install imagick
+	echo "extension=imagick.so" >> /etc/php.ini
+
+		#php版本问题: TODO - 有空升级一下PHP
+		原来想使用pecl install imagick 安装imagick扩展但是报错：
+		pecl/imagick requires PHP (version >= 5.4.0), installed version is 5.3.3
+
+		所以把老机器上的这些文件复制到新机器上了：
+		/usr/lib64/ImageMagick-6.5.4
+		/usr/lib64/libMagick*
+		/usr/lib64/php/modules/imagick.so
+
+	-- other
+	yum install glibc-headers gcc gcc-c++ make
+
+
+
+
+3. memcache安装
+
+	yum install libevent libevent-devel zlib zlib-devel -y
+	wget http://pecl.php.net/get/memcache-3.0.8.tgz
+	tar zxvf memcache-3.0.8.tgz
+	cd memcache-3.0.8
+	phpize
+	./configure
+	make
+	make install
+
+	echo "extension=memcache.so" >> /etc/php.ini
+	restart httpd
+
+	wget http://danga.com/memcached/dist/memcached-1.4.0.tar.gz
+	tar -zxvf memcached-1.4.0.tar.gz
+	cd memcached-1.4.0
+	./configure
+	make
+	make install
+	/usr/local/bin/memcached -d -m 1024 -u nobody -p 11211 -l 127.0.0.1
+
+
+5. qmail
+	参见 qmail安装.htm(http://lifewithqmail.org/LWQ-CN.html#daemontools)
+	/service/qmail-smtpd的启动有问题（猜测是网络配置引起的或softlimit设置问题），但不影响发邮件。
+6. other tool
+	#rz/sz
+	yum install lrzsz
+
+7. linux 开机启动程序方法
+
+	(1) 在/etc/rc.d/rc.local文件中加入程序路径及程序名
+	(2) 在/etc/rc.d/init.d/中添加可执行程序, 然后在/etc/rc.d/rcN.d/中添加符号链接(N表示运行级别)
+		先查看/etc/inittab文件中当前系统设置的默认级别,再将符号连接添加到对应的运行级别目录中.
+		符号连接命名规则:
+		以S开头(Start开启服务)再跟启动顺序数学(2位,00~99)再跟文件名
+		以K开头(Kill终止服务)再跟终止顺序数学(2位,00~99)再跟文件名
+		查看系统默认运行级别在/etc/inittab
+
+		例如：
+		cp test /etc/rc.d/init.d/
+
+		在/etc/rc.d/rc5.d/中添加符号连接
+		ln -s /etc/rc.d/init.d/test S99test
+
+
+

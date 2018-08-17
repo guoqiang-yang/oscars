@@ -1,0 +1,60 @@
+<form class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">供应商：</label>
+        <div class="col-sm-4">
+            <input class="form-control" type="text" name="supplier_id" value="{{$supplier_id}}" disabled>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">仓库：</label>
+        <div class="col-sm-4">
+            <select class="form-control" name="wid" disabled>
+                {{foreach $warehouse_list as $_wid=>$_wname}}
+                <option value="{{$_wid}}" {{if $wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+                {{/foreach}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">备注：</label>
+        <div class="col-sm-8">
+            <textarea class="form-control" name="note" rows="3"></textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">退货清单：</label>
+        <div class="col-sm-10">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>sid</th>
+                    <th>名称</th>
+                    <th>类别</th>
+                    <th>平均进价</th>
+                    <th>数量/可退数量/占用</th>
+                    <th>货位</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{foreach $products as $_product}}
+                <tr data-sid="{{$_product['sid']}}" data-loc="{{$_product['location']}}">
+                    <td>{{$_product['sid']}}</td>
+                    <td>{{$_product['_skuInfo']['title']}}</td>
+                    <td>{{$cate1_list[$_product['_skuInfo']['cate1']]['name']}}-{{$cate2_list[$_product['_skuInfo']['cate1']][$_product['_skuInfo']['cate2']]['name']}}</td>
+                    <td>
+                        <input style="width: 80px;" type="text" name="price" value="{{$_product['avg_price']}}" {{if empty($_permissions['hc_edit_supplier_refund_price'])}}disabled="true"{{/if}}>
+                    </td>
+                    <td>
+                        <input style="width: 80px;" type="text" name="num">
+                        / <span class="available_num">{{$_product['num'] - $_product['occupied']}}</span>
+                        / <span class="">{{$_product['occupied']}}</span>
+                    </td>
+                    <td>{{$_product['location']}}</td>
+                </tr>
+                {{/foreach}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</form>

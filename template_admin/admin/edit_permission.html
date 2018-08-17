@@ -1,0 +1,53 @@
+<style>
+    .list_items {padding: 6px 0; border-bottom: 1px solid #ddd;}
+    .list_items:last-child {border: none;}
+    .pages {font-size: 15px; font-weight: 600;}
+    .items {font-size: 17px; font-weight: 800;}
+</style>
+<input type="hidden" id="role_id" value="{{$id}}" />
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">编辑权限</h1>
+	<table style="margin-bottom: 50px;" class="table">
+        <thead>
+            <tr>
+                <th>模块</th>
+                <th>权限列表</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $role => $item}}
+        <tr>
+            <td style="vertical-align: middle; min-width: 150px;">
+                <label class="checkbox-inline items">
+                    <input class="parent_menu" type="checkbox" value="{{$role}}"> {{$item.name}}
+                </label>
+            </td>
+            <td>
+                {{foreach $item.pages as $page}}
+                <div class="list_items">
+                    <div style="float: left; width: 15%;">
+                        <label class="checkbox-inline pages">
+                            <input class="parent_menu" data-frole="{{$role}}" type="checkbox" value="{{$page.key}}"> {{$page.name}}
+                        </label>
+                    </div>
+                    <div style="float: right; width: 85%;">
+                        {{foreach $page.buttons as $button}}
+                        <label style="margin: 0; padding: 0; margin-left: 20px; margin-right: 20px;" class="checkbox-inline">
+                            {{*<input {{if in_array($button.key, $permission_list[$page.key])}}checked="checked"{{/if}} class="permission_item" data-frole="{{$role}}" data-srole="{{$page.key}}" type="checkbox" value="{{$button.key}}"> {{$button.name*}}
+                            <input {{if $button.is_owned||$button.is_rel}}checked="checked"{{/if}} {{if $button.is_rel}} disabled="true"{{/if}} class="permission_item" data-frole="{{$role}}" data-srole="{{$page.key}}" type="checkbox" value="{{$button.key}}"> {{$button.name}}
+                        </label>
+                        {{/foreach}}
+                    </div>
+                    <div style="clear: both;"></div>
+                </div>
+                {{/foreach}}
+            </td>
+        </tr>
+        {{/foreach}}
+        <tbody>
+	</table>
+
+    <div style="text-align: center; position: fixed; bottom: 10px; width: 80%;background-color: #eee;left: 17%;">
+        <button id="save_permission" type="button" class="btn-lg btn-primary">保    存</button>
+    </div>
+</div>

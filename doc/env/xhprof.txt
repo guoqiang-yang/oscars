@@ -1,0 +1,23 @@
+1、执行yum install xhprof，在询问Is this ok? 的时候输入y；
+
+2、切换目录至：/etc/php.d，编辑xhprof.ini，可以通过修改xhprof.output_dir设置输出目录；
+
+3、安装图形化工具yum install graphviz（如果已经安装会提示 ... already installed and latest version）；
+
+4、重启服务器service httpd restart；
+
+5、cd /etc/httpd/conf.d，编辑xhprof.conf，绑定域名；
+
+6、在要测试的代码开头加入：
+    xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY);
+    结尾加入：
+        $xhprofData = xhprof_disable();
+        require '/usr/share/xhprof/xhprof_lib/utils/xhprof_lib.php';
+        require '/usr/share/xhprof/xhprof_lib/utils/xhprof_runs.php';
+        $xhprofRuns = new XHProfRuns_Default();
+        $runId = $xhprofRuns->save_run($xhprofData, 'xhprof_test');
+        echo 'http://x.test.haocaisong.cn/index.php?run=' . $runId . '&source=xhprof_test';
+在页面的底部会生成一个链接，访问链接即可得到分析结果；
+
+
+参考链接：http://blog.csdn.net/u013474436/article/details/70161399

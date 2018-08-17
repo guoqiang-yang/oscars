@@ -1,0 +1,147 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">数据导出</h1>
+
+  {{if count($type_list) > 0}}
+  <form class="form-inline" role="form" id="form_export" action="/statistics/export.php">
+    <div class="placeholder">
+      <div class="form-group" style="margin-right: 20px;" id="time_dlg">
+        <label>时间：</label>
+        <input type="date" class="form-control" name="start_time" value="{{$start_time}}" style="display: inline-block;width: 170px;"> - <input type="date" class="form-control" name="end_time" value="{{$end_time}}" style="display: inline-block;width: 170px;">
+      </div>
+      </div>
+      <div class="placeholder">
+      	<!-- 城市 -->
+		<div class="form-group" style="margin-right: 20px;" id="city_dlg">
+            <label>城市：</label>
+            <select id="select_city" name="city" class="form-control">
+            	<option value="">请选择</option>
+            	<option value="0">全部</option>
+            	{{foreach $citys as $item}}
+            		<option value="{{$item.city_id}}">{{$item.city_name}}</option>
+            	{{/foreach}}
+            </select>
+        </div>
+      	<!-- 仓库 -->
+        <div class="form-group" style="margin-right: 20px;" id="wid_dlg">
+            <label>仓库：</label>
+            <select id="select_warehouses" name="wid" class="form-control">
+            	<option value="">请选择</option>
+            </select>
+        </div>
+		<!-- 导出类型 -->
+      <div class="form-group" style="margin-right: 20px;">
+        <label>类型：</label>
+        <select id="sel_mode" name="type" class="form-control">
+          {{foreach $type_list as $type_id => $name}}
+          <option {{if $type == $type_id}}selected="selected"{{/if}} value="{{$type_id}}">{{$name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+      <input type="submit" name="submit" class="btn btn-primary" id="btn_search" value="导出"/>
+      <span style="color:red;display:none;" id="export_tip">　注意：期末库存仅供参考，由于历史数据不全，可能跟实际有一定偏差。</span>
+    </div>
+  </form>
+  {{else}}
+    暂无需要导出的数据
+  {{/if}}
+
+
+</div>
+
+<script>
+    $(function () {
+    	/* 根据所选城市动态获取仓库信息 */
+    	$("#select_city").change(function (){
+    		var $this = $(this);
+    		var $warehouses = $("#select_warehouses");
+    		var cityId = $this.val();
+    		$('#wid_dlg').show();
+    		if (cityId == ""){
+    			$warehouses.html("");
+				$warehouses.append("<option value=''>请选择</option>");
+    		} else {
+    			K.post("/statistics/ajax/get_warehouses.php", {cityId : cityId} , function (res) {
+        			console.log(res);
+        			if (res.code == 0){
+        				$warehouses.html("");
+        				$warehouses.append("<option value=''>请选择</option>\
+        						<option value='0'>全部</option>");
+        				for (var i in res.warehouses) {
+        					$warehouses.append("<option value='"+ res.warehouses[i].wid +"'>" + res.warehouses[i].wname + "</option>");
+        				}
+        			}
+    			});
+    		}
+    	});
+    	
+    	/* 执行导出表单提交 */
+    	$("#form_export").submit(function (){
+    		var city = $("#select_city").val();
+    		if (city == ""){
+    			alert("请选择导出数据的城市");
+    			return false;
+    		} else {
+    			return true;
+    		}
+    	});
+
+        $('#sel_mode').change(function () {
+            $('#export_tip').hide();
+            var selectedId = $(this).val();
+            if ('13' == selectedId || '5' == selectedId || '16' == selectedId ||
+                '20' == selectedId || '28' == selectedId || '30' == selectedId ||
+                '31' == selectedId
+            ) {
+                $('#time_dlg').hide();
+            } else {
+                $('#time_dlg').show();
+            }
+
+            if ('14' == selectedId) {
+                $('input[name=start_time]').hide();
+                $('#export_tip').text("　注意：期末库存仅供参考，由于历史数据不全，可能跟实际有一定偏差。").show();
+            } else {
+                $('input[name=start_time]').show();
+            }
+
+            if ('21' == selectedId) {
+                $('input[name=end_time]').hide();
+            } else {
+                $('input[name=end_time]').show();
+            }
+
+            if ('22' == selectedId) {
+                $('input[name=end_time]').hide();
+                $('input[name=start_time]').attr('type', 'month');
+            } else {
+                $('input[name=end_time]').show();
+                $('input[name=start_time]').attr('type', 'date');
+            }
+        });
+    })
+</script>
+<!-- 下载 -->
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">文件下载</h1>
+	<form class="form-inline" role="form" id="form_download" action="/statistics/export.php">
+    <div class="placeholder">
+      	<div class="form-group" style="margin-right: 20px;" id="time_dlg">
+        	<label>提取码：</label>
+        	<input type="text" class="form-control" name="code" value="{{$code}}" style="margin-right : 20px;" />
+        	<input type="submit" name="submit_download" class="btn btn-primary" id="btn_search" value="下载"/>
+      	</div>
+	</div>
+</div>
+<script>
+	$(function (){
+		$("#form_download").submit(function (){
+			var code = $("input[name='code']").val();
+			if (code == ''){
+				alert('请输入提取码！');
+				return false;
+			} else {
+				return true;
+			}
+		});
+	});
+</script>

@@ -1,0 +1,143 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    
+    <h1 class="page-header">
+	    临采入库单
+    </h1>
+
+    <form class="form-horizontal" role="form">
+        <input type="hidden" name="oid" value="{{$oid}}">
+        
+        <div class="order-bottom" style="background: #F2F2F2;">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">供应商信息：</label>
+
+				<div class="col-sm-10">
+					<span class="text-value">【姓名】{{$inorder_info.contact_name}}（ID：{{$inorder_info.sid}}）</span>
+                    <span class="text-value">【电话】{{$inorder_info.contact_phone}} </span>
+				</div>
+			</div>
+            <div class="form-group">
+				<label class="col-sm-2 control-label">仓库：</label>
+
+				<div class="col-sm-10">
+					<span class="text-value" style="color:red;">{{$inorder_info._warehouse_name}}</span>
+                    <span class="text-value">【送货时间】{{$inorder_info._delivery_date}}</span>
+				</div>
+			</div>
+            <div class="form-group">
+				<label class="col-sm-2 control-label">备注：</label>
+
+				<div class="col-sm-10">
+					<span class="text-value">{{if !empty($inorder_info.note)}}{{$inorder_info.note}}{{else}}无{{/if}}</span>
+				</div>
+			</div>
+            <div class="form-group">
+				<label class="col-sm-2 control-label">订单状态：</label>
+
+				<div class="col-sm-10">
+					<span class="text-value" style="color:red;margin-right:15px;font-size:18px;font-weight:bold;">{{$inorder_info._step}}</span>
+                    <span class="text-value" style="color:red;margin-right:15px;">{{$inorder_info._source}}</span>
+				</div>
+			</div>
+        </div>
+        
+        <div class="order-bottom products_area">
+            <div class="form-group">
+            <label class="col-sm-2 control-label">采购单商品列表：</label>
+
+            <div class="col-sm-10">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>skuid</th>
+                        <th width="25%;">名称</th>
+                        <th>单价</th>
+                        <th>单位</th>
+                        <th>采购数</th>
+                        <th>已入库数</th>
+                        <th>集采入库</th>
+                        <th>临采入库</th>
+                        <th>入库单ID</th>
+                        <th>未入库数</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{foreach $products as $p}}
+                    <tr class="_j_product" data-sid="{{$p.sid}}" style="{{if array_key_exists($p.sid, $products_sales_order)}}font-weight:bold;color:blue;{{else}}color:gray;{{/if}}">
+                        <td>{{$p.sid}}</td>
+                        <td>
+                            {{$skuinfos[$p.sid]['title']}}
+                            {{if !empty($skuinfos[$p.sid]['alias'])}}<br><span style="color:gray;">{{$skuinfos[$p.sid]['alias']}}</span>{{/if}}
+                        </td>
+                        <td>
+                            {{if $_isAdmin||$_isBuyer||$_isFinance}}{{$p.price/100}}元{{else}}-{{/if}}
+                        </td>
+                        <td>{{$skuinfos[$p.sid]['unit']|default:'个'}}</td>
+                        <td>{{$p.num}}</td>
+                        <td>{{$p.stockin_num}}</td>
+                        <td>{{$p.stockin_num_c}}</td>
+                        <td>{{$p.stockin_num_t}}</td>
+                        <td>
+                            {{if !empty($p.stockin_ids)}}
+                                {{foreach $p.stockin_ids as $o}}
+                                <a href="/warehouse/edit_stock_in.php?id={{$o.id}}" target="_blank">{{$o.n}}：{{$o.id}}</a>
+                                {{/foreach}}
+                            {{else}}
+                            --
+                            {{/if}}
+                        </td>
+                        <td>{{$p.un_stockin_num}}</td>
+                    </tr>
+                    {{if array_key_exists($p.sid, $products_sales_order)}}
+                    <tr style="font-size:12px;">
+                        <td colspan="10" style="padding-left: 20%;">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>oid</th>
+                                <th width="15%;">配送日期</th>
+                                <th>空采数</th>
+                                <th>已临采数</th>
+                                <th>已入库数</th>
+                                <th>可入库数</th>
+                                <th>是否入库</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {{foreach $products_sales_order[$p.sid] as $sp}}
+                                <tr class="sales_order" data-oid="{{$sp.oid}}" data-sid="{{$sp.sid}}" data-pid="{{$sp.pid}}" data-num="{{$sp.un_tmp_inorder_num}}" style="{{if $p.un_stockin_num>0 &&$sp.un_tmp_inorder_num>0}}color:darkred;{{else}}color:gray;{{/if}}">
+                                    <td><a href="/order/order_detail.php?oid={{$sp.oid}}" target="blank">{{$sp.oid}}</a></td>
+                                    <td>{{$sp.delivery_desc}}</td>
+                                    <td>{{$sp.vnum}}</td>
+                                    <td>{{$sp.tmp_bought_num}}</td>
+                                    <td>{{$sp.tmp_inorder_num}}</td>
+                                    <td>{{$sp.un_tmp_inorder_num}}</td>
+                                    <td>
+                                        {{if $p.un_stockin_num>0 &&$sp.un_tmp_inorder_num>0}}
+                                        <div class="checkbox" style="font-size: 14px; font-weight:bold;color:green;">
+                                            <label><input type="checkbox" name="bluk_tmp_stockin">入库</label>
+                                        </div>
+                                        {{else}}<span style="color:red;font-weight:bold;font-size:14px;">否</span>{{/if}}
+                                    </td>
+                                </tr>
+                                {{/foreach}}
+                            </tbody>
+                        </table>
+                        </td>
+                    </tr>
+                    {{/if}}
+                    {{/foreach}}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+        
+        
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-primary" id="_j_tmp_stock_in" style="margin-right:20px;">确认入库</button>
+            </div>
+        </div>
+    </form>
+</div>

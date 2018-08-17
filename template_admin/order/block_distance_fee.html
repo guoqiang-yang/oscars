@@ -1,0 +1,22 @@
+{{if !$res}}
+	读取失败！
+{{else}}
+{{if 0 == 5}}
+	<span class="text-value" style="color: red; float: left; width: 40%;">【待验证，验证之后距离及运费方可见】</span>
+{{else}}
+	<span class="text-value" style="color: green; float: left; width: 13%;">【已验证】</span>
+	<span class="text-value col-sm-2">距离：<span style="color: red;" class="order_distance" data-distance="{{$distance}}">{{$distance}} 公里</span></span>
+	{{*{{foreach $fee_list as $item}}
+	<span style="margin: 0 10px;">{{$item._model}}：<span style="color: red;">{{$item.freight / 100}}</span> 元</span>
+	{{/foreach}}*}}
+	{{if !empty($note)}}
+	<span style="margin: 0 10px;">(备注：{{$note}})</span>
+{{/if}}
+{{/if}}
+{{if $status == 5}}
+<a class="btn btn-default" href="/order/edit_community_fee.php?community_id={{$community_id}}&wid={{$wid}}" style="margin-left:20px;" target="_blank">去验证</a>
+{{else}}
+<a class="btn btn-default" href="/order/edit_community_fee.php?community_id={{$community_id}}&wid={{$wid}}" style="margin-left:20px;"  target="_blank">去修改</a>
+{{/if}}
+
+{{/if}}

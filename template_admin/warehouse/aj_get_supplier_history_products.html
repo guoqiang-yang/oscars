@@ -1,0 +1,42 @@
+{{if !empty($history_product)}}
+<table class="table">
+    <thead>
+    <tr>
+        <th>sku_id</th>
+        <th style="width: 16%;">名称</th>
+        <th style="width: 10%;">类别</th>
+        <th>成本/采购价</th>
+        <th style="width: 15%;">单价</th>
+        <th style="width: 15%;">采购数量</th>
+        <th style="width: 15%;">入库数量</th>
+        <th style="width: 12%;">库存状态(库存)</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $history_product as $productItem}}
+    <tr class="_j_product" data-sid="{{$productItem.sid}}">
+        <td>{{$productItem.sid}}</td>
+        <td>{{$productItem.title}}</a></td>
+        <td>{{$cate1_list[$productItem.cate1]['name']}}-{{$cate2_list[$productItem.cate1][$productItem.cate2]['name']}}</td>
+        <td>
+            {{$productItem._stock.cost/100}}元/{{$productItem._stock.purchase_price/100}}元
+        </td>
+        <td>
+            <input class="form-control" type="text" name="price" value="{{$productItem._buy_price}}" style="width: 60%; display:inline;" placeholder="单价" {{if $productItem._stockin.num>0}} disabled="true"{{/if}}>元
+        </td>
+        <td>
+            <input class="form-control" type="text" name="num" value="{{$productItem._inorder.num}}" style="width: 60%; display:inline;">{{$productItem.unit}}
+        </td>
+        <td>
+            <input class="form-control" type="text" name="num" value="{{$productItem._stockin.num}}" style="width: 60%; display:inline;" disabled="true">{{$productItem.unit}}
+        </td>
+        <td>
+            {{if $productItem._stock.alert_threshold>$productItem._stock.num}} <span style="color:red;">预警</span> {{else}} <span>正常</span> {{/if}} ({{$productItem._stock.num}})
+        </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>{{else}}
+<div style="padding:40px 380px;">
+    <span style="font-size: 20px;">无历史购买商品！！</span>
+</div>{{/if}}

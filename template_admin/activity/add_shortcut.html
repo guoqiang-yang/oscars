@@ -1,0 +1,81 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">{{if empty($shortcut.id)}}添加{{else}}编辑{{/if}}快捷入口</h1>
+    <form class="form-horizontal" role="form">
+        {{if $shortcut.sid}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">id：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" id="sid" value="{{$shortcut.sid}}" readonly="true">
+            </div>
+        </div>
+        {{/if}}
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">入口名称：</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="name" value="{{$shortcut.name}}" maxlength="4" placeholder="（请输入1~4个汉字作为入口名称）">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">所在城市：</label>
+            <div class="col-sm-6">
+                <div class="checkbox" id="box">
+                    <label style="margin-right:10px;" class="col-sm-2">
+                        <input type="checkbox" value="" onclick="checkAll(this)" all="none">全选
+                    </label>
+                    {{foreach $city as $id => $name}}
+                    <label style="margin-right:10px;" class="col-sm-2">
+                        <input type="checkbox" value="{{$id}}" name="city" {{if strpos($shortcut.city, (string)$id) !== false}} checked="checked" {{/if}}>{{$name}}
+                    </label>
+                    {{/foreach}}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">跳转链接：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" id="url" value="{{$shortcut.url}}"  placeholder="（可不填，不填则不跳转）">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">显示顺序：</label>
+            <div class="col-sm-2">
+                <input type="text" class="form-control" id="sort" placeholder="请输入数字" value="{{$shortcut.sort}}">
+            </div>
+            <label class="control-label" style="color:red">*数字越小位置越靠前，0为最小</label>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">开始时间：</label>
+            <div class="col-sm-3">
+                <input type="datetime-local" class="form-control" id="start_time" value="{{$shortcut.start_time}}">
+            </div>
+            <label class="col-sm-1 control-label" style="text-align: center">~</label>
+            <div class="col-sm-3">
+                <input type="datetime-local" class="form-control" id="end_time" value="{{$shortcut.end_time}}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">选择图片：</label>
+            <div class="col-sm-8">
+                <div style="display:inline-block;" class="_j_logo_wrap">
+                    <img id="_j_upload_view_img" src="{{if empty($shortcut.imgurl)}}/i/nopic100.jpg{{else}} {{$shortcut.imgurl}} {{/if}}">
+                </div>
+                <button style="display:inline-block; margin-left:10px;" type="button" class="btn btn-default" id="_j_btn_select_pic" data-path="shortcut">从电脑选择图片</button>
+                <input type="hidden" name="pic_tag" value="" id="imgurl">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-primary" id="btn_save_shortcut">保存</button>
+                <a type="button" style="margin-left:20px;" class="btn btn-default" onClick="javascript:history.back(-1);">取消</a>
+            </div>
+        </div>
+    </form>
+
+</div>

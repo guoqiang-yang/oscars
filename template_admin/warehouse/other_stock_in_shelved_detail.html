@@ -1,0 +1,87 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">其他入库单 - 上架</h1>
+
+    <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">其他入库单ID：</label>
+            <div class="col-sm-8">
+                <a class="text-value" href="/warehouse/add_other_stock_in_order.php?oid={{$order.oid}}" target="_blank">{{$order.oid}}</a>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">仓库ID：</label>
+            <div class="col-sm-8">
+                <span class="text-value" style="color:red; font-weight:bold;">{{$warehouses[$order.wid]}}</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">上架清单：</label>
+
+            <div class="col-sm-8">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>sid</th>
+                        <th style="width:15%;">名称</th>
+                        <th>已上架数量/总数量</th>
+                        <th style="width: 100px">实际收货数量</th>
+                        <th style="width: 130px">货位号</th>
+                        <th style="width: 130px">已用货位</th>
+                        <th>勾选上架</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{foreach $order.products as $p}}
+                    <tr class="_j_product" data-sid="{{$p.sid}}">
+                        <td>{{$p.sid}}</td>
+                        <td>{{$skuinfos[$p.sid]['title']}}</td>
+                        <td><span style="color:red;">{{$p.shelved_num}}</span> / {{$p.num}}</td>
+                        <td>
+                            <input type="text" class="form-control" name="num">
+                        </td>
+                        <td>
+                            {{if !empty($p.from_location)}}
+                            <input type="hidden" name="location" value="{{$p.from_location}}">{{$p.from_location}}</input>
+                            {{else}}
+                            <input type="text" class="form-control" name="location" value="{{if isset($order.loc_list[$p.sid])}}{{$order.loc_list[$p.sid][0]}}{{/if}}">
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{if isset($order.loc_list[$p.sid])}}
+                                {{foreach $order.loc_list[$p.sid] as $_loc}}
+                                    {{$_loc}}<br>
+                                {{/foreach}}
+
+                                {{if empty($p.location)}}
+                                <span style="color:blue;">请确认上货架位</span>
+                                {{/if}}
+                            {{else}}
+                            <span style="color:red;">暂无，请分配新货位</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{if !empty($p.location)}}
+                            <span style="color:red;">已上架</span>
+                            {{else}}
+                            <div class="checkbox" style="font-size: 16px;">
+                                <label><input type="checkbox" name="wait_shelved" checked="checked">上架</label>
+                            </div>
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/foreach}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                {{if $order.step == 4 || $order.step == 5}}
+                <button type="button" class="btn btn-primary" id="_j_confirm_other_stock_in_product_shelved" data-oid="{{$order.oid}}" style="margin-right:20px;">确认上架</button>
+                {{/if}}
+            </div>
+        </div>
+    </form>
+</div>

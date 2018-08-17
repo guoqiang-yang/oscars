@@ -1,0 +1,94 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">仓库-{{if empty($stock.sid)}}添加库存{{else}}编辑库存{{/if}}</h1>
+
+  <form class="form-horizontal" role="form">
+    <input type="hidden" name="sid" value="{{$sid}}">
+    <div class="form-group">
+      <label class="col-sm-2 control-label">商品名称：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="title" value="{{$sku.title}}" readonly="true">
+      </div>
+    </div>
+      {{if empty($_user.wid)}}
+      <div class="form-group">
+          <label class="col-sm-2 control-label">城市：</label>
+
+          <div class="col-sm-2">
+              <select class="form-control" name="city_id"  id="city_id" {{if $_user.city_id}} disabled="true"{{/if}}
+              data-city-wid="{{$city_wid_list}}" data-wid-list="{{json_encode($_warehouseList)}}">
+              <option value="0" {{if !$wid}} selected="selected"{{/if}}>请选择</option>
+              {{foreach $city_list as $city_id => $cname}}
+              <option value="{{$city_id}}" {{if $_user.city_id==$city_id}} selected="selected"{{/if}}>{{$cname}}</option>
+              {{/foreach}}
+              </select>
+          </div>
+      </div>
+      {{/if}}
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label">仓库：</label>
+			
+			<div class="col-sm-2">
+				<select class="form-control" name="wid"  id="_j_select_stock" {{if $_user.wid}} disabled="true"{{/if}}>
+					{{if $_user.wid}}
+					<option value="{{$_user.wid}}" selected="selected">{{$_warehouseList[$_user.wid]}}</option>
+					{{else}}
+						<option value="0" {{if !$wid}} selected="selected"{{/if}}>请选择</option>
+						{{foreach $_warehouseList as $_wid=>$_wname}}
+						<option value="{{$_wid}}" {{if $wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+						{{/foreach}}
+					{{/if}}
+				</select>
+			</div>
+		</div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">采购价：</label>
+
+        <div class="col-sm-2">
+            {{foreach $stock as $_wid => $_info}}
+            <input type="hidden" class="_j_purchaseprice_{{$_wid}}" data-purchaseprice{{$_wid}}="{{$_info.purchase_price/100|string_format:'%d'}}">
+            {{/foreach}}
+            <input type="text" class="form-control" name="purchase_price" value="{{$stock[$_user.wid].purchase_price/100|string_format:'%d'}}">
+        </div>
+        <label class="col-sm-2" style="padding-top:7px;">元</label>
+    </div>
+    
+    <div class="form-group">
+        <label class="col-sm-2 control-label">成本：</label>
+
+        <div class="col-sm-2">
+            {{foreach $stock as $_wid => $_info}}
+            <input type="hidden" class="_j_cost_{{$_wid}}" data-cost{{$_wid}}="{{$_info.cost/100|string_format:'%d'}}"  disabled="true">
+            {{/foreach}}
+            <input type="text" class="form-control" name="cost" value="{{$stock[$_user.wid].cost/100|string_format:'%d'}}" disabled="true">
+        </div>
+        <label class="col-sm-2" style="padding-top:7px;">元
+            <span style="color:red;" id="_j_df_cost_desc">（默认值）</span>
+        </label>
+    </div>
+		
+    <div class="form-group">
+			{{foreach $stock as $_wid => $_info}}
+			<input type="hidden" class="_j_alert_{{$_wid}}" data-alert{{$_wid}}="{{$_info.alert_threshold|string_format:'%d'}}">
+			{{/foreach}}
+      <label class="col-sm-2 control-label">报警阈值：</label>
+
+      <div class="col-sm-2">
+        <input type="text" class="form-control" name="alert_threshold" value="{{$stock[$_user.wid].alert_threshold|string_format:'%d'}}">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="button" class="btn btn-primary" id="_j_save_stock" data-refer="{{$smarty.server.HTTP_REFERER}}">保存</button>
+      </div>
+    </div>
+
+  </form>
+
+</div>
+
+<div id="show_hccommon_admin_log" data-objid="{{$sid}}" data-objtype="5" data-actiontype=""></div>

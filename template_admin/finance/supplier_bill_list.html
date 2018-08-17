@@ -1,0 +1,254 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">供应商账务清单</h1>
+	
+	<form class="form-inline" role="form" action="/finance/supplier_bill_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>供应商ID：</label>
+				<input class="form-control" type="text" name="sid" value="{{if $sid}}{{$sid}}{{/if}}" style="margin-right: 20px;" placeholder="请输入供应商id">
+			</div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>支付方式：</label>
+                <select class="form-control" name="payment_type">
+                    <option value="0" {{if 0==$payment_type}}selected="selected"{{/if}}>全部</option>
+                    {{foreach $payment_types as $_ptid => $_desc}}
+                    <option value="{{$_ptid}}" {{if $_ptid==$payment_type}}selected="selected"{{/if}}>{{$_desc}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>银行：</label>
+                <select class="form-control" name="paid_source">
+                    <option value="0" {{if 0==$paid_source}}selected="selected"{{/if}}>全部</option>
+                    <option value="999" {{if 999==$paid_source}}selected="selected"{{/if}}>无</option>
+                    <option value="100" {{if 100==$paid_source}}selected="selected"{{/if}}>余额</option>
+                    {{foreach $paid_sources as $_psid => $_desc}}
+                    <option value="{{$_psid}}" {{if $_psid==$paid_source}}selected="selected"{{/if}}>{{$_desc}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+			<div class="form-group" style="margin-right:20px;">
+				{{if !empty($_permissions["/finance/download_pay_detail"]) && !empty($sid)}}
+				<a href="/finance/download_pay_detail.php?{{$queryStr}}" class="btn btn-success" style="margin-left:50px;">下载账务清单</a>
+				{{/if}}
+			</div>
+		</div>
+        <div class="placeholder">
+            <div class="form-group" style="margin-right: 20px;">
+				<label>日期 (YYYY-MM-DD)：</label>
+				<input type="date" class="form-control" name="from_date" value="{{if $from_date}}{{$from_date}}{{/if}}" style="width: 150px;">
+				<span> - </span>
+				<input type="date" class="form-control" name="end_date" value="{{if $end_date}}{{$end_date}}{{/if}}" style="width: 150px;">
+			</div>
+			<button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+	</form>
+	
+	<hr>
+	
+	{{if !empty($bill_list)}}
+	<table class="table">
+		<thead>
+		<tr>
+            <th>id</th>
+            <th>仓库ID</th>
+            <th>单据类型</th>
+            <th style="width:10%;">供应商</th>
+            <th>应付减少</th>
+            <th>应付增加</th>
+            <th>应付余额</th>
+            <th>收款方式</th>
+            <th style="width:10%;">日期</th>
+            <th style="width:15%;">备注</th>
+            <th>执行人</th>
+            <th>操作</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $bill_list as $one}}
+		<tr data-oid="{{$one.objid}}" data-id="{{$one.id}}">
+			<td>{{$one.id}}</td>
+			<td>{{$one.wid}}</td>
+			<td>
+			{{if !empty($one.objUrl)}}
+                <a href="{{$one.objUrl}}" target="_blank">{{$st_desc[$one.type]}}</a>
+			{{else}}
+                {{$st_desc[$one.type]}}
+			{{/if}}
+            {{if $one.objid}}&nbsp;-&nbsp;{{if $one.type==3}}[采]{{elseif $one.type==1}}[入]{{/if}}{{$one.objid}}{{/if}}
+			</td>
+			<td>
+        <a href="?sid={{$one._supplier.sid}}">{{$one._supplier.name}}</a>
+      </td>
+			<td>{{if $one.type==1||$one.type==3||$one.type==4||$one.type==5||($one.type==2&&$one.price<0)}}￥{{$one.price/100}}{{/if}}</td>
+			<td>{{if $one.type==0||($one.type==2&&$one.price>0)}}￥{{$one.price/100}}{{/if}}</td>
+			<td><span style="color:red;">￥{{$one.amount/100}}</span></td>
+      <td>
+        {{$one.payment_name}}
+        <br>
+        <span class="_paid_source" data-src="{{$one.paid_source}}">{{if $one.paid_source!=100}}{{$paid_sources[$one.paid_source]}}{{else}}余额{{/if}}</span>
+      </td>
+			<td>{{$one.ctime}}</td>
+			<td>{{$one.note}}</td>
+			<td data-suid="{{$one._operator.suid}}">{{$one._operator.name}}</td>
+      <td>
+          {{if !empty($_permissions["/finance/ajax/modify_money_out"])}}
+            {{if $one.type==1||$one.type==3}}
+            <a class="modify_paid_source" href="javascript:;">修改</a>
+            {{else}}
+            <span> -- </span>
+            {{/if}}
+          {{/if}}
+      </td>
+		</tr>
+		{{/foreach}}
+		</tbody>	
+	</table>
+  
+	{{else}}
+  <span>无账务清单！！</span>
+	{{/if}}
+  
+  
+	<nav>
+		<ul class="pagination" style="margin:0;">
+		  {{$pageHtml nofilter}}
+		  <li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+      {{foreach $prices as $pval}}
+      <li><a style="color:#555;">{{$pval.type_name}}：{{$pval.price/100}}</a></li>
+      {{/foreach}}
+		</ul>
+
+    {{if !empty($sid)}}
+        {{if !empty($_permissions["/finance/ajax/save_money_out"])}}
+		<a href="javascript:void(0);" class="btn btn-primary" data-toggle="modal" data-target="#adjustFinanceModal" style="margin-right:20px;float:left;">调账</a>
+        {{/if}}
+    {{/if}}
+	</nav>
+
+</div>
+
+<div class="modal fade _j_dialog" id="adjustFinanceModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.info.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">调账</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="col-sm-3 control-label">类型：</label>
+						<div class="col-sm-7">
+						<input style="margin-right: 5%" type="radio" value="1" name="adtype">
+						<span style="margin-right: 10%">应付增加</span>
+						<input style="margin-right: 5%" class="" type="radio" value="2" name="adtype">
+						<span style="margin-right: 10%">应付减少</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">金额：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="price" placeholder="金额" value="" style="display:inline-block;width:100px;">元
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+						<div class="col-sm-7">
+							<textarea class="form-control" rows="2" name="note"></textarea>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary _j_adjust_money_out" data-sid="{{$sid}}">确认调账</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="payFinanceModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-oid="{{$order.info.oid}}">
+	<div class="modal-dialog modal-sm" role="document" style="width:500px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">返现</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+                    <div class="form-group">
+                      <label class="col-sm-3 control-label">款项来源：</label>
+                      <div class="col-sm-7">
+                        <select class="form-control" name="paid_source" style="display:inline-block;width:150px;">
+                        <option value="0">请选择</option>
+                        {{foreach $paid_sources as $id => $desc}}
+                        <option value="{{$id}}">{{$desc}}</option>
+                        {{/foreach}}
+                        </select>
+                      </div>
+                    </div>
+					{{*<div class="form-group">
+						<label class="col-sm-3 control-label">预付金额：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="pre_pay" placeholder="金额" value="" style="display:inline-block;width:100px;">元
+						</div>
+					</div>*}}
+					<div class="form-group">
+						<label class="col-sm-3 control-label">返现金额：</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="privilege" placeholder="金额" value="" style="display:inline-block;width:100px;">元
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+						<div class="col-sm-7">
+							<textarea class="form-control" rows="2" name="note"></textarea>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary _j_pay_privilege_money_out" data-sid="{{$sid}}">确认</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade _j_dialog" id="modifySupplierPaidSource" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">财务修改</h4>
+        </div>
+        <div class="modal-body">
+          <form class="form-horizontal">
+            <div class="form-group">
+              <label class="col-sm-3 control-label">支付情况：</label>
+              <div class="col-sm-7">
+                <span id="_j_money_out_detail" style="line-height:30px; font-size:16px;"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-sm-3 control-label">款项来源：</label>
+              <div class="col-sm-7">
+                <select class="form-control" name="paid_source" style="display:inline-block;width:150px;">
+                  <option value="0">无</option>
+                  {{foreach $paid_sources as $src_id => $src_name}}
+                  <option value="{{$src_id}}">{{$src_name}}</option>
+                  {{/foreach}}
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" id="_j_confirm_single_money_out">确认修改</button>
+        </div>
+      </div>
+    </div>
+  </div>

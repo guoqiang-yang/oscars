@@ -1,0 +1,136 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">结算单详情（{{$statement_info.id}}）</h1>
+    <input type="hidden" value="{{$supplier.amount/100}}" name="supplier_total_amount">
+    <input type="hidden" value="{{$supplier.sid}}" name="supplier_id">
+    <input type="hidden" value="{{$total_refund_price}}" name="total_refund_price">
+    <input type="hidden" value="{{$total_amount}}" name="total_amount">
+    <h3>供应商：{{$supplier.name}}({{$supplier.sid}})</h3>
+
+    {{if !empty($refundOrdList)}}
+    <h4 style="color:red; margin-top: 30px;">退货单:</h4>
+    <table class="table">
+        <thead>
+        <th style="width: 10%">退货单ID</th>
+        <th style="width: 10%">入库单ID</th>
+        <th style="width: 14%">供应商</th>
+        <th style="width: 12%">仓库</th>
+        <th style="width: 12%">退货金额</th>
+        <th style="width: 14%">退货时间</th>
+        <th style="width: 12%">操作</th>
+        </thead>
+        <tbody class="son">
+        {{foreach $refundOrdList as $refundList}}
+        <tr>
+            <td>{{$refundList.srid}}</td>
+            <td>{{$refundList.stockin_id}}</td>
+            <td>{{$supplier.name}}</td>
+            <td>{{$_warehouseList[$refundList.wid]}}</td>
+            <td>￥{{$refundList.price/100}}</td>
+            <td>{{$refundList.ctime}}</td>
+            <td><a href="/warehouse/stockin_refund_detail.php?srid={{$refundList.srid}}" target="_blank">查看</a></td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    {{/if}}
+
+    <h4 style="color:red;">入库单</h4>
+	<table class="table" id="stock_in_list">
+		<thead>
+		<tr>
+			<th style="width:13%;">入库单ID</th>
+			<th style="width:10%;">采购单ID</th>
+			<th style="width:12%;">仓库</th>
+			<th style="width:12%;">送货时间</th>
+			<th style="width:8%;">类型</th>
+            <th style="width:8%;">金额</th>
+			<th style="width:12%;">兑账人</th>
+			<th style="width:8%;">核销金额</th>
+			<th>支付金额</th>
+            {{if $statement_info.paid != 2}}
+			<th style="width:8%">操作</th>
+            {{/if}}
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $stock_in_lists as $stock_in}}
+		<tr class="stockin_info" data-id="{{$stock_in.id}}" data-role="{{if $stock_in.paid==0}}buyer{{else}}finance{{/if}}">
+			<td><a href="/warehouse/edit_stock_in.php?id={{$stock_in.id}}" target="_blank">{{$stock_in.id}}</a>{{if !empty($stock_in._refund_info)}}<br>
+                <span title="入库退货单信息">
+                {{foreach $stock_in._refund_info as $refundInfo}}
+                <span style="color: silver; font-size: 12px;">退：{{$refundInfo.srid}}</span>&nbsp;
+                <span style="color: silver; font-size: 12px;">￥{{$refundInfo.price/100}}</span><br>
+                {{/foreach}}
+                </span>
+                {{/if}}</td>
+			<td>
+                <a href="/warehouse/detail_in_order.php?oid={{$stock_in.oid}}" target="_blank">{{$stock_in.oid}}</a><br>
+				<span>{{$stock_in.in_order_type}}</span><br/>
+            </td>
+			<td>{{$_warehouseList[$stock_in.wid]}}</td>
+            <td>{{$stock_in.ctime}}</td>
+            <td>{{if $stock_in.source==2}}<span style="color:red; font-weight:bold;">临采</span>{{else}}普采{{/if}}</td>
+			<td>￥{{$stock_in.price/100}}</td>
+            <td>{{$financeList[$stock_in.check2_suid]}}</td>
+            <td>￥{{$stock_in._srid_price/100}}</td>
+            <td>
+                {{if $statement_info.paid == 1}}
+                <input class="form-control" type="text" value="{{($stock_in.price)/100 - $stock_in._srid_price/100}}" name="will_pay" style="width:80px;display:inline-block;" onkeypress="if(!this.value.match(/^[\+\-]?\d*?\.?\d*?$/))this.value=this.t_value;else this.t_value=this.value;if(this.value.match(/^(?:[\+\-]?\d+(?:\.\d+)?)?$/))this.o_value=this.value" onkeyup="if(!this.value.match(/^[\+\-]?\d*?\.?\d*?$/))this.value=this.t_value;else this.t_value=this.value;if(this.value.match(/^(?:[\+\-]?\d+(?:\.\d+)?)?$/))this.o_value=this.value" onblur="if(!this.value.match(/^(?:[\+\-]?\d+(?:\.\d+)?|\.\d*?)?$/))this.value=this.o_value;else{if(this.value.match(/^\.\d+$/))this.value=0+this.value;if(this.value.match(/^\.$/))this.value=0;this.o_value=this.value}"> 元
+                {{/if}}
+                {{if $statement_info.paid == 2}}
+                ￥{{$stock_in.real_amount/100}}
+                {{/if}}
+            </td>
+			<td>
+                {{if $statement_info.paid<2 && !empty($_permissions['/finance/ajax/recall_stockin'])}}
+                <a href="javascript:;" class="_j_recall_stockin" data-num="{{$stockin_order_num}}" data-statement-id="{{$statement_info.id}}" data-id="{{$stock_in.id}}">撤回</a><br/>
+                {{/if}}
+                <!--{{if $stock_in.paid==2}}-->
+                <!--<a href="javascript:;" data-toggle="modal" data-target="#checkAccountBox" data-id="{{$stock_in.id}}">兑账</a>-->
+                <!--{{/if}}-->
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+    <div style="margin-top: 50px;">
+        <div style="float: left; font-size: 18px;">总计：<span style="color: red;">¥</span> <span id="stockin_statement_detail_total" style="color: red;">{{if $statement_info.paid == 2}}{{$sum_amount}}{{else}}{{$total_amount}}{{/if}}</span>&nbsp;&nbsp;
+            可用余额：<span style="color: red;">￥{{$supplier.amount/100}}</span>{{if $statement_info.paid == 1}}&nbsp;&nbsp;
+            使用余额：<input type="text" style="width: 80px;display: inline" class="form-control in_use_amount" name="in_use_amount" {{if $supplier.amount <= 0}} disabled {{/if}} value=""> 元{{/if}}&nbsp;&nbsp;
+            <span class="remainder_money" style="color: red;"></span>
+        </div>
+        {{if $statement_info.paid== 1 && $searchConf['id']==0 && !empty($_permissions["/warehouse/ajax/stockin_statement_paid"])}}
+        <div style="float: left;">
+            <a href="javascript:;" class="btn btn-primary" id="_j_pay_stockin_statement" data-id="{{$statement_info.id}}" style="float:right;margin-left:20px;">支付</a>
+            <div style="width:130px; float:right;margin-left: 50px;">
+                <select class="form-control" id="_j_bulk_paid_source">
+                    <option value="0">请选择支付类型</option>
+                    {{foreach $paid_sources as $payid=>$payname}}
+                    <option value="{{$payid}}">{{$payname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    {{/if}}
+</div>
+<div class="modal fade _j_dialog" id="checkAccountBox" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">入库单商品列表</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="_j_save_check_account_box">已兑账</button>
+            </div>
+        </div>
+    </div>
+</div>

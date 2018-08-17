@@ -1,0 +1,244 @@
+<pre id="reason_data" style="display:none">
+{{$reason_data}}
+</pre>
+<pre id="reason_detail_data" style="display: none;">
+    {{$reason_detail_data}}
+</pre>
+<pre id="reason_type_data" style="display: none;">
+    {{$reason_type_data}}
+</pre>
+<pre id="wid_refund_data_key" style="display: none;">
+    {{$wid_refund_data_key}}
+</pre>
+<pre id="wid_refund_data_val" style="display: none;">
+    {{$wid_refund_data_val}}
+</pre>
+
+<style>
+    .data-container {border-radius: 10px; overflow: auto;text-align: center;border: 2px solid #8dc63f;float: left; width: 18%; margin-right: 2%;}
+    .data-title {font-family: "chaparral-pro",serif; font-size: 18px;background-color: #f6f6f8;padding: 8px 0;}
+    .data-item {font-family: "brandon-grotesque",sans-serif; font-size: 16px; width: 100%; overflow: auto; padding: 6px; border-bottom: 1px solid #efefef;}
+    .data-item:last-child {border: none;}
+    .data-item-title {float: left;}
+    .data-item-val {float: right;}
+</style>
+
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        概览
+    </h1>
+
+    <div style="overflow: auto;">
+        <div class="data-container">
+            <div class="data-title">
+              <a target="_blank" href="/statistics/user_purchase.php">销售额>></a>
+              <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="计算口径：“已出库”后的订单"></span>
+            </div>
+            <div class="data-item"><span class="data-item-title">今天</span><span class="data-item-val">￥{{$result.today_amount|number_format}} 元</span></div>
+            <div class="data-item"><span class="data-item-title">昨天</span><span class="data-item-val">￥{{$result.yesterday_amount|number_format}} 元</span></div>
+            <div class="data-item"><span class="data-item-title">本月</span><span class="data-item-val">￥{{$result.total_amount|number_format}} 元</span></div>
+        </div>
+        <div class="data-container">
+            <div class="data-title">
+              <a target="_blank" href="/statistics/user_purchase.php">订单量>></a>
+              <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="“已出库”后的订单，并且不包含算补单/售后单"></span>
+            </div>
+            <div class="data-item"><span class="data-item-title">今天</span><span class="data-item-val">{{$result.today_num|number_format}} 单</span></div>
+            <div class="data-item"><span class="data-item-title">昨天</span><span class="data-item-val">{{$result.yesterday_num|number_format}} 单</span></div>
+            <div class="data-item"><span class="data-item-title">本月</span><span class="data-item-val">{{$result.total_num|number_format}} 单</span></div>
+        </div>
+        <div class="data-container">
+            <a target="_blank" href="/statistics/user_purchase.php"><div class="data-title">客户数>></div></a>
+            <div class="data-item"><span class="data-item-title">今天</span><span class="data-item-val">{{$result.today_buyer_num|number_format}} 人</span></div>
+            <div class="data-item"><span class="data-item-title">昨天</span><span class="data-item-val">{{$result.yesterday_buyer_num|number_format}} 人</span></div>
+            <div class="data-item"><span class="data-item-title">本月</span><span class="data-item-val">{{$result.total_buyer_num|number_format}} 人</span></div>
+        </div>
+        <div class="data-container">
+            <a target="_blank" href="/statistics/refund_statistics.php"><div class="data-title">退单量>></div></a>
+            <div class="data-item"><span class="data-item-title">今天</span><span class="data-item-val">{{$result.today_refund_num|number_format}} 单</span></div>
+            <div class="data-item"><span class="data-item-title">昨天</span><span class="data-item-val">{{$result.yesterday_refund_num|number_format}} 单</span></div>
+            <div class="data-item"><span class="data-item-title">本月</span><span class="data-item-val">{{$result.total_refund_num|number_format}} 单</span></div>
+        </div>
+        <div class="data-container">
+            <a target="_blank" href="/statistics/count.php"><div class="data-title">毛利率>></div></a>
+            <div class="data-item"><span class="data-item-title">今天</span><span class="data-item-val">{{$result.today_gross_rate}}%</span></div>
+            <div class="data-item"><span class="data-item-title">昨天</span><span class="data-item-val">{{$result.yesterday_gross_rate}}%</span></div>
+            <div class="data-item"><span class="data-item-title">本月</span><span class="data-item-val">{{$result.total_gross_rate}}%</span></div>
+        </div>
+    </div>
+
+    <div style="overflow: auto; margin-top: 20px;">
+        <div id="order_os" style="background: #efefef; float: left; width:42%; margin-right: 2%; height: 300px;"></div>
+        <div id="delivery_warehouse" style="background: #efefef; float: left; width: 56%; height: 300px;"></div>
+    </div>
+
+    {{*
+    <div style="overflow: auto;">
+        <h3>缺货统计</h3>
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>库房</th>
+                {{foreach $cate1_list as $cate1}}
+                <th>{{$cate1.name}}</th>
+                {{/foreach}}
+            </tr>
+            {{foreach $lack_list as $lack}}
+            <tr>
+                <td>{{$lack.wname}}</td>
+                <td>
+                    <span style="margin-right: 8px; color: #828282;">无库存</span><a target="_blank" href="/warehouse/stock_warning.php?cate1=1&wid={{$lack.wid}}&sortby=stock_num">{{$lack.1.empty|string_format:"%d"}}</a><br />
+                    <span style="margin-right: 8px; color: #828282;">缺货</span><a target="_blank" href="/warehouse/stock_warning.php?cate1=1&wid={{$lack.wid}}">{{$lack.1.lack|string_format:"%d"}}</a>
+                </td>
+                <td>
+                    <span style="margin-right: 8px; color: #828282;">无库存</span><a target="_blank" href="/warehouse/stock_warning.php?cate1=2&wid={{$lack.wid}}&sortby=stock_num">{{$lack.2.empty|string_format:"%d"}}</a><br />
+                    <span style="margin-right: 8px; color: #828282;">缺货</span><a target="_blank" href="/warehouse/stock_warning.php?cate1=2&wid={{$lack.wid}}">{{$lack.2.lack|string_format:"%d"}}</a>
+                </td>
+                <td>
+                    <span style="margin-right: 8px; color: #828282;">无库存</span><a target="_blank" href="/warehouse/stock_warning.php?cate3=1&wid={{$lack.wid}}&sortby=stock_num">{{$lack.3.empty|string_format:"%d"}}</a><br />
+                    <span style="margin-right: 8px; color: #828282;">缺货</span><a target="_blank" href="/warehouse/stock_warning.php?cate1=3&wid={{$lack.wid}}">{{$lack.3.lack|string_format:"%d"}}</a>
+                </td>
+                <td>
+                    <span style="margin-right: 8px; color: #828282;">无库存</span><a target="_blank" href="/warehouse/stock_warning.php?cate4=1&wid={{$lack.wid}}&sortby=stock_num">{{$lack.4.empty|string_format:"%d"}}</a><br />
+                    <span style="margin-right: 8px; color: #828282;">缺货</span><a target="_blank" href="/warehouse/stock_warning.php?cate1=4&wid={{$lack.wid}}">{{$lack.4.lack|string_format:"%d"}}</a>
+                </td>
+                <td>
+                    <span style="margin-right: 8px; color: #828282;">无库存</span><a target="_blank" href="/warehouse/stock_warning.php?cate1=5&wid={{$lack.wid}}&sortby=stock_num">{{$lack.5.empty|string_format:"%d"}}</a><br />
+                    <span style="margin-right: 8px; color: #828282;">缺货</span><a target="_blank" href="/warehouse/stock_warning.php?cate1=5&wid={{$lack.wid}}">{{$lack.5.lack|string_format:"%d"}}</a>
+                </td>
+                <td>
+                    <span style="margin-right: 8px; color: #828282;">无库存</span><a target="_blank" href="/warehouse/stock_warning.php?cate6=1&wid={{$lack.wid}}&sortby=stock_num">{{$lack.6.empty|string_format:"%d"}}</a><br />
+                    <span style="margin-right: 8px; color: #828282;">缺货</span><a target="_blank" href="/warehouse/stock_warning.php?cate1=6&wid={{$lack.wid}}">{{$lack.6.lack|string_format:"%d"}}</a>
+                </td>
+            </tr>
+            {{/foreach}}
+        </table>
+    </div>
+    *}}
+    
+    <!--<div style="overflow: auto;">-->
+        <!--<h3>今日挂单数据</h3>-->
+        <!--<table class="table table-striped table-bordered">-->
+            <!--<tr>-->
+                <!--<th>-->
+                    <!--订单数{{$today}}-->
+                    <!--<span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="" data-original-title="正常订单，且状态大于等于“客服未确认”，不计算售后单"></span>-->
+                <!--</th>-->
+                <!--<th>补单数</th>-->
+                <!--<th>未确认</th>-->
+                <!--<th>未安排司机</th>-->
+                <!--<th>未出库</th>-->
+                <!--<th>未回单</th>-->
+                <!--<th>已回单</th>-->
+            <!--</tr>-->
+            <!--<tr>-->
+                <!--<td>-->
+                    <!--<a href="/order/order_list.php?status=0&from_date={{$today}}&end_date={{$today}}" target="_blank">-->
+                        <!--{{$order_step_info.total|number_format}}-->
+                    <!--</a>-->
+                <!--</td>-->
+                <!--<td>-->
+                    <!--<a href="/order/order_list.php?status=0&from_date={{$today}}&end_date={{$today}}&step=1" target="_blank">-->
+                        <!--{{$order_step_info.add_on|number_format}}-->
+                    <!--</a>-->
+                <!--</td>-->
+                <!--<td>-->
+                    <!--<a href="/order/order_list.php?status=0&from_date={{$today}}&end_date={{$today}}&step=1" target="_blank">-->
+                        <!--{{$order_step_info.un_confirm|number_format}}-->
+                    <!--</a>-->
+                <!--</td>-->
+                <!--<td>-->
+                    <!--<a href="/order/order_list.php?status=0&from_date={{$today}}&end_date={{$today}}&step=3" target="_blank">-->
+                        <!--{{$order_step_info.un_set_driver|number_format}}-->
+                    <!--</a>-->
+                <!--</td>-->
+                <!--<td>-->
+                    <!--<a href="/order/order_list.php?status=0&from_date={{$today}}&end_date={{$today}}&step=4" target="_blank">-->
+                        <!--{{$order_step_info.un_delivery|number_format}}-->
+                    <!--</a>-->
+                <!--</td>-->
+                <!--<td>-->
+                    <!--<a href="/order/order_list.php?status=0&from_date={{$today}}&end_date={{$today}}&step=5" target="_blank">-->
+                        <!--{{$order_step_info.un_back|number_format}}-->
+                    <!--</a>-->
+                <!--</td>-->
+                <!--<td>-->
+                    <!--<a href="/order/order_list.php?status=0&from_date={{$today}}&end_date={{$today}}&step=7" target="_blank">-->
+                        <!--{{$order_step_info.back|number_format}}-->
+                    <!--</a>-->
+                <!--</td>-->
+            <!--</tr>-->
+        <!--</table>-->
+    <!--</div>-->
+
+</div>
+
+<!--下单OS柱状图数据源-->
+<table style="display: none;" id="order_os_data">
+    <thead>
+    <tr>
+        <th></th>
+        <th>App</th>
+        <th>微信商城</th>
+        <th>客服下单</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>今天</th>
+        <td>{{$result.source_arr.app.today}}</td>
+        <td>{{$result.source_arr.weixin.today}}</td>
+        <td>{{$result.source_arr.kefu.today}}</td>
+    </tr>
+    <tr>
+        <th>昨天</th>
+        <td>{{$result.source_arr.app.yesterday}}</td>
+        <td>{{$result.source_arr.weixin.yesterday}}</td>
+        <td>{{$result.source_arr.kefu.yesterday}}</td>
+    </tr>
+    <tr>
+        <th>本月</th>
+        <td>{{$result.source_arr.app.total}}</td>
+        <td>{{$result.source_arr.weixin.total}}</td>
+        <td>{{$result.source_arr.kefu.total}}</td>
+    </tr>
+    </tbody>
+</table>
+
+<!--出库订单库房柱状图数据源-->
+<table style="display: none;" id="delivery_warehouse_data">
+    <thead>
+    <tr>
+        <th></th>
+        {{foreach $result.wid_arr as $wid => $info}}
+        <th>{{$warehouse_list.$wid}}</th>
+        {{/foreach}}
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>今天</th>
+        {{foreach $result.wid_arr as $wid => $info}}
+        <td>{{$info.today}}</td>
+        {{/foreach}}
+    </tr>
+    <tr>
+        <th>昨天</th>
+        {{foreach $result.wid_arr as $wid => $info}}
+        <td>{{$info.yesterday}}</td>
+        {{/foreach}}
+    </tr>
+    <tr>
+        <th>本月平均</th>
+        {{foreach $result.wid_arr as $wid => $info}}
+        <td>{{$info.total}}</td>
+        {{/foreach}}
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>

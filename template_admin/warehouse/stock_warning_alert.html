@@ -1,0 +1,165 @@
+<form class="form-horizontal" role="form">
+    {{if isset($cate_brand['cate1'])}}
+    <div class="placeholder">
+        <div class="form-group">
+            <label class="col-sm-1 control-label">大类：</label>
+
+            <div class="col-sm-10">
+                <ul class="nav nav-pills">
+                    {{foreach $cate_brand['cate1'] as $item}}
+                    <li class="{{$item.html_class}}">
+                        <a href="{{$item.query}}">{{$item.name}}</a>
+                    </li>
+                    {{/foreach}}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+    
+    {{if isset($cate_brand['cate2'])}}
+    <div class="placeholder">
+        <div class="form-group">
+            <label class="col-sm-1 control-label">小类：</label>
+
+            <div class="col-sm-10">
+                <ul class="nav nav-pills">
+                    {{foreach $cate_brand['cate2'] as $item}}
+                    <li class="{{$item.html_class}}">
+                        <a href="{{$item.query}}">{{$item.name}}</a>
+                    </li>
+                    {{/foreach}}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+    
+    {{if isset($cate_brand['brand'])}}
+    <div class="placeholder">
+        <div class="form-group">
+            <label class="col-sm-1 control-label">品牌：</label>
+
+            <div class="col-sm-10">
+                <ul class="nav nav-pills">
+                    {{foreach $cate_brand['brand'] as $item}}
+                    <li class="{{$item.html_class}}">
+                        <a href="{{$item.query}}">{{$item.name}}</a>
+                    </li>
+                    {{/foreach}}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {{/if}}
+    
+    <div class="placeholder">
+        <div class="form-group">
+            <label class="col-sm-1 control-label">仓库：</label>
+
+            <div class="col-sm-10">
+                <ul class="nav nav-pills">
+                    {{foreach $_allowed_warehouses as $_wid=>$_wname}}
+                    <li class="{{if $search.wid==$_wid}}active{{/if}}">
+                        <a href="?cate1={{$search.cate1}}&cate2={{$search.cate2}}&bid={{$search.bid}}&wid={{$_wid}}">{{$_wname}}</a>
+                    </li>
+                    {{/foreach}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</form>
+
+<hr>
+
+<table class="table">
+    <thead>
+    <tr>
+      <th>商品编号</th>
+      <th width="10%">图片</th>
+      <th width="10%">商品信息</th>
+      <th width="10%">总库存/被占用/残损&预盘亏</th>
+      <th><a href="{{$current_url}}&sortby=ave_sale">平均销量</a></th>
+      <th>
+          <a href="{{$current_url}}&sortby=turn_day">周转/天</a>
+          <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="库存-占用+在途/平均销售"></span>
+      </th>
+      <th>
+          目标存量
+          <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="平均销量*调整系数*目标存量(天)"></span>
+      </th>
+      <th>货期</th>
+      <th>在途数量</th>
+      <th>
+          安全库存
+          <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="平均销售量*调整系数*（货期+最小库存天数）"></span>
+      </th>
+      <th>
+          订货量
+          <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="目标存量-库存+min(一个货期销量，库存)"></span>
+      </th>
+      <th>
+          <a href="{{$current_url}}&sortby=short_quantity">缺货量</a>
+          <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="安全库存-库存"></span>
+      </th>
+      <th width="8%">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $alert_list as $p}}
+    <tr class="_j_product">
+      <td>{{$p.sid}}</td>
+      <td><img width="100" src="{{if $p.pinfo.pic}}{{$p.pinfo.pic}}{{else}}/i/nopic100.jpg{{/if}}"></td>
+      <td>
+        {{$p.pinfo.title}}<br/>
+        <span style="color:gray;">{{$p.pinfo.alias}}</span>
+      </td>
+      {{if $_hide_useless && $p.num<0}}{{$p.num=$p.occupied+8}}{{/if}}
+      <td>{{$p.num|string_format:"%d"}} / {{$p.occupied|string_format:"%d"}} / {{$p.damaged_num|string_format:"%d"}}</td>
+      {{*
+      <td>{{$p.alert_threshold}}</td>
+      <td>
+          {{if $p.pureStock<=$p.alert_threshold}}
+          <span style="color:red;">库存紧张<br/>需采: {{$p.pre_buy}}</span>
+          {{else}}富余：{{$p.pureStock-$p.alert_threshold}}{{/if}}
+      </td>
+      *}}
+      <td>{{$p.ave_sale_num}}</a></td>
+      <td>{{$p.turn_day}}</td>
+      <td>{{$p.target_num}}</td>
+      <td>{{$p.delivery_day}} 天</td>
+      <td>{{$p.wait_num}}</td>
+      <td>{{$p.order_point}}</td>
+      <td>{{$p.order_quantity}}</td>
+      <td>{{$p.short_quantity}}</td>
+      <td>
+        {{if !empty($_permissions['/warehouse/edit_stock'])}}
+        <a href="/warehouse/edit_stock.php?wid={{$p.wid}}&sid={{$p.sid}}" target="_blank">编辑</a><br/>
+        {{/if}}
+        {{if !empty($_permissions['/warehouse/ajax/create_inorder_4_supplier'])}}
+        <a href="javascript:void(0)" class="show_supplier_list_modal" data-sid="{{$p.sid}}">创建采购单</a><br/>
+        {{/if}}
+        {{if !empty($_permissions['/warehouse/location_list'])}}
+        <a href="/warehouse/location_list.php?sid={{$p.sid}}&wid={{$p.wid}}" target="_blank">货位库存</a><br>
+        {{/if}}
+        {{if !empty($_permissions['/warehouse/stock_history'])}}
+        <a href="/warehouse/stock_history.php?date=&wid={{$p.wid}}&type=-1&sid={{$p.sid}}" target="_blank">库存历史</a>
+        {{/if}}
+      </td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+  </table>
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+<script>
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});            
+</script>

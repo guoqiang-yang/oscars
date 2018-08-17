@@ -1,0 +1,140 @@
+<div id="days" style="display: none;">
+    {{$days}}
+</div>
+<div id="lines" style="display: none;">
+    {{$lines}}
+</div><input type="hidden" id="title" value="{{$title}}"/>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        购买数据 </h1>
+
+    <form class="form-inline" role="form" action="" data-cate1="{{$search_conf.cate1}}" data-cate2="{{$search_conf.cate2}}">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>查看方式：</label>
+                <select class="form-control" name="view_mode">
+                    <option value="month" {{if $view_mode=="month"}}selected="selected"{{/if}}>按月查看</option>
+                    <option value="date" {{if $view_mode=="date"}}selected="selected"{{/if}}>按天查看</option>
+                </select>
+            </div>
+            <div class="form-group _j_date_selecter" style="margin-right: 20px;{{if $view_mode == 'month'}}display: none;{{/if}}">
+                <label>时间：</label>
+                <input type="date" class="form-control" name="from_date" value="{{$from_date}}" style="display: inline-block;width: 160px;"> To
+                <input type="date" class="form-control" name="end_date" value="{{$end_date}}" style="display: inline-block;width: 160px;">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>城市：</label>
+                <select class="form-control" name="city" id="select_city">
+                    <option value="0" {{if $city_id== 0}}selected="selected" {{/if}}>全部</option>
+                    {{foreach $city_list as $cityId => $cityName}}
+                    <option value="{{$cityId}}" {{if $city_id== $cityId}}selected="selected" {{/if}}>{{$cityName}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>库房：</label>
+                <select class="form-control" name="wid" id="select_warehouse" data-id="{{$cur_wid}}" style="margin-right:20px;">
+                    <option data-city="0" value="0">全部</option>
+                    {{foreach $warehouse_list as $wid => $warehouse}}
+                    <option {{if $wid == $cur_wid}}selected="selected"{{/if}} {{if $city_id>0 && $city_id != $warehouse.city}}style="display: none;"{{/if}} data-city="{{$warehouse.city}}" value="{{$wid}}">{{$warehouse.wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+            <div class="form-group" style="float:right;">
+                <button type="submit" name="action" value="download" class="btn btn-success">导出当前数据</button>
+            </div>
+        </div>
+    </form>
+
+    <ul class="nav nav-tabs" role="tablist">
+        <!--<li role="presentation" {{if $line_type=="customer"}}class="active"{{/if}}><a href="/statistics/user_purchase.php?line_type=customer&view_mode={{$view_mode}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$city_id}}&wid={{$cur_wid}}">用户数</a></li>-->
+        <li role="presentation" {{if $line_type=="order"}}class="active"{{/if}}><a href="/statistics/user_purchase.php?line_type=order&view_mode={{$view_mode}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$city_id}}&wid={{$cur_wid}}">订单量</a></li>
+        <li role="presentation" {{if $line_type=="amount"}}class="active"{{/if}}><a href="/statistics/user_purchase.php?line_type=amount&view_mode={{$view_mode}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$city_id}}&wid={{$cur_wid}}">订单金额</a></li>
+        <li role="presentation" {{if $line_type=="price"}}class="active"{{/if}}><a href="/statistics/user_purchase.php?line_type=price&view_mode={{$view_mode}}&from_date={{$from_date}}&end_date={{$end_date}}&city={{$city_id}}&wid={{$cur_wid}}">客单价</a></li>
+    </ul>
+    <div id="daily_order_num"></div>
+
+    {{if count($data_list) > 0}}
+    <p style="color: red;margin-top:20px;">注：订单金额 = 货款 + 运费 + 搬运费 - 优惠</p>
+    <table style="margin-top: 40px;" class="table table-bordered">
+        <thead>
+        <tr>
+            <th>{{if $view_mode == "month"}}月{{else}}天{{/if}}</th>
+            <!--<th>购买用户</th>-->
+            <th>订单量</th>
+            <th>订单金额</th>
+            <th>客单价</th>
+            <!--<th>新客数</th>-->
+            <th>新客订单量</th>
+            <th>新客订单金额</th>
+            <th>新客客单价</th>
+            <!--<th>老客数</th>-->
+            <th>老客订单量</th>
+            <th>老客订单金额</th>
+            <th>老客客单价</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $data_list as $item}}
+        <tr {{if $today==$item.day}}style="background-color:#FFE7BA;"{{/if}}>
+            <td>{{if $view_mode == "month"}}{{$item.month}}{{else}}{{$item.day}}{{/if}}</td>
+            <!--<td>{{$item.buyer_num}}</td>-->
+            <td>{{$item.order_num}}</td>
+            <td>￥{{($item.amount/100)|number_format}}</td>
+            <td>￥{{if $item.order_num>0}}{{($item.amount/$item.order_num/100)|string_format:"%.1f"}}{{else}}0{{/if}}</td>
+
+            <!--<td>{{$item.new_buyer_num}}</td>-->
+            <td>{{$item.new_order_num}}</td>
+            <td>￥{{($item.new_amount/100)|number_format}}</td>
+            <td>￥{{if $item.new_amount>0}}{{($item.new_amount/$item.new_order_num/100)|string_format:"%.1f"}}{{else}}0{{/if}}</td>
+
+            <!--<td>{{$item.buyer_num - $item.new_buyer_num}}</td>-->
+            <td>{{$item.order_num - $item.new_order_num}}</td>
+            <td>￥{{(($item.amount - $item.new_amount)/100)|number_format}}</td>
+            <td>￥{{if ($item.order_num-$item.new_order_num)>0}}{{(($item.amount-$item.new_amount)/($item.order_num-$item.new_order_num)/100)|string_format:"%.1f"}}{{else}}0{{/if}}</td>
+
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    {{else}} 暂无记录 {{/if}}
+
+    {{if $view_mode == "date"}}
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555555;">共{{$total|string_format:"%d"}}条</a></li>
+        </ul>
+    </nav>
+    {{/if}}
+</div>
+
+<script>
+    $(function () {
+        $('select[name="view_mode"]').change(function () {
+            if ('month' == $(this).val()) {
+                $('._j_date_selecter').hide();
+            } else {
+                $('._j_date_selecter').show();
+            }
+        });
+
+        $('#select_city').on('change', _changeCity);
+        function _changeCity()
+        {
+            var city = parseInt($('#select_city').val());
+            $('#select_warehouse').val(0);
+            $('#select_warehouse option').each(function() {
+                if (city == 0 || parseInt($(this).data('city')) == city) {
+                    $(this).css('display', '');
+                } else {
+                    $(this).css('display', 'none');
+                }
+            });
+        }
+    })
+</script>

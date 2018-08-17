@@ -1,0 +1,100 @@
+<script type="text/javascript" src="/js/oss/lib/crypto1/crypto/crypto.js"></script>
+<script type="text/javascript" src="/js/oss/lib/crypto1/hmac/hmac.js"></script>
+<script type="text/javascript" src="/js/oss/lib/crypto1/sha1/sha1.js"></script>
+<script type="text/javascript" src="/js/oss/lib/base64.js"></script>
+<script type="text/javascript" src="/js/oss/lib/plupload-2.1.2/js/plupload.full.min.js"></script>
+<script type="text/javascript" src="/js/oss/upload.js"></script>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	<h1 class="page-header">{{if $info.id}}编辑{{else}}添加{{/if}}app版本管理</h1>
+	<form enctype="multipart/form-data" class="form-horizontal" role="form" method="post">
+		<input type="hidden" class="form-control" name="id" value="{{$info.id}}">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">平台：</label>
+            <div class="col-sm-4">
+                <select style="display: inline-block; width: 40%; margin-right: 5%;" class="form-control" name="platform">
+                    <option value="0" {{if empty($info.platform)}}selected="true" {{/if}}>选择平台</option>
+                    <option value="1" {{if $info.platform == 1}}selected="true" {{/if}}>安卓</option>
+                    <option value="2" {{if $info.platform == 2}}selected="true" {{/if}}>iOS</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+			<label class="col-sm-2 control-label">应用：</label>
+			<div class="col-sm-4">
+				<select style="display: inline-block; width: 40%; margin-right: 5%;" class="form-control" name="cate">
+					<option value="0" {{if empty($info.cate)}}selected="true" {{/if}}>选择应用</option>
+					{{foreach $cate_list as $cate => $cname}}
+					<option value="{{$cate}}" {{if $info.cate== $cate}}selected="true" {{/if}}>{{$cname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">环境：</label>
+			<div class="col-sm-4">
+				<select style="display: inline-block; width: 40%; margin-right: 5%;" class="form-control" name="dev">
+					<option value="0" {{if empty($info.dev)}}selected="true" {{/if}}>选择环境</option>
+					{{foreach $dev_list as $dev => $dname}}
+					<option value="{{$dev}}" {{if $info.dev== $dev}}selected="true" {{/if}}>{{$dname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">渠道：</label>
+			<div class="col-sm-4">
+				<!--<input type="text" class="form-control" name="channel" value="{{$info.channel}}">-->
+				<select style="display: inline-block; width: 40%; margin-right: 5%;" class="form-control" name="channel">
+					<option value="0" {{if empty($info.channel)}}selected="true" {{/if}}>选择渠道</option>
+					{{foreach $channelList as $pinyin => $channelName}}
+					<option value="{{$pinyin}}" {{if $info.channel== $pinyin}}selected="true" {{/if}}>{{$channelName}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">versionCode：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" name="version_code" value="{{$info.version_code}}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">版本号：</label>
+			<div class="col-sm-8">
+				<input type="text" class="form-control" name="version" value="{{$info.version}}">
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">强制升级：</label>
+            <div class="col-sm-8">
+                <label class="radio-inline">
+                    <input {{if $info.is_force==0}}checked="checked"{{/if}} type="radio" name="is_force" value="0"> 否
+                </label>
+                <label class="radio-inline">
+                    <input {{if $info.is_force==1}}checked="checked"{{/if}} type="radio" name="is_force" value="1"> 是
+                </label>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">文件：</label>
+			<div id="select_file_container" class="col-sm-6">
+				<div id="file_name"></div>
+				<button id="select_file" type="button" class="btn btn-warning">选择文件</button>
+				<button style="margin-left: 20px;" id="upload_file" type="button" class="btn btn-success">上传文件</button>
+				<input type="hidden" id="apk_file_name" name="file" value="">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">更新说明：</label>
+			<div class="col-sm-8">
+				<textarea class="form-control" rows="2" name="description">{{$info.description}}</textarea>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<input type="submit" name="submit" value="提交" class="btn btn-primary" id="btn_save"/>
+			</div>
+		</div>
+	</form>
+</div>

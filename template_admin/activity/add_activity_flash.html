@@ -1,0 +1,75 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        添加活动
+    </h1>
+    <form class="form-horizontal" role="form">
+        <input type="hidden" id="id" value="{{$id}}">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动名称：</label>
+            <div class="col-sm-7">
+                <input type="text" class="form-control" placeholder="请输入活动的名称" value="{{$activity.name}}" id="activity_name">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动类型：</label>
+            <div class="col-sm-2" style="padding: 0;margin-left: 15px;">
+                <select class="form-control"  style="float: left" id="activity_type">
+                    <option value="0">请选择</option>
+                    {{foreach $type as $id => $item}}
+                    <option value="{{$id}}" {{if $id == $activity.type}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动平台：</label>
+            <div class="col-sm-2" style="padding: 0;margin-left: 15px;">
+                <select class="form-control"  style="float: left" id="platform">
+                    <option value="0">请选择</option>
+                    {{foreach $platform as $id => $item}}
+                    <option value="{{$id}}" {{if $id == $activity.platform}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动城市：</label>
+            <div class="col-sm-6">
+                <div class="checkbox" id="box">
+                    <label style="margin-right:10px;" class="col-sm-2">
+                        <input type="checkbox" value="" onclick="checkAll(this)" all="none">全选
+                    </label>
+                    {{foreach $city as $id => $name}}
+                    <label style="margin-right:10px;" class="col-sm-2">
+                        <input type="checkbox" value="{{$id}}" name="city" {{if strpos($activity.city, (string)$id) !==false}} checked="checked" {{/if}}>{{$name}}
+                    </label>
+                    {{/foreach}}
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动规则：</label>
+            <div class="col-sm-7">
+                <textarea class="form-control" id="rule" maxlength="200" rows="3">{{$activity.rule}}</textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动时间：</label>
+            <div class="col-sm-3">
+                <input type="datetime-local" class="form-control" id="activity_start_time" value="{{$activity.start_time}}">
+            </div>
+            <div style="float: left;margin: 10px;" >
+                ~
+            </div>
+            <div class="col-sm-3">
+                <input type="datetime-local" class="form-control" id="activity_end_time" value="{{$activity.end_time}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-primary" id="btn_save_activity">保存</button>
+                <a type="button" style="margin-left:20px;" class="btn btn-default" onClick="javascript:history.back(-1);">取消</a>
+            </div>
+        </div>
+    </form>
+</div>

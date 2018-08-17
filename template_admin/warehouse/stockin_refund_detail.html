@@ -1,0 +1,164 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">查看入库退货单</h1>
+
+    <form class="form-horizontal" role="form">
+        <input type="hidden" name="srid" value="{{$stockin_refund_info.srid}}">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">入库单ID：</label>
+
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="supplier_id" value="{{$stockin_refund_info.stockin_id}}" disabled="true">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">供应商ID：</label>
+
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="supplier_id" value="{{$stockin_refund_info.supplier_id}}" disabled="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">联系人：</label>
+
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="contact_name" value="{{$stockin_info.customer.name}}" disabled="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">联系电话：</label>
+
+            <div class="col-sm-8">
+                <input type="text" class="form-control" name="contact_phone" value="{{$stockin_info.customer.phone}}" style="width:450px;display:inline-block;" disabled="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">仓库：</label>
+
+            <div class="col-sm-8">
+                <input type="text" class="form-control" name="wid" value="{{$warehouse_list[$stockin_refund_info.wid]}}" style="color:red;width:450px;display:inline-block;" disabled="true">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">状态：</label>
+
+            <div class="col-sm-8">
+                <span style="font-size: 25px; color:red;">{{$status_descs[$stockin_refund_info.step]}}</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">备注：</label>
+
+            <div class="col-sm-5">
+                <textarea class="form-control" name="note" rows="4" disabled>{{$stockin_refund_info.note}}</textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">退货清单：</label>
+
+            <div class="col-sm-8">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>名称</th>
+                        <th>类别</th>
+                        {{if !empty($_permissions['hc_show_inorder_product_price'])}}
+                        <th>单价</th>
+                        {{/if}}
+                        <th>数量</th>
+                        <th>货位</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{foreach $stockin_refund_products as $productItem}}
+                    <tr class="_j_product" data-pid="{{$productItem.sid}}">
+                        <td>{{$productItem.sid}}</td>
+                        <td>
+                            <a href="/shop/edit_sku.php?sid={{$productItem.sid}}" target="_blank">{{$productItem.sku.title}}</a>
+                        </td>
+                        <td>
+                            {{$cate1_list[$productItem.sku.cate1]['name']}} - {{$cate2_list_all[$productItem.sku.cate1][$productItem.sku.cate2]['name']}}
+                        </td>
+                        {{if !empty($_permissions['hc_show_inorder_product_price'])}}
+                        <td>
+                            <input type="text" class="form-control" name="price" value="{{$productItem.price/100}}" style="width:60px;" disabled="true">
+                        </td>
+                        {{/if}}
+                        <td>
+                            <input type="text" class="form-control" name="num" value="{{$productItem.num}}" style="width:80px;" disabled="true" }>
+                        </td>
+                        <td>{{$productItem['location']}}</td>
+                        <td>
+                            {{if $stockin_refund_info.step == 1}}
+                            {{if !empty($_permissions['/warehouse/ajax/update_refund_product_price'])}}
+                            <a href="javascript:;" class="show_edit_refund_price">修改</a>
+                            {{else}}--
+                            {{/if}}
+                            {{else}}--
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/foreach}}
+                    {{if !empty($_permissions['hc_show_inorder_product_price'])}}
+                    <tr>
+                        <td>退货总价:</td>
+                        <td colspan="6">￥{{$stockin_info.info.refund_price/100}}</td>
+                    </tr>
+                    {{/if}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                {{if $stockin_refund_info.step==1 && !empty($_permissions['/warehouse/ajax/confirm_refund_stockin'])}}
+                <button type="button" class="btn btn-primary" id="_j_stockin_refund_confirm" data-id="{{$stockin_refund_info.stockin_id}}" data-srid="{{$stockin_refund_info.srid}}" style="margin-right:20px;">确认退货</button>
+                {{/if}}
+                {{if !empty($stockin_refund_info.stockin_id)}}
+                {{if !empty($_permissions['/warehouse/edit_stock_in'])}}
+                <a href="/warehouse/edit_stock_in.php?id={{$stockin_refund_info.stockin_id}}" class="btn btn-default" style="margin-right:20px;" target="_blank">查看入库单</a>
+                {{/if}}
+                {{/if}}
+                <a class="btn btn-default" href="/warehouse/stockin_refund_print.php?srid={{$stockin_refund_info.srid}}" target="_blank">打印</a>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="modal fade _j_dialog" id="edit_refund_product_price" data-srid="{{$stockin_refund_info.srid}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">修改单价</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="select_warehouse_area">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">sid：</label>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="text" name="sid" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">单价(元)：</label>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="text" name="price">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="update_refund_product_price" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>

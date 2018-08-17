@@ -1,0 +1,101 @@
+<form class="form-inline" role="form">
+    <div class="placeholder">
+        <div class="form-group" style="margin-right:20px;">
+          <label>仓库：</label>
+          <select class="form-control" name="wid" {{if $_user.wid}} disabled="true"{{/if}}>
+            {{foreach $warehose_list as $_wid=>$_wname}}
+            <option value="{{$_wid}}" {{if $search.wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+            {{/foreach}}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>配送日期：</label>
+          <input type="date" class="form-control" name="delivery_date" value="{{$search.delivery_date}}" style="margin-right: 20px;">
+        </div>
+        <div class="form-group">
+          <label>订单ID：</label>
+          <input type="text" class="form-control" name="oid" value="{{$search.oid}}" style="margin-right: 20px; width: 100px;">
+        </div>
+        <div class="form-group">
+          <label>商品ID：</label>
+          <input type="text" class="form-control" name="pid" value="{{$search.pid}}" style="margin-right: 20px; width: 100px;">
+        </div>
+        <input type="hidden" name="cate" value="1">
+        <button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查 询</button>
+      </div>
+</form>
+   
+<hr>
+  
+{{if !empty($product_list)}}
+<table class="table temp_product_list">
+    <thead>
+    <tr>
+        <th style="width:5%;"></th>
+        <th>商品信息</th>
+        <th style="width:12%;">订单信息</th>
+        <th>采购信息</th>
+        <th>录采购单数量</th>
+        <th>采购价（元）</th>
+    </tr>
+    </thead>
+    <tbody class="tmp_product_list">
+        {{foreach $product_list as $p_list}}
+        {{foreach $p_list as $p}}
+        <tr class="product" data-sid="{{$p.sid}}" data-inorder_num="{{$p.wait_inorder}}" data-oid="{{$p.oid}}" data-pid="{{$p.pid}}">
+            <td> 
+                <div class="checkbox">
+                    <label><input type="checkbox" name="temp_product" value="" {{if $order_list[$p.oid]['step']<5}} disabled="true"{{/if}}></label>
+                </div>
+            </td>
+            <td>
+                <span style="font-weight:bold;">{{$sku_infos[$p.sid]['title']}}</span><br>
+                <span style="color:gray;">{{$cate1_list[$sku_infos[$p.sid]['cate1']]['name']}} - {{$cate2_list[$sku_infos[$p.sid]['cate1']][$sku_infos[$p.sid]['cate2']]['name']}}</span><br><br>
+                <span style="color:green;">PID:{{$p.pid}} / SID:{{$p.sid}}</span>
+            </td>
+            
+            <td>
+                <span>订单ID：{{$order_list[$p.oid]['oid']}}</span><br>
+                {{if $order_list[$p.oid]['step'] < 5}}
+                <span style="color:red;">[未出库]</span>
+                {{/if}}
+                <br>
+                <span style="color:gray;">{{$order_list[$p.oid]['delivery_desc']}}</span>
+            </td>
+            
+            <td>
+                <span>空采数量：{{$p.vnum}}</span><br>
+                <span>已采数量：{{$p.tmp_bought_num}}</span><br>
+                {{if $p.need_buy > 0}}
+                <span style="color:red;">还需采购：{{$p.need_buy}}</span><br>
+                <span style="color:red;">请查看：【临】待采购列表！</span>
+                <a href="/warehouse/tmp_wait_list.php?wid={{$search.wid}}&delivery_date={{$search.delivery_date}}&pid={{$p.pid}}" target="_blank">查看</a>
+                {{else if $p.need_buy < 0}}
+                <span style="color:red;">多采购：{{$p.need_buy}}</span><br>
+                <span style="color:red;">多出商品需做采购单并入库！</span>
+                <a href="/warehouse/tmp_alert_list.php?wid={{$search.wid}}&delivery_date={{$search.delivery_date}}&pid={{$p.pid}}" target="_blank">查看预警</a>
+                {{/if}}
+            </td>
+            <td>
+                <input class="form-control" type="text" name="num" value="{{$p.wait_inorder}}" disabled="true" style="width:65px; display:inline-block;"> 
+                <span style="margin-left:3px;">{{$sku_infos[$p.sid]['unit']|default:'个'}}</span>
+                <br><br>
+                <span style="color:gray;">总空采数：{{$total_buy_num[$p.sid]}} {{$sku_infos[$p.sid]['unit']|default:'个'}}</span>
+            </td>
+            <td>
+                <input class="form-control" type="text" name="price" value="{{$sku_infos[$p.sid]['cost']/100}}" style="width:100px;">
+            </td>
+        </tr>
+        {{/foreach}}
+        {{/foreach}}
+    </tbody>
+  </table>
+  
+  <a href="javascript:void(0);" class="btn btn-primary" id="_j_save_tmp_2_inorder" style="margin-right:20px;">创建临采单</a>
+  
+  {{else}}
+  <span style="font-size: 25px; color:red;"> 无临采商品 </span>
+  {{/if}}
+  
+  <div id="_j_left_tmp_2_inorder" data-wid="{{$search.wid}}" data-delivery_date="{{$search.delivery_date}}"></div>
+ 

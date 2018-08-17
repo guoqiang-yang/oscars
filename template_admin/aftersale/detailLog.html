@@ -1,0 +1,235 @@
+<style>
+    .form-group {
+        margin-bottom: 6px;
+    }
+
+    .order-bottom {
+        border-bottom: 1px dashed #eee;
+        margin: 20px;
+    }
+
+    .coopworker-list {
+        padding: 6px 12px;
+    }
+    .btn-selected {
+        color: #fff;
+        background-color: #E22121;
+        border-color: #2e6da4;
+    }
+</style>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        工单详情:{{$order.oid}}
+    </h1>
+    <h3 style="margin-left:20px;color:#5d5d5d;">投诉概况</h3>
+    <form class="form-horizontal" role="form" data-oid="{{$order.oid}}">
+        <div class="order-bottom" style="background: #F2F2F2;">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">投诉人：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale.contact_name}}
+					</span>
+                </div>
+                <label class="col-sm-2 control-label">投诉人ID：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+                         {{if $aftersale.fb_type == 1}}
+                            {{if $aftersale.type == 2 && $aftersale.typeid==1}}
+                            【客户ID】<a target="_blank" href="/order/customer_list_cs.php?cid={{$aftersale.fb_uid}}&asid={{$aftersale.id}}">{{$aftersale.fb_uid}}</a><br />
+                            {{else}}
+                            【客户ID】<a target="_blank" href="/crm2/customer_detail.php?cid={{$aftersale.fb_uid}}">{{$aftersale.fb_uid}}</a><br />
+                            {{/if}}
+                         {{else if $aftersale.fb_type == 2}}
+                        【司机】<a target="_blank" href="/logistics/driver.php?id={{$aftersale.fb_uid}}">{{$aftersale.fb_uid}}</a><br />
+                         {{else if $aftersale.fb_type == 3}}
+                        【搬运工】<a target="_blank" href="/logistics/carrier.php?id={{$aftersale.fb_uid}}">{{$aftersale.fb_uid}}</a><br />
+                         {{else}}
+                        【工作人员】<a target="_blank" href="/admin/staff_list.php?name={{$aftersale.contact_name}}&mobile={{$aftersale.contact_mobile}}">{{$aftersale.fb_uid}}</a><br />
+                         {{/if}}
+					</span>
+                </div>
+                <label class="col-sm-2 control-label">投诉类型：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale._re_type}}
+					</span>
+                </div>
+                <label class="col-sm-2 control-label">投诉人类型：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale._fb_type}}
+					</span>
+                </div>
+                <label class="col-sm-2 control-label">电话：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale.contact_mobile}}
+					</span>
+                </div>
+                {{if $aftersale.contact_way}}
+                <label class="col-sm-2 control-label">其他联系方式：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale.contact_way}}
+					</span>
+                </div>
+                {{/if}}
+                <label class="col-sm-2 control-label">问题描述：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+						{{$aftersale.content}}
+					</span>
+                </div>
+                {{if !empty($aftersale.pic_ids)}}
+                <label class="col-sm-2 control-label">图片：</label>
+                <div class="col-sm-10">
+                    {{foreach $aftersale.pic_urls as $pic}}
+                    <div style="display:inline-block; margin-right:20px;">
+                        <div><img style="max-width:550px;" src="{{$pic}}"></div>
+                        <div style="margin-top:15px;">
+                            <a style="" type="button" class="btn btn-default" href="{{$pic}}" target="_blank">查看原图</a>
+                        </div>
+                    </div>
+                    {{/foreach}}
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </form>
+    {{if !empty($orders)}}
+    <h3 style="margin-left:20px;color:#5d5d5d;">订单信息</h3>
+    <form class="form-horizontal" role="form" data-oid="{{$key}}">
+        <div class="order-bottom" style="background: #F2F2F2;">
+            {{foreach $orders as $key => $order}}
+            <div class="form-group">
+                <label class="col-sm-2 control-label" style="font-size: 17px;">订单ID：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+						<a href="/order/order_detail.php?oid={{$key}}" target="_blank" >{{$key}}</a>
+					</span>
+                </div>
+                <label class="col-sm-2 control-label">收货地址：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+						{{$order.address}}
+					</span>
+                </div>
+
+                <div class="col-sm-8">
+                    <table class="table table-bordered col-sm-8 col-sm-offset-1" style="background: white; text-align: center;margin-left: 80px;">
+                        <thead>
+                        <tr>
+                            <th class="col-sm-1" style="text-align: center;">商品ID</th>
+                            <th class="col-sm-3" style="text-align: center;">商品名</th>
+                            <th class="col-sm-3" style="text-align: center;">单价</th>
+                            <th class="col-sm-1" style="text-align: center;">数量</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{foreach $order.products as $product}}
+                        <tr>
+                            <td>{{$product.pid}}</td>
+                            <td>{{$product.sku.title}}</td>
+
+                            <td>&yen;{{$product.price/100}}</td>
+                            <td>{{$product.num}}</td>
+                        </tr>
+                        {{/foreach}}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            {{/foreach}}
+            {{if $aftersale.type < 4}}
+            {{foreach $r_orders as $rid=>$r_order}}
+            <div class="form-group">
+                <label class="col-sm-2 control-label" style="font-size: 17px;">{{$aftersale.re_type}}ID：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+						{{$rid}}
+					</span>
+                </div>
+                <label class="col-sm-2 control-label">收货地址：</label>
+                <div class="col-sm-10">
+					<span class="text-value">
+						{{$r_order.address}}
+					</span>
+                </div>
+                <div class="col-sm-8">
+                    <table class="table table-bordered col-sm-8 col-sm-offset-1" style="background: white; text-align: center;margin-left: 80px;">
+                        <thead>
+                        <tr>
+                            <th class="col-sm-1" style="text-align: center;">商品ID</th>
+                            <th class="col-sm-3" style="text-align: center;">商品名</th>
+                            <th class="col-sm-3" style="text-align: center;">单价</th>
+                            <th class="col-sm-1" style="text-align: center;">数量</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{foreach $r_order.products as $product}}
+                        <tr>
+                            <td>{{$product.pid}}</td>
+                            <td>{{$product.sku.title}}</td>
+                            <td>&yen;{{$product.price/100}}</td>
+                            <td>{{$product.num}}</td>
+                        </tr>
+                        {{/foreach}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {{/foreach}}
+            {{/if}}
+        </div>
+    </form>
+    {{/if}}
+    <h3 style="margin-left:20px;color:#5d5d5d;">工单流转&&处理</h3>
+    <form class="form-horizontal" role="form" data-oid="{{$order.oid}}">
+        <div class="order-bottom" style="background: #F2F2F2;">
+            <div class="form-group">
+                <div class="col-sm-8" style="margin-top: 25px;">
+                    <table class="table table-bordered col-sm-10 col-sm-offset-1" style="background: white; text-align: center;margin-left: 80px;width:800px;">
+                        <thead style="background:#b6b6b6">
+                        <tr>
+                            <th style="text-align: center;width:10%;">受理部门</th>
+                            <th style="text-align: center;width:10%;;">受理人</th>
+                            <th style="text-align: center;width:10%;">操作</th>
+                            <th style="text-align: center;width:35%;">处理方案</th>
+                            <th style="text-align: center;width:15%;">操作后状态</th>
+                            <th style="text-align: center;width:20%;">处理时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{foreach $log as $item}}
+                        <tr>
+                            <td>{{$item.exec_department}}</td>
+                            <td>{{$item.username}}</td>
+                            <td>{{$item.action}}</td>
+                            <td>{{$item.content}}</td>
+                            <td>{{$item.after_step}}</td>
+                            <td>{{$item.mtime}}</td>
+                        </tr>
+                        {{/foreach}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="btn-group" style="float: right;margin-right: 20px;">
+        {{if $aftersale.type == 1 && $aftersale.typeid==15}} <a href="/aftersale/edit.php?id={{$aftersale.id}}"><button type="button" class="btn btn-default" style="background: #508EC7;color:#ffffff;">回访</button></a><br />{{/if}}
+    {{if $aftersale.exec_suid == 0 && ($aftersale.duty_department==$_user.role || !empty($_permissions['/aftersale/deal'])) && $aftersale.exec_status < 5}}
+    <a href="/aftersale/deal.php?id={{$aftersale.id}}&claim=1"><button type="button" class="btn btn-default" style="background: #508EC7;color:#ffffff;">认领</button></a><br />
+    {{elseif $aftersale.exec_suid>0 }}
+    {{if ($_uid == $item.exec_suid || !empty($_permissions['/aftersale/deal'])) && $aftersale.exec_status < 5}}
+    <a href="/aftersale/deal.php?id={{$aftersale.id}}"><button type="button" class="btn btn-default" style="background: #508EC7;color:#ffffff;">处理</button></a><br />
+    {{else if (($_uid == $aftersale.create_suid && !in_array($aftersale.typeid,array(12,13,14,15,16)) ) || !empty($_permissions['/aftersale/deal'])) && $aftersale.exec_status == 5}}
+    <a href="/aftersale/deal.php?id={{$aftersale.id}}"><button type="button" class="btn btn-default" style="background: #508EC7;color:#ffffff;">处理／关闭</button></a><br />
+    {{/if}}
+    {{/if}}
+    </div>
+</div>
+

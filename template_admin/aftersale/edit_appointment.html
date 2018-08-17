@@ -1,0 +1,138 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if empty($info.id)}}添加{{else}}处理{{/if}}预约</h1>
+
+	<form class="form-horizontal" role="form">
+		{{if $info.id}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">id：</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="id" name="id" value="{{$info.id}}" readonly="true">
+			</div>
+		</div>
+		{{/if}}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">所在区域：</label>
+			<div class="col-sm-8">
+                <input style="width: 200px; float: left; margin-right: 10px;" type="text" id="city" class="form-control" name="city" value="{{$info.city}}">
+                <input style="width: 200px; float: left; margin-right: 10px;" type="text" class="form-control" id="district" name="district" value="{{$info.district}}">
+                <input style="width: 200px; float: left; " type="text" class="form-control" id="area" name="area" value="{{$info.area}}">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">姓名：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" id="name" value="{{$info.name}}">
+            </div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">手机号：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" id="mobile" value="{{$info.mobile}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">类型：</label>
+            <div class="col-sm-4">
+                <select class="form-control" id="house_style">
+                    <option value="0">请选择</option>
+                    {{foreach $house_style as $id => $item}}
+                    <option {{if $info.house_style == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">户型：</label>
+            <div class="col-sm-4">
+                <select class="form-control" id="house_type">
+                    <option value="0">请选择</option>
+                    {{foreach $house_type as $id => $item}}
+                    <option {{if $info.house_type == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">面积：</label>
+            <div class="col-sm-4">
+                <select class="form-control" id="house_area">
+                    <option value="0">请选择</option>
+                    {{foreach $house_area as $id => $item}}
+                    <option {{if $info.house_area == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">预算：</label>
+            <div class="col-sm-4">
+                <select class="form-control" id="budget">
+                    <option value="0">请选择</option>
+                    {{foreach $budget as $id => $item}}
+                    <option {{if $info.budget == $id}} selected="selected" {{/if}} value="{{$id}}">{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">装修时间：</label>
+            <div class="col-sm-4">
+                <input type="date" class="form-control" id="fit_time" value="{{$info.fit_time}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">关联案例：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" id="case_id" value="{{$info.case_id}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">关联工长：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" id="fid" value="{{$info.fid}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">特殊要求：</label>
+            <div class="col-sm-6">
+                <textarea class="form-control" id="note">{{$info.note}}</textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">指派销售：</label>
+            <div class="col-sm-4">
+                <select class="form-control" id="saler_suid">
+                    <option value="0">请选择</option>
+                    {{foreach $salers as $item}}
+                    <option {{if $info.saler_suid == $item.suid}} selected="selected" {{/if}} value="{{$item.suid}}">{{$item.name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">备注：</label>
+            <div class="col-sm-6">
+                <textarea class="form-control" id="hc_note">{{$info.hc_note}}</textarea>
+            </div>
+		</div>
+
+        {{if $info.step < 33}}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-primary" id="btn_save">保存</button>
+                <button style="margin-left:20px;" type="button" class="btn btn-success" id="btn_assign_to_saler">提交销售</button>
+                <button style="margin-left:20px;" type="button" class="btn btn-warning" id="btn_complate">处理完成</button>
+            </div>
+        </div>
+        {{else if $info.step < 99}}
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="button" class="btn btn-primary" id="btn_save">保存</button>
+				<button style="margin-left:20px;" type="button" class="btn btn-warning" id="btn_complate">处理完成</button>
+			</div>
+		</div>
+        {{/if}}
+	</form>
+
+</div>

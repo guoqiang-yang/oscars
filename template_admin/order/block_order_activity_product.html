@@ -1,0 +1,199 @@
+<div style="padding: 10px 0; margin: 10px 0;">
+    {{if $order.step < 2}}
+    {{if $privilege.vip_privilege > 0}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">VIP现金券：</label>
+        <div class="col-sm-8">
+            <span class="text-value">{{$privilege.vip_num}}张VIP现金券，优惠{{$privilege.vip_privilege / 100}}元</span>
+        </div>
+    </div>
+    {{/if}}
+    {{if $privilege.coupon_privilege > 0}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">现金券：</label>
+        <div class="col-sm-8">
+            <span class="text-value">优惠{{$privilege.coupon_privilege / 100}}元</span>
+        </div>
+    </div>
+    {{/if}}
+    {{if $privilege.manjian_privilege > 0}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">满减活动优惠：</label>
+        <div class="col-sm-8">
+            {{$privilege.manjian_privilege / 100}}元 {{if $privilege.manjian_id > 0}}(id:{{$privilege.manjian_id}}){{/if}}
+        </div>
+    </div>
+    {{/if}}
+    {{if $privilege.discount_privilege > 0}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">折扣优惠：</label>
+        <div class="col-sm-8">
+            <span class="text-value">{{$privilege.discount_privilege / 100}}元 &emsp;{{if $privilege.discount_info.m_type == 1}}（平台折扣： {{$privilege.discount_info.conf.rate}}折{{if $privilege.discount_info.conf.is_coupon}}，可与优惠券同享{{/if}}）{{else}}（指定用户折扣：{{$customer.discount_ratio}}折）{{/if}}</span>
+        </div>
+    </div>
+    {{/if}}
+    {{if $privilege.customer_privilege > 0}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">折扣优惠：</label>
+        <div class="col-sm-8">
+            <span class="text-value">{{$privilege.customer_privilege / 100}}元 （指定用户折扣：{{$customer.discount_ratio}}折）</span>
+        </div>
+    </div>
+    {{/if}}
+    {{if $privilege.gift_privilege > 0}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">满赠活动优惠：</label>
+        <div class="col-sm-8">
+            {{$privilege.gift_privilege / 100}}元
+        </div>
+    </div>
+    {{/if}}
+    {{if $privilege.special_price_privilege > 0}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">满特价活动优惠：</label>
+        <div class="col-sm-8">
+            {{$privilege.special_price_privilege / 100}}元
+        </div>
+    </div>
+    {{/if}}
+    {{if $privilege.freight_privilege > 0}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">运费券：</label>
+        <div class="col-sm-8">
+            <span class="text-value">优惠{{$privilege.freight_privilege / 100}}元</span>
+        </div>
+    </div>
+    {{/if}}
+    {{else}}
+    <div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">总优惠：</label>
+            <div class="col-sm-10">
+                <div class="text-value col-sm-2">{{$order.privilege / 100}}元</div>
+                <span class="text-value col-sm-8">{{if $order.privilege_note}}【优惠原因】{{$order.privilege_note}}{{/if}}</span>
+            </div>
+        </div>
+        {{if !empty($order_privileges)}}
+        {{foreach $order_privileges as $item}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label">{{$item._type}}：</label>
+            <div class="col-sm-10">
+                <div class="text-value col-sm-2">{{$item.amount / 100}}元 &emsp;{{if $item.activity_id > 0}}(id:{{$item.activity_id}}){{/if}}</div>
+                <span class="text-value col-sm-8">{{$item.info}}</span>
+            </div>
+        </div>
+        {{/foreach}}
+        {{/if}}
+    </div>
+    {{/if}}
+    {{if !empty($order.sale_privilege)}}
+    <div class="form-group">
+        <label class="col-sm-2 control-label">销售优惠：</label>
+        <div class="col-sm-10">
+            <div class="text-value col-sm-2">{{$order.sale_privilege / 100}}元</div>
+        </div>
+    </div>
+    {{/if}}
+</div>
+{{if !empty($privilege['show_gift_products'])}}
+<div style="background: #eee; padding: 10px 0; margin: 10px 0;">
+    <div class="form-group">
+        <label class="col-sm-2 control-label" style="color: red;">请选择赠品</label>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label">&emsp;</label>
+        <div class="col-sm-10">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>商品名</th>
+                    <th>PID</th>
+                    <th>SID</th>
+                    <th>赠送数量</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{foreach $privilege['show_gift_products'] as $item}}
+                <tr>
+                    <td><input type="checkbox" name="gift_pid" value="{{$item.pid}}" data-num="{{$item.num}}" {{if in_array($item.pid, array_keys($privilege['gift_products'][$item['activity_id']]))}} checked="checked"{{/if}}>{{$item.title}}</td>
+                    <td>{{$item.pid}}</td>
+                    <td>{{$item.sid}}</td>
+                    <td>{{$item.num}}</td>
+                </tr>
+                {{/foreach}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{/if}}
+{{if !empty($privilege['show_special_price_products'])}}
+<div style="background: #eee; padding: 10px 0; margin: 10px 0;">
+    <div class="form-group">
+        <label class="col-sm-2 control-label" style="color: red;">请选择特价商品</label>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label">&emsp;</label>
+        <div class="col-sm-10">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>商品名</th>
+                    <th>PID</th>
+                    <th>SID</th>
+                    <th>价格</th>
+                    <th>购买数量</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{foreach $privilege['show_special_price_products'] as $item}}
+                <tr>
+                    <td><input type="checkbox" name="special_price_pid" data-price="{{$item.price}}" value="{{$item.pid}}"  {{if in_array($item.pid, array_keys($privilege['special_price_products'][$item['activity_id']]))}} checked="checked"{{/if}}>{{$item.title}}</td>
+                    <td>{{$item.pid}}</td>
+                    <td>{{$item.sid}}</td>
+                    <td>¥{{$item.price/100}}(限购{{$item.num}}个)</td>
+                    <td><input type="text" name="special_price_num" value="{{if $privilege['special_price_products'][$item['activity_id']][$item.pid]['num'] > 0}}{{$privilege['special_price_products'][$item['activity_id']][$item.pid]['num']}}{{else}}1{{/if}}" data-num="{{$item.num}}"> </td>
+                </tr>
+                {{/foreach}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{/if}}
+{{if !empty($activity_products)}}
+<div style="background: #eee; padding: 10px 0; margin: 10px 0;">
+    <div class="form-group">
+        <label class="col-sm-2 control-label" style="color: red;">活动商品清单</label>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label">&emsp;</label>
+        <div class="col-sm-10">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>商品名</th>
+                    <th>PID</th>
+                    <th>SID</th>
+                    <th>价格</th>
+                    <th>购买数量</th>
+                    <th>备注</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{foreach $activity_products as $item}}
+                <tr>
+                    <td>{{$item.title}}</td>
+                    <td>{{$item.pid}}</td>
+                    <td>{{$item.sid}}</td>
+                    <td>¥{{$item.price/100}}</td>
+                    <td>{{$item.num}}({{$item.unit}})</td>
+                    <td>{{if $item.type == 18}}赠品{{elseif $item.type == 19}}特价商品{{/if}}</td>
+                </tr>
+                {{/foreach}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{/if}}

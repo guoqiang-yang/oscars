@@ -1,0 +1,49 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        添加楼层
+    </h1>
+    <form class="form-horizontal" role="form">
+        <input type="hidden" id="fid" value="{{$floor.fid}}">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">楼层类型：</label>
+            <div class="col-sm-2" style="padding: 0;margin-left: 15px;">
+                <select class="form-control"  style="float: left" id="floor_type">
+                    <option value="0">请选择</option>
+                    {{foreach $type as $id => $item}}
+                    <option value="{{$id}}" {{if $id == $floor.type}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动城市：</label>
+            <div class="col-sm-6">
+                <div class="checkbox" id="box">
+                    <label style="margin-right:10px;" class="col-sm-2">
+                        <input type="checkbox" value="" onclick="checkAll(this)" all="none">全选
+                    </label>
+                    {{foreach $city as $id => $name}}
+                    <label style="margin-right:10px;" class="col-sm-2">
+                        <input type="checkbox" value="{{$id}}" name="city" {{if in_array($id, $floor._city)}} checked="checked" {{/if}}>{{$name}}
+                    </label>
+                    {{/foreach}}
+                </div>
+                <span style="color: red;">(注意：同一城市(包含全部城市)不能同时开展两个及以上相同类型的活动)</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">显示顺序：</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="sort" value="{{$floor.sort}}" placeholder="请输入数字">
+            </div>
+            <div style="margin-top: 7px;"><span style="color: red;">*数字越小位置越靠前，0为最小</span></div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-primary" id="btn_save_floor_activity">保存</button>
+                <a type="button" style="margin-left:20px;" class="btn btn-default" onClick="javascript:window.location.href='/activity/floor_activity_list.php';">取消</a>
+                <div style="color: red;">*(确定提交后请点击查看详情编辑活动详情)</div>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,37 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">司机来源</h1>
+
+    <a href="/role/add_source.php" class="btn btn-primary">新增</a>
+
+    <hr>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>来源</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{foreach $source_list as $source}}
+                <tr data-cid="{{$source.sid}}">
+                    <td>
+                        {{$source.source}}
+                    </td>
+                    <td>
+                        <a href="/role/add_source.php?sid={{$source.sid}}">编辑</a>　
+                        <a data-id="{{$source.sid}}" class="delete_source" href="javascript:;">删除</a>　
+                    </td>
+                </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+                <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>

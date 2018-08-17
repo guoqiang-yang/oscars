@@ -1,0 +1,40 @@
+{{if $otype == 'show_tmp'}}
+<table class="table">
+    <thead>
+    <tr>
+        <th>商品名称</th>
+        <th>数量</th>
+        <th>操作类型</th>
+        <th>删除数量</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="_j_product" data-sid="{{$sid}}" data-oid="{{$oid}}">
+        <td>{{$product.sku.title}}</td>
+        <td>
+            <span>{{$product.num}}</span>
+            {{foreach $sales_orders as $_oid=>$_num}}
+            <br><span style="color:red;">{{$_oid}}：{{$_num}}</span>
+            {{/foreach}}
+        </td>
+        <td>
+            <select class="form-control" name="chg_type" style="width:50%;">
+                <option value="0">请选择</option>
+                <option value="1">删除</option>
+                <option value="2">转普采</option>
+            </select>
+        </td>
+        <td>
+            <select class="form-control" name="del_num" style="width:50%;">
+                <option value="0">请选择</option>
+                {{foreach $sales_orders_num as $_oid=>$_num}}
+                <option value="{{$_num}}" data-oid="{{$_oid}}">{{$_num}}</option>
+                {{/foreach}}
+            </select>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+{{/if}}
+

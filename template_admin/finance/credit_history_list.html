@@ -1,0 +1,226 @@
+<style>
+  h1 {font-family: STKaiti;}
+  table {font-size:14px; border-spacing: 0;border-collapse: collapse; }
+  table td {padding:5px 10px;}
+  table.border td {border:1px solid #333;}
+</style>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+	
+	<h1 class="page-header">金融账户流水</h1>
+	
+	<form class="form-inline" role="form" action="/finance/credit_history_list.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:10px;">
+				<label>客户ID：</label>
+				<input class="form-control" type="text" name="cid" value="{{if $search.cid}}{{$search.cid}}{{/if}}" style="margin-right: 20px;" placeholder="请输入客户id">
+			</div>
+            <div class="form-group" style="margin-right:10px;">
+                <label>单据类型：</label>
+                <select class="form-control" name="objtype">
+                    <option value="0" {{if 0==$type}}selected="selected"{{/if}}>全部</option>
+                    {{foreach $objtypes as $_type => $_desc}}
+                    <option value="{{$_type}}" {{if $_type==$search.objtype}}selected="selected"{{/if}}>{{$_desc}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+        </div>
+	</form>
+
+    <hr>
+    {{if !empty($customer_account)}}
+    <table class="border" width="100%">
+        <tbody>
+            <tr>
+                <td width="33%">客户ID：{{$customer_account.cid}}</td>
+                <td width="33%">总额度：{{$customer_account.total_amount/100}}元</td>
+                <td width="33%">可用额度：{{$customer_account.available_amount/100}}元</td>
+            </tr>
+        </tbody>
+    </table>
+	<hr>
+    {{/if}}
+    
+	{{if !empty($bill_list)}}
+		<table class="table">
+			<thead>
+			<tr>
+				<th>id</th>
+				<th>单据类型</th>
+				<th style="width:10%;">客户</th>
+				<th>额度增加</th>
+                <th>额度减少<span style="color:gray;font-size:12px;">/临额</span><span style="color:blue;font-size:12px;">/自额</span></th>
+				<th>应还款额</th>
+				<th style="width:10%;">交易日期</th>
+                <th style="width:10%;">计息日期</th>
+				<th style="width:14%;">备注</th>
+				<th>执行人</th>
+			</tr>
+			</thead>
+			<tbody>
+			{{foreach $bill_list as $one}}
+				<tr>
+					<td>{{$one.id}}</td>
+					<td>
+                        {{if !empty($one._objurl)}}
+                        <a href="{{$one._objurl}}" target="_blank">{{$objtypes[$one.objtype]}}&nbsp;-&nbsp;{{$one.objid}}</a>
+                        {{else}}
+                        <span>{{$objtypes[$one.objtype]}}&nbsp;-&nbsp;{{$one.objid}}</span>
+                        {{/if}}
+					</td>
+					<td>
+                        <a href="?cid={{$one.cid}}">{{$one._customer.name}}</a><br>
+                        <span style="color:gray;">CID: {{$one.cid}}</span>
+					</td>
+					<td>
+                        {{if $one.price<=0}}￥{{$one.price/100}}{{/if}}
+                        {{if $one.objtype==3}}
+                        <br><span style='color:gray;font-size:12px;'>{{$payment_types[$one.payment_type]}}</span>
+                        {{/if}}
+                    </td>
+					<td>
+                        {{if $one.price>0}}￥{{$one.price/100}}
+                        <span style="color:gray;font-size:12px;">/{{$one.tmp_price/100}}</span>
+                        <span style="color:blue;font-size:12px;">/{{$one.self_price/100}}</span>
+                        {{/if}}
+                        {{if $one.objtype==1 && $one.is_paid==1}}
+                        <br><span style='color:gray;font-size:12px;'>还: {{$one.paid_time}}</span>
+                        {{/if}}
+                    </td>
+					<td><span style="color:red;">￥{{$one.amount/100}}</span></td>
+					<td>{{$one.ctime}}</td>
+                    <td>{{if $one.sync_time!='0000-00-00 00:00:00'}}{{$one.sync_time}}{{else}}--{{/if}}</td>
+					<td>{{$one.note}}</td>
+					<td>{{$one._suser.name}}</td>
+				</tr>
+			{{/foreach}}
+			</tbody>
+		</table>
+    
+        {{if !empty($customer_account)}}
+        <a href="javascript:void(0);" class="btn btn-primary" data-toggle="modal" data-target="#FinanceRepay" style="margin-right:20px;float:left;">还  款</a>
+        {{/if}}
+        
+		<nav>
+			<ul class="pagination" style="margin:0;">
+				{{$pageHtml nofilter}}
+				<li><a style="color:#555;">共{{$total|string_format:"%d"}}条</a></li>
+			</ul>
+		</nav>
+	{{else}}
+		<span>无账务清单！！</span>
+	{{/if}}
+</div>
+
+
+<div class="modal fade _j_dialog" id="FinanceRepay" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog modal-sm" role="document" style="width:600px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">还  款</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal">
+                    <div class="form-group">
+                       <label class="col-sm-3 control-label">订单ID：</label>
+						<div class="col-sm-7">
+                            <input type="text" class="form-control" name="oid" placeholder="请输入订单号" style="display:inline-block;width:150px;">
+                            <a href="javascript:void(0);" class="btn btn-primary" id="getRepayDetail" style="margin-left:10px;">查还款额</a>
+                        </div> 
+                    </div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">金额：</label>
+						<div class="col-sm-7">
+                            <span class="text-value repay_price">0 元</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">还款方式：</label>
+						<div class="col-sm-7">
+							<select class="form-control" name="payment_type" style="display:inline-block;width:150px;">
+								<option value="0">请选择</option>
+								{{foreach $payment_types as $type_id => $type_name}}
+								<option value="{{$type_id}}">{{$type_name}}</option>
+								{{/foreach}}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label">备注：</label>
+						<div class="col-sm-7">
+							<textarea class="form-control" rows="2" name="note"></textarea>
+						</div>
+					</div>
+                    <div class="form-group" style="display:none;">
+                        <label class="col-sm-3 control-label">消费明细：</label>
+						<div class="col-sm-7 text-value repay_detail">
+						</div>
+                    </div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary _j_finance_confirm_repay" data-cid="{{$search.cid}}" data-type="3">还款</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+    
+    $(document).ready(function(){
+        (function(){
+
+            $('#getRepayDetail').on('click', function(){
+                var dlg = $('#FinanceRepay');
+                var para = {
+                    cid: dlg.find('._j_finance_confirm_repay').attr('data-cid'),
+                    oid: dlg.find('input[name=oid]').val(),
+                    otype: 'detail'
+                };
+
+                K.post('/finance/ajax/credit_repay.php', para, function(ret){
+                    if (ret.st!=0 || ret.data.repay==0){
+                        dlg.find('._j_finance_confirm_repay').attr('disabled', true);
+                        dlg.find('.repay_detail').parent().hide();
+                    }
+                    else{
+                        dlg.find('._j_finance_confirm_repay').attr('disabled', false);
+                        dlg.find('.repay_detail').parent().show();
+                    }
+
+                    var repayNotice = ret.data.repay/100 + ' 元';
+                    if (ret.data.repay <= 0){
+                        repayNotice += '<span style="color:red;">（该订单无需还款）</span>';
+                    }
+                    dlg.find('.repay_price').html(repayNotice);
+                    dlg.find('.repay_price').attr('data-repay_price', ret.data.repay);
+                    dlg.find('.repay_detail').html(ret.data.html);
+                });
+            });
+
+            $('#FinanceRepay ._j_finance_confirm_repay').on('click', function (){
+                var dlg = $('#FinanceRepay');
+                var para = {
+                    cid: $(this).attr('data-cid'),
+                    oid: dlg.find('input[name=oid]').val(),
+                    price: dlg.find('.repay_price').attr('data-repay_price'),
+                    payment_type: dlg.find('select[name=payment_type]').val(),
+                    note: dlg.find('textarea[name=note]').val(),
+                    otype: 'repay'
+                };
+                
+                $(this).attr('disabled', false);
+                K.post('/finance/ajax/credit_repay.php', para, function(ret){
+                    alert('还款成功！');
+                    window.location.reload();
+                });
+            });
+            
+            
+        })();
+    });
+    
+</script>

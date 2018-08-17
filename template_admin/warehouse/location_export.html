@@ -1,0 +1,69 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		盘库导出
+	</h1>
+
+	<form class="form-inline" role="form" action="/warehouse/location_export.php">
+		<div class="placeholder">
+			{{if count($_allowed_warehouses) > 1}}
+			<div class="form-group" style="margin-right:50px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+					{{foreach $_allowed_warehouses as $wid => $wid_name}}
+					<option value="{{$wid}}" {{if $search.wid== $wid}}selected="selected" {{/if}}>{{$wid_name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			{{/if}}
+			<div class="form-group" style="margin-right:25px;">
+				<input class="form-control" type="text" value="{{$search.lstart}}" style="margin-right:5px; width: 150px;" name="lstart" placeholder="起始货位" />
+			</div>
+			-
+			<div class="form-group" style="margin-left:25px; margin-right: 50px;">
+				<input class="form-control" type="text" value="{{$search.lend}}" style="margin-right:5px; width: 150px;" name="lend" placeholder="终止货位" />
+			</div>
+
+			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-right:30px;">查询</button>
+            {{if !empty($_permissions["/warehouse/download"])}}
+			<a href="/warehouse/download.php?wid={{$search.wid}}&lstart={{$search.lstart}}&lend={{$search.lend}}" class="btn btn-danger" style="margin-right:30px;">导出</a>
+            {{/if}}
+        </div>
+	</form>
+
+	<hr>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>sid</th>
+			<th>SKU信息</th>
+            <th>单位</th>
+			<th>货位</th>
+			<th>库存数量</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $location_list as $loc}}
+		<tr class="dialog" data-id="{{$loc.id}}">
+			<td class="sid" data-sid="{{$loc.sid}}">
+				{{$loc.sid}}<br> {{if $loc.sid==0}}<span style="color:red;">未使用</span>{{/if}}
+			</td>
+			<td class="title">
+				{{if !empty($loc._skuInfo)}} <span>{{$loc._skuInfo.title}}</span> {{else}} -- {{/if}}
+			</td>
+      <td class="unit">
+        {{if !empty($loc._skuInfo)}} <span>{{$loc._skuInfo.unit}}</span> {{else}} -- {{/if}}
+      </td>
+			<td class="loc" data-loc="{{$loc.location}}">
+				{{$loc.location}}{{if $loc.is_virtual}}<span style="color:red;">【虚拟货位】</span>{{/if}}
+			</td>
+			<td class="num" data-num="{{$loc.num}}" data-occupied="{{$loc.occupied}}">
+				{{$loc.num}}
+			</td>
+		</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+</div>

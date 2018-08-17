@@ -1,0 +1,35 @@
+<table class="table" style="text-align: center;">
+    <thead>
+    <tr>
+        <th>商品id</th>
+        <th>skuid</th>
+        <th>名称</th>
+        <th>数量</th>
+        {{foreach $wids as $item}}
+        <th>{{$item}}</th>
+        {{/foreach}}
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $product_list as $p}}
+    <tr>
+        <td>{{$p.pid}}</td>
+        <td>{{$p.sid}}</td>
+        <td>{{$p.sku.title}}</td>
+        <td>{{$p.num}}</td>
+        {{foreach $wids as $wid=>$item}}
+
+        {{if isset($p.ware[$wid])}}
+            {{if ($p.ware[$wid]-$p.num)>0}}
+            <td>{{$p.ware[$wid]}}{{if $p.product.buy_type == 2}}<br/>(临){{/if}}</td>
+            {{else}}
+            <td style="color: red;">{{$p.ware[$wid]}}{{if $p.product.buy_type == 2}}<br/>(临){{/if}}</td>
+            {{/if}}
+        {{else}}
+            <td style="color: red;">0{{if $p.product.buy_type == 2}}<br/>(临){{/if}}</td>
+        {{/if}}
+        {{/foreach}}
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>

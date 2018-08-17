@@ -1,0 +1,90 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">
+    SKU搜索
+  </h1>
+
+  <form class="form-inline" action="/shop/sku_search.php">
+    <div class="form-group" style="margin-right:10px;">
+      <input type="text" class="form-control" name="keyword" value="{{$keyword}}">
+    </div>
+      {{if !empty($_permissions["/shop/sku_search"])}}
+        <button type="submit" class="btn btn-primary">搜索</button>
+      {{/if}}
+  </form>
+
+    <hr>
+    <div style="color: red; font-size: 24px;">库房打印条形码请使用sid</div>
+    <hr>
+
+    {{if count($list) > 0}}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>sid</th>
+            <th>图片</th>
+            <th>信息</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $list as $sku}}
+        <tr data-sid="{{$sku.sid}}" class="_j_sku">
+            <td>
+                {{$sku.sid}}
+            </td>
+            <td>
+                <img width="120" src="{{if $sku._pic}}{{$sku._pic.small}}{{else}}/i/nopic100.jpg{{/if}}">
+            </td>
+            <td>
+                【名称】{{$sku.title}}<br/>
+                {{if $sku.alias}}<span style="color:gray;">【俗称】{{$sku.alias}}</span><br />{{/if}}
+                {{if $sku.unit}}<span style="color:#2222F1;">【单位】{{$sku.unit}}</span><br />{{/if}}
+                {{if $sku.package}}<span style="color:#0B8E1B;">【规格】{{$sku.package}}</span><br />{{/if}}
+                {{if $sku.bid}}<span style="color:#912A08;">【品牌】{{foreach $brands as $brand}}{{if $brand.bid == $sku.bid}}{{$brand.name}}{{/if}}{{/foreach}}</span><br />{{/if}}
+                {{if $sku.mids}}<span style="color:#DACC07;">【型号】
+                    {{foreach $sku._models as $model}}
+                    {{$model}}
+                    {{/foreach}}<br />{{/if}}
+                {{if $sku.length > 0 || $sku.width > 0 || $sku.height > 0}}
+                <span style="color:#F3204A;">【尺寸】{{$sku.length / 100}}米 * {{$sku.width / 100}}米 * {{$sku.height / 100}}米</span><br/>
+                {{/if}}
+                {{if $sku.weight > 0}}
+                <span style="color:#A0AF2C;">【重量】{{$sku.weight / 1000}} 千克</span><br/>
+                {{/if}}
+            </td>
+            <td>
+                {{if $sku.status > 0}}<span style="color:red;">(下架)</span>{{else}}上架{{/if}}<br/>
+            </td>
+            <td>
+                {{if !empty($_permissions["/shop/edit_sku"])}}
+                    <a href="/shop/edit_sku.php?sid={{$sku.sid}}">编辑</a><br/>
+                {{/if}}
+                {{if !empty($_permissions["/warehouse/stock_history"])}}
+                    <a href="/warehouse/stock_history.php?type=-1&wid=3&sid={{$sku.sid}}">库存</a><br />
+                {{/if}}
+                {{if !empty($_permissions["/shop/add_product"])}}
+                    {{if $sku.product_id > 0}}
+                        <a href="/shop/edit_product.php?pid={{$sku.product_id}}">查看商品</a>
+                    {{else}}
+                        <a href="/shop/add_product.php?sid={{$sku.sid}}">添加商品</a>
+                    {{/if}}
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+    {{else}}
+    无sku信息
+    {{/if}}
+
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

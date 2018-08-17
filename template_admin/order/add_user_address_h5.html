@@ -1,0 +1,116 @@
+<style>
+    .table tbody tr td {border: none;}
+	.nav-sidebar {display: none;}
+	span.nav {width: 50%; display: block; color: black; text-align: center; padding: 0.5em 0; background: #ccc; border-bottom: 1px solid #ccc;}
+	span.selected {border-color: #d9534f; color: #d9534f;}
+	div.address_list {display: none; padding: 0; background: #ccc;}
+	ul,li {list-style: none;}
+	ul.address_detail {margin-top: 6px; background: #fff; padding: 10px;}
+</style>
+<div style="display: none;" id="city-json">
+    {{$city}}
+</div>
+<div style="display: none;" id="distinct-json">
+    {{$distinct}}
+</div>
+<div style="display: none;" id="area-json">
+    {{$area}}
+</div>
+
+<input type="hidden" id="city_id" value="{{$city_id}}" />
+<input type="hidden" id="oid" value="{{$oid}}" />
+<!-- 用户信息，用于添加完地址后跳转订单编辑页传参 -->
+<input type="hidden" id="cid" value="{{$cid}}" />
+<input type="hidden" id="uid" value="{{$uid}}" />
+<input type="hidden" id="delivery_type" value="{{$delivery_type}}" />
+<!-- 用于判断方向 -->
+<input type="hidden" id="from" value="{{$from}}" />
+<input type="hidden" id="platform" value="{{$platform}}" />
+<input type="hidden" id="version" value="{{$version}}" />
+<div>
+	<span style="float: left;" class="nav selected" id="add_address">添加地址</span>
+    <span style="float: right;" class="nav" id="select_address">选择已有地址</span>
+</div>
+<!-- 清除浮动 -->
+<div style="clear: both; height: 0; overflow: hidden;"></div>
+<!-- 添加地址 -->
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main add_address">
+    <table class="table">
+    	<tr>
+            <td>
+                姓名：
+            </td>
+            <td>
+                <input type="text" class="form-control" id="contact_name" value="{{$contact_name}}" name="contact_name" placeholder="请输入收货人" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                手机：
+            </td>
+            <td>
+                <input type="text" class="form-control" id="contact_phone" name="contact_phone" value="{{$contact_phone}}" placeholder="请输入收货人手机" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                城市：
+            </td>
+            <td>
+                <select id="select-city" class="form-control" name="city_id" data-id="{{$select_city}}"></select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                城区：
+            </td>
+            <td>
+                <select id="select-district" class="form-control" name="district_id" data-id="{{$select_district}}"></select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                区域范围：
+            </td>
+            <td>
+                <select id="select-area" class="form-control" name="ring_road" data-id="{{$select_area}}"></select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                小区/大厦：
+            </td>
+            <td>
+                <input type="text" class="form-control" id="community_name" value="{{$community_name}}" placeholder="点击选择小区"/>
+                <input type="hidden" id="community_address" name="community_address" value="{{$community_address}}" />
+                <input type="hidden" id="lat" name="community_lat" value="{{$community_lat}}" />
+                <input type="hidden" id="lng" name="community_lng" value="{{$community_lng}}" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                详细地址：
+            </td>
+            <td>
+                <textarea name="address_detail" class="form-control" id="address_detail" placeholder="请输入街道门牌号详细地址"></textarea>
+            </td>
+        </tr>
+    </table>
+    <div>
+        <a id="add_btn" href="javascript:;" style="width: 100%;" class="btn btn-danger">添加使用</a>
+    </div>
+</div>
+<!-- 已有地址列表,这里不是客户本人操作不添加删除以及编辑地址操作只提供选择 -->
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main address_list">
+	{{foreach $addressList as $address}}
+		<ul class="address_detail" data-address="{{$address.address}}" 
+		data-contact-name="{{$address.contact_name}}" 
+		data-contact-phone="{{$address.contact_phone}}" 
+		data-community-id="{{$address.community_id}}"
+		data-address-id="{{$address.id}}">
+			<li>收货人：{{$address.contact_name}}</li>
+			<li>手机：{{$address.contact_phone}}</li>
+			<li>收货地址：{{$address.address}}</li>
+		</ul>
+	{{/foreach}}
+</div>

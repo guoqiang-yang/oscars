@@ -1,0 +1,51 @@
+{{if $total != 0}}
+  {{if $role == 1}} {{*司机*}}
+  {{foreach $worker_list as $worker}}
+  <div class="col-md-12" style="margin-bottom: 10px;">
+    <span class="col-md-4">{{$worker.name}}</span>
+    <span class="col-md-4">{{$worker.mobile}}</span>
+    <!--<input class="col-md-2" type="text" placeholder="金额" name="price" value="{{$worker.price}}">-->
+    {{if $worker.hasSelected}}
+    <span class="col-md-2">已选择</span>
+    {{else}}
+    <a class="col-md-2 _j_select_cooperworker" href="javascript:;" data-utype="1" data-cuid="{{$worker.did}}" data-role="{{$role}}">选择</a>
+    {{/if}}
+  </div>
+  {{/foreach}}
+  
+  {{else}} {{*搬运工*}}
+  {{foreach $has_selected_drivers as $driver}}
+  <div class="col-md-12" style="margin-bottom: 10px;">
+    <span class="col-md-4">{{$driver.name}}【司机】</span>
+    <span class="col-md-4">{{$driver.mobile}}</span>
+    <!--<input class="col-md-2" type="text" placeholder="金额" name="price" value="{{$driver.price}}">-->
+    {{if $driver.hasSelected}}
+    <span class="col-md-2">已选择</span>
+    {{else}}
+    <a class="col-md-2 _j_select_cooperworker" href="javascript:;" data-cuid="{{$driver.cuid}}" data-role="2" data-utype="1">选择</a>
+    {{/if}}
+  </div>
+  {{/foreach}}
+  {{foreach $worker_list as $worker}}
+  <div class="col-md-12" style="margin-bottom: 10px;">
+    <span class="col-md-4">{{$worker.name}}</span>
+    <span class="col-md-4">{{$worker.mobile}}</span>
+    <!--<input class="col-md-2" type="text" placeholder="金额" name="price" value="{{$worker.price}}">-->
+    {{if $worker.hasSelected}}
+    <span class="col-md-2">已选择</span>
+    {{else}}
+    <a class="col-md-2 _j_select_cooperworker" href="javascript:;" data-utype="2" data-cuid="{{$worker.cid}}" data-role="{{$role}}">选择</a>
+    {{/if}}
+  </div>
+  {{/foreach}}
+  {{/if}}
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+{{else}}
+  <span>暂无可选的第三方工人！！</span>
+{{/if}}

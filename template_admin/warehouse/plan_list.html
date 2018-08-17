@@ -1,0 +1,244 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">盘点计划</h1>
+
+    <form class="form-inline" role="form" action="/warehouse/plan_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>创建时间：</label>
+                <input type="date" class="form-control" name="start_time" value="{{$search_conf.start_time}}" style="width: 160px;">&nbsp;-&nbsp;
+                <input type="date" class="form-control" name="end_time" value="{{$search_conf.end_time}}" style="width: 160px;">
+            </div>
+            {{if count($_allowed_warehouses) > 1}}
+            <div class="form-group" style="margin-right:20px;">
+                <label>仓库：</label>
+                <select class="form-control" name="wid">
+                    <option value="0">全部</option>
+                    {{foreach $_allowed_warehouses as $_wid=>$_wname}}
+                    <option value="{{$_wid}}" {{if $search_conf.wid==$_wid}} selected="selected"{{/if}}>{{$_wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            {{/if}}
+            <div class="form-group" style="margin-right:20px;">
+                <label>计划类型：</label>
+                <select class="form-control" name="plan_type">
+                    <option value="">全部</option>
+                    {{foreach $plan_types as $id => $type_name}}
+                    <option value="{{$id}}" {{if $id == $search_conf.plan_type}} selected="selected" {{/if}}>{{$type_name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <!--<div class="form-group" style="margin-right:20px;">-->
+                <!--<label>状态：</label>-->
+                <!--<select class="form-control" name="step">-->
+                    <!--<option value="0">全部</option>-->
+                    <!--{{foreach $step_list as $step=>$step_name}}-->
+                    <!--<option value="{{$step}}" {{if $search_conf.step==$step}} selected="selected"{{/if}}>{{$step_name}}</option>-->
+                    <!--{{/foreach}}-->
+                <!--</select>-->
+            <!--</div>-->
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-right: 20px;">查询</button>
+            {{if !empty($_permissions['hc_add_inventory_plan']) && !empty($_allowed_warehouses)}}
+            <button type="button" class="btn btn-primary" id="btn_add_plan" data-exec-type="add">创建计划</button>
+            {{/if}}
+        </div>
+    </form>
+
+    <hr>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>计划id</th>
+            <th>仓库</th>
+            <th>计划信息</th>
+            <th>创建时间</th>
+            <th>结束时间</th>
+            <th>创建人</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{foreach $plan_list as $_plan}}
+        <tr data-pid="{{$_plan.pid}}" data-plan="{{json_encode($_plan)}}">
+            <td>{{$_plan.pid}}</td>
+            <td>{{$_all_warehouses[$_plan.wid]}}</td>
+            <td>
+                <span>计划类型: {{$plan_types[$_plan.plan_type]}}</span><br/>
+                <span>盘点次数: {{$_plan.times}}</span><br/>
+                <span>盘点类型: {{$types[$_plan.type]}}</span><br/>
+                {{if $_plan.type == 2}}
+                <span style="margin-left: 20px;">起始货位: {{$_plan.start_location}}</span><br/>
+                <span style="margin-left: 20px;">终止货位: {{$_plan.end_location}}</span><br/>
+                {{elseif $_plan.type == 3}}
+                <span style="margin-left: 20px;">品牌ID: {{$_plan.brand_id|truncate:39:"..."}}</span><br/>
+                {{/if}}
+                <span>是否抽盘: {{if $_plan.is_random == 1}}是{{elseif $_plan.is_random == 0}}否{{/if}}</span><br/>
+                {{if $_plan.is_random == 1}}
+                <span style="margin-left: 20px;">抽盘数量: {{$_plan.random_num}}</span>
+                {{/if}}
+            </td>
+            <td>{{$_plan.ctime}}</td>
+            <td>{{if $_plan.etime == '0000-00-00 00:00:00'}}-{{else}}{{$_plan.etime}}{{/if}}</td>
+            <td>{{$staff_list[$_plan.suid]}}</td>
+            <td>
+                {{if $_plan.is_update == 1}}
+                计划完成
+                {{else}}
+                {{$step_list[$_plan.step]}}
+                {{/if}}
+            </td>
+            <td>
+                {{if $_plan.step == 1}}
+                {{if !empty($_permissions['hc_edit_inventory_plan'])}}
+                <a class="edit_inventory_plan" href="javascript: void(0)" style="margin-right: 10px;" data-exec-type="edit">编辑</a>
+                {{/if}}
+                {{/if}}
+                {{if !empty($_permissions['/warehouse/plan_detail'])}}
+                <a href="/warehouse/plan_detail.php?pid={{$_plan.pid}}&wid={{$_plan.wid}}" target="_blank" style="margin-right: 10px;">任务详情</a>
+                {{/if}}
+                {{if $_plan.step == 2}}
+                {{if !empty($_permissions['/warehouse/ajax/get_inventory_plan_degree'])}}
+                <a class="show_inventory_degree" href="javascript: void(0)" style="margin-right: 10px;">查看进度</a>
+                {{/if}}
+                {{/if}}
+                {{if $_plan.step >= 1}}
+                {{if !empty($_permissions['/warehouse/deal_diff_products'])}}
+                <a href="/warehouse/deal_diff_products.php?pid={{$_plan.pid}}" target="_blank" style="margin-right: 10px;">盘点差异</a>
+                {{/if}}
+                {{/if}}
+                {{if !empty($_permissions['hc_del_inventory_plan'])}}
+                {{if $_plan.step == 1}}
+                <a class="del_inventory_plan" href="javascript: void(0)">删除</a>
+                {{/if}}
+                {{/if}}
+                {{if !empty($_permissions['/warehouse/inventory_product_list'])}}
+                <br>
+                <a href="/warehouse/inventory_product_list.php?plan_id={{$_plan.pid}}" target="_blank">查看商品</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/foreach}}
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+        </ul>
+    </nav>
+
+</div>
+
+<div class="modal fade _j_dialog" id="modal_add_plan" tabindex="-1" data-pid="" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:400px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">创建盘点计划</h4>
+            </div>
+            <div class="modal-body">
+                <div style="width: 100%; height: 40px;margin-left: 40px;">
+                    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">仓库：</div>
+                    <div style="width: 80%; float: left; text-align: left">
+                        <select class="form-control" id="modal_wid" name="wid" style="width: 200px; display: inline-block; margin-right: 50px;">
+                            {{foreach $_allowed_warehouses as $wid => $wid_name}}
+                            <option value="{{$wid}}" {{if $wid == $search_conf.wid}} selected="selected" {{/if}}>{{$wid_name}}</option>
+                            {{/foreach}}
+                        </select>
+                    </div>
+                </div>
+                <div style="width: 100%; height: 40px;margin-left: 40px;">
+                    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">盘点方式：</div>
+                    <div style="width: 80%; float: left; text-align: left">
+                        <select class="form-control" name="method" style="width: 200px; display: inline-block; margin-right: 50px;">
+                            {{foreach $method_list as $method => $method_name}}
+                            <option value="{{$method}}" {{if $method == $search_conf.method}} selected="selected" {{/if}}>{{$method_name}}</option>
+                            {{/foreach}}
+                        </select>
+                    </div>
+                </div>
+                <div style="width: 100%; height: 40px;margin-left: 40px;">
+                    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">计划类型：</div>
+                    <div style="width: 80%; float: left; text-align: left">
+                        <select class="form-control" name="plan_type" style="width: 200px; display: inline-block; margin-right: 50px;">
+                            {{foreach $plan_types as $plan => $plan_name}}
+                            <option value="{{$plan}}" {{if $plan == $search_conf.plan}} selected="selected" {{/if}}>{{$plan_name}}</option>
+                            {{/foreach}}
+                        </select>
+                    </div>
+                </div>
+                <div style="width: 100%; height: 40px;margin-left: 40px;">
+                    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">盘点属性：</div>
+                    <div style="width: 80%; float: left; text-align: left">
+                        <select class="form-control" name="attribute" style="width: 200px; display: inline-block; margin-right: 50px;">
+                            {{foreach $attr_list as $attr => $attr_name}}
+                            <option value="{{$attr}}" {{if $attr == $search_conf.$attr}} selected="selected" {{/if}}>{{$attr_name}}</option>
+                            {{/foreach}}
+                        </select>
+                    </div>
+                </div>
+                <div style="width: 100%; height: 40px;margin-left: 40px;">
+                    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">盘点次数：</div>
+                    <div style="width: 80%; float: left; text-align: left">
+                        <select class="form-control" name="times" style="width: 200px; display: inline-block; margin-right: 50px;">
+                            {{foreach $times as $time}}
+                            <option value="{{$time}}" {{if $time == $search_conf.time}} selected="selected" {{/if}}>{{$time}}</option>
+                            {{/foreach}}
+                        </select>
+                    </div>
+                </div>
+                <div style="width: 100%; height: 40px;margin-left: 40px;">
+                    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">盘点类型：</div>
+                    <div style="width: 80%; float: left; text-align: left">
+                        <select class="form-control" id="inventory_type" name="type" style="width: 200px; display: inline-block; margin-right: 50px;">
+                            {{foreach $types as $type => $type_name}}
+                            <option value="{{$type}}" {{if $type == $search_conf.type}} selected="selected" {{/if}}>{{$type_name}}</option>
+                            {{/foreach}}
+                        </select>
+                    </div>
+                </div>
+                <div id="inventory_location_area" style="width: 100%; height: 40px;margin-left: 40px; display: none;">
+                    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">货位：</div>
+                    <div style="width: 80%; float: left; text-align: left">
+                        <input type="text" name="start_location" placeholder="起始货位" style="width: 100px ;">
+                        <input type="text" name="end_location" placeholder="终止货位" style="width: 100px ;">
+                    </div>
+                </div>
+                <div id="inventory_brand_area" style="width: 100%; height: 40px;margin-left: 40px; display: none;">
+                    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">品牌：</div>
+                    <div style="width: 80%; float: left; text-align: left">
+                        <input type="text" name="brand_list" placeholder="请输入品牌ID，多个用,分离" style="width: 200px;" value="">
+                    </div>
+                </div>
+                <div style="width: 100%; height: 40px;margin-left: 40px;">
+                    <div style="width: 20%; float: left; text-align: right; padding-top: 8px;">是否抽盘：</div>
+                    <div style="width: 80%; float: left; text-align: left">
+                        <label style="margin-right: 10px;line-height: 40px;">否<input class="is_random" type="radio" name="is_random" checked value="0"></label>
+                        <label style="margin-right: 10px;">是<input class="is_random" type="radio" name="is_random" value="1"></label>
+                        <input id="random_num" type="text" name="random_num" placeholder="输入抽盘总数" value="" style="width: 130px; display: none;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" id="btn-save-plan" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade _j_dialog" id="modal_show_inventory_degree" tabindex="-1" data-pid="" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:600px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">查看盘点进度</h4>
+            </div>
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>

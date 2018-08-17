@@ -1,0 +1,538 @@
+1 接口格式
+
+	- 地址格式
+		http://api.haocaisong.cn/{接口}
+		http://api.haocaisong.cn/{模块}/{接口}
+
+	- 通用参数
+		- version: 版本号
+		- cityid:  城市编号
+		- token:   校验编码
+		- ?设备相关: os,dev
+
+
+2 返回格式 json:
+		{
+			errno: 0-正确, >0:错误,
+			errmsg: 错误信息
+			data: {} 数据
+		}
+
+
+3 通用返回元素:
+1) 商品:
+	$product$
+	{
+		pid: 商品id
+		title: 商品名称
+		alias: 商品规格
+		price: 价格(单位:分)
+		unit: 单位(例如个,包)
+		pic: {normal:普通图片url, small:小图片url, big:大图片url}
+		icon: 右上角促销图片url
+	}
+
+
+4 页面链接规则
+
+	H5页面链接格式
+		haocai://h5?title=xxx&url=urlencode(url)&bottom=enabled     【通用】
+		- title:头部的文案
+		- bottom:是否显示底部操控栏{enabled-显示, disabled-不显示}
+
+	- native页面链接格式
+		商品列表页: haocai://products?cate1=xxx&cate2=xxx&brand=xxx&model=xxx
+		商品详情页: haocai://product_detail?pid=xxx
+		商品促销页: haocai://sale_products?title=xxx&type=yyy
+
+
+5 接口定义
+
+ 5.1 首页:
+
+    接口: /index
+    method:method: get/post
+    参数:
+          cityid = xxx [必选]
+
+    返回: {
+          errno:xxx
+          errmsg:xxx
+          data:{
+            banners: [
+                 {url:xxx,  pic_url:xxx}
+                 ...
+            ],
+
+            sale_products: [
+              {
+                title: 名称, 比如"限时抢购",
+                url: 跳转到的页面,
+                products:[
+                  { pid:xx,title:xxx, pic:xx1, price:11, ... },
+                  ...
+                ]
+              }
+                 ...
+             ],
+          } //data
+      }
+
+5.2 商城:
+
+  5.2.1 商城商品 - 按分类
+    接口: /mall/products
+    method: get/post
+    参数:
+          cate1: 一级分类id [必选]
+          cate2: 二级分类id [可选]
+          bid: 品牌id [可选]
+          mid: 型号id [可选]
+          next_pos: 游标
+
+    返回: {
+            errno:xxx
+            errmsg:xxx
+            data: {
+            	list:[$product$, ..]
+            	next_pos:,
+            }
+        }
+
+  5.2.2 商城商品 - 搜索
+    接口: /mall/search
+    method: get/post
+    参数:
+		keyword:  [必选]
+		next_pos: 游标
+
+    返回: {
+            errno:xxx
+            errmsg:xxx
+            data: {
+            	list:[$product$, ..]
+            	next_pos:,
+            }
+        }
+
+  5.2.3 经常购买
+    接口: /mall/often_buy
+    method: get/post
+    参数:
+    	cate1: 一级分类
+    返回: {
+            errno:xxx
+            errmsg:xxx
+            data: {
+            	list:[$product$, ..]
+            }
+        }
+
+  5.2.4 促销 - 特价商品/热卖商品
+    接口: /mall/sale_products
+    method:get/post
+    输入:
+        type:类型 {sale-特价商品，hot-热卖商品}
+        next_pos: 游标,
+    返回: {
+            errno:xxx
+            errmsg:xxx
+            data: {
+            	list:[$product$, ..]
+            	next_pos:,
+            }
+        }
+
+5.3 订单
+
+  5.3.1 我的订单
+    接口:/order/my_orders
+    method: get/post
+    参数:
+        type=xxx [可选，默认0] {0-全部，1-未付款，2-已完成，3-已取消}
+        next_pos: 游标,
+
+    返回:{
+            errno:xxx
+            errmsg:xxx
+            data: {
+            	list:[
+            	{
+					oid: 订单id
+					ocode: 订单编号
+					paid: 订单支付情况{1-已付款，其他(可能是0,或其他整数)未付款}
+					real_amount: 实付金额
+					items:	//订单内容项
+					[
+						{
+							name:名称
+							value:内容
+							color:内容颜色, int值
+							type:内容类型, 0-文本, 1-电话
+						},
+						...
+					]
+			    },
+			    ...]
+            	next_pos:,
+            }
+        }
+
+  5.3.2 订单详情
+    接口:/order/detail
+    method: get/post
+    输入: oid=xxx  [必选]
+
+    返回:{
+		errno:xxx
+		errmsg:xxx
+		data:{
+			order:
+			{
+				oid: 订单id
+				ocode: 订单编码
+
+				contact_name: 联系人姓名
+				contact_phone: 联系人电话
+				address: 配送地址
+
+				info_items:	//基本信息项
+				[
+					{
+						name:名称
+						value:内容
+						color:内容颜色, int值
+					},
+					...
+				]
+				fee_items:	//费用信息项
+				[
+					{
+						name:,
+						value:,
+					}
+					...
+				]
+				products: [$product$, ...., ]
+				refund_products: [$product$, ...., ]
+
+				can_cancel: 是否可以取消订单{0-否, 1-是}
+				will_pay_amount: 应付金额
+			}
+		}
+	}
+
+  5.3.3 下单接口
+	接口: /order/create
+	method:post
+	参数: //默认 必选
+		delivery_time: 送货日期+时间，例如 2016-02-20 11:00:00
+		construction: 送货地址id
+		service: 是否需要上楼 {0-否 1-电梯上楼 2-楼梯上楼}
+		floor_num: 楼层                                     [楼梯上楼，必选]
+		customer_note: 备注                                 [可选]
+		product_list: [{pid:xx,num:xx},...]    //订单商品列表
+
+    返回:{
+          errno:xxx
+          errmsg:xxx
+          data: {oid:订单id}
+      }
+
+  5.3.4 取消订单
+    接口:/order/cancel
+    method: post
+    参数:
+        oid=xxx  [必选]
+
+    返回:{
+          errno:xxx
+          errmsg:xxx
+        }
+
+
+  5.3.6 计算订单相关费用 （没有oid)
+    接口:/order/cal_fee
+    method: post
+    参数:
+          construction=送货地址id     [必须]
+          product_list={[pid:xx, num:xx]}    [必须]  //订单商品列表，json
+    返回:{
+          errno: xxx
+          errmsg: xxx
+          data:{
+          	real_amount: 实付总金额
+			items:[
+				{
+					name:,
+					price:,
+				}
+				...
+			]
+          }
+        }
+
+
+  5.3.7 获取支付相关信息
+    接口:/order/pay_info
+    method:post
+    参数: oid=xxxx      [必须]
+    返回:{
+          errno: xxx
+          errmsg: xxx
+          data:{
+            pay_amount: 需要支付金额
+            account_amount: 账户余额
+          }
+        }
+
+  5.3.8 微信支付回调
+    接口:/order/pay_callback_weixin
+    mehtod:get/post
+    参数:
+        @todo 根据sdk的回调情况
+
+
+  5.3.9 支付宝支付回调
+    接口:/order/pay_callback_alipay
+    mehtod:get/post
+    参数:
+        @todo 根据sdk的回调情况
+
+
+5.4 个人中心
+  5.4.1 个人中心首页
+    接口:/user/center
+    method: get/post
+    参数:
+    返回:{
+          errno: xxx
+          errmsg: xxx
+          data: {
+            cid: 客户id
+            uid: 用户id
+            name: 姓名
+            mobile: 手机号
+
+            account_amount: 账户余额
+            order_num:  订单数
+            coupon_num: 优惠券张数
+          }
+        }
+
+  5.4.2 收货地址/工地地址
+    接口:/user/construction_list
+    method:get/post
+    参数:
+    	next_pos: 游标
+    返回:{
+          errno: xxx
+          errmsg: xxx
+          data: {
+            list:
+            [
+	            {
+	              id:xx,
+	              contact_name:xx,
+	              contact_phone:xx,
+	              city:xx,
+	              district:xxx,
+                  area:xxx,
+	              address:xxx,
+	            },
+	            ...
+	        ]
+	        next_pos:,
+          }
+        }
+
+  5.4.3 保存收货地址 （添加or编辑）
+    接口:/user/save_address
+    method: post
+    参数:
+        id=xxxx         [编辑地址:必选，添加地址:不需要]
+        contact_name=xxx  [必选]
+        contact_phone=xxx  [必选]
+        city=xxx  [必选]
+        district=xxx  [必选]
+        area = xxx  [可选]
+        address=xxx  [必选]
+
+    返回:{
+            errno:xxx
+            errmsg:xxx
+            data: {construction_id: xxx}
+        }
+
+  5.4.4 删除收货地址
+    接口:/user/del_address
+    method: post
+    参数:
+      id=xxx        [必选]
+
+    返回:{
+          errno: xxx
+          errmsg: xxx
+        }
+
+
+  5.4.5 修改密码
+    接口:/user/change_passwd
+    method: get/post
+    参数:
+        old_passwd=xxx   [必选]
+        new_passwd=xxx   [必选]
+        new_passwd2=xxx  [必选]
+    返回:{
+          errno: xxx
+          errmsg: xxx
+          data:{
+            token: 修改密码后的token
+          }
+        }
+
+  5.4.6 修改昵称
+    接口:/user/edit_uinfo
+    method: get/post
+    参数:
+      name=xxxxx      [必选]
+    返回:{
+          errno: xxx
+          errmsg: xxx
+        }
+
+  5.4.7 优惠券列表
+    接口:/user/coupon_list
+    method:get/post
+    参数:
+        status=xxx    [必选] {0-未使用，1-已使用，2-已过期}
+        next_pos: 游标
+
+    返回:{
+          errno: xxx
+          errmsg: xxx
+          data:[
+            list:[
+            {
+              id: 券id
+              amount:面值
+              used:是否被使用
+              cate:类型, 1-普通, 2-vip
+              rule:使用规则
+              deadline:有效期
+            },
+            ....]
+                
+            next_pos: xx
+          ]
+        }
+
+5.5 登陆，注册 (接5.4 部分接口)
+  5.5.1 登录接口
+    接口:/user/login
+    method: post
+    参数:
+        mobile:xxx [必选]
+        password:xxx [必选]
+    返回:{
+          errno:xxx
+          errmsg:xxx
+          data: {
+            cid: 客户id
+            uid: 用户id
+            token: 登录成功的标识，授权使用
+            name: 用户姓名
+            mobile: 手机号
+          }
+        }
+
+  5.5.2 注册接口
+    接口:/user/register
+    method: post
+    参数:
+        mobile:手机号  [必选]
+        smscode:短信验证码   [必选]
+        passwd:密码        [必选]
+        passwd2: 确认密码  [必选]
+    返回:{
+          errno:xxx
+          errmsg:xxx
+          data: {
+            cid: 客户id
+            uid: 用户id
+            token: 登录成功的标识，授权使用
+            name: 用户姓名
+            mobile: 手机号
+          }
+        }
+
+  5.5.3 找回密码
+    接口: /user/find_passwd
+    method: post
+    参数:
+        mobile:手机号  [必选]
+        smscode:短信验证码  [必选]
+        passwd:密码   [必选]
+        passwd2: 确认密码   [必选]
+    返回:{
+          errno: xxx
+          errmsg: xxx
+        }
+
+
+5.6 公共接口
+  5.6.1 通用配置
+    接口: /common/get_config
+    返回:
+	{
+		latest_version: 最新版本号,
+
+		citys: //当前开通城市
+		[
+			{id:,name:北京},
+			{id:,name:燕郊},
+			...
+		],
+
+		product_categories://商品分类
+		[
+			{
+				id:
+				name:
+				sub_categories:	//二级分类列表
+				[
+					{
+						id:
+						name:
+						brands:	//品牌列表
+						[
+							{
+								id:
+								name:
+								models:	//型号列表
+								[
+									{id:,name:},...
+								]
+							}
+						]
+
+					},
+					...
+				]
+			}
+		]
+	}
+
+  5.6.2 发短信
+    接口:/common/send_sms
+    method: post/get
+    参数:
+        mobile:手机号
+        type:  服务类型:findpwd, register etc
+
+    返回:{
+          errno: xxx
+          errmsg: xxx
+        }
+
+

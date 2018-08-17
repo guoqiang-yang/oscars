@@ -1,0 +1,40 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">司机地图</h1>
+    <div style="float: left;height: 60px;margin-top: 10px;">
+        <form class="form-inline" role="form" action="/logistics/drivers_location.php" style="float: left">
+            <div class="placeholder">
+                <div class="form-group" style="margin-right:20px;">
+                    <label>仓库选择：</label>
+                    <select name="wid" class="form-control">
+                        <option value="0">全部</option>
+                        {{foreach $warehouses as $key => $value}}
+                        <option value="{{$key}}" {{if $key == $wid}}selected="selected"{{/if}}>{{$value}}</option>
+                        {{/foreach}}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" id="btn_search">查询</button>
+            </div>
+        </form>
+    </div>
+
+    <div style="margin-left: 100px; ">
+        {{foreach $counts as $count}}
+        <div style="height: 60px;width: 150px;margin-bottom: 7px;margin-left: 50px;float: left;border: 1px solid {{$count.color}}">
+            <div style="text-align: right;margin-right: 20px;color: {{$count.color}}">
+                <span style="font-size: 24px;">{{$count.count}}</span>
+                <br/>
+                <span style="font-size: 16px;">{{$count.detail}}</span>
+            </div>
+        </div>
+        {{/foreach}}
+    </div>
+    <div id="order_line_view">
+
+        <div style="width:100%; float:left;">
+            <div style="height:800px;" id="mapContainer"></div>
+            <input type="hidden" id="drivers" value="{{$drivers}}">
+            <input type="hidden" id="cityName" value="{{$city_name}}">
+        </div>
+    </div>
+</div>

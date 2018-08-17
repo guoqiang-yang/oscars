@@ -1,0 +1,27 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">
+    商品搜索
+  </h1>
+
+  <form class="form-inline" action="/shop/product_search.php">
+    <div class="form-group" style="margin-right:10px;">
+      <input type="text" class="form-control" name="keyword" value="{{$keyword}}">
+    </div>
+      {{if !empty($_permissions["/shop/product_search"])}}
+        <button type="submit" class="btn btn-primary">搜索</button>
+      {{/if}}
+  </form>
+
+    <hr>
+    <div style="color: red; font-size: 24px;">库房打印条形码请使用sid</div>
+    <hr>
+    {{include "shop/block_product_list.html"}}
+  <nav>
+    <ul class="pagination">
+      {{$pageHtml nofilter}}
+      <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+    </ul>
+  </nav>
+
+</div>

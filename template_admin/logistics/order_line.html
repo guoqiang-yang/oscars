@@ -1,0 +1,230 @@
+<style>
+    .selected_summary_order {
+       font-size: 16px; 
+        border: 3px solid red; 
+        width: 357px; 
+        margin-bottom:10px; 
+    }
+    .un_selected_summary_order {
+        font-size: 16px; 
+        border: 1px solid; 
+        width: 357px; 
+        margin-bottom:10px;
+    }
+    a:hover{
+        text-decoration: none;
+    }
+    a:visited{
+        text-decoration: none;
+    }
+    a:link{
+        text-decoration: none;
+    }
+</style>
+
+<div id="order_list" style="display: none;">{{$order_list}}</div>
+<div id="warehouse_points" style="display: none;">{{$warehouse_points}}</div>
+
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        订单排线
+        <a class="btn btn-success" href="/logistics/order_line.php?delivery_data={{$today}}" style="margin-left:50px;">今天配送</a>
+        <a class="btn btn-info" href="/logistics/order_line.php?delivery_data={{$tomorrow}}" style="margin-left:50px;">明天配送</a>
+    </h1>
+    
+    <form class="form-inline" role="form" action="/logistics/order_line.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>仓库：</label>
+                <select class="form-control" name="wid">
+                    <option value="0" {{if !$query.wid}} selected="selected" {{/if}}>全部</option>
+                    {{foreach $allow_worehouses as $_wid=>$_wname}}
+                    <option value="{{$_wid}}" {{if $query.wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div id="h5-deliver-date" class="form-group" style="margin-right: 20px;">
+                <label>送货时间：</label>
+                <input type="date" class="form-control" name="delivery_data" value="{{$query.delivery_data}}" style="width: 160px;"> 
+                <!--input type="text" class="form-control" name="delivery_btime" value="{{$query.delivery_btime}}" style="width:50px;margin-left:10px;"> 点
+                <span> - </span>
+                <input type="text" class="form-control" name="delivery_etime" value="{{$query.delivery_etime}}" style="width:50px;margin-left:10px;"> 点-->
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>订单号：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="oid" value="{{$query.oid}}">
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>客户ID：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="cid" value="{{$query.cid}}">
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-right:40px;">查询</button>
+
+            
+            {{*<a href="javascript:;" class="btn btn-primary" id="set_order_line">排线</a>*}}
+        </div>
+
+    </form>
+
+    <hr>
+    <div id="show_availabled_driver" style="background-color:cyan;margin-bottom:5px;overflow:auto;display:none;"></div>
+
+    <div id="order_line_view">
+        
+        <div style="width:65%; float:left;">
+            <div id="add_orderline_carmodel" style="background-color:lemonchiffon;margin-bottom:5px;padding-top:5px;">
+                <h4 style="margin-left: 30px;">
+                    <span>选车型 && 排线</span>
+                </h4>
+                <hr>
+                <form class="form-inline" role="form">
+                    <div class="line_type_area">
+                        <div class="form-group" style="margin:0px 50px 10px 50px; width:80%;">
+                            <label class="col-sm-2 control-label" style="text-align: center;">线种：</label>
+                            <div class="col-sm-10">
+                                <label style="margin-right: 30px;"><input type="radio" name="line_type" value="common" checked="checked"> 普通</label>
+                                <label style="margin-right: 30px;"><input type="radio" name="line_type" value="escort"> 押车</label>
+                                <label style="margin-right: 30px;"><input type="radio" name="line_type" value="trash"> 拉垃圾</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="car_area">
+                        <div class="form-group had_car_model" style="margin:0px 50px 10px 50px; width:80%;">
+                            <label class="col-sm-2 control-label" style="text-align: center;">车型：</label>
+                            <div class="col-sm-10">
+                                <select name="car_model" class="form-control" style="width:40%; margin-right:10px;">
+                                    {{foreach $car_model as $id=>$desc}}
+                                    <option value="{{$id}}">{{$desc}}</option>
+                                    {{/foreach}}
+                                </select>
+                                <input type="hidden" name="fee" class="form-control" value="0" style="width:40%; margin-right:15px;" placeholder="运费">
+                                <a href="javascript:;" class="cancel_added_car_model">取消</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin:15px 0px 5px 0px; width:100%;">
+                        <label class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <a href="javascript:;" id="add_car_model_orderline" style="float:left;">[+]继续添加车型</a>
+                            {{if !empty($_permissions['/logistics/ajax/save_order_line'])}}
+                            <a href="javascript:;" id="confirm_order_line" class="btn btn-primary" style="float:right;">确认排线</a>
+                            {{/if}}
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div style="height:600px;" id="order_map"></div>
+        </div>
+
+        <div id="new_unline_order" style="position: relative; width: 32%; height: 20px;float: right;background-color: #ffa7a3;display: none">
+            <div style="width:90%;float: left;text-align: center;color: blue"><a id="flush_orders" href="javascript: void(0)" onclick="window.location.reload()">有新的待调度订单！请点击加载</a></div>
+            <div id="cancel_flush" style="width: 10%;float: left;"><a href="javascript: void(0)" onclick="$('#new_unline_order').hide()">×</a></div>
+        </div>
+
+        <div id="order_line_area" style="width:32%;float:right; overflow-y:auto;height:800px;" data-max-oid="{{$max_oid}}">
+            {{if !empty($order_list_full)}}
+            {{foreach $order_list_full as $oinfo}}
+            <div class="un_selected_summary_order order_summary_info" data-oid="{{$oinfo.oid}}" data-community-id="{{$oinfo.community_id}}" data-cid="{{$oinfo.cid}}" data-priority="{{$oinfo.priority}}" id="order_summary_{{$oinfo.oid}}">
+                <div style="width: 100%;">
+                    <a class="show_pt_BaiduMap" data-lat="{{$oinfo.lat}}" data-lng="{{$oinfo.lng}}" style="float: left; width: 35%; border: 1px solid;">订单ID：<span style="color: blue;">{{$oinfo.oid}}</span></a>
+                    <div style="float: left; width: 40%; border: 1px solid;">{{$oinfo.show_delivery_date}}</div>
+                    <div style="float: left; width: 25%; border: 1px solid;">{{$oinfo.distance}}公里</div>
+                    <div style="clear:both;"></div>
+                </div>
+                <div class="summary_info" style="width: 100%; background-color:#E4E4E4;">
+                    <table style="width: 100%; font-size:15px;">
+                        <tr>
+                            <td style="padding: 2px;">订单类型：</td>
+                            <td style="padding: 2px;" colspan="3">{{if empty($oinfo.aftersale_type)}}普通订单{{else}}{{$aftersale_types[$oinfo.aftersale_type]}}{{/if}}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 2px;">仓库：</td>
+                            <td style="padding: 2px;" colspan="3">{{$allow_worehouses[$oinfo.wid]}}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 2px;">距离：</td>
+                            <td style="padding: 2px;" colspan="3">{{$oinfo.distance}}Km</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 2px;">地址：</td>
+                            <td style="padding: 2px;" colspan="3">{{$oinfo.cm_name}}</td>
+                        </tr>
+                        {{if !empty($oinfo.source_oid)}}
+                        <tr style="color:red;">
+                            <td style="padding: 2px;">主单：</td>
+                            <td style="padding: 2px;">{{$oinfo.source_oid}}</td>
+                            <td style="padding: 2px;">{{$step_list[$source_order_detail[$oinfo['source_oid']]['step']]}}</td>
+                            {{if !empty($source_order_detail[$oinfo['source_oid']]['line_id'])}}
+                            <td style="padding: 2px;"><a href="order_line_list.php?oid={{$oinfo.source_oid}}" target="_blank">{{$source_order_detail[$oinfo['source_oid']]['line_id']}}</a></td>
+                            {{/if}}
+                        </tr>
+                        {{elseif !empty($oinfo.add_oid)}}
+                        <tr style="color:red;">
+                            <td style="padding: 2px;">补单：</td>
+                            <td style="padding: 2px;">{{$oinfo.add_oid}}</td>
+                            <td style="padding: 2px;">{{$step_list[$order_list_full[$oinfo['add_oid']]['step']]}}</td>
+                        </tr>
+                        {{/if}}
+                        {{if $oinfo.max_length > 0 || $oinfo.max_width > 0 || $oinfo.max_height > 0}}
+                        <tr>
+                            <td style="padding: 2px;">最大长宽高：</td>
+                            <td style="padding: 2px;" colspan="3">{{$oinfo.max_length /100}}米 x {{$oinfo.max_width /100}}米 x {{$oinfo.max_height /100}}米</td>
+                        </tr>
+                        {{/if}}
+                        {{if $oinfo.total_weight > 0}}
+                        <tr>
+                            <td style="padding: 2px;">总重量：</td>
+                            <td style="padding: 2px;" colspan="3">{{$oinfo.total_weight /1000}}千克（{{$oinfo.total_weight /1000 / 1000}}吨）</td>
+                        </tr>
+                        {{/if}}
+                    </table>
+                </div>
+                <div>
+                    <table style="width: 100%; border: 1px solid;">
+                    {{foreach $oinfo.summary as $p}}
+                        {{if $p@index%3 == 0}}<tr>{{/if}}
+                        <td style="padding: 2px; width: 33%; border:solid #000; border-width:0px 1px 1px 0px;">{{$p.name}} {{$p.num}}件</td>
+                        {{if $p@index%3==2 || $p@last}}</tr>{{/if}}
+                    {{/foreach}}
+                    </table>
+                </div>
+                <div>
+                    <button class="wait_order_line" style="width: 33%; padding: 8px; background-color:cornsilk;">分配订单</button>
+                    <button class="top_order_line" style="width: 33%; padding: 8px; background-color:cornsilk;">置顶</button>
+                    <button class="show_order_detail_info" style="width: 34%; padding: 8px; background-color:cornsilk;">详情</button>
+                </div>
+            </div>
+            {{/foreach}}
+            {{else}}
+            <div><span style="color:red;font-size:20px;">暂无订单！！</span></div>
+            {{/if}}
+            
+            {{*<div id="order_line" style="margin-top:10px;"></div>*}}
+            {{*<div id="order_line_summary_info" style="display:none;"></div>*}}
+        </div>
+        
+        <div style="clear:both;"></div>
+    </div>
+
+</div>
+
+<div class="modal fade _j_dialog" id="show_order_detail_inmap" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">订单详情</h4>
+            </div>
+            
+            <div class="modal-body"></div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                {{*<button type="button" id="ready_to_order_line" class="btn btn-primary">装车</button>*}}
+            </div>
+        </div>
+    </div>
+</div>
+<div style="position: fixed; width: 250px; height: 50px; background-color: #999999; top: 60px; right: 10px; color: red; font-size: 26px; padding: 5px 10px;">还有{{count($order_list_full)}}单未排线！</div>

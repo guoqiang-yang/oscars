@@ -1,0 +1,126 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">
+        拣货单列表
+    </h1>
+
+    <form class="form-inline" role="form" action="/logistics/picking_list.php">
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>拣货状态：</label> 
+                <select class="form-control" name="picking_type">
+                    <option value="0" {{if $search.picking_type==0}} selected="selected"{{/if}}>全部</option>
+                    <option value="1" {{if $search.picking_type==1}} selected="selected"{{/if}}>已拣货</option>
+                    <option value="2" {{if $search.picking_type==2}} selected="selected"{{/if}}>未拣货</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>类型：</label>
+                <select class="form-control" name="aftersale_type">
+                    <option value="0">全部</option>
+                    {{foreach $aftersale_types as $type => $name}}
+                    <option value="{{$type}}" {{if $search.aftersale_type==$type}} selected="selected"{{/if}}>{{$name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>配送时间：</label>
+                <input class="form-control" type="date" name="delivery_date" value="{{$search.delivery_date}}" style="margin-right:5px;">
+                <select class="form-control" name="delivery_time">
+                    <option value="0" {{if $search.delivery_time==0}} selected="selected"{{/if}}>全部</option>
+                    <option value="9" {{if $search.delivery_time==9}} selected="selected"{{/if}}>12点前</option>
+                    <option value="12" {{if $search.delivery_time==12}} selected="selected"{{/if}}>12点-18点</option>
+                    <option value="18" {{if $search.delivery_time==18}} selected="selected"{{/if}}>18点后</option>
+                </select>
+            </div>
+            
+            <div class="form-group" style="margin-right:20px;">
+                <div class="checkbox" style="font-size: 18px;margin-right:10px;">
+                    <label><input type="checkbox" name="A_area" {{if !empty($picking_area.A_area)}} checked="checked"{{/if}}> A区</label>
+                </div>
+                <div class="checkbox" style="font-size: 18px;margin-right:10px;">
+                    <label><input type="checkbox" name="B_area" {{if !empty($picking_area.B_area)}} checked="checked"{{/if}}> B区</label>
+                </div>
+                <div class="checkbox" style="font-size: 18px;margin-right:10px;">
+                    <label><input type="checkbox" name="C_area" {{if !empty($picking_area.C_area)}} checked="checked"{{/if}}> C区</label>
+                </div>
+                <div class="checkbox" style="font-size: 18px;margin-right:10px;">
+                    <label><input type="checkbox" name="D_area" {{if !empty($picking_area.D_area)}} checked="checked"{{/if}}> D区</label>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="placeholder">
+            <div class="form-group" style="margin-right:20px;">
+                <label>订单ID：</label> 
+                <input style="width: 80px;" type="text" class="form-control" name="oid" value="{{$search.oid}}">
+            </div>
+
+            <div class="form-group" style="margin-right:20px;">
+                <label>仓库：</label>
+                <select class="form-control" name="wid">
+                    {{foreach $allowed_warehouses as $wid => $wid_name}}
+                    <option value="{{$wid}}" {{if $search.wid== $wid}}selected="selected" {{/if}}>{{$wid_name}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" id="btn_search" style="margin-right:30px;">查询</button>
+            
+        </div>
+        
+    </form>
+
+    <hr>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width:8px;">订单ID</th>
+                <th style="width:8px;">订单类型</th>
+                <th style="width:10px;">客户ID</th>
+                <th style="width:30%;">配送地址</th>
+                <th style="width:10%;">配送日期</th>
+                <th style="width:10%;">拣货区</th>
+                <th style="width:10%;">订单状态</th>
+                <th style="width:10%;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{foreach $picking_list as $order}}
+                <tr class="_dialog" date-oid="{{$order.oid}}" {{if $order.has_print==0}} style="background: #FAEBD7;"{{/if}}>
+                    <td><a href="/order/order_detail.php?oid={{$order.oid}}" target="_blank">{{$order.oid}}</a></td>
+                    <td>{{if empty($order.aftersale_type)}}普通订单{{else}}{{$aftersale_types[$order.aftersale_type]}}{{/if}}</td>
+                    <td><a href="/order/customer_list_cs.php?cid={{$order.cid}}" target="_blank">{{$order.cid}}</a></td>
+                    <td>
+                        <a href="/order/edit_community_fee.php?community_id={{$order.community_id}}&wid={{$order.wid}}" target="_blank">{{$order.address}}</a><br>
+                        <span style="color:gray;">{{$order._city}}-{{$order._area}}-{{$order._district}}</span>
+                    </td>
+                    <td>{{$order._delivery_date}}</td>
+                    
+                    <th>
+                        {{foreach $order.picking_area as $_area}}
+                        <span style="margin-right:5px;{{if in_array($_area, $search.picking_area)}} color:red;{{else}}color:gray;{{/if}}">{{$_area}}区</span>
+                        {{/foreach}}
+                    </th>
+                    
+                    <th>{{$order._step_show}}</th>
+                    <th>
+                        <a href="/order/picking_detail.php?oid={{$order.oid}}" style="margin-right: 10px;" target="_blank">查看</a>
+                        <a href="/order/picking_print.php?oid={{$order.oid}}" target="_blank">打印</a>
+                    </th>
+                </tr>
+            {{/foreach}}
+        </tbody>
+    </table>
+    
+    <nav>
+        <ul class="pagination">
+            {{$pageHtml nofilter}}
+            <li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+            
+        </ul>
+    </nav>
+
+</div>

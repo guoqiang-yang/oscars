@@ -1,0 +1,113 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        添加商品
+    </h1>
+    <form class="form-horizontal" role="form">
+        <input type="hidden" id="pid" value="{{$product.product.pid}}">
+        <input type="hidden" id="id" value="{{$flash_sale.id}}">
+        <input type="hidden" id="fid" value="{{if !empty($fid)}}{{$fid}}{{else}}{{$flash_sale.fid}}{{/if}}">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">商品信息：</label>
+            <div class="col-sm-8">
+                <div style="display:inline-block;float:left" data-x="{{$picture._picinfo.srcinfo.x}}" data-y="{{$picture._picinfo.srcinfo.y}}" data-w="{{$picture._picinfo.srcinfo.w}}" data-h="{{$sku._picinfo.srcinfo.h}}" data-url="{{if $sku._picinfo._srcpic}}{{$sku._picinfo._srcpic.middle}}{{else}}{{if $sku._pic.middle}}{{$sku._pic.middle}}{{/if}}{{/if}}">
+                    <img src="{{if empty($flash_sale.cover)}}{{if empty($product.sku._pic)}}/i/nopic100.jpg{{else}} {{$product.sku._pic.small}} {{/if}}{{else}}{{$flash_sale.cover}}{{/if}}" id="pic_url">
+                </div>
+                <div style="margin-left: 10px;margin-top: 10px;float: left;">
+                    <p>名称：{{$product.sku.title}}</p>
+                    <p>规格：{{$product.sku.package}}</p>
+                    <p>价格：<em style="color: red;font-size: 18px;">&yen;{{$product.product.price/100}}元/{{if $product.sku.unit}}{{$product.sku.unit}}{{else}}个{{/if}}</em></p>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">选择图片：</label>
+            <div class="col-sm-8">
+                <div style="display:inline-block;" class="_j_logo_wrap" data-x="{{$picture._picinfo.srcinfo.x}}" data-y="{{$picture._picinfo.srcinfo.y}}" data-w="{{$picture._picinfo.srcinfo.w}}" data-h="{{$sku._picinfo.srcinfo.h}}" data-url="{{if $sku._picinfo._srcpic}}{{$sku._picinfo._srcpic.middle}}{{else}}{{if $sku._pic.middle}}{{$sku._pic.middle}}{{/if}}{{/if}}">
+                    <img id="_j_upload_view_img" src="/i/nopic100.jpg">
+                </div>
+                <button style="display:inline-block; margin-left:10px;" type="button" class="btn btn-default" id="_j_btn_select_pic" data-path="activity">
+                    从电脑选择图片
+                </button>
+                <span style="color: red;margin-left: 20px">如不选择默认使用原图片</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">商品活动价：</label>
+            <div class="col-sm-1" style="padding: 0;margin-left: 15px;">
+                <select class="form-control"   style="float: left" name="price">
+                    {{foreach $price as $id => $item}}
+                    <option value="{{$id}}" {{if $id == $flash_sale.sale_price[0]}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="col-sm-1" style="padding: 0">
+                <select class="form-control" name="price" data-init="{{$picture.type}}" style="float: right">
+                    {{foreach $price as $id => $item}}
+                    <option value="{{$id}}" {{if $id == $flash_sale.sale_price[1]}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="col-sm-1" style="padding: 0">
+                <select class="form-control" name="price" data-init="{{$picture.type}}" style="float: right">
+                    {{foreach $price as $id => $item}}
+                    <option value="{{$id}}" {{if $id == $flash_sale.sale_price[2]}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div style="float: left;margin: 10px;">
+            .
+            </div>
+            <div class="col-sm-1" style="padding: 0">
+                <select class="form-control" name="price" data-init="{{$picture.type}}" style="float: right">
+                    {{foreach $price as $id => $item}}
+                    <option value="{{$id}}" {{if $id == $flash_sale.sale_price[3]}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+            <div class="col-sm-1" style="padding: 0">
+                <select class="form-control" name="price" data-init="{{$picture.type}}" style="float: right">
+                    {{foreach $price as $id => $item}}
+                    <option value="{{$id}}" {{if $id == $flash_sale.sale_price[4]}}selected="selected"{{/if}}>{{$item}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">显示顺序：</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="sort" value="{{$flash_sale.sort}}">
+            </div>
+            <label class="col-sm-3 control-label" style="margin-left: -40px"><span style="color: red;" placeholder="请输入数字">*数字越小位置越靠前，0为最小</span></label>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">商品库存：</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="sale_num" placeholder="请输入参加本次活动的商品总数" value="{{$flash_sale.sale_num}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">每名用户限购数量：</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="limit_num" placeholder="输入0表示每名用户不限购" value="{{$flash_sale.limit_count}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">上架时间：</label>
+            <div class="col-sm-3">
+                <input type="datetime-local" class="form-control" id="start_time" value="{{$flash_sale.start_time}}">
+            </div>
+            <div style="float: left;margin: 10px;">
+                ~
+            </div>
+            <div class="col-sm-3">
+                <input type="datetime-local" class="form-control" id="end_time" value="{{$flash_sale.end_time}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="button" class="btn btn-primary" id="btn_save_flash">保存</button>
+                <a type="button" style="margin-left:20px;" class="btn btn-default" onClick="javascript:window.location.href='/activity/flash_sale_list.php?fid={{if !empty($fid)}}{{$fid}}{{else}}{{$flash_sale.fid}}{{/if}};'">取消</a>
+            </div>
+        </div>
+    </form>
+</div>

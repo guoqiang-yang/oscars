@@ -1,0 +1,264 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+    <h1 class="page-header">{{if $searchConf.paid==0}}<span style="color:red;">采购</span>{{else}}财务{{/if}}兑账</h1>
+
+	<form class="form-inline" role="form" action="/finance/purchase_for_finance.php">
+		<div class="placeholder">
+			<div class="form-group" style="margin-right:20px;">
+				<label>入库单ID：</label>
+				<input type="text" class="form-control" name="id" value="{{$searchConf.id}}" style="width:80px;">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>采购订ID：</label>
+				<input type="text" class="form-control" name="oid" value="{{$searchConf.oid}}" style="width:80px;">
+			</div>
+			<div class="form-group" style="margin-right:20px;">
+				<label>供应商ID：</label>
+				<input type="text" class="form-control" name="sid" value="{{$searchConf.sid}}" style="width:80px;">
+			</div>
+
+			<div class="form-group" style="margin-right:50px;">
+				<label>仓库：</label>
+				<select class="form-control" name="wid">
+					<option value="0" {{if !$searchConf.wid}} selected="selected" {{/if}}>全部</option>
+					{{foreach $_warehouseList as $_wid=>$_wname}}
+					<option value="{{$_wid}}" {{if $searchConf.wid==$_wid}} selected="selected" {{/if}}>{{$_wname}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+            
+			<div class="form-group">
+				<label>采购员：</label>
+				<select class="form-control" name="buyer_uid" style="margin-right:20px;">
+					<option value="0" {{if $searchConf.buyer_uid==0}} selected="selected" {{/if}}>全部</option>
+					{{foreach $buyerList as $oner}}
+					<option value="{{$oner.suid}}" {{if $searchConf.buyer_uid==$oner.suid}}selected="selected" {{/if}}>{{$oner.name}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+		</div>
+		<div class="placeholder">
+
+            <div class="form-group" style="margin-right:20px;">
+                <label>结算单ID：</label>
+                <input type="text" class="form-control" name="statement_id" value="{{$searchConf.statement_id}}" style="width:80px;">
+            </div>
+
+			<div class="form-group">
+				<label>付款方式：</label>
+				<select class="form-control" name="payment_type" style="margin-right:20px;">
+					<option value="0" {{if empty($searchConf.payment_type)}} selected="selected" {{/if}}>全部</option>
+					{{foreach $all_pay_types as $v=>$desc}}
+					<option value="{{$v}}" {{if $v==$searchConf.payment_type}} selected="selected" {{/if}}>{{$desc}}</option>
+					{{/foreach}}
+				</select>
+			</div>
+			<div class="form-group">
+				<label>入库时间：</label>
+				<input type="date" class="form-control" name="from_date" value="{{if $searchConf.from_date}}{{$searchConf.from_date}}{{/if}}" style="width: 160px;"> —
+				<input type="date" class="form-control" name="end_date" value="{{if $searchConf.end_date}}{{$searchConf.end_date}}{{/if}}" style="width: 160px;">
+			</div>
+
+			<button style="margin-left: 50px;" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+		</div>
+	</form>
+
+    <nav class="nav navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li {{if $searchConf.paid == 127 }}class="active"{{/if}}>
+                        <a href="{{$page_url}}&paid=127" style="padding-right: 30px;padding-left: 30px;">全部</a>
+                    </li>
+                    <li {{if $searchConf.paid == 0 }}class="active"{{/if}}>
+                        <a href="{{$page_url}}&paid=0" style="padding-right: 30px;padding-left: 30px;">未付款</a>
+                    </li>
+                    <li {{if $searchConf.paid == 1 }}class="active"{{/if}}>
+                        <a href="{{$page_url}}&paid=1" style="padding-right: 30px;padding-left: 30px;">已付款</a>
+                    </li>
+                    <li {{if $searchConf.paid == 2 }}class="active"{{/if}}>
+                        <a href="{{$page_url}}&paid=2" style="padding-right: 30px;padding-left: 30px;">采购已兑账</a>
+                    </li>
+                    <li {{if $searchConf.paid == 3 }}class="active"{{/if}}>
+                        <a href="{{$page_url}}&paid=3" style="padding-right: 30px;padding-left: 30px;">兑账未付款</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>采购单ID</th>
+                <th>入库单ID</th>
+                <th>结算单ID</th>
+                <th width="12%">供应商</th>
+                <th>仓库</th>
+                <th width="10%">入库时间</th>
+                <th>类型</th>
+                <th>金额</th>
+                <th>付款方式/是否付款</th>
+                <th>操作人</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{foreach $grouped_stockin_list as $oid => $inorder}}
+            {{if $inorder.info.source==3}}
+            <tr data-oid="{{$oid}}" data-role="{{if $searchConf.paid==0}}buyer{{else}}finance{{/if}}">
+                <td><a href="/warehouse/detail_in_order.php?oid={{$oid}}" target="_blank">{{$inorder.info.oid}}</a></td>
+                <td><a href="/warehouse/edit_stock_in.php?id={{$inorder.data[0].id}}" target="_blank">{{$inorder.data[0].id}}</a></td>
+                <td>{{if $inorder.data[0].statement_id>0}}<a href="/finance/stockin_statement_detail.php?statement_id={{$inorder.data[0].statement_id}}">{{$inorder.data[0].statement_id}}</a>{{/if}}</td>
+                <td><a href="/warehouse/edit_supplier.php?sid={{$inorder.info.sid}}" target="_blank">{{$inorder.info.contact_name}}</a></td>
+                <td>{{$warehouses[$inorder.info.wid]}}</td>
+                <td>{{$inorder.data[0].ctime}}</td>
+                <td><span style="color:red">{{$inorder_source[$inorder.info.source]}}</span></td>
+                <td>{{$inorder.info.price/100}}元</td>
+                <td>--</td>
+                <td>采购人：{{$inorder.info.buyer_name}}</td>
+                <td>
+                    {{if $inorder.info.paid==0 && !empty($_permissions['/warehouse/ajax/check_account'])}}
+                        {{if $inorder.info.step==4 && $searchConf.paid==0}}
+                        <a class="btn btn-primary btn-xs" href="javascript:;" data-toggle="modal" data-target="#checkAccountBox" data-oid="{{$oid}}">综合兑账 [采]</a>
+                        {{elseif $inorder.info.step==4 && $searchConf.paid==2}}
+                        <a class="btn btn-primary btn-xs" href="javascript:;" data-toggle="modal" data-target="#checkAccountBox" data-oid="{{$oid}}">综合兑账 [财]</a>
+                        {{elseif $searchConf.paid==127}}
+                        --
+                        {{else}}
+                        <span style="color:red;font-weight:bold;">未完全入库</span>
+                        {{/if}}
+                    {{else}}
+                    --
+                    {{/if}}  
+                </td>
+            </tr>
+            <tr>
+                <td colspan="11" style="padding-left: 20%;">
+                    <table class="table" style="background-color:aliceblue">
+                        <!--thead>
+                        <tr>
+                            <th>入库单ID</th>
+                            <th width="15%;">入库时间</th>
+                            <th>总金额</th>
+                            <th>收货人</th>
+                            <th>付款方式/是否付款</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead-->
+                        <tbody>
+                            {{foreach $inorder.data as $stockin}}
+                            <tr data-id="{{$stockin.id}}">
+                                <td><a href="/warehouse/edit_stock_in.php?id={{$stockin.id}}" target="_blank">{{$stockin.id}}</a></td>
+                                <td>{{$stockin.ctime}}</td>
+                                <td>{{$stockin.price/100}} 元</td>
+                                <td>收货人：{{$stockin.stockin_name}}</td>
+                                <td>审核人：{{$stockin.check1_name|default: '-'}} / {{$stockin.check2_name|default: '-'}} 
+                                </td>
+                                <td>
+                                    {{$all_pay_types[$stockin.payment_type]}} /
+                                    {{if $stockin.paid==1}}
+                                    <span style="color:green;">【已付】</span>
+                                    {{elseif $stockin.paid==2}}
+                                    <span style="color:blue;">【采购已兑账】</span>
+                                    {{elseif $stockin.paid==3}}
+                                    <span style="color:limegreen;">【兑账未支付】</span>
+                                    {{else}}
+                                    <span style="color:red;">【未付】</span>
+                                    {{/if}}
+                                </td>
+                                <td><span style="{{if $stockin.source==2}}color:blue;{{/if}}">{{$inorder_source[$stockin.source]}}</span></td>
+                            </tr>
+                            {{/foreach}}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            {{else}}
+                {{foreach $inorder.data as $stockin}}
+                <tr data-id="{{$stockin.id}}" data-role="{{if $searchConf.paid==0}}buyer{{else}}finance{{/if}}">
+                    <td><a href="/warehouse/detail_in_order.php?oid={{$stockin.oid}}" target="_blank">{{$stockin.oid}}</td>
+                    <td><a href="/warehouse/edit_stock_in.php?id={{$stockin.id}}" target="_blank">{{$stockin.id}}</a></td>
+                    <td>{{if $stockin.statement_id>0}}<a href="/finance/stockin_statement_detail.php?statement_id={{$stockin.statement_id}}">{{$stockin.statement_id}}</a>{{/if}}</td>
+                    <td><a href="/warehouse/edit_supplier.php?sid={{$inorder.info.sid}}" target="_blank">{{$inorder.info.contact_name}}</a></td>
+                    <td>{{$warehouses[$inorder.info.wid]}}</td>
+                    <td>{{$stockin.ctime}}</td>
+                    <td><span style="{{if $inorder.info.source==2}}color:blue;{{/if}}">{{$inorder_source[$inorder.info.source]}}</span></td>
+                    <td>{{$stockin.price/100}}元</td>
+                    <td>
+                        {{$all_pay_types[$stockin.payment_type]}} /
+                        {{if $stockin.paid==1}}
+                        <span style="color:green;">【已付】</span>
+                        {{elseif $stockin.paid==2}}
+                        <span style="color:blue;">【采购已兑账】</span>
+                        {{elseif $stockin.paid==3}}
+                        <span style="color:limegreen;">【兑账未支付】</span>
+                        {{else}}
+                        <span style="color:red;">【未付】</span>
+                        {{/if}}
+                    </td>
+                    <td>
+                        采购人：{{$inorder.info.buyer_name}}<br>
+                        收货人：{{$stockin.stockin_name}}<br>
+                        {{if isset($stockin.check1_name)}}
+                        一级审核：{{$stockin.check1_name}}
+                        {{/if}}
+                        {{if isset($stockin.check2_name)}}
+                        二级审核：{{$stockin.check2_name}}
+                        {{/if}}
+                    </td>
+                    <td>
+                        {{if !empty($_permissions['/warehouse/ajax/check_account'])}}
+                            {{if $inorder.info.source!=3 && $stockin.paid==0 && $searchConf.paid==0}}
+                            <a class="btn btn-primary btn-xs" href="javascript:;" data-toggle="modal" data-target="#checkAccountBox" data-id="{{$stockin.id}}">入库单兑账 [采]</a>
+                            {{elseif $inorder.info.source!=3 && $stockin.paid==2 && $searchConf.paid==2}}
+                            <a class="btn btn-primary btn-xs" href="javascript:;" data-toggle="modal" data-target="#checkAccountBox"  data-id="{{$stockin.id}}">入库单兑账 [财]</a>
+                            {{else}}
+                            --
+                            {{/if}}
+                        {{else}}
+                            --
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/foreach}}
+            {{/if}}
+            {{/foreach}}
+        </tbody>
+    </table>
+    
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li><a style="color:#555;">共{{$total|string_format:"%d"}}个</a></li>
+			<li><a style="color:#555;">金额：{{$sum / 100}} 元</a></li>
+		</ul>
+	</nav>
+
+</div>
+
+<div class="modal fade _j_dialog" id="checkAccountBox" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document" style="width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">入库单商品列表</h4>
+            </div>
+            <div class="modal-body">
+                
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="_j_save_check_account_box">已兑账</button>
+            </div>
+        </div>
+    </div>
+</div>

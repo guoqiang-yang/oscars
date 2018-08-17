@@ -1,0 +1,175 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">{{if $info.id}}编辑{{else}}添加{{/if}}优惠券</h1>
+
+	<form class="form-horizontal" id="activity_coupon" role="form">
+		<input type="hidden" id="referer" value="{{$referer}}"/>
+
+		{{if $info.id}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>优惠券ID：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="id" id="id" value="{{$info.id}}" readonly>
+            </div>
+        </div>
+
+		{{/if}}
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>优惠券名称：</label>
+            <div class="col-sm-4">
+                <input type="text" class="form-control" name="title" id="title" value="{{$info.title}}" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>优惠券类型：</label>
+            <div class="col-sm-6">
+                <select name="coupon_type" id="coupon_type" style="width: 100px; margin-bottom: 5px;" {{$is_disabled}}>
+                    {{foreach $coupon_type_list as $key => $value}}
+                    <option value="{{$key}}" {{if $info.coupon_type == $key }} selected {{/if}}>{{$value}}</option>
+                    {{/foreach}}
+                </select>
+            </div>
+        </div>
+        <div class="form-group" id="coupon_share">
+            <label class="col-sm-2 control-label">是否共享：</label>
+            <div class="col-sm-9">
+                {{foreach $type_list as $key=>$item}}
+                {{if $key <> 2}}
+                <label class="inline" style="display: inline-block; min-width: 100px;">
+                    <input type="checkbox" name="type_ids[]" value="{{$key}}" {{if in_array($key,$info.type_ids)}}checked{{/if}} {{$is_disabled}}> {{$item}}
+                </label>
+                {{/if}}
+                {{/foreach}}
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>有效期：</label>
+            <div class="col-sm-6">
+                <select name="validity_type" id="validity_type" style="width: 100px; margin-bottom: 5px;" {{$is_disabled}}>
+                    <option value="1" {{if $info.validity_type != 2}} selected{{/if}}>固定时间段</option>
+                    <option value="2" {{if $info.validity_type == 2}} selected{{/if}}>固定时长</option>
+                </select>
+                <div id="validity_type_show" {{if $info.validity_type == 2}} style="display: none;"{{/if}}>
+                    使用时间：<input type="text" class="form-control" name="validity_stime" id="stime" value="{{$info.validity_stime}}" style="display: inline-block;width: 159px;" {{$is_readonly}}>
+                    &emsp;to&emsp;
+                    <input type="text" class="form-control" name="validity_etime" id="etime" value="{{$info.validity_etime}}" style="display: inline-block;width: 159px;"{{$is_readonly}}>
+                    <p>时间格式（2016-11-01 12:00:00）</p>
+                </div>
+                <div id="validity_type_show2" {{if $info.validity_type != 2}} style="display: none;"{{/if}}>
+                    自领取之日起<input type="number" style="width: 100px;" name="validity_lastdate" id="lastdate" value="{{$info.validity_lastdate}}">日之内可用
+                </div>
+            </div>
+        </div>
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label"><i style="color: red;">*</i>额度配置：</label>
+			<div class="col-sm-4">
+                <textarea name="conf" id="conf" class="form-control" rows="5" style="width: 354px;" {{$is_readonly}}>{{$info.conf}}</textarea>
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">配置说明：</label>
+            <div class="col-sm-4">
+                例如：优惠券、VIP现金券格式 - 满1000减50：<br />
+                1000:50<br />
+                运费券格式 - 最高减50：<br/>
+                50
+            </div>
+        </div>
+        <!--<div class="form-group">-->
+            <!--<label class="col-sm-2 control-label"><i style="color: red;">*</i>可否和满减活动叠加：</label>-->
+            <!--<div class="col-sm-4">-->
+                <!--<label class="radio radio-inline">-->
+                    <!--<input type="radio" name="contain_manjian" value="1" {{if $info.contain_manjian == 1}}checked="checked"{{/if}} {{$is_disabled}}>-->
+                    <!--可以-->
+                <!--</label>-->
+                <!--<label class="radio radio-inline">-->
+                    <!--<input type="radio" name="contain_manjian" value="0" {{if empty($info) || $info.contain_manjian == 0}}checked="checked"{{/if}} {{$is_disabled}}>-->
+                    <!--不可以-->
+                <!--</label>-->
+            <!--</div>-->
+        <!--</div>-->
+        <div id="coupon_more_reason">
+		<div class="form-group">
+			<label class="col-sm-2 control-label"><i style="color: red;">*</i>是否包含砂石/砖/水泥：</label>
+			<div class="col-sm-4">
+                <label class="radio radio-inline">
+                    <input type="radio" name="contain_sand" value="1" {{if $info.contain_sand == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    包含
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="contain_sand" value="0" {{if empty($info) || $info.contain_sand == 0}}checked="checked"{{/if}} {{$is_disabled}}>
+                    不包含
+                </label>
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>是否包含美巢产品：</label>
+            <div class="col-sm-4">
+                <label class="radio radio-inline">
+                    <input type="radio" name="contain_meichao" value="1" {{if $info.contain_meichao == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    包含
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="contain_meichao" value="0" {{if empty($info) || $info.contain_meichao == 0}}checked="checked"{{/if}} {{$is_disabled}}>
+                    不包含
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>是否包含特价商品：</label>
+            <div class="col-sm-4">
+                <label class="radio radio-inline">
+                    <input type="radio" name="contain_special" value="1" {{if $info.contain_special == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    包含
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="contain_special" value="0" {{if empty($info) || $info.contain_special == 0}}checked="checked"{{/if}} {{$is_disabled}}>
+                    不包含
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><i style="color: red;">*</i>是否包含热卖商品：</label>
+            <div class="col-sm-4">
+                <label class="radio radio-inline">
+                    <input type="radio" name="contain_hot" value="1" {{if $info.contain_hot == 1}}checked="checked"{{/if}} {{$is_disabled}}>
+                    包含
+                </label>
+                <label class="radio radio-inline">
+                    <input type="radio" name="contain_hot" value="0" {{if empty($info) || $info.contain_hot == 0}}checked="checked"{{/if}} {{$is_disabled}}>
+                    不包含
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">商品白名单：</label>
+            <div class="col-sm-4">
+                <textarea name="goods_whitelist" class="form-control" rows="5" style="width: 354px;" {{$is_readonly}}>{{$info.goods_whitelist}}</textarea>
+                <p>需填入商品ID（pid），多个商品以英文逗号隔开，为空表示不限制。该字段表示，填入其中的商品均可以参加该活动（即使被其它条件限制为不参加活动的商品）</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">商品黑名单：</label>
+            <div class="col-sm-4">
+                <textarea name="goods_blacklist" class="form-control" rows="5" style="width: 354px;" {{$is_readonly}}>{{$info.goods_blacklist}}</textarea>
+                <p>需填入商品ID（pid），多个商品以英文逗号隔开，为空表示不限制。该字段表示，填入其中的商品均不可以参加该活动（即使符合其它条件限制为可参加活动的商品）</p>
+            </div>
+        </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动说明：</label>
+            <div class="col-sm-8">
+                <textarea name="activity_content" class="form-control" rows="10" style="width: 500px;">{{$info.activity_content}}</textarea>
+            </div>
+        </div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="button" class="btn btn-primary" id="save_coupon" style="margin-right:20px;">保存</button>
+			</div>
+		</div>
+
+	</form>
+
+</div>

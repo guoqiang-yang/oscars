@@ -1,0 +1,84 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+	<h1 class="page-header">
+		优惠券发放列表
+	</h1>
+
+    <form class="form-inline" role="form" action="">
+        <div class="placeholder">
+            <div class="form-group" style="margin:0 20px;">
+                <label>使用情况：</label>
+                <select class="form-control" name="used" style="width: 100px;">
+                    <option value="-1" {{if $search_conf.used == -1}}selected="selected"{{/if}}>全部</option>
+                    <option value="0" {{if $search_conf.used == 0}}selected="selected"{{/if}}>未使用</option>
+                    <option value="1" {{if $search_conf.used == 1}}selected="selected"{{/if}}>已使用</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-right:20px;">
+                <label>客户ID：</label>
+                <input style="width: 120px;" type="text" class="form-control" name="cid" value="{{$search_conf.cid}}">
+            </div>
+            <div id="h5-deliver-hour" class="form-group" style="margin-right: 20px;">
+                <label>发放时间：</label>
+                <input type="date" class="form-control" name="ctime" value="{{if $search_conf.ctime}}{{$search_conf.ctime}}{{/if}}" style="width: 160px;">
+            </div>
+            <input type="hidden" name="tid" value="{{$tid}}" />
+            <button name="submit" value="submit" type="submit" class="btn btn-primary" id="btn_search">查询</button>
+            <button name="submit" value="download" style="margin-left: 100px;" type="submit" class="btn btn-success" id="btn_download">下载</button>
+        </div>
+    </form>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>优惠券id</th>
+			<th>优惠券面额</th>
+			<th>用户id</th>
+			<th>原订单id</th>
+			<th>活动id</th>
+			<th>发放时间</th>
+			<th>过期时间</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{foreach $list as $coupon}}
+			<tr>
+				<td>
+                    {{$coupon.id}}
+				</td>
+				<td>
+					{{$coupon.amount}} 元
+				</td>
+				<td>
+					{{$coupon.cid}}
+				</td>
+				<td>
+					{{if $coupon.from_oid > 0}}
+                    <a href="/order/order_detail.php?oid={{$coupon.from_oid}}">{{$coupon.from_oid}}</a>
+                    {{else}}
+                    --
+                    {{/if}}
+				</td>
+                <td>
+                    {{$coupon.aid}}
+                </td>
+				<td>
+					{{$coupon.ctime}}
+				</td>
+				<td>{{$coupon.deadline}}</td>
+			</tr>
+		{{/foreach}}
+		</tbody>
+	</table>
+
+	<nav>
+		<ul class="pagination">
+			{{$pageHtml nofilter}}
+			<li>
+				<a style="color:#555;">共{{$total|string_format:"%d"}}个
+				</a>
+			</li>
+		</ul>
+	</nav>
+
+</div>

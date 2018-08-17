@@ -1,0 +1,18 @@
+<table class="table">
+    <thead>
+    <tr>
+        <th>小区名</th>
+        <th>工地地址</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{foreach $community_list as $item}}
+    <tr>
+        <td>{{$item.community_name}}</td>
+        <td>{{$item.address}}</td>
+        <td><a href="javascript:void(0);" class="btn btn-primary" data-value="{{$item|@json_encode}}">选择</a></td>
+    </tr>
+    {{/foreach}}
+    </tbody>
+</table>

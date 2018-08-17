@@ -1,0 +1,75 @@
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+  <h1 class="page-header">{{if $carrier.cid}}编辑{{else}}添加{{/if}}搬运工</h1>
+
+  <form class="form-horizontal" role="form">
+    <input type="hidden" class="form-control" id="cid" value="{{$carrier.cid}}">
+	<input type="hidden" id="referer" value="{{$referer}}" />
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label">姓名：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="name" value="{{$carrier.name}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">手机：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="mobile" value="{{$carrier.mobile}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">收款人：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="real_name" value="{{if $carrier.real_name}}{{$carrier.real_name}}{{/if}}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">收款卡号：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="card_num" value="{{if $carrier.card_num}}{{$carrier.card_num}}{{/if}}">
+        <span style="color:red;">例：6217900100019196968(中间不能有空格)</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">开户行：</label>
+
+      <div class="col-sm-4">
+        <input type="text" class="form-control" name="bank_info" value="{{if $carrier.bank_info}}{{$carrier.bank_info}}{{/if}}">
+        <span style="color:red;">例：中国银行北京三元桥支行</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">所属库房：</label>
+      <div class="col-sm-2">
+        <select class="form-control" name="wid" {{if empty($_permissions['hc_advanced_edit_carrier']) && $carrier.cid}}disabled{{/if}}>
+          <option value="0">请选择</option>
+          {{foreach $warehouse as $wid => $name}}
+          <option value="{{$wid}}" {{if $carrier.wid == $wid}}selected="true"{{/if}}>{{$name}}</option>
+          {{/foreach}}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">状态：</label>
+      <div class="col-sm-2">
+        <select class="form-control" name="status">
+          <option value="0" {{if $carrier.status == 0}}selected="true"{{/if}}>正常</option>
+          <option value="1" {{if $carrier.status == 1}}selected="true"{{/if}}>删除</option>
+          <option value="5" {{if $carrier.status == 5}}selected="true"{{/if}}>未审核</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="button" class="btn btn-primary" id="add_carrier" style="margin-right:20px;">保存</button>
+      </div>
+    </div>
+
+  </form>
+
+</div>
