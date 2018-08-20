@@ -1,12 +1,34 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: qihua
- * Date: 17/1/11
- * Time: 10:26
+ * 权限管理.
+ * 
  */
+
+
 class Permission_Api extends Base_Api
 {
+    public static function add($role, $department, $rkey, $suid, $relRole='')
+    {
+        $pr = new Permission_Role();
+
+        $info = array(
+            'role' => $role,
+            'rkey' => $rkey,
+            'department' => $department,
+            'suid' => $suid,
+            'rel_role' => $relRole,
+        );
+
+        return $pr->add($info);
+    }
+
+    public static function update($id, $update, $change = array())
+    {
+        $pr = new Permission_Role();
+
+        return $pr->update($id, $update, $change);
+    }
+    
     public static function get($id)
     {
         $pr = new Permission_Role();
@@ -259,27 +281,5 @@ class Permission_Api extends Base_Api
         }
 
         return $data;
-    }
-
-    public static function add($role, $department, $rkey, $suid, $relRole='')
-    {
-        $pr = new Permission_Role();
-
-        $info = array(
-            'role' => $role,
-            'rkey' => $rkey,
-            'department' => $department,
-            'suid' => $suid,
-            'rel_role' => $relRole,
-        );
-
-        return $pr->add($info);
-    }
-
-    public static function update($id, $update, $change = array())
-    {
-        $pr = new Permission_Role();
-
-        return $pr->update($id, $update, $change);
     }
 }

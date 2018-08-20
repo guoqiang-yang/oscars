@@ -4,106 +4,106 @@
  */
 class Admin_Staff extends Base_Func
 {
+    private $_staffDao = null;
+    
+    function __construct()
+    {
+        $this->_staffDao = new Data_Dao('t_staff_user');
+    }
+    
 	public function add(array $info)
 	{
 		assert( !empty($info) );
-
-		$info['ctime'] = $info['mtime'] = date('Y-m-d H:i:s');
+        
         $info['wids'] = !empty($info['wids'])? $info['wids']: '';
         $info['cities'] = !empty($info['cities'])? $info['cities']: '';
         
-		$res = $this->one->insert('t_staff_user', $info);
-		$suid = $res['insertid'];
+        $suid = $this->_staffDao->add($info);
+        
 		return $suid;
 	}
 
 	public function delete($suid)
 	{
-		$suid = intval($suid);
-		assert($suid > 0);
+		assert(intval($suid) > 0);
 
-		$where = array('suid' => $suid);
-		$update = array('status' => Conf_Base::STATUS_DELETED);
-		$ret = $this->one->update('t_staff_user', $update, array(), $where);
-		return $ret['affectedrows'];
+        return $this->_staffDao->delete($suid);
 	}
 
 	public function update($suid, array $info)
 	{
-		$suid = intval($suid);
-		assert( $suid > 0 );
+		assert( intval($suid) > 0 );
 		assert( !empty($info) );
-
-		$where = array('suid' => $suid);
-		$ret = $this->one->update('t_staff_user', $info, array(), $where);
-		return $ret['affectedrows'];
+        
+        return $this->_staffDao->update($suid, $info);
 	}
 
 	public function get($suid, $status=Conf_Base::STATUS_NORMAL)
 	{
-		$suid = intval($suid);
-		assert($suid > 0);
-
+		assert(intval($suid) > 0);
+        
         $where = 'suid='. $suid;
+        
         if ($status != Conf_Base::STATUS_ALL)
         {
             $where .= ' and status = '. $status;
         }
         
-        $data = $this->one->select('t_staff_user', array('*'), $where);
-        $userInfo = $data['data'][0];
+        $data = $this->_staffDao->getListWhere($where);
+        
+        $userInfo = current($data);
         
         if (!empty($userInfo))
         {
             $userInfo['team_member'] = array($suid);    //兼容之前数据结构
-            $userInfo = $this->_parseCitiesAndWids($userInfo);
+            $userInfo['_city_ids'] = explode(',', $userInfo['cities']);
+            $userInfo['_wids'] = explode(',', $userInfo['wids']);
         }
         
         return $userInfo;
-        
-//        $where = "(suid=$suid or leader_suid=$suid)";
-//        if ($status != Conf_Base::STATUS_ALL)
-//        {
-//            $where .= ' and status = '. $status;
-//        }
-//		$data = $this->one->select('t_staff_user', array('*'), $where);
-//		if (empty($data['data']))
-//		{
-//			return array();
-//		}
-//        
-//        $userInfo = array();
-//        $teamMember = array();
-//        foreach($data['data'] as $onerInfo)
-//        {
-//            if ($onerInfo['suid'] == $suid)
-//            {
-//                $userInfo = $onerInfo;
-//            } 
-//            $teamMember[] = intval($onerInfo['suid']);
-//        }
-//        
-//        $userInfo['team_member'] = $teamMember;
-//        $userInfo = $this->_parseCitiesAndWids($userInfo);
-//
-//		return $userInfo;
+	}
+    
+    public function getUsers(array $uids, $field=array('*'))
+	{
+		assert(!empty($uids));
+
+        return $this->_staffDao->setFields($field)
+                               ->getList($uids);
 	}
 
 	public function getByMobile($mobile)
 	{
-		$mobile = strval($mobile);
 		assert(!empty($mobile));
 
 		$where = array('mobile' => $mobile);
-		$data = $this->one->select('t_staff_user', array('*'), $where);
-
-		if (empty($data['data']))
-		{
-			return array();
-		}
-		return $data['data'][0];
+        
+        $_userInfo = $this->_staffDao->getListWhere($where);
+        
+        return current($_userInfo);
 	}
 
+	public function getByWhere($where, $start=0, $num=0, $field=array('*'), $order='')
+    {
+        assert(!empty($where));
+        
+        return $this->_staffDao->setFields($field)
+                               ->limit($start, $num)
+                               ->order($order)
+                               ->getListWhere($where, false);
+    }
+    
+    public function getTotal($where)
+    {
+        return $this->_staffDao->getTotal($where);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     public function getByCityAndRole($city, $role)
     {
         $city = intval($city);
@@ -151,28 +151,6 @@ class Admin_Staff extends Base_Func
         return $data['data'];
     }
 
-	public function getUsers(array $uids, $field=array('*'))
-	{
-		assert(!empty($uids));
-
-		$where = array('suid' => $uids);
-		$data = $this->one->select('t_staff_user', $field, $where);
-		if (empty($data['data']))
-		{
-			return array();
-		}
-
-		return $data['data'];
-	}
-
-	public function getByWhere($where, $start=0, $num=0, $field=array('*'), $order='')
-    {
-        assert(!empty($where));
-        $data = $this->one->select('t_staff_user', $field, $where);
-
-        return $data['data'];
-    }
-
     // 通过角色获取人员（new）
     public function getByRole($role, $status=false, $kind=0, $cityId=0)
     {
@@ -204,90 +182,8 @@ class Admin_Staff extends Base_Func
         
         return $staffList;
     }
-    
-    // 方法下线 addby: guoqiang/20170927
-	public function getByRole_Del_($role, $status=false, $kind=0, $cityId=0)
-	{
-		$where = '1=1';
-		if (false !== $status)
-		{
-			$where .= sprintf(' and status=%d', $status);
-		}
-		if ($kind && is_numeric($kind))
-		{
-			$where .= sprintf(' and kind=%d', $kind);
-		}else if (!empty($kind) && is_array($kind))
-		{
-			$where .= sprintf(' and kind in (%s)', implode(',',$kind));
-		}
-		if ($cityId)
-		{
-			$where .= sprintf(' and city_id=%d', $cityId);
-		}
+   
 
-        $pr = new Permission_Role();
-        $roleInfos = $pr->getByKeys($role);
-
-		$data = $this->one->select('t_staff_user', array('*'), $where);
-		if (empty($data['data']))
-		{
-			return array();
-		}
-		$list = $data['data'];
-		foreach ($list as $idx => $item)
-		{
-			$rolesOfItem = explode(',', $item['roles']);
-			if (!is_array($role))
-			{
-				if (!in_array($roleInfos[$role]['id'], $rolesOfItem))
-				{
-					unset($list[$idx]);
-				}
-			}
-			else
-			{
-				$find = false;
-				for($i=0,$len=count($role); $i<$len; $i++)
-				{
-					if (in_array($roleInfos[$role[$i]]['id'], $rolesOfItem))
-					{
-						$find = true;
-						break;
-					}
-				}
-				if (!$find)
-				{
-					unset($list[$idx]);
-				}
-			}
-		}
-
-		return $list;
-	}
-
-	public function getList(&$total, $start=0, $num=20, $searchConf='')
-	{
-        !empty($searchConf['status'])&&$searchConf['status']==Conf_Base::STATUS_ALL? $where='1=1 ': $where='status=0 ';
-        empty($searchConf['wid'])?'':$where .= " AND wid = $searchConf[wid] ";
-        empty($searchConf['name'])?'':$where .= " AND name like '%{$searchConf['name']}%' ";
-        empty($searchConf['mobile'])?'':$where .= " AND mobile like '%{$searchConf['mobile']}%' ";
-        empty($searchConf['role'])?'':$where .= " AND find_in_set({$searchConf['role']}, roles)";
-        empty($searchConf['department'])?'':$where .= " AND department = {$searchConf['department']}";
-        empty($searchConf['city_id'])? '': $where .= " AND find_in_set({$searchConf['city_id']}, cities)";
-        
-		// 查询数量
-		$data = $this->one->select('t_staff_user', array('count(1)'), $where);
-		$total = intval($data['data'][0]['count(1)']);
-		if (empty($total))
-		{
-			return array();
-		}
-		// 查询结果
-		$order = 'order by suid desc';
-		$data = $this->one->select('t_staff_user', array('*'), $where, $order, $start, $num);
-
-		return $data['data'];
-	}
 
     /**
      * 附加操作员信息.
@@ -406,138 +302,5 @@ class Admin_Staff extends Base_Func
 		}
 	}
 
-	public function getAll($all=false)
-	{
-		$where = $all ? array():array('status' => 0);
-
-		// 查询结果
-		$order = 'order by suid desc';
-		$data = $this->one->select('t_staff_user', array('*'), $where, $order, 0, 0);
-		if (empty($data['data']))
-		{
-			return array();
-		}
-
-		return $data['data'];
-	}
-
-	private function _parseCitiesAndWids($userInfo)
-    {
-        $cities = explode(',', $userInfo['cities']);
-        $wids = explode(',', $userInfo['wids']);
-        $mapping = Conf_Warehouse::$WAREHOUSE_CITY_MAPPING;
-
-        foreach ($cities as $city)
-        {
-            $userInfo['city_wid_map'][$city] = array();
-            foreach ($wids as $wid)
-            {
-                if ($city == $mapping[$wid])
-                {
-                    $userInfo['city_wid_map'][$city][] = $wid;
-                }
-            }
-        }
-
-        return $userInfo;
-    }
-    
-    /**
-     * 获取指定城市下属
-     * @author wangxuemin
-     * @param string $role 权限
-     * @param string $status 状态
-     * @param int $kind 职位状态
-     * @param int $cityId 城市ID
-     * @param int $leaderSuid 直属上级suid
-     * @return array
-     */
-    public function getGroupStaffoByRole($role, $status = false, $kind = 0, $cityId = 0, $leaderSuid = 0)
-    {
-        $where = '1=1';
-        $where .= ($status !== false)? ' and status='. $status: '';
-        $where .= (!empty($kind)&&is_numeric($kind))? ' and kind='.$kind :
-        (!empty($kind)&&is_array($kind)? ' and kind in ('. implode(',', $kind). ')': '');
-        $where .= !empty($cityId)? ' and city_id='. $cityId: '';
-        $where .= !empty($leaderSuid)? ' and leader_suid='. $leaderSuid : '';
-        $_staffs = $this->one->select('t_staff_user', array('*'), $where);
-        $staffList = $_staffs['data'];
-        if (empty($staffList)) return array();
-        // 角色
-        $roleInfos = Permission_Api::getRolesByRkey($role, array('id', 'role', 'rkey'));
-        $alloRoleIds = Tool_Array::getFields($roleInfos, 'id');
-        foreach($staffList as $index => $info)
-        {
-            $staffRoleIds = explode(',', $info['roles']);
-            $comRoles = array_intersect($staffRoleIds, $alloRoleIds);
-    
-            if (empty($comRoles))
-            {
-                unset($staffList[$index]);
-            }
-        }
-        return $staffList;
-    }
-    
-    /**
-     * 获取全部下属（递归所有下级）
-     * @author wangxuemin
-     * @param string $role 权限
-     * @param string $status 状态
-     * @param int $kind 职位状态
-     * @param int $cityId 城市ID
-     * @param int $leaderSuid 直属上级suid
-     * @return array
-     */
-    public function getTeamMembersById($role, $status = false, $kind = 0, $cityId = 0, $leaderSuid = 0)
-    {
-        $result = array();
-        $memberList = $this->getGroupStaffoByRole($role, $status, $kind, $cityId, $leaderSuid);
-        foreach ($memberList as $key => $val) {
-            $result[] = $val;
-            if ($val['suid'] !== $leaderSuid) {
-               $res = $this->getTeamMembersById($role, $status, $kind, $cityId, $val['suid']);
-               $result = array_merge($result, $res);
-            }
-        }
-        return $result;
-    }
-    
-    /**
-     * 获取团队人员信息
-     * @author wangxuenmin
-     * @param string $role 权限
-     * @param string $status 状态
-     * @param int $kind 职位状态
-     * @param int $cityId 城市ID
-     * @param array $suids
-     * @return array
-     */
-    public function getTeamMembers($role, $status = false, $kind = 0, $cityId = 0, $suids = array(0))
-    {
-        $where = '1=1';
-        $where .= ($status !== false)? ' and status='. $status: '';
-        $where .= (!empty($kind)&&is_numeric($kind))? ' and kind='.$kind :
-        (!empty($kind)&&is_array($kind)? ' and kind in ('. implode(',', $kind). ')': '');
-        $where .= !empty($cityId)? ' and city_id='. $cityId: '';
-        $where .= ' and suid in ('.implode(',', $suids).')';
-        $_staffs = $this->one->select('t_staff_user', array('*'), $where);
-        $staffList = $_staffs['data'];
-        if (empty($staffList)) return array();
-        // 角色
-        $roleInfos = Permission_Api::getRolesByRkey($role, array('id', 'role', 'rkey'));
-        $alloRoleIds = Tool_Array::getFields($roleInfos, 'id');
-        foreach($staffList as $index => $info)
-        {
-            $staffRoleIds = explode(',', $info['roles']);
-            $comRoles = array_intersect($staffRoleIds, $alloRoleIds);
-        
-            if (empty($comRoles))
-            {
-                unset($staffList[$index]);
-            }
-        }
-        return $staffList;
-    }
     
 }

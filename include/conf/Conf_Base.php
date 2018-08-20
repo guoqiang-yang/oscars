@@ -22,30 +22,18 @@ class Conf_Base
         STATUS_WAIT_AUDIT = 5,  //未审核
         STATUS_UN_AUDIT = 6,    //驳回
         STATUS_ALL = 127;       //全部
-    /**
-     * 客户类型
-     */
-    const
-        CUSTOMER_ALL = 0,
-        CUSTOMER_NO_WISH = 1, //非会员
-        CUSTOMER_WISH = 2,    //会员
-        CUSTOMER_ORDERED = 3,    //下单会员(付费的才算)
-        CUSTOMER_UNORDERED = 4;    //下单会员(付费的才算)
-    /**
-     * 性别
-     */
-    const
-        SEX_MALE = 0, SEX_FEMALE = 1;
-    /**
-     * 客户历史类型
-     */
-    const
-        CHISTORY_CALL = 0,     //电话联系
-        CHISTORY_VISIT = 1,    //拜访
-        CHISTORY_MEMBER = 2,   //等级会员
-        CHISTORY_ORDER = 3,    //下订单
-        CHISTORY_PAY = 4,      //付款
-        CHISTORY_RECOMMEND = 5;//推荐
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     /**
      * 付款方式:
      */
@@ -88,30 +76,6 @@ class Conf_Base
     
     const CUSTOMER_PT_ONLINE_PAY = 1,     //在线支付（客户端使用）
         CUSTOMER_PT_OFFLINE_PAY = 2;    //货到付款（客户端使用）
-    /**
-     * 各种政策的地址:
-     */
-
-    const POLICY = '/article/detail.php?id=';
-    //app相关配置
-
-    const    VERSIONCODE = 6;    //版本号
-    const    VERSIONNAME = '2.0.1';    //版本名
-    const    APPURL = 'http://haocaisong.oss-cn-hangzhou.aliyuncs.com/android/hc_app_2.1.0.apk';    //更新下载地址
-    const    APPFORCE = TRUE;    //是否强制更新
-    const    APPINTRO = "1.优化了界面和交互\n2.增加了运行安全性和稳定性\n";    //新版本介绍
-
-    /**
-     * 文章类型
-     */
-
-    const TYPE_OPERATION_ACT = 1;
-    const TYPE_UPSTAIRS_POL = 2;
-    const TYPE_REGISTRATION_AGR = 3;
-    const TYPE_SERVICE_POL = 4;
-    const TYPE_FAVOURED_POL = 5;
-    const TYPE_DISTRIBUTION_POL = 6;
-    const TYPE_AFTERSALE_POL = 7;
 
     static $COOPWORKER_PAYMENT_TYPES = array(
         self::PT_CASH => '现金',

@@ -22,8 +22,4 @@ class Base_Func
         );
 	}
     
-    protected function is($param)
-    {
-        return (isset($param)&&!empty($param))? true: false;
-    }
 }

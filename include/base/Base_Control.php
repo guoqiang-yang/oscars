@@ -12,7 +12,7 @@ class Base_Control
 	/**
 	 * 设置当前登录用户uid
 	 */
-	public function setCurUid($uid)
+	protected function setCurUid($uid)
 	{
 		$this->_uid = $uid;
 	}
@@ -20,7 +20,7 @@ class Base_Control
 	/**
 	 * 设置当前登录用户uid
 	 */
-	public function setCurUser($user)
+	protected function setCurUser($user)
 	{
 		$this->_user = $user;
 	}

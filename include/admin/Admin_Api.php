@@ -5,6 +5,26 @@
  */
 class Admin_Api extends Base_Api
 {
+    
+    public static function getStaff($suid, $status=Conf_Base::STATUS_NORMAL, $nocache=false)
+    {
+        $memKey = Conf_Memcache::getMemcacheKey(Conf_Memcache::MEMKEY_STAFF_INFO, $suid);
+        
+        $staff = Data_Memcache::getInstance()->get($memKey);
+        
+        if (empty($staff) || !is_array($staff))
+        {
+            $as = new Admin_Staff();
+            $staff = $as->get($suid, $status);
+            
+            Data_Memcache::getInstance()->set($memKey, $staff, 86400);
+        }
+        
+        return $staff;
+    }
+    
+    
+    
 	public static function getStaffList($start = 0, $num = 1000, $searchConf='')
 	{
 		$as = new Admin_Staff();
@@ -48,87 +68,6 @@ class Admin_Api extends Base_Api
         $where = sprintf('department=%d and status=%d and (city_id=%d OR find_in_set("%d", cities))', Conf_Permission::DEPARTMENT_SELL,Conf_Base::STATUS_NORMAL,$city_id, $city_id);
         $list = $as->getByWhere($where, 0, 0);
         return $list;
-    }
-
-    public static function getStaff($suid, $status=Conf_Base::STATUS_NORMAL, $nocache=false)
-    {
-        $memKey = Conf_Memcache::getMemcacheKey(Conf_Memcache::MEMKEY_STAFF_INFO, $suid);
-        
-        $staff = array();
-        if ($_SERVER['SERVER_ADDR'] != '127.0.0.1' && !$nocache)
-        {
-            $staff = Data_Memcache::getInstance()->get($memKey);
-        }
-        
-        if (empty($staff))
-        {
-            $as = new Admin_Staff();
-            $staff = $as->get($suid, $status);
-            $staff['team_member'] = self::_getTeamMember4Sales($staff);
-            
-            if ($_SERVER['SERVER_ADDR'] != '127.0.0.1')
-            {
-                Data_Memcache::getInstance()->set($memKey, $staff, 86400);
-            }
-        }
-        
-        return $staff;
-    }
-    
-    /**
-     * 获取销售的成员.
-     * 
-     *  - 销售总监，城市经理：获取选择城市的销售
-     *  - 其他：获取对应的小组成员，获取深度为2
-     */
-    private static function _getTeamMember4Sales($staffInfo)
-    {
-        if (empty($staffInfo)) return array();
-        
-        $as = new Admin_Staff();
-        $allSales = Tool_Array::list2Map($as->getByRole(Conf_Admin::ROLE_SALES_NEW, Conf_Base::STATUS_NORMAL), 'suid');
-        
-        $teamValues = array();
-        foreach($allSales as $item)
-        {
-            $leaderSuid = !empty($item['leader_suid'])? $item['leader_suid']: $item['suid'];
-            
-            if (empty($teamValues[$leaderSuid]))
-            {
-                $teamValues[$leaderSuid]['city_id'] = explode(',', $allSales[$leaderSuid]['cities']);
-            }
-            $teamValues[$leaderSuid]['member'][] = $item['suid'];
-        }
-        
-        $member = array();
-        $specailRoles = array(Conf_Admin::ROLE_SALES_DIRECTOR, Conf_Admin::ROLE_CITY_ADMIN_NEW);
-        
-        if (Admin_Role_Api::hasRoles($staffInfo, $specailRoles))    //返回城市的所有销售
-        {
-            $cities = explode(',', $staffInfo['cities']);
-            
-            foreach($teamValues as $tItem)
-            {
-                if (! array_intersect($cities, $tItem['city_id'])) continue;
-                
-                $member = array_merge($member, $tItem['member']);
-            }
-        }
-        else    //返回自己的销售组员
-        {
-            $_member = $teamValues[$staffInfo['suid']]['member'];
-            
-            $member = $_member;
-            foreach($_member as $_memSuid)
-            {
-                if (empty($teamValues[$_memSuid]['member'])) continue;
-                
-                $member = array_merge($member, $teamValues[$_memSuid]['member']);
-            }
-        }
-        $member[] = $staffInfo['suid'];
-        
-        return array_unique($member);
     }
 
     /**

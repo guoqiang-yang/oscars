@@ -167,6 +167,7 @@ class Admin_Auth_Api extends Base_Api
         return $ret;
     }
 
+    
     public static function checkVerify($verify, $expiredTime = 86400, $checkVerify = true)
     {
         if (empty($verify))
@@ -180,19 +181,21 @@ class Admin_Auth_Api extends Base_Api
         {
             return FALSE;
         }
+        
         if (empty($uid))
         {
             return FALSE;
         }
-
-        $as = new Admin_Staff();
-        $userInfo = $as->get($uid);
-        if (empty($userInfo) || $userInfo['status'] != Conf_Base::STATUS_NORMAL)
+        
+        $userInfo = Admin_Api::getStaff($uid);
+        
+        if (empty($userInfo))
         {
             return FALSE;
         }
-        $isSaler = Admin_Role_Api::hasRole($userInfo, Conf_Admin::ROLE_SALES_NEW);
-        if ($uid != 1078 && !$isSaler && $checkVerify && (empty($verify) || $userInfo['verify'] != $verify))
+        
+        //单点登录
+        if ($checkVerify && (empty($verify) || $userInfo['verify'] != $verify))
         {
             return FALSE;
         }
@@ -202,13 +205,13 @@ class Admin_Auth_Api extends Base_Api
             return FALSE;
         }
 
-        return $uid;
+        return array('uid'=>$uid, 'user'=>$userInfo);
     }
 
     public static function createVerify($uid, $password)
     {
         $now = time();
-        //Tool_Log::debug('createVerify', $now . ':' . $uid . ':' . $password . ':' . self::SECRET);
+        
         $verify = md5($now . ':' . $uid . ':' . $password . ':' . self::SECRET) . '_' . $now . '_' . $uid;
 
         return $verify;
@@ -217,7 +220,7 @@ class Admin_Auth_Api extends Base_Api
     public static function _checkVerify($verify, $password)
     {
         list($hash, $timestamp, $uid) = explode('_', $verify);
-        //Tool_Log::debug('_checkVerify', $timestamp . ':' . $uid . ':' . $password . ':' . self::SECRET);
+        
         if (md5($timestamp . ':' . $uid . ':' . $password . ':' . self::SECRET) != $hash)
         {
             return FALSE;

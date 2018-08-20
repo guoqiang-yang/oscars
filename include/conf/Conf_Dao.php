@@ -6,6 +6,16 @@
 class Conf_Dao
 {
     private static $_tables = array(
+        't_staff_user' => array(
+            'pk' => 'cid',
+            'fields' => array('*'),//todo: key=>type, 这样还可以检查转换类型
+            'created_time' => 'ctime',
+            'modified_time' => 'mtime',
+            'status' => 'status',   //统一的状态字段, 1-删除。设置这个字段，则没有物理删除
+        ),
+        
+        
+        
         't_customer' => array(
             'pk' => 'cid',
             'fields' => array('*'),//todo: key=>type, 这样还可以检查转换类型
@@ -186,12 +196,7 @@ class Conf_Dao
             'created_time' => 'ctime',
             'modified_time' => 'mtime',
         ),
-        't_staff_user' => array(
-            'pk' => 'suid',
-            'fields' => array('*'),
-            'created_time' => 'ctime',
-            'modified_time' => 'mtime',
-        ),
+        
         //订单日志
         't_order_action_log' => array(
             'pk' => 'lid',

@@ -12,9 +12,9 @@ class Permission_Role extends Base_Func
 
     public function __construct()
     {
-        $this->_dao = new Data_Dao('t_role');
-
         parent::__construct();
+        
+        $this->_dao = new Data_Dao('t_role');        
     }
 
     public function add($info)

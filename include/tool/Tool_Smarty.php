@@ -1,4 +1,5 @@
 <?php
+
 require_once dirname(__FILE__)."/../vendor/Smarty-3.1.7/libs/Smarty.class.php";
 
 /**
@@ -19,6 +20,7 @@ class Tool_Smarty
 		$this->smarty->compile_dir = '/tmp/templates_c/';
 		$this->smarty->loadFilter("variable", "htmlspecialchars");
 		$this->smarty->loadFilter("pre", "strip");
+        
 		foreach ($param as $key => $val)
 		{
 			$this->smarty->$key = $val;

@@ -2,30 +2,33 @@
 include_once dirname(__FILE__) . "/conf.php";
 include_once dirname(__FILE__) . "/common.php";
 
-//autoload
-function __autoload($className) {
-	//找到目录
+spl_autoload_register('__autoload');
 
+function __autoload($className) 
+{    
 	$pos = strpos($className, '_');
-	if (!$pos) {
+	if (!$pos) 
+    {
 		return false;
 	}
-	$dir = substr($className, 0, $pos);
-	$dir = strtolower($dir);
+    
+	$dir = strtolower(substr($className, 0, $pos));
 
 	//加载
 	$classFile = INCLUDE_PATH . $dir . '/' . $className . '.php';
 
-	if (is_file($classFile)) {
+	if (is_file($classFile)) 
+    {
 		require_once $classFile;
+        
 		return true;
 	}
+    
 	return false;
 }
 
-spl_autoload_register('__autoload');
-
-function my_assert_handler($file, $line, $code) {
+function my_assert_handler($file, $line, $code) 
+{
 	$detailLog = _assertDetailLog($file, $line, $code);
 	$simpleLog = _assertSimpleLog($file, $line);
 
@@ -38,7 +41,8 @@ function my_assert_handler($file, $line, $code) {
 // Set up the callback
 assert_options(ASSERT_CALLBACK, 'my_assert_handler');
 
-function _assertDetailLog($file, $line, $code) {
+function _assertDetailLog($file, $line, $code) 
+{
 	$info = "\n<!--Assertion Failed:
         File '$file'<br />
         Line '$line'<br />
@@ -54,7 +58,8 @@ function _assertDetailLog($file, $line, $code) {
 	return $info;
 }
 
-function _assertSimpleLog($file, $line) {
+function _assertSimpleLog($file, $line) 
+{
 	$info = "\nAssert Position:\tFile: " . str_replace(ROOT_PATH, '', $file) . "\t##Line: $line\n";
 
 	$traces = array();
