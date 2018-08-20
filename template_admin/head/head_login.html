@@ -50,25 +50,6 @@
           <a class="navbar-brand" href="#">{{$title}}</a>
         </div>
         <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            {{foreach $modules as $key => $item name=module_iter}}
-            {{if $item.display != "hidden"}}
-            <li class="{{if $smarty.foreach.module_iter.first}}first{{/if}} {{if $curModule==$key}}active{{/if}}">
-              <a href="{{if empty($item['pages'])}}#{{else}}{{$item['pages'][0]['url']}}{{/if}}">{{$item.name}}</a>
-              {{*
-              <b></b>
-              {{if $key != 'home'}}
-              <dl>
-                {{foreach $item.pages as $item2}}
-                <dd><a href="{{$item2.url}}" title="{{$item2.name}}">{{subString str=$item2.name len=10 ext=".."}}</a></dd>
-                {{/foreach}}
-              </dl>
-              {{/if}}
-              *}}
-            </li>
-            {{/if}}
-            {{/foreach}}
-          </ul>
 
         </div>
 

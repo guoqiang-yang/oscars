@@ -19,6 +19,6 @@ class App extends App_Admin_Page
 	}
 }
 
-$app = new App('pub');
+$app = new App('pri');
 $app->run();
 

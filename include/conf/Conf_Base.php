@@ -10,6 +10,14 @@ class Conf_Base
         APP_TOKEN_EXPIRED = 315360000,    //10年
         WEB_TOKEN_EXPIRED_REMEMBER = 2592000,        //30天
         MOBILE_TOKEN_EXPIRED = 7776000;    //90天
+    
+    /**
+     * Cookie Key.
+     */
+    const 
+        COKEY_VERIFY_SA = '_admin_verify',
+        COKEY_SUID_SA   = '_admin_uid',
+        COKEY_CITY_SA   = '_admin_city';
     /**
      * 通用status
      */

@@ -41,14 +41,16 @@
             {{/if}}
         </div>
         <div class="navbar-collapse collapse">
+            {{if !empty($modules)}}
             <ul class="nav navbar-nav navbar-right">
-                {{foreach $modules as $key => $item name=module_iter}}
-                {{if $item.display != "hidden"}}
-                <li class="{{if $smarty.foreach.module_iter.first}}first{{/if}} {{if $curModule==$key}}active{{/if}}">
-                    <a href="{{if empty($item['pages'])}}#{{else}}{{$item['pages'][0]['url']}}{{/if}}">{{$item.name}}</a>
-                </li>
-                {{/if}}
+                {{foreach $modules as $key => $item}}
+                    {{if !isset($item.display) || $item.display != 'hidden'}}
+                    <li class="{{if $curModule==$key}}active{{/if}}">
+                        <a href="{{if empty($item['pages'])}}#{{else}}{{$item['pages'][0]['url']}}{{/if}}">{{$item.name}}</a>
+                    </li>
+                    {{/if}}
                 {{/foreach}}
+                
                 {{if $_uid}}
                 <li>
                     <div class="dropdown" style="margin-top: 8px;">
@@ -57,8 +59,6 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                            <li role="presentation" style="clear: both;"><a href="/user/message.php" role="menuitem" tabindex="-1">消息<span id="tip_message_body" style="display:none; float:right;border-radius: 10px; background: #CC0000; font-size: 12px; padding: 1px 5px; color: #FFFFFF;"></span></a></li>
-                            <li role="presentation" class="divider"></li>
                             <li role="presentation" style="clear: both;"><a href="/user/chgpwd.php" role="menuitem" tabindex="-1">修改密码<span id="" style="display:none; float:right;border-radius: 10px; background: #CC0000; font-size: 12px; padding: 1px 5px; color: #FFFFFF;"></span></a></li>
                             <li role="presentation" class="divider"></li>
                             <li role="presentation"><a href="/user/logout.php" role="menuitem" tabindex="-1">退出</a></li>
@@ -67,7 +67,7 @@
                 </li>
                 {{/if}}
             </ul>
-
+            {{/if}}
         </div>
 
     </div>
@@ -76,19 +76,18 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
+            {{if !empty($modules)}}
             <ul class="nav nav-sidebar">
-                {{$module}}
-                {{foreach $modules[$curModule]['pages'] as $item name=page_iter}}
+                {{foreach $modules[$curModule]['pages'] as $item}}
                 <li class="{{if $curPage == $item.page }}active{{/if}}">
                     <a href="{{$item.url}}" title="{{$item.name}}">{{$item.name}}</a>
                 </li>
                 {{/foreach}}
             </ul>
+            {{/if}}
         </div>
     </div>
 </div>
-
-<input type="hidden" id="max-time" value="{{$max_time}}"/>
 
 <!-- Modal -->
 <div class="modal fade" id="showCityList" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">

@@ -78,8 +78,16 @@ class Admin_Staff extends Base_Func
 		$where = array('mobile' => $mobile);
         
         $_userInfo = $this->_staffDao->getListWhere($where);
+        $userInfo = current($_userInfo);
         
-        return current($_userInfo);
+        if (!empty($userInfo))
+        {
+            $userInfo['team_member'] = array($userInfo['suid']);    //兼容之前数据结构
+            $userInfo['_city_ids'] = explode(',', $userInfo['cities']);
+            $userInfo['_wids'] = explode(',', $userInfo['wids']);
+        }
+        
+        return $userInfo;
 	}
 
 	public function getByWhere($where, $start=0, $num=0, $field=array('*'), $order='')

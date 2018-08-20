@@ -14,7 +14,7 @@ class App extends App_Admin_Page
     protected function main()
     {
         self::clearVerifyCookie();
-        header('Location: /');
+        header('Location: /user/login.php');
         exit;
     }
 }

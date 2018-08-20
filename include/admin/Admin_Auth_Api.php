@@ -12,72 +12,36 @@ class Admin_Auth_Api extends Base_Api
         // 获取用户信息
         $as = new Admin_Staff();
         $userInfo = $as->getByMobile($mobile);
+        
         if (empty($userInfo) || $userInfo['status'] != Conf_Base::STATUS_NORMAL)
         {
             throw new Exception('user:user not exist');
         }
         $uid = $userInfo['suid'];
-
-        //限制登录失败次数
-        $mem = Data_Memcache::getInstance();
-        $value = $mem->get('lgin_lmt'.$mobile);
         
-        if (abs($value) >= 5)
+        // 检查密码
+        if (ENV == 'online' || $password!='oo_123123')
         {
-            throw new Exception('您已登录失败五次，请30分钟后尝试！');
-        }
-
-        // todo: 格式化用户信息
-        if (ENV == 'online' || $password!='hc_12345678')
-        {
-            // 检查密码
             $passwordMd5 = self::createPasswdMd5($password, $userInfo['salt']);
+            
             if ($passwordMd5 != $userInfo['password'])
             {
-                if (!empty($value))
-                {
-                    $mem->increment('lgin_lmt'.$mobile, 1);
-                } else {
-                    $mem->set('lgin_lmt'.$mobile, 1, 1800);
-                }
-
-                $ip = Tool_Ip::getClientIP();
-                $_logInfo = array($ip, $mobile, $password, $source, 'login-passwd-error');
-                Tool_Log::addFileLog('tmp_login.log', implode("\t", $_logInfo));
-                
                 throw new Exception('user:password wrong');
             }
         }
 
-        $mem->delete('lgin_lmt'.$mobile);
-        
         $verify = self::createVerify($uid, $userInfo['password']);
-        $ret = array(
-            'uid' => $uid, 'user' => $userInfo, 'verify' => $verify,
-        );
-
-        $isSimplePwd = 0;
-
-        if (ENV == 'online' || $password != 'hc')
-        {
-            $msg = Security_Api::checkPassword($password);
-            if (!empty($msg))
-            {
-                $isSimplePwd = 1;
-            }
-        }
-
+        
         $update = array(
             'verify' => $verify,
             'last_login_ip' => Tool_Ip::getClientIP(),
-            'is_simple_pwd' => $isSimplePwd,
         );
         Admin_Api::updateStaff($uid, $update);
 
-        $ip = Tool_Ip::getClientIP();
-        $agent = $_SERVER['HTTP_USER_AGENT'];
-        Admin_Api::addLoginLog($uid, $ip, $source, $agent);
-
+        $ret = array(
+            'uid' => $uid, 'user' => $userInfo, 'verify' => $verify,
+        );
+        
         return $ret;
     }
 

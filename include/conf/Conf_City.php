@@ -4,7 +4,7 @@
  */
 class Conf_City
 {
-    const BEIJING = 101;
+    const BEIJING = 110;
 
     private static $CITY_INFOS = array(
         self::BEIJING   => array('cn'=>'北京', 'py'=>'beijing', 'code'=>'BJ', 'poi'=>array('lng'=>'116.404', 'lat'=>'39.915')),
@@ -32,16 +32,4 @@ class Conf_City
         }
     }
     
-    /**
-     * 获取Cookie中使用的city-key.
-     */
-    public static function getKey4Cookie($platfome)
-    {
-        $conf = array(
-            'sa'    => '_admin_city',       //sa管理后台
-        );
-        
-        return array_key_exists($platfome, $conf)? $conf[$platfome]: '_err_city';
-    }
-
 }

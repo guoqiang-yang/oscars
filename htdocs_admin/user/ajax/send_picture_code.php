@@ -1,7 +1,7 @@
 <?php
 include_once('../../../global.php');
 
-class CApp extends App_Ajax
+class CApp extends App_Admin_Ajax
 {
     protected function main()
     {
@@ -23,7 +23,7 @@ class CApp extends App_Ajax
         $buttum_c = ImageColorAllocate($im,$tmpC0,$tmpC1,$tmpC2);
         imagefill($im, 16, 13, $buttum_c);
 
-        $font = ROOT_PATH.'/htdocs_admin/fonts/verify.ttf';
+        $font = ROOT_PATH.'/data/fonts/verify.ttf';
 
         for ($i=0;$i<strlen($text);$i++)
         {
@@ -93,5 +93,5 @@ class CApp extends App_Ajax
     }
 }
 
-$app = new CApp("");
+$app = new CApp("pub");
 $app->run();

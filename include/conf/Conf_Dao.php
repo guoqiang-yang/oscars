@@ -7,7 +7,7 @@ class Conf_Dao
 {
     private static $_tables = array(
         't_staff_user' => array(
-            'pk' => 'cid',
+            'pk' => 'suid',
             'fields' => array('*'),//todo: key=>type, 这样还可以检查转换类型
             'created_time' => 'ctime',
             'modified_time' => 'mtime',

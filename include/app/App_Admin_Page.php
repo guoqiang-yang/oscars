@@ -15,7 +15,6 @@ class App_Admin_Page extends App_Admin_Web
 	protected $headjslist = array('js/base.js', 'js/env.js');
 	protected $footjslist = array();
     
-    protected $currCityId = array();
     
 	function __construct($lgmode='pri', $tmplpath=ADMIN_TEMPLATE_PATH, $cssjs=ADMIN_HOST)
 	{
@@ -34,7 +33,7 @@ class App_Admin_Page extends App_Admin_Web
 			header('Location: http://'.Conf_Base::getAdminHost().'/user/login.php');
 			exit;
 		}
-
+        
 		if ($this->lgmode == 'pri')
 		{
             $forbidden = parent::checkPermission($permission);
@@ -44,15 +43,6 @@ class App_Admin_Page extends App_Admin_Web
                 exit;
             }
 		}
-
-        //选择的城市
-        $cityCookieKey = Conf_City::getKey4Cookie('sa');
-        $this->currCityId = Tool_Input::clean('c', $cityCookieKey, TYPE_INT);
-        if (empty($this->currCityId))
-        {
-            $this->currCityId = $this->_user['_city_ids'][0];
-            setcookie($cityCookieKey, $this->currCityId, 86400, '/', Conf_Base::getAdminHost());
-        }
 	}
 
 	protected function setTitle($title)
@@ -137,16 +127,15 @@ class App_Admin_Page extends App_Admin_Web
 		}
 
 		list($module, $page) = $this->getCurrentPage();
-
+        
 		$this->smarty->assign('curPage', $page);
 		$this->smarty->assign('curModule', $module);
 		$this->smarty->assign('modules', Conf_Admin_Page::getMODULES($this->_uid, $this->_user));
 		$this->smarty->assign('title', $this->title);
 		$this->smarty->assign('cssHtml', Tool_CssJs::getCssHtml($this->csslist));
 		$this->smarty->assign('jsHtml', Tool_CssJs::getJsHtml($this->headjslist));
-		
-        
-        $this->smarty->assign('cur_city', Conf_City::getByCityId($this->currCityId, 'cn'));
+        $this->smarty->assign('cur_city', Conf_City::getByCityId($this->_curCityId, 'cn'));
+        $this->smarty->assign('can_change_city', count($this->_user['_city_ids'])>1?true:false);
         
 		$this->smarty->display($this->headTmpl);
 	}

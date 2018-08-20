@@ -6,11 +6,12 @@
  */
 class Base_Control
 {
-	protected $_uid;
-	protected $_user;
+	protected $_uid = null;
+	protected $_user = null;
+    protected $_curCityId = null;
 
 	/**
-	 * 设置当前登录用户uid
+	 * 设置当前登录用户uid.
 	 */
 	protected function setCurUid($uid)
 	{
@@ -18,10 +19,18 @@ class Base_Control
 	}
 
 	/**
-	 * 设置当前登录用户uid
+	 * 设置当前登录用户uid.
 	 */
 	protected function setCurUser($user)
 	{
 		$this->_user = $user;
 	}
+    
+    /**
+     * 设置当前登录用户的城市信息
+     */
+    protected function setCurCityId($cityId)
+    {
+        $this->_curCityId = $cityId;
+    }
 }

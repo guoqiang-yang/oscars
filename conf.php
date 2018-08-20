@@ -15,12 +15,12 @@ if (!defined('DS'))
 }
 
 //域名
-define('BASE_HOST', '.haocai001.cn');
+define('BASE_HOST', '.hc001.cn');
 
-define('PIC_HOST', 'p.haocai001.cn');
+define('PIC_HOST', 'p.hc001.cn');
 
-define('ADMIN_HOST', 'o.haocai001.cn');
-define('CSSJS_HOST', 'o.haocai001.cn');
+define('ADMIN_HOST', 'o.hc001.cn');
+define('CSSJS_HOST', 'o.hc001.cn');
 define('OSS_HOST', 'https://img.haocaisong.cn/');     //OSS里面配置的，就是这个，不根据域名变
 
 //路径

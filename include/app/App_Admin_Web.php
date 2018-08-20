@@ -23,14 +23,14 @@ class App_Admin_Web extends Base_App
     protected function checkAuth()
     {
         //check Login
-        $verify = Tool_Input::clean('c', '_admin_session', TYPE_STR);
+        $verify = Tool_Input::clean('c', Conf_Base::COKEY_VERIFY_SA, TYPE_STR);
         
         $checkRet = Admin_Auth_Api::checkVerify($verify);
         
         if (!empty($checkRet['uid']))
         {
-            $this->_uid = $checkRet['uid'];
-            $this->_user = $checkRet['user'];
+            $this->setCurUid($checkRet['uid']);
+            $this->setCurUser($checkRet['user']);
         }
         else
         {
@@ -38,6 +38,16 @@ class App_Admin_Web extends Base_App
             
             return false;
         }
+
+        //选择的城市
+        $currCityId = Tool_Input::clean('c', Conf_Base::COKEY_CITY_SA, TYPE_INT);
+        if (empty($currCityId))
+        {
+            $currCityId = $this->_user['_city_ids'][0];
+            setcookie(Conf_Base::COKEY_CITY_SA, $currCityId, 86400, '/', Conf_Base::getAdminHost());
+        }
+        
+        $this->setCurCityId($currCityId);
     }
     
     protected function setCommonPara()
@@ -84,7 +94,7 @@ class App_Admin_Web extends Base_App
         }
 
         empty($permission) && $permission = str_replace('.php', '', $_SERVER['SCRIPT_NAME']);
-
+        
         if (is_array($permission))
         {
             $forbidden = TRUE;
@@ -109,7 +119,7 @@ class App_Admin_Web extends Base_App
         $permissions = array();
         
         // 超级管理员
-        if (in_array($this->_uid, Conf_Admin::$SUPER_ADMINER))
+        if (1 || in_array($this->_uid, Conf_Admin::$SUPER_ADMINER))
         {
             foreach (Conf_Admin_Page::$MODULES as $fitem)
             {
@@ -144,19 +154,20 @@ class App_Admin_Web extends Base_App
         }
     }
     
-    protected function setSessionVerifyCookie($token, $expiredTime = 0)
+    protected function setCookie4LoginSucc($cookies, $expiredTime=0)
     {
-        $expiredTime = !empty($expiredTime) ? (time() + $expiredTime) : 0;
-        
-        setcookie('_admin_session', $token,     $expiredTime, '/', Conf_Base::getAdminHost());
-        setcookie('_admin_uid',     $this->_uid, $expiredTime, '/', Conf_Base::getAdminHost());
+        foreach($cookies as $coKey => $coVal)
+        {
+            setcookie($coKey, $coVal,   time()+$expiredTime, '/', Conf_Base::getAdminHost());
+        }
     }
+
 
     protected static function clearVerifyCookie()
     {
-        setcookie('_admin_session', '', -86400, '/', Conf_Base::getAdminHost());
-        setcookie('_admin_uid',     '', -86400, '/', Conf_Base::getAdminHost());
-        setcookie(Conf_City::getKey4Cookie('sa'),    '', -86400, '/', Conf_Base::getAdminHost());
+        setcookie(Conf_Base::COKEY_VERIFY_SA, '', -86400, '/', Conf_Base::getAdminHost());
+        setcookie(Conf_Base::COKEY_SUID_SA,   '', -86400, '/', Conf_Base::getAdminHost());
+        setcookie(Conf_Base::COKEY_CITY_SA,   '', -86400, '/', Conf_Base::getAdminHost());
     }
 
     protected function delegateTo($path)
@@ -190,7 +201,7 @@ class App_Admin_Web extends Base_App
             Tool_Log::addFileLog('slow_log', $slowLog);
         }
 
-        if ($_REQUEST['debug'] == 2)
+        if (!empty($_REQUEST['debug']) && $_REQUEST['debug'] == 2)
         {
             print_r($HC_SQL_EXTIMES);
         }

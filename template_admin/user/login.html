@@ -16,79 +16,35 @@
 	.tips_mation{line-height: 30px; display: inline-block;}
 </style>
 
-<div class="">
-	<div class="login_Cont">
-		<h1 class="page-header">运营后台登陆</h1>
-
-		<ul id="myTab" class="nav nav-tabs" style="width: 250px; margin: 0 auto;">
-			<li class="active">
-				<a href="#login_pwd" data-toggle="tab" id="code_pwd">手机密码登录</a>
-			</li>
-			<li>
-				<a href="#login_ding" data-toggle="tab" id="code_ding">钉钉验证码登录</a>
-			</li>
-		</ul>
-		<div id="myTabContent" class="tab-content" style="margin-top:30px;margin-left: 500px;">
-			<div class="tab-pane fade in active" id="login_pwd">
-				<form class="form-horizontal">
-					<div class="form-group">
-						<label class="col-sm-2 control-label">账号：</label>
-						<div class="col-sm-10">
-							<input type="text" name="mobile_pwd" class="form-control" value="" style="width:180px;" placeholder="请输入您的账号"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">密码：</label>
-						<div class="col-sm-10">
-							<input type="password" name="password" class="form-control" value="" style="width:180px;" placeholder="请输入您的密码"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">验证码：</label>
-						<div class="col-sm-10">
-							<input class="form-control" style="width: 180px; display: inline-block;" type="text" name="picture_pwd" placeholder="请输入图片验证码">
-							<img src="/user/ajax/send_picture_code.php" class="get_picture_code_pwd" title="看不清，点击换一张" align="absmiddle" style="width: 80px; height: 34px; margin-left: 10px;" />
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label"></label>
-						<div class="col-sm-10">
-							<input type="button" class="btn btn-default  _j_login" data-type="pwd" value="登录"/>
-						</div>
-					</div>
-				</form>
-			</div>
-			<div class="tab-pane fade" id="login_ding">
-				<form class="form-horizontal">
-					<div class="form-group">
-						<label class="col-sm-2 control-label">账号：</label>
-						<div class="col-sm-10">
-							<input type="text" name="mobile_ding" class="form-control" value="" style="width:180px;" placeholder="请输入您的账号"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">验证码：</label>
-						<div class="col-sm-10">
-							<input class="form-control" style="width: 180px; display: inline-block;" type="text" name="picture_ding" placeholder="请输入图片验证码">
-							<img src="" class="get_picture_code_ding" title="看不清，点击换一张" align="absmiddle" style="width: 80px; height: 34px; margin-left: 10px;" />
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label">钉钉：</label>
-						<div class="col-sm-3">
-							<input type="text" name="ding_verify" class="form-control" value="" style="width: 180px; display: inline-block;" placeholder="请输入钉钉验证码"/>
-						</div>
-						<button type="button" class="btn btn-primary" id="ding_verify" style="padding:0;width: 80px; height: 34px; margin-left: -40px; display: inline;">获取验证码</button>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-2 control-label"></label>
-						<div class="col-sm-10">
-							<input type="button" class="btn btn-default _j_login" data-type="ding" value="登录"/>
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
-		</div>
-	</div>
+<h1 class="page-header">运营后台登陆</h1>
+<div id="myTabContent" class="tab-content" style="margin-top:30px;margin-left: 500px;">
+    <div class="tab-pane fade in active" id="login_pwd">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">账号：</label>
+                <div class="col-sm-10">
+                    <input type="text" name="mobile_pwd" class="form-control" value="" style="width:180px;" placeholder="请输入您的账号"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">密码：</label>
+                <div class="col-sm-10">
+                    <input type="password" name="password" class="form-control" value="" style="width:180px;" placeholder="请输入您的密码"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">验证码：</label>
+                <div class="col-sm-10">
+                    <input class="form-control" style="width: 180px; display: inline-block;" type="text" name="picture_pwd" placeholder="请输入图片验证码">
+                    <img src="/user/ajax/send_picture_code.php" class="get_picture_code_pwd" title="看不清，点击换一张" align="absmiddle" style="width: 80px; height: 34px; margin-left: 10px;" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label"></label>
+                <div class="col-sm-10">
+                    <input type="button" class="btn btn-default  _j_login" data-type="pwd" value="登录"/>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>

@@ -1,6 +1,12 @@
 <?php
 /**
  * sql语句拼装
+ * 
+ * @Notice - TODO
+ * 
+ *      【有一个大坑】：因为php7 删除了mysql_* 方法的支持，暂定使用 addslashes 替代 mysql_escape_string
+ *                   addslashes 现在不安全
+ * 
  */
 
 class Tool_Sql
@@ -9,7 +15,7 @@ class Tool_Sql
 	 *  1.数据未插入时，插入数据
 	 *  2.数据已经插入时，更新数据
 	 */
-	function insert($table, $insertfield , $updateField = array(), $changeField = array(), $notEscFields=array())
+	public static function insert($table, $insertfield , $updateField = array(), $changeField = array(), $notEscFields=array())
 	{
 		$sql = "insert into $table (";
 
@@ -24,7 +30,7 @@ class Tool_Sql
 		$flag = 0;
 		foreach($insertfield as $k => $v)
 		{
-			$v = (empty($notEscFields) || !in_array($k,$notEscFields)) ? ("'".mysql_escape_string($v)."'") : $v;
+			$v = (empty($notEscFields) || !in_array($k,$notEscFields)) ? ("'".addslashes($v)."'") : $v;
 			$sql .= ($flag==0?"":", "). $v;
 			$flag = 1;
 		}
@@ -36,7 +42,7 @@ class Tool_Sql
 			$flag = 0;
 			foreach ($updateField as $k)
 			{
-				$v = (empty($notEscFields) || !in_array($k,$notEscFields)) ? ("'".mysql_escape_string($insertfield[$k])."'") : $insertfield[$k];
+				$v = (empty($notEscFields) || !in_array($k,$notEscFields)) ? ("'".addslashes($insertfield[$k])."'") : $insertfield[$k];
 				$sql .= ($flag==0?"":", ").$k." = ".$v;
 				$flag = 1;
 			}
@@ -49,7 +55,7 @@ class Tool_Sql
 				}
 				else
 				{
-					$sql .= ($flag==0?"":", ").$k."=CONCAT(".$k.",'".mysql_escape_string($v)."')";
+					$sql .= ($flag==0?"":", ").$k."=CONCAT(".$k.",'".addslashes($v)."')";
 				}
 				$flag = 1;
 			}
@@ -60,7 +66,7 @@ class Tool_Sql
 	/**
 	 * 插入多条数据
 	 */
-	function batchInsert($table , $insertFieldList, $notEscFields=array())
+	public static function batchInsert($table , $insertFieldList, $notEscFields=array())
 	{
 		$tmpArr = $insertFieldList[0];
 
@@ -78,7 +84,7 @@ class Tool_Sql
 			$sql.="(";
 			foreach($varr as $k => $v)
 			{
-				$v = (empty($notEscFields) || !in_array($k,$notEscFields)) ? ("'".mysql_escape_string($v)."'") : $v;
+				$v = (empty($notEscFields) || !in_array($k,$notEscFields)) ? ("'".addslashes($v)."'") : $v;
 				$sql .= ($flag==0?"":", ").$v;
 				$flag = 1;
 			}
@@ -92,7 +98,7 @@ class Tool_Sql
 	/**
 	 * 删除
 	 */
-	function delete($table , $whereField)
+	public static function delete($table , $whereField)
 	{
 		$where = "";
 		foreach($whereField as $k=>$v)
@@ -101,7 +107,7 @@ class Tool_Sql
 			{
 				$where .= " and ";
 			}
-			$where .= $k." = '".mysql_escape_string($v)."'";
+			$where .= $k." = '".addslashes($v)."'";
 		}
 
 		if(0 == strlen($where))
@@ -116,7 +122,7 @@ class Tool_Sql
 	/**
 	 * replace
 	 */
-	function replace($table , $replaceField)
+	public static function replace($table , $replaceField)
 	{
 		$sql = "replace into $table (";
 		$flag = 0;
@@ -129,7 +135,7 @@ class Tool_Sql
 		$flag = 0;
 		foreach($replaceField as $k => $v)
 		{
-			$sql .= ($flag==0?"'":", '").mysql_escape_string($v)."'";
+			$sql .= ($flag==0?"'":", '").addslashes($v)."'";
 			$flag = 1;
 		}
 		$sql .= ")";
@@ -139,7 +145,7 @@ class Tool_Sql
 	/*
 	 * replace多条数据
 	 */
-	function replaceEx($table , $replaceFieldList)
+	public static function replaceEx($table , $replaceFieldList)
 	{
 		$tmpArr = $replaceFieldList[0];
 		$sql = "replace into $table (";
@@ -156,7 +162,7 @@ class Tool_Sql
 			$sql.="(";
 			foreach($varr as $k => $v)
 			{
-				$sql .= ($flag==0?"'":", '").mysql_escape_string($v)."'";
+				$sql .= ($flag==0?"'":", '").addslashes($v)."'";
 				$flag = 1;
 			}
 			$sql .= "),";
@@ -169,13 +175,13 @@ class Tool_Sql
 	/**
 	 * 更新
 	 */
-	function update($table , $updateField , $changeField = array() , $whereField, $notEscFields=array())
+	public static function update($table , $updateField , $changeField = array() , $whereField, $notEscFields=array())
 	{
 		$sql = "update $table set ";
 		$flag = 0;
 		foreach($updateField as $k => $v)
 		{
-			$v = (empty($notEscFields) || !in_array($k,$notEscFields)) ? ("'".mysql_escape_string($v)."'") : $v;
+			$v = (empty($notEscFields) || !in_array($k,$notEscFields)) ? ("'".addslashes($v)."'") : $v;
 			$sql .= ($flag==0?"":", ").$k." = ".$v;
 			$flag = 1;
 		}
@@ -190,7 +196,7 @@ class Tool_Sql
 			else
 			{
 				$sql .= sprintf("%s %s=CONCAT(%s,'%s')", ($flag==0 ? "" : ","),
-						$k, $k, mysql_escape_string($v));
+						$k, $k, addslashes($v));
 				$flag = 1;
 			}
 		}
@@ -208,13 +214,13 @@ class Tool_Sql
 				{
 					foreach($v as $i=>$item)
 					{
-						$v[$i] = mysql_escape_string($item);
+						$v[$i] = addslashes($item);
 					}
 					$where .= $k." in ('". implode("', '", $v) ."')";
 				}
 				else
 				{
-					$where .= $k." = '".mysql_escape_string($v)."'";
+					$where .= $k." = '".addslashes($v)."'";
 				}
 			}
 		} 
@@ -235,13 +241,13 @@ class Tool_Sql
 	/**
 	 * 更新
 	 */
-	function updateEx($table , $updateField , $changeField = array() , $where, $notEscFields=array())
+	public static function updateEx($table , $updateField , $changeField = array() , $where, $notEscFields=array())
 	{
 		$sql = "update $table set ";
 		$flag = 0;
 		foreach($updateField as $k => $v)
 		{
-			$v = (empty($notEscFields) || !in_array($k,$notEscFields)) ? ("'".mysql_escape_string($v)."'") : $v;
+			$v = (empty($notEscFields) || !in_array($k,$notEscFields)) ? ("'".addslashes($v)."'") : $v;
 			$sql .= ($flag==0?"":", ").$k." = ".$v;
 			$flag = 1;
 		}
@@ -256,7 +262,7 @@ class Tool_Sql
 			else
 			{
 				$sql .= sprintf("%s %s=CONCAT(%s,'%s')", ($flag==0 ? "" : ","),
-						$k, $k, mysql_escape_string($v));
+						$k, $k, addslashes($v));
 				$flag = 1;
 			}
 		}
@@ -276,10 +282,10 @@ class Tool_Sql
 	/**
 	 * select
 	 */
-    function select($table , $selectField , $whereField , $order , $start , $num , $foundRows=false)
+    public static function select($table , $selectField , $whereField , $order , $start , $num , $foundRows=false)
 	{
 		assert(is_array($whereField));
-
+        
 		$select = implode(",",$selectField);
 
 		$where = "";
@@ -295,13 +301,13 @@ class Tool_Sql
 				{
 					foreach($v as $i=>$item)
 					{
-						$v[$i] = mysql_escape_string($item);
+						$v[$i] = addslashes($item);
 					}
 					$where .= $k." in ('". implode("', '", $v) ."')";
 				}
 				else
 				{
-					$where .= $k." = '".mysql_escape_string($v)."'";
+					$where .= $k." = '".addslashes($v)."'";
 				}
 			}
 		}
@@ -332,7 +338,7 @@ class Tool_Sql
 	/**
 	 * select
 	 */
-    function selectRawWhere($table , $selectField , $where , $order , $start , $num , $foundRows=false)
+    public static function selectRawWhere($table , $selectField , $where , $order , $start , $num , $foundRows=false)
 	{
 		$select = implode(",",$selectField);
 

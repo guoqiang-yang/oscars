@@ -20,17 +20,8 @@ class App_Admin_Ajax extends App_Admin_Web
             if ($forbidden)
             {
                 throw new Exception('您无权执行该操作！');
-                exit;
             }
         }
-
-        //城市
-        City_Api::setCity($_COOKIE['shop_city_id']);
-	}
-
-	protected function setAllowedMethod($method)
-	{
-		$this->allowedMethods = array_map("strtoupper", (array) $method);
 	}
 
 	protected function outputPage()
