@@ -12,9 +12,8 @@ class Crm2_Auth_Api extends Base_Api
      * 
      * @param type $customerInfo
      * @param type $userInfo
-     * @param array $adminInfo 管理员信息  //兼职(除毕胜磊)注册客户进入公海(毕：私海)
      */
-    public static function register($customerInfo, $userInfo, $adminInfo=array(), $channel = '')
+    public static function register($customerInfo, $userInfo)
     {
         if (empty($customerInfo) || empty($userInfo))
         {
@@ -32,19 +31,10 @@ class Crm2_Auth_Api extends Base_Api
         $cu = new Crm2_User();
         
         // 判断手机号是否注册
-        $existInvaildUser = false;
         $regCustomer = $cu->getByMobile($userInfo['mobile'], true);
         if (!empty($regCustomer))
         {
-            $_userInfo = current($regCustomer);
-            if ($_userInfo['status'] != Conf_Base::STATUS_NORMAL) //无效用户，标记
-            {
-                $existInvaildUser = true;
-            }
-            else // 有效用户，抛异常
-            {
-                throw new Exception('user:mobile occupied');
-            }
+            throw new Exception('user:mobile occupied');
         }
         
         // 注册流程
@@ -58,119 +48,15 @@ class Crm2_Auth_Api extends Base_Api
         // 默认用户属性
         $customerInfo['sale_status'] = isset($customerInfo['sale_status'])?$customerInfo['sale_status']:Conf_User::CRM_SALE_ST_INNER;
         $customerInfo['chg_sstatus_time'] = date('Y-m-d H:i:s');
-        $customerInfo['level_for_saler'] = Conf_User::SALER_LEVEL_NEW;
         
-        // 销售类型，注册来源
-        if (isset($customerInfo['sales_suid']) && !empty($customerInfo['sales_suid']))
-        {
-            $customerInfo['record_suid'] = $customerInfo['sales_suid'];     //冗余
-            $customerInfo['sale_status'] = Conf_User::CRM_SALE_ST_PRIVATE;
-            $customerInfo['reg_source'] = Conf_User::CUSTOMER_REG_SALER;
-        }
-        
-        // 销售本人注册 && 是兼职 （毕,老汪进私海，其他进公海）
-//        if ($customerInfo['sales_suid']==$adminInfo['suid'] && $adminInfo['kind']==Conf_Admin::JOB_KIND_PARTTIME)
-//        {
-//            $spSuid = array(1041,1040,1039);
-//            $customerInfo['sale_status'] = (in_array($adminInfo['suid'],$spSuid))? Conf_User::CRM_SALE_ST_PRIVATE:Conf_User::CRM_SALE_ST_PUBLIC;
-//            $customerInfo['sales_suid'] = (in_array($adminInfo['suid'],$spSuid))? $adminInfo['suid']: 0;
-//        }
-
-        if (!isset($customerInfo['city_id']) || empty($customerInfo['city_id']))
-        {
-            if (isset($adminInfo['city_id']) && !empty($adminInfo['city_id']))
-            {
-                $customerInfo['city_id'] = $adminInfo['city_id'];
-            }
-            else
-            {
-                $curCity = City_Api::getCity();
-                $customerInfo['city_id'] = $curCity['city_id'];
-            }
-        }
-
-        // 客户没有销售，随机分配一个销售
-        if (empty($customerInfo['sales_suid']))
-        {
-            $cityId = !empty($customerInfo['city_id'])? $customerInfo['city_id']: Conf_City::BEIJING;
-            
-            if ($cityId != Conf_City::BEIJING)
-            {
-                $allSalers = Admin_Api::getSales4City($cityId);
-                $salesSuids = Tool_Array::getFields($allSalers, 'suid');
-                $salesSuids = array_diff($salesSuids, array(1427, 1463));
-                if (!empty($salesSuids))
-                {
-                    $customerInfo['sales_suid'] = $salesSuids[array_rand($salesSuids)];
-                    $customerInfo['sale_status'] = Conf_User::CRM_SALE_ST_PRIVATE;
-                }else{
-                    $customerInfo['sale_status'] = Conf_User::CRM_SALE_ST_PUBLIC;
-                }
-            }
-            else
-            {
-                $customerInfo['sales_suid'] = 1076; //分给吕园梦，简单处理
-                $customerInfo['sale_status'] = Conf_User::CRM_SALE_ST_PRIVATE;
-            }
-            
-            // 注册时，无销售的客户，进入公海 addby:guoqiang 2017-03-29
-//            $customerInfo['sale_status'] = Conf_User::CRM_SALE_ST_PUBLIC;
-            
-        }
-
-        $identity = Conf_User::CRM_IDENTITY_PERSONAL;
-        if(!isset($customerInfo['identity']))
-        {
-            $customerInfo['identity'] = Conf_User::CRM_IDENTITY_PERSONAL;
-        }elseif($customerInfo['identity']!=Conf_User::CRM_IDENTITY_PERSONAL)
-        {
-            $identity = $customerInfo['identity'];
-            $customerInfo['identity'] = Conf_User::CRM_IDENTITY_PERSONAL;
-        }
-
-        $needCertCity = Conf_Crm::getNeedCertCity();
-        if ($identity != Conf_User::CRM_IDENTITY_PERSONAL && !$needCertCity[$customerInfo['city_id']])
-        {
-            $customerInfo['identity'] = $identity;
-        }
-
         $cid = $cc->add($customerInfo);
-        $saleInfo = Admin_Api::getStaff($customerInfo['sales_suid']);
-        if(!empty($saleInfo['ding_id']))
-        {
-            Tool_DingTalk::sendAutoAllocationSalerMessage($saleInfo['ding_id'], $cid);
-        }
-        if($identity != Conf_User::CRM_IDENTITY_PERSONAL && $needCertCity[$customerInfo['city_id']])
-        {
-            $ccia = new Crm2_Customer_Identity_Apply();
-            $dataInfo = array(
-                'cid' => $cid,
-                'identity' => $identity,
-                'suid' => $saleInfo['leader_suid'] > 0 ? $saleInfo['leader_suid'] : 1073,
-                'step' => 1
-            );
-            $ccia->add($dataInfo);
-        }
-
+        
         // 2)注册一个user，并绑定customer
-	    !empty($channel) && $userInfo['channel'] = $channel;
-        if ($existInvaildUser)
-        {
-            $retUinfo = array(
-                'uid' => $_userInfo['uid'],
-            );
-            $userInfo['cid'] = $cid;
-            $userInfo['status'] = Conf_Base::STATUS_NORMAL;
-            $cu->update($_userInfo['uid'], $userInfo);
-        }
-        else
-        {
-            $retUinfo = $cu->add($cid, $userInfo);
-        }
+	    $retUinfo = $cu->add($cid, $userInfo);
 
         return array('cid' => $cid, 'uid' => $retUinfo['uid'], 'verify' => $retUinfo['verify']);
-        
     }
+    
 	// 判断手机号是否注册
 	public static function checkMobile($mobile)
 	{

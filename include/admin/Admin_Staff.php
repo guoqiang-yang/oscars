@@ -8,6 +8,8 @@ class Admin_Staff extends Base_Func
     
     function __construct()
     {
+        parent::__construct();
+        
         $this->_staffDao = new Data_Dao('t_staff_user');
     }
     

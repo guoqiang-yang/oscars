@@ -63,50 +63,18 @@
         var para = {
             cid:            box.find('input[name=cid]').val(),
 			name:           box.find('input[name=name]').val(),
-            nick_name:      box.find('input[name=nick_name]').val(),
-            // age:            box.find('input[name=age]').val(),
-            // birthday:       box.find('input[name=birthday]').val(),
-            sex:            box.find('input[name=sex]:checked').val(),
             identity:       box.find('select[name=identity]').val(),
             source:         box.find('select[name=source]').val(),
             city_id:        box.find('select[name=city_id]').val(),
-            birth_place:    box.find('select[name=birth_place]').val(),
-            // work_age:       box.find('input[name=work_age]').val(),
-            // interest:       box.find('input[name=interest]').val(),
-            // address:        box.find('input[name=address]').val(),
-            // work_area:      box.find('input[name=work_area]').val(),
-            // character_tag:  box.find('input[name=character_tag]').val(),
             note:           box.find('textarea[name=note]').val(),
-            //编辑相关
-            record_suid:    box.find('select[name=record_suid]').val(),
-			sales_suid:     box.find('select[name=sales_suid]').val(),
-
-            rival_desc:     box.find('select[name=rival_desc]').val(),
-			payment_days:   box.find('input[name=payment_days]').val(),
-			status:         box.find('select[name=status]').val(),
-            member_date:    box.find('input[name=member_date]').val(),
-
-            level_for_saler: box.find('select[name=level_for_saler]').val(),
+            sales_suid:     box.find('select[name=sales_suid]').val(),
             level_for_sys:  box.find('select[name=level_for_sys]').val(),
-	        has_duty:       box.find('select[name=has_duty]').val(),
-            discount_ratio: box.find('input[name=discount_ratio]').val(),
+	        tax_point:      box.find('input[name=tax_point]').val(),
             
             //联系人信息
             user_name:      box.find('input[name=name]').val(),
             mobile:         box.find('input[name=mobile]').val(),
-            hometown:       box.find('select[name=birth_place]').val(),
-            // qq:             box.find('input[name=qq]').val(),
-            // weixin:         box.find('input[name=weixin]').val(),
-            // email:          box.find('input[name=email]').val(),
-            //认证相关
-            // real_name:      box.find('input[name=real_name]').val(),
-            // id_number:      box.find('input[name=id_number]').val(),
-            // band_card_number:  box.find('input[name=band_card_number]').val(),
-            identity_mobile: box.find('input[name=identity_mobile]').val(),
-            // company_name:    box.find('input[name=company_name]').val(),
-            // legal_person_name: box.find('input[name=legal_person_name]').val(),
-            // legal_person_id_number: box.find('input[name=legal_person_id_number]').val(),
-            // social_credit_number: box.find('input[name=social_credit_number]').val()
+            hometown:       box.find('select[name=birth_place]').val()
         };
 
         $(this).attr('disabled', true);
@@ -114,10 +82,11 @@
             $('#_j_save_customer_info').attr('disabled', false);
 
             if (ret.st==0){
+                alert('保存成功！');
+                
                 if (ret.url){
                     window.location.href = ret.url;
                 } else {
-                    alert('保存成功！');
                     window.location.reload();
                 }
             } else {

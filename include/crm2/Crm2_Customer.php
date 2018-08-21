@@ -17,32 +17,6 @@ class Crm2_Customer extends Base_Func
     private static $_instance = null;
     
     private $_dao = null;
-    
-    private $_write_field = array(
-        'name', 'city', 'district', 'area', 'address', 'note', 'member_date',
-        'last_order_date', 'order_num', 'record_suid', 'sales_suid', 'city_id', 'identity',
-        'level_for_saler', 'sale_status', 'mode', 'way', 'status', 'kind', 'code',
-        'rcmd_cid', 'reg_source', 'source', 'rival_desc', 'account_balance', 
-        'account_amount', 'order_amount', 'total_amount', 'payment_days', 'payment_due_date', 
-        'remind_count', 'last_remind_suid', 'last_remind_date', 'visit_due_date',
-        'bid', 'is_auto_save', 'all_user_names', 'all_user_mobiles', 'first_order_date',
-        'second_order_date', 'chg_sstatus_time', 'level_for_sys', 'refund_amount',
-	    'has_duty', 'refund_num', 'perpay_amount', 'total_privilege', 'online_order_num',
-        'nick_name', 'age', 'sex', 'birth_place', 'work_age', 'interest', 'work_area',
-        'email', 'character_tag', 'birthday', 'weixin', 'qq','discount_ratio','lday_2_public',
-        'payment_amount', 'contract_btime', 'contract_etime'
-    );
-    
-    public static function getInstance()
-    {
-        if (empty(self::$_instance))
-        {
-            self::$_instance = new self;
-        }
-        
-        return self::$_instance;
-    }
-    
     function __construct()
     {
         parent::__construct();
@@ -53,56 +27,40 @@ class Crm2_Customer extends Base_Func
     /**
      * 添加/注册 客户Customer.
      * 
-     * @param array $info
+     * @param array $regInfo
      * @return int 客户id
      */
-    public function add($info)
+    public function add($regInfo)
     {
-        assert( !empty($info) && is_array($info) );
-        
-        // 过滤字段
-        $regInfo = Tool_Array::checkCopyFields($info, $this->_write_field);
+        assert( !empty($regInfo) && is_array($regInfo) );
         
         // 补齐字段
-        if (!$this->is($regInfo['identity']))
+        if (empty($regInfo['identity']))
         {
             $regInfo['identity'] = Conf_User::CRM_IDENTITY_PERSONAL;
         }
-        
-        if (!$this->is($regInfo['member_date']))
-        {
-            $regInfo['member_date'] = date('Y-m-d');
-        }
-        
-        if (!$this->is($regInfo['note']))
+       
+        if (empty($regInfo['note']))
 		{
 			$regInfo['note'] = '';
 		}
         
-        if (!isset($regInfo['level_for_saler']))
-        {
-            $regInfo['level_for_saler'] = Conf_User::SALES_LEVEL_HADORDER;
-        }
-
         //如果没有city_id,默认使用北京的city_id
-        if (!isset($regInfo['city_id']) || !array_key_exists($regInfo['city_id'], Conf_City::$CITY))
+        if (!isset($regInfo['city_id']) || !Conf_City::isCityExist($regInfo['city_id']))
         {
             $regInfo['city_id'] = Conf_City::BEIJING;
         }
 
-        if (!$this->is($regInfo['chg_sstatus_time']))
+        if (empty($regInfo['chg_sstatus_time']))
         {
             $regInfo['chg_sstatus_time'] = date('Y-m-d H:i:s');
         }
         
-        if (!$this->is($regInfo['level_for_sys']) 
+        if (empty($regInfo['level_for_sys']) 
             && !array_key_exists($regInfo['level_for_sys'], Conf_User::$Customer_Sys_Level_Descs))
         {
             $regInfo['level_for_sys'] = Conf_User::CRM_SYS_LEVEL_COMMON;
         }
-        
-        // 处理地址
-        $regInfo['address'] = $this->_genCustomerAddress($regInfo);
         
 		$regInfo['ctime'] = $regInfo['mtime'] = date('Y-m-d H:i:s');
   
@@ -123,22 +81,14 @@ class Crm2_Customer extends Base_Func
         $_cid = intval($cid);
         assert( $_cid > 0);
         
-        // 更新地址信息
-        if ($this->is($upData['address']))
-        {
-            $upData['address'] = $this->_genCustomerAddress($upData);
-        }
         
         // 如果更新内容包括 销售人员，这将该客户放到该销售的私海
-        if ($this->is($upData['sales_suid']))
+        if (!empty($upData['sales_suid']))
         {
             $upData['sale_status'] = Conf_User::CRM_SALE_ST_PRIVATE;
         }
-
-        $_upData = Tool_Array::checkCopyFields($upData, $this->_write_field);
-        $_chgData = Tool_Array::checkCopyFields($chgData, $this->_write_field);
-
-        $affectedRows = $this->_dao->update($_cid, $_upData, $_chgData);
+        
+        $affectedRows = $this->_dao->update($_cid, $upData, $chgData);
         
 		return $affectedRows;
     }
@@ -148,20 +98,11 @@ class Crm2_Customer extends Base_Func
         assert(!empty($upData)||!empty($chgData));
         assert(!empty($where));
         
-        // 更新地址信息
-        if ($this->is($upData['address']))
-        {
-            $upData['address'] = $this->_genCustomerAddress($upData);
-        }
-        
         // 如果更新内容包括 销售人员，这将该客户放到该销售的私海
-        if ($this->is($upData['sales_suid']))
+        if (!empty($upData['sales_suid']))
         {
             $upData['sale_status'] = Conf_User::CRM_SALE_ST_PRIVATE;
         }
-        
-        $_upData = Tool_Array::checkCopyFields($upData, $this->_write_field);
-        $_chgData = Tool_Array::checkCopyFields($chgData, $this->_write_field);
         
         $affectedRow = $this->_dao->updateWhere($where, $_upData, $_chgData);
         
@@ -174,12 +115,6 @@ class Crm2_Customer extends Base_Func
         assert( $_cid>0 );
         
         $customerInfo = $this->_dao->get($_cid);
-        
-        if (!empty($customerInfo))
-        {
-            $customerInfo['full_addr'] = str_replace(self::ADDR_SEPARATE, '-', $customerInfo['address']);
-            $this->_parseCustomerAddress($customerInfo['address']);
-        }
         
         return $customerInfo;
     }
@@ -197,20 +132,7 @@ class Crm2_Customer extends Base_Func
         
         return $customerInfos;
     }
-
-	public function getAll()
-	{
-		$where = 'status=0';
-		$customerInfos = $this->_dao->getListWhere($where);
-		foreach($customerInfos as &$_customer)
-		{
-			$this->_parseCustomerAddress($_customer['address']);
-		}
-
-		return $customerInfos;
-	}
-
-
+    
     public function searchCustomerWithMobiles($mobiles)
     {
         assert(!empty($mobiles) && is_array($mobiles));
@@ -348,7 +270,7 @@ class Crm2_Customer extends Base_Func
                 break;
         }
         
-        if ($this->is($salerSuid))
+        if (!empty($salerSuid))
         {
             $where .= ' and sales_suid='. $salerSuid;
         }
@@ -436,31 +358,18 @@ class Crm2_Customer extends Base_Func
         $where = ' 1=1 ';
   
         // 对于：sale_status - 搜索 自己/下属的私海 或 公海
-        if (!empty($searchConf['sales_suid']) && !$searchConf['sales_director'])
+        if (!empty($searchConf['sales_suid']))
         {
-
             if ($searchConf['sale_status'] == Conf_User::CRM_SALE_ST_PUBLIC)
             {
                 $where .= sprintf(' and sale_status=%d', Conf_User::CRM_SALE_ST_PUBLIC);
             }
             else
             {
-                /*
-                if (isset($searchConf['staff_kind']) && $searchConf['staff_kind']==Conf_Admin::JOB_KIND_PARTTIME)
-                { //兼职销售
-                    $where .= sprintf(' and (sales_suid=%d or record_suid=%d) ',
-                            $searchConf['sales_suid'], $searchConf['sales_suid']);
-                }
-                else
-                {
-                */
-                    $where .= sprintf(' and sale_status=%d', Conf_User::CRM_SALE_ST_PRIVATE);
-                /*
-                }
-                */
+                $where .= sprintf(' and sale_status=%d', Conf_User::CRM_SALE_ST_PRIVATE);
             }
         }
-        else if ($this->is($searchConf['sale_status']))
+        else if (!empty($searchConf['sale_status']))
         {
             $where .= sprintf(' and sale_status=%d', $searchConf['sale_status']);
         }
@@ -471,91 +380,11 @@ class Crm2_Customer extends Base_Func
                 $where .= sprintf(' and sales_suid=%d', $searchConf['sales_suid']);
             }
         }
-         
-        // 首单
-        if ($this->is($searchConf['first_order_date']))
-        {
-            $_searchWithTime = false;
-            if ($this->is($searchConf['first_order_date']['btime']))
-            {
-                $where .= sprintf(' and first_order_date>=date("%s")', $searchConf['first_order_date']['btime']);
-                $_searchWithTime = true;
-            }
-            if ($this->is($searchConf['first_order_date']['etime']))
-            {
-                $where .= sprintf(' and first_order_date<=date("%s")', $searchConf['first_order_date']['etime']);
-                $_searchWithTime = true;
-            }
-            
-            if (!$_searchWithTime)
-            {
-                $where .= sprintf(' and first_order_date!=0');
-            }
-            
-            // 首单的下单时间要在属于该客户之后 @todo 20160401打开
-            //$where .= sprintf(' and date(first_order_date)>=date(chg_sstatus_time)');
-        }
-        
-        // 复购（第二个订单）
-        if ($this->is($searchConf['second_order_date']))
-        {
-            $_searchWithTime = false;
-            if ($this->is($searchConf['second_order_date']['btime']))
-            {
-                $where .= sprintf(' and second_order_date>=date("%s")', $searchConf['second_order_date']['btime']);
-                $_searchWithTime = true;
-            }
-            if ($this->is($searchConf['second_order_date']['etime']))
-            {
-                $where .= sprintf(' and second_order_date<=date("%s")', $searchConf['second_order_date']['etime']);
-                $_searchWithTime = true;
-            }
-            
-            if (!$_searchWithTime)
-            {
-                $where .= sprintf(' and second_order_date!=0');
-            }
-        }
-
-        //回访相关
-        if (isset($searchConf['tracking_cate']))
-        {
-            if ($searchConf['tracking_cate'] == 0)
-            {
-                $where .= sprintf(' and visit_due_date != "1999-09-09" and visit_due_date < "' . date('Y-m-d') . '" ');
-            }
-            else if ($searchConf['tracking_cate'] == 1)
-            {
-                $where .= sprintf(' and visit_due_date >= "' . date('Y-m-d') . '" ');
-            }
-            else
-            {
-                $where .= sprintf(' and visit_due_date = "1999-09-09" ');
-            }
-        }
-        if ($searchConf['has_payment_days'] == 1)
-        {
-            $where .= sprintf(' and payment_days > 0');
-        }
-        if ($searchConf['has_payment_days'] == 2)
-        {
-            $where .= sprintf(' and payment_days = 0');
-        }
 
         //按城市
-        if ($this->is($searchConf['city_id']))
+        if (!empty($searchConf['city_id']))
         {
             $where .= sprintf(' and city_id = %d', $searchConf['city_id']);
-        }
-
-        //注册时间
-        if ($this->is($searchConf['start_ctime']))
-        {
-            $where .= sprintf(' AND ctime>="%s 00:00:00"', $searchConf['start_ctime']);
-        }
-        if ($this->is($searchConf['end_ctime']))
-        {
-            $where .= sprintf(' AND ctime<="%s 23:59:59"', $searchConf['end_ctime']);
         }
 
         return $where;
@@ -573,14 +402,14 @@ class Crm2_Customer extends Base_Func
         );
         
         // 按cid
-        if ($this->is($searchConf['cid']))
+        if (!empty($searchConf['cid']))
         {
             $where .= ' and cid='. $searchConf['cid'];
             return $where;
         }
         
         // 按客户基本信息模糊匹配
-        if ($this->is($searchConf['keyword']))
+        if (!empty($searchConf['keyword']))
         {
             $_where = '';
             foreach($searchKeywordKeys as $_key)
@@ -598,40 +427,15 @@ class Crm2_Customer extends Base_Func
         } 
         else 
         {
-            if ($this->is($searchConf['mobile']))
+            if (!empty($searchConf['mobile']))
             {
                 $where .= sprintf(' and all_user_mobiles like "%%%s%%" ', $searchConf['mobile']);
             }
-            if ($this->is($searchConf['name']))
+            if (!empty($searchConf['name']))
             {
                 $where .= sprintf(' and (name like "%%%s%%" or all_user_names like "%%%s%%") ', 
                             $searchConf['name'], $searchConf['name']);
             }
-        }
-        
-        // 是否下单
-        if ($this->is($searchConf['customer_kind']))
-        {
-            if ($searchConf['customer_kind'] == 2)  //已下单筛选
-            {
-                $where .= ' and order_num>0' ;
-            }
-            else
-            {
-                $where .= ' and order_num<=0 ';
-            }
-        }
-        
-        // 客户状态
-        if (isset($searchConf['status']) && $searchConf['status']!=Conf_Base::STATUS_ALL)
-        {
-            $where .= ' and status='. $searchConf['status'];
-        }
-        
-        // 录入专员
-        if ($this->is($searchConf['record_suid']))
-        {
-            $where .= ' and record_suid='. ($searchConf['record_suid']>1? $searchConf['record_suid']: 0); // ==1 表示 ‘无录入专员’
         }
         
         // 客户的销售级别
@@ -655,7 +459,7 @@ class Crm2_Customer extends Base_Func
         // 常规搜索条件
         foreach($searchCommonKeys as $_key)
         {
-            if ($this->is($searchConf[$_key]))
+            if (!empty($searchConf[$_key]))
             {
                 $where .= " and $_key=". $searchConf[$_key];
             }
@@ -699,40 +503,6 @@ class Crm2_Customer extends Base_Func
         return $affectedRows;
     }
     
-    
-    /**
-     * 合成详细地址，存储.
-     * 
-     * @param array $customerInfo
-     */
-    private function _genCustomerAddress($customerInfo)
-    {
-        $newAddr = '';
-        $allCitys = Conf_Area::$CITY;
-        
-        $address = $this->is($customerInfo['address'])? $customerInfo['address']: '';
-        $city = $this->is($customerInfo['city'])? $customerInfo['city']: 0;
-        $district = $this->is($customerInfo['district'])? $customerInfo['district']: 0;
-        $area = $this->is($customerInfo['area'])? $customerInfo['area']: 0;
-        
-        if (empty($address) || empty($city) || !array_key_exists($city, $allCitys))
-        {
-            return $address;
-        }
-        
-        $newAddr .= $allCitys[$city];
-        
-        if (isset(Conf_Area::$DISTRICT[$city]) && array_key_exists($district, Conf_Area::$DISTRICT[$city]))
-        {
-            $newAddr .= Conf_Area::$DISTRICT[$city][$district];
-        }
-        if (isset(Conf_Area::$AREA[$district]) && array_key_exists($area, Conf_Area::$AREA[$district]))
-        {
-            $newAddr .= Conf_Area::$AREA[$district][$area];
-        }
-        
-        return $newAddr. self::ADDR_SEPARATE. $address;
-    }
     
     /**
      * 解析地址 - 显示使用， 去掉添加信息.

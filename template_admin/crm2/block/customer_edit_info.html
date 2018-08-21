@@ -1,32 +1,14 @@
-<div style="display: none;" id="area-json">
-	{{$area}}
-</div>
-<div style="display: none;" id="city-json">
-	{{$city}}
-</div>
-<div style="display: none;" id="distinct-json">
-	{{$distinct}}
-</div>
 
-<input type="hidden" name="cid" value="{{$customer.cid}}">
+<input type="hidden" name="cid" value="{{$customer.cid|default:0}}">
 
 		<div class="area-bottom">
 			<div class="form-group">
 				<label class="col-sm-2 control-label">客户名称：</label>
 				<div class="col-sm-4">
-					<input type="text" class="form-control" name="name" value="{{$customer.name}}" style="display:inline;">
+					<input type="text" class="form-control" name="name" value="{{$customer.name|default:''}}" style="display:inline;">
 				</div>
 				<div class="col-sm-1">
 					<span class="text-value" style="font-size:14px; margin-left: -20px; color:red;">【必选】</span>
-				</div>
-			</div>
-            <div id="real_name_identification">
-
-            </div>
-			<div class="form-group">
-				<label class="col-sm-2 control-label">称呼：</label>
-				<div class="col-sm-4">
-					<input type="text" class="form-control" name="nick_name" value="{{$customer.nick_name}}" style="display:inline;">
 				</div>
 			</div>
 			{{if empty($customer.cid)}}
@@ -41,20 +23,12 @@
 			</div>
 			{{/if}}
 			<div class="form-group">
-				<label class="col-sm-2 control-label">性别：</label>
-				<div class="col-sm-4">
-					<label class="checkbox-inline"><input type="radio" name="sex" value="0" style="display:inline;" {{if empty($customer) || $customer.sex == 0 }} checked{{/if}}>&nbsp;男</label>
-					<label class="checkbox-inline"><input type="radio" name="sex" value="1" style="display:inline;" {{if $customer.sex == 1 }} checked{{/if}}>&nbsp;女</label>
-				</div>
-			</div>
-			<div class="form-group">
 				<label class="col-sm-2 control-label">客户类型：</label>
 				<div class="col-sm-4">
-                    <input type="hidden" name="cid" value="{{$customer.cid}}">
-					<select id="_j_chg_customer_identity" class="form-control" name="identity" {{if !$customer.canIdentity}} disabled{{/if}}>
+					<select id="_j_chg_customer_identity" class="form-control" name="identity">
 						<option value="0" {{if empty($customer.identity)}} selected="true" {{/if}}>请选择</option>
 						{{foreach $identitys as $k=>$v}}
-						<option value="{{$k}}" {{if $customer.identity==$k}} selected="true" {{/if}}>{{$v}}</option>
+						<option value="{{$k}}" {{if !empty($customer.identity)&&$customer.identity==$k}} selected="true" {{/if}}>{{$v}}</option>
 						{{/foreach}}
 					</select>
 				</div>
@@ -68,8 +42,8 @@
 				<div class="col-sm-4">
 					<select class="form-control" name="source">
 						<option value="0" {{if empty($customer.source)}}selected="true" {{/if}}>请选择</option>
-						{{foreach $user_source as $skey=>$src}}
-						<option value="{{$skey}}" {{if $customer.source==$skey}}selected="true"{{/if}}>{{$src}}</option>
+						{{foreach $sources as $skey=>$src}}
+						<option value="{{$skey}}" {{if !empty($customer.source)&&$customer.source==$skey}}selected="true"{{/if}}>{{$src}}</option>
 						{{/foreach}}
 					</select>
 				</div>
@@ -81,8 +55,9 @@
                 <label class="col-sm-2 control-label">客户城市：</label>
                 <div class="col-sm-4">
                     <select class="form-control" name="city_id">
+                    <option value="0" {{if empty($customer.city_id)}}selected="true" {{/if}}>请选择</option>
                     {{foreach $cities as $city_id => $city_name}}
-                    <option value="{{$city_id}}" {{if $customer.city_id==$city_id}}selected="true"{{/if}}>{{$city_name}}</option>
+                    <option value="{{$city_id}}" {{if !empty($customer.city_id)&&$customer.city_id==$city_id}}selected="true"{{/if}}>{{$city_name}}</option>
                     {{/foreach}}
                     </select>
                 </div>
@@ -91,54 +66,20 @@
                 </div>
             </div>
 			<div class="form-group">
-				<label class="col-sm-2 control-label">籍贯：</label>
-				<div class="col-sm-4">
-					<select class="form-control" name="birth_place">
-						<option value="" {{if empty($customer.birth_place)}}selected="true"{{/if}}>请选择</option>
-						{{foreach $province as $pname}}
-						<option value="{{$pname}}" {{if $customer.birth_place==$pname}}selected="true"{{/if}}>{{$pname}}</option>
-						{{/foreach}}
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
 				<label class="col-sm-2 control-label">备注：</label>
 				<div class="col-sm-6">
-					<textarea class="form-control" name="note" rows="4">{{$customer.note nofilter}}</textarea>
+					<textarea class="form-control" name="note" rows="4">{{$customer.note|default:''}}</textarea>
 				</div>
 			</div>
 		</div>
         <div class="area-bottom">
-            {{if !empty($_permissions["crm2_update_customer_other_info"])}}
             <div class="form-group">
                 <label class="col-sm-2 control-label">客户类别：</label>
                 <div class="col-sm-3">
-                    <select class="form-control" name="level_for_sys" disabled="true">
+                    <select class="form-control" name="level_for_sys">
                         <option value="0" {{if empty($customer.level_for_sys)}}selected="true" {{/if}}>请选择类别</option>
                         {{foreach $sys_levels as $l=>$desc}}
-                        <option value="{{$l}}" {{if $customer.level_for_sys== $l}}selected="true" {{/if}}>{{$desc}}</option>
-                        {{/foreach}}
-                    </select>
-                </div>
-            </div>
-            {{/if}}
-			{{if !empty($_permissions["crm2_update_customer_other_info"])}}
-			<div class="form-group">
-				<label class="col-sm-2 control-label">折扣比例：</label>
-				<div class="col-sm-2">
-					<input type="text" class="form-control" name="discount_ratio" value="{{$customer.discount_ratio}}" style="display:inline;">
-				</div>
-                <div class="col-sm-2"><span class="text-value" style="font-size:16px; margin-left: -20px;">%</span></div>
-			</div>
-			{{/if}}
-            {{if !empty($_permissions["crm2_update_customer_suser"]) && !empty($customer.cid)}}
-            <div class="form-group">
-                <label class="col-sm-2 control-label">录入专员：</label>
-                <div class="col-sm-3">
-                    <select class="form-control" name="record_suid" {{if !empty($customer.cid)}} disabled="true" {{/if}}>
-                        <option value="0" {{if empty($customer.record_suid)}}selected="true" {{/if}}>自己注册</option>
-                        {{foreach $record_salelist as $sales}}
-                        <option value="{{$sales.suid}}" {{if $customer.record_suid== $sales.suid}}selected="true" {{/if}}>{{$sales.name}}</option>
+                        <option value="{{$l}}" {{if !empty($customer.level_for_sys)&&$customer.level_for_sys== $l}}selected="true" {{/if}}>{{$desc}}</option>
                         {{/foreach}}
                     </select>
                 </div>
@@ -148,96 +89,20 @@
                 <div class="col-sm-3">
                     <select class="form-control" name="sales_suid">
                         <option value="0" {{if empty($customer.sales_suid)}} selected="true" {{/if}}>请选择销售专员</option>
-                        <option value="1078" {{if $customer.sales_suid==1078}} selected="true" {{/if}}>任慧娟</option>
                         {{foreach $sales_list as $sales}}
-                        <option value="{{$sales.suid}}" {{if $customer.sales_suid== $sales.suid}} selected="true" {{/if}}>{{$sales.name}}</option>
+                        <option value="{{$sales.suid}}" {{if !empty($customer.sales_suid)&&$customer.sales_suid== $sales.suid}} selected="true" {{/if}}>{{$sales.name}}</option>
                         {{/foreach}}
-                    </select>
-                </div>
-            </div>
-            {{/if}}
-            {{if !empty($_permissions["crm2_update_customer_level_for_saler"])}}
-            <div class="form-group">
-                <label class="col-sm-2 control-label">客户级别：</label>
-                <div class="col-sm-3">
-                    <select class="form-control" id="level_for_saler" name="level_for_saler" disabled="true">
-                        <option value="0" {{if empty($customer.level_for_saler)}}selected="true" {{/if}}>请选择客户级别</option>
-                        {{foreach $customer_levels as $level=>$ldesc}}
-                        <option value="{{$level}}" {{if $customer.level_for_saler== $level}}selected="true" {{/if}}>{{$ldesc}}</option>
-                        {{/foreach}}
-                    </select>
-                </div>
-            </div>
-            <div class="form-group" id="customer_contract_div" {{if $customer.level_for_saler < 5}} style="display:none;"{{/if}}>
-                <label class="col-sm-2 control-label">合同起止日期：</label>
-                <div class="col-sm-4">
-                    [始]<input type="date" class="form-control" name="contract_btime" style="display: inline-block;width: 80%;" value="{{$customer.contract_btime}}" disabled placeholder="YYYY-MM-DD"><br/>
-                    [终]<input type="date" class="form-control" name="contract_etime"  style="display: inline-block;width: 80%;" value="{{$customer.contract_etime}}" disabled placeholder="YYYY-MM-DD">
-                </div>
-            </div>
-            {{/if}}
-            <div class="form-group">
-                <label class="col-sm-2 control-label">竞争对手情况：</label>
-                <div class="col-sm-3">
-                    <select class="form-control" name="rival_desc">
-                        <option value="0" {{if empty($customer.rival_desc)}}selected="true" {{/if}}>请选择</option>
-                        {{foreach $rival_descs as $rkey=>$desc}}
-                        <option value="{{$rkey}}" {{if $customer.rival_desc==$rkey}}selected="true"{{/if}}>{{$desc}}</option>
-                        {{/foreach}}
-                    </select>
-                </div>
-            </div>
-			{{if !empty($_permissions["crm2_update_customer_other_info"])}}
-            <div class="form-group">
-                <label class="col-sm-2 control-label">账期：</label>
-                <div class="col-sm-3">
-                    <input style="display: inline-block; width:100%;" class="form-control" type="text" readonly name="payment_days" value="{{$customer.payment_days}}" placeholder="账期">
-                </div>
-                <div class="col-sm-1">
-                    <span class="text-value" style="font-size:16px; margin-left: -20px;">天</span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label">账额：</label>
-                <div class="col-sm-3">
-                    <input style="display: inline-block; width:100%;" class="form-control" type="text" name="payment_amount" value="{{$customer.payment_amount/100}}" readonly placeholder="账额">
-                </div>
-                <div class="col-sm-1">
-                    <span class="text-value" style="font-size:16px; margin-left: -20px;">元</span>
-                </div>
-            </div>
-			{{/if}}
-            {{if !empty($_permissions['crm2_update_customer_other_info'])}}
-            <div class="form-group">
-                <label class="col-sm-2 control-label">状态：</label>
-                <div class="col-sm-3">
-                    <select class="form-control" name="status">
-                        <option value="0" {{if 0== $customer.status}}selected="true" {{/if}}>正常</option>
-                        <option value="5" {{if 5== $customer.status}}selected="true" {{/if}}>未审核</option>
-                        <option value="2" {{if 2== $customer.status}}selected="true" {{/if}}>封禁</option>
-                        <option value="1" {{if 1== $customer.status}}selected="true" {{/if}}>删除</option>
                     </select>
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="col-sm-2 control-label">含税：</label>
+                <label class="col-sm-2 control-label">税点：</label>
                 <div class="col-sm-3">
-                    <select class="form-control" name="has_duty" disabled="disabled">
-                        <option value="2" {{if 2 == $customer.has_duty}} selected="true" {{/if}}>不含税账户</option>
-                        <option value="1" {{if 1 == $customer.has_duty}} selected="true" {{/if}}>含税账户</option>
-                    </select>
+                    <input class="form-control" name="tax_point" value="{{$customer.tax_point|default:0}}">
                 </div>
-                <div class="col-sm-2">
-                    <span class="text-value" style="font-size:14px; margin-left: -20px; color:red;">【不知道作用别改】</span>
-                </div>
-            </div>
-            {{/if}}
-
-            <div class="form-group">
-                <label class="col-sm-2 control-label">开发日期：</label>
                 <div class="col-sm-3">
-                    <input type="text" class="form-control" name="member_date" value="{{if $customer.member_date}}{{$customer.member_date}}{{else}}{{$smarty.now|date_format:'%Y-%m-%d'}}{{/if}}" disabled="ture">
+                    <span class="text-value" style="font-size:14px; margin-left: -20px; color:red;">【0: 不含税；8: 8个点税】</span>
                 </div>
             </div>
         </div>

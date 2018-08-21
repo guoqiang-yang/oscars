@@ -38,7 +38,6 @@ CREATE TABLE t_customer (
   mtime             timestamp       not null default current_timestamp ON UPDATE CURRENT_TIMESTAMP,
 
   PRIMARY KEY (cid),
-  index (all_user_names),
   index (sales_suid),
   index (record_suid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 auto_increment=6000;
@@ -66,7 +65,7 @@ CREATE TABLE t_user (
 
   PRIMARY KEY (uid),
   unique (mobile),
-  index (cid),
+  index (cid)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 auto_increment=6000;
 

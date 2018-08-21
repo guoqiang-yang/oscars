@@ -65,9 +65,7 @@ class Conf_Admin_Page
                     'buttons' => array(
                         array('key' => '/order/customer_list_cs', 'name' => '列表'),
                         array('key' => '/order/add_order2', 'name' => '一步下单'),
-                        array('key' => '/order/add_order_logistics_h5', 'name' => '手机下单'),
                         array('key' => '/crm2/ajax/reset_pass', 'name' => '重置密码'),
-                        array('key' => '/crm2/ajax/save_customer_high', 'name' => '高级编辑'),
                     ),
                 ),
                 array(
@@ -384,74 +382,7 @@ class Conf_Admin_Page
 
 	public static function getFirstPage($suid, $suser)
 	{
-        
         return '/user/chgpwd.php';
-        
-		$url = '/user/message.php';
-        $user = Admin_Api::getStaff($suid);
-        if (Admin_Role_Api::hasRole($user, Conf_Admin::ROLE_STATISTICS_OVERVIEW))
-        {
-            $url = '/statistics/overview.php';
-        }
-        if($user['department'] == Conf_Permission::DEPARTMENT_SELL)
-        {
-            $url = '/crm2/sales_homepage.php';
-            $url = '/user/message.php';
-        }
-        return $url;
-
-
-
-		$roleLevels = Admin_Role_Api::getRoleLevels($suid, $suser);
-		if (isset($roleLevels[Conf_Admin::ROLE_ADMIN_NEW]))
-		{
-			$url = '/order/order_list.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_SALES_NEW]))
-		{
-			$url = '/crm2/customer_list.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_BUYER]))
-		{
-			$url = '/warehouse/in_order_list.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_LM]))
-		{
-			$url = '/order/order_list.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_OP]))
-		{
-			$url = '/order/order_list.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_CS]))
-		{
-			$url = '/order/order_list.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_WAREHOUSE]))
-		{
-			$url = '/order/order_list.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_FINANCE]))
-		{
-			$url = '/finance/customer_list.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_YUNNIAO]))
-		{
-			$url = '/logistics/driver.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_CITY_ADMIN]))
-		{
-			$url = '/shop/product_list.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_AFTER_SALE]))
-		{
-			$url = '/aftersale/list.php';
-		}
-		elseif (isset($roleLevels[Conf_Admin::ROLE_EDITOR]))
-		{
-			$url = '/shop/sku_list.php';
-		}
-		return $url;
 	}
 
     public static function getModulesForRoleManage()

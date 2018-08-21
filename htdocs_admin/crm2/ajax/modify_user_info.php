@@ -24,7 +24,7 @@ class App extends App_Admin_Ajax
     private $userInfo;
     private $ajResponse;
 
-    protected function checkAuth()
+    protected function checkAuth($permission='')
     {
         parent::checkAuth('/crm2/edit_customer');
     }
@@ -37,8 +37,6 @@ class App extends App_Admin_Ajax
         $this->name = Tool_Input::clean('r', 'name', TYPE_STR);
         $this->mobile = Tool_Input::clean('r', 'mobile', TYPE_STR);
         $this->hometown = Tool_Input::clean('r', 'hometown', TYPE_STR);
-        $this->realName = Tool_Input::clean('r', 'real_name', TYPE_STR);
-        $this->idCardNo = Tool_Input::clean('r', 'id_card_no', TYPE_STR);
         $this->isAdmin = Tool_Input::clean('r', 'is_admin', TYPE_UINT);
 
         $this->ajResponse = array(
@@ -70,12 +68,6 @@ class App extends App_Admin_Ajax
 
     protected function main()
     {
-        //todo: 临时限制欠款大户，谁看到这条就可以找王申确认下是否可以删掉了
-        if (in_array($this->_uid, array(1039, 1437, 1089, 1320, 1496,1041,1603,1107,1378)))
-        {
-            return;
-        }
-
         if ($this->ajResponse['st'] != 0)
         {
             return;
@@ -173,8 +165,6 @@ class App extends App_Admin_Ajax
             'name' => $this->name,
             'mobile' => $this->mobile,
             'hometown' => $this->hometown,
-            'real_name' => $this->realName,
-            'id_card_no' => $this->idCardNo,
             'is_admin' => $this->isAdmin,
         );
         $ret = Crm2_Api::bindUserWithCustomer($this->cid, $bindUserInfo);
@@ -213,8 +203,6 @@ class App extends App_Admin_Ajax
             'name' => $this->name,
             'mobile' => $this->mobile,
             'hometown' => $this->hometown,
-            'real_name' => $this->realName,
-            'id_card_no' => $this->idCardNo,
             'is_admin' => $this->isAdmin,
         );
         $ret = Crm2_Api::updateUserInfo($this->uid, $this->cid, $modifyUinfo);
@@ -229,31 +217,14 @@ class App extends App_Admin_Ajax
             $this->ajResponse['st'] = 42;
             $this->ajResponse['msg'] = '更新失败！请联系管理员！';
         }
-
-        if ($ret > 0)
-        {
-            // 记录客户跟踪信息
-            if ($this->isAdmin != $this->userInfo['is_admin'])
-            {
-                $content = '修改 User(' . $this->userInfo['uid'] . ') 的管理员权限：从【' . $this->userInfo['is_admin'] . '】变更为【' . $this->isAdmin . '】';
-
-                $trackingInfo = array(
-                    'cid' => $this->cid,
-                    'edit_suid' => $this->_uid,
-                    'content' => $content,
-                    'type' => Conf_User::CT_CUSTOMER_LEVEL,
-                );
-                Crm2_Api::saveCustomerTracking(0, $trackingInfo);
-            }
-        }
     }
 
     private function _getCustomerInfo()
     {
-        $ret = Crm2_Api::getCustomerInfo($this->cid, FALSE, FALSE);
-
+        $ret = Crm2_Api::getCustomerInfo($this->cid, FALSE);
+        
         $this->customerInfo = $ret['customer'];
-        $this->userInfo = $ret['user'];
+        $this->userInfo = $ret['users'];
     }
 
     private function _getUserInfo()

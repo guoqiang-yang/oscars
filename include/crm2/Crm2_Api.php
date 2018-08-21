@@ -10,7 +10,7 @@ class Crm2_Api extends Base_Api
      *
      * @param int $cid
      */
-    public static function getCustomerInfo($cid, $needUsers = TRUE, $needCoupon = TRUE)
+    public static function getCustomerInfo($cid, $needUsers = TRUE)
     {
         $cc = new Crm2_Customer();
         $cu = new Crm2_User();
@@ -24,13 +24,6 @@ class Crm2_Api extends Base_Api
             $users = $cu->getUsersOfCustomer($cid);
         }
 
-        //补充优惠券信息
-        if ($needCoupon)
-        {
-            $ccoupon = new Coupon_Coupon();
-            $ccoupon->appendCoupon($customer, 'cid');
-        }
-
         return array('customer' => $customer[0], 'users' => $users);
     }
 
@@ -41,7 +34,7 @@ class Crm2_Api extends Base_Api
      * @param bool $needCustomerInfo
      * @param bool $needCoupon
      */
-    public static function getUserInfo($uid, $needCustomerInfo = TRUE, $needCoupon = FALSE)
+    public static function getUserInfo($uid, $needCustomerInfo = TRUE)
     {
         $cc = new Crm2_Customer();
         $cu = new Crm2_User();
@@ -52,38 +45,6 @@ class Crm2_Api extends Base_Api
         if ($needCustomerInfo && isset($user['cid']))
         {
             $customer = array($cc->get($user['cid']));
-        }
-
-        if ($needCoupon)
-        {
-            $ccoupon = new Coupon_Coupon();
-            $ccoupon->appendCoupon($customer, 'cid');
-        }
-        if (empty($user['logurl']))
-        {
-            $wx = new WeiXin_Api();
-            $wxInfo = $wx->getByUid($user['uid']);
-            $user['logurl'] = $wxInfo['headimgurl'];
-            if (empty($user['logurl']))
-            {
-                $user['logurl'] = 'http://haocaisong.oss-cn-hangzhou.aliyuncs.com/static/icon_userinfo_head.png';
-            }
-        }
-        else if (strpos($user['logurl'], 'http') === FALSE && strpos($user['logurl'], 'https') === FALSE)
-        {
-            $user['logurl'] = Oss_Api::getImageUrl($user['logurl'], 800, 800);
-        }
-
-        if (empty($user['grade']))
-        {
-            $user['grade'] = 1;
-        }
-        $userGrade = Conf_User::getMemberGrade();
-        $user['_grade_show'] = $userGrade[$user['grade']];
-        $user['total_point'] = $user['vaild_point'] + $user['frozen_point'];
-        if ($user['birthday'] == 0)
-        {
-            $user['birthday'] = '';
         }
 
         return array('customer' => $customer[0], 'user' => $user);
@@ -118,30 +79,10 @@ class Crm2_Api extends Base_Api
      * @param int   $cid
      * @param array $customerInfo
      */
-    public static function updateCustomerInfo($cid, $customerInfo, $chgData = array(), $adminInfo = array())
+    public static function updateCustomerInfo($cid, $customerInfo, $chgData = array())
     {
         $cc = new Crm2_Customer();
-
-        $oldCustomerInfo = $cc->get($cid);
-
-        // 记录客户跟踪信息
-        $trackingContent = '';
-        $trackType = '';
-        if (isset($customerInfo['level_for_sys']) && $oldCustomerInfo['level_for_sys'] != $customerInfo['level_for_sys'])
-        {
-            $trackType = Conf_User::CT_CUSTOMER_LEVEL;
-            $trackingContent = '客户类别变更：从【' . Conf_User::$Customer_Sys_Level_Descs[$oldCustomerInfo['level_for_sys']] . '】' . '变更为【' . Conf_User::$Customer_Sys_Level_Descs[$customerInfo['level_for_sys']] . '】';
-        }
-
-        if (!empty($trackingContent) && !empty($trackType))
-        {
-            $trackingInfo = array(
-                'cid' => $cid, 'edit_suid' => isset($adminInfo['suid']) ? $adminInfo['suid'] : 0, 'content' => $trackingContent, 'type' => $trackType,
-            );
-            Crm2_Api::saveCustomerTracking(0, $trackingInfo);
-        }
-
-        // update-customer
+        
         return $cc->update($cid, $customerInfo, $chgData);
     }
 
@@ -269,7 +210,7 @@ class Crm2_Api extends Base_Api
             $cu = new Crm2_User();
 
             $ret = $cu->add($cid, $userInfo);
-
+            
             // 更新客户中冗余的用户的信息
             if ($ret)
             {
@@ -375,42 +316,26 @@ class Crm2_Api extends Base_Api
      * @param int    $num
      * @param strint $sort
      */
-    public static function getCustomerListForAdmin($searchConf, $adminor, $orderBy = 'cid', $start = 0, $num = 20, $sort = 'desc')
+    public static function getCustomerList($searchConf, $adminor, $orderBy = 'cid', $start = 0, $num = 20, $sort = 'desc')
     {
         $cc = new Crm2_Customer();
-        //$cu = new Crm2_User();
-
-        self::_setRoleForSearchCustomer($searchConf, (Str_Check::checkMobile($searchConf['mobile']) ? NULL : $adminor));
+        
+        $_mobile = !empty($searchConf['mobile'])? $searchConf['mobile']: '';
+        self::_setRoleForSearchCustomer($searchConf, (Str_Check::checkMobile($_mobile) ? NULL : $adminor));
 
         $customerList = $cc->search($searchConf, array('*'), $start, $num, $orderBy, $sort);
 
         //补充市场专员信息
-        $as = new Admin_Staff();
-        $as->appendSuers($customerList['data'], 'sales_suid', 'record_suid', TRUE);
-
-        //补充优惠券信息
-        $cco = new Coupon_Coupon();
-        $cco->appendCoupon($customerList['data'], 'cid');
+        Admin_Api::appendStaffInfos($customerList['data'], 'sales_suid');
 
         //补全客户基本信息
         $cids = array_keys($customerList['data']);
         if (!empty($cids))
         {
-            $wxCustomer = WeiXin_Api::getByCids($cids);
-
             foreach ($customerList['data'] as &$cinfo)
             {
-                $cinfo['has_weixin'] = 0;
-                if (!empty($wxCustomer[$cinfo['cid']]))
-                {
-                    $cinfo['has_weixin'] = 1;
-                }
-
                 if (Admin_Role_Api::isAdmin($adminor['suid'], $adminor) || 
-                    Admin_Role_Api::hasRole($adminor, Conf_Admin::ROLE_CITY_ADMIN_NEW) || 
-                    Admin_Role_Api::hasRole($adminor, Conf_Admin::ROLE_SALES_DIRECTOR) || 
-                    $adminor['suid'] == $cinfo['sales_suid'] || 
-                    in_array($cinfo['sales_suid'], $adminor['team_member']) )
+                    $adminor['suid'] == $cinfo['sales_suid'])
                 {
                     $cinfo['is_show_mobile'] = 1;
                 }
@@ -564,28 +489,11 @@ class Crm2_Api extends Base_Api
             return;
         }
 
-        // 管理员角色判断
-        //        $_isSaler = 0;
-        //	    $_isAdmin = 0;
-        //        $_salerLevel = 0;
-        //        foreach($adminor['level'] as $role=>$level)
-        //        {
-        //            if ($role == Conf_Admin::ROLE_SALES)
-        //            {
-        //                $_isSaler = 1;
-        //                $_salerLevel = $level;
-        //            }
-        //	        if ($role == Conf_Admin::ROLE_ADMIN)
-        //	        {
-        //		        $_isAdmin = 1;
-        //	        }
-        //        }
-
         if (Admin_Role_Api::hasRole($adminor, Conf_Admin::ROLE_SALES_NEW))
         {
             if ($searchConf['sale_status'] == Conf_User::CRM_SALE_ST_PUBLIC)
             {
-                $searchConf['city_id'] = $adminor['city_id'];
+                $searchConf['city_id'] = $adminor['_city_ids'];
             }
             else if ($searchConf['sale_status'] == Conf_User::CRM_SALE_ST_PRIVATE && isset($searchConf['city_id']))
             {

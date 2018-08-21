@@ -7,11 +7,6 @@ class Crm2_User extends Base_Func
     private static $_instance = null;
     private $_dao = null;
     
-    private $_write_field = array(
-        'cid', 'name', 'mobile', 'password', 'salt', 'is_admin', 
-        'hometown', 'status', 'position', 'birthday', 'sex', 'qq',
-        'weixin', 'wx_openid','channel',
-    );
     
     function __construct()
     {
@@ -33,7 +28,7 @@ class Crm2_User extends Base_Func
     {
         assert( !empty($cid) );
         assert( !empty($uinfo) );
-        assert( $this->is($uinfo['mobile']) );
+        assert( !empty($uinfo['mobile']) );
         
         $uinfo['cid'] = $cid;
         
@@ -48,17 +43,14 @@ class Crm2_User extends Base_Func
         
         //初始化密码和salt
 		$salt = mt_rand(1000, 9999);
-		$password = empty($uinfo['password'])? substr($uinfo['mobile'], -6, 6):$uinfo['password'];
+		$password = !empty($uinfo['password'])? $uinfo['password']: substr($uinfo['mobile'], -6, 6);
 		$uinfo['password'] = Crm2_Auth_Api::createPasswdMd5($password, $salt);
 		$uinfo['salt'] = $salt;
         
-        $userInfo = Tool_Array::checkCopyFields($uinfo, $this->_write_field);
-        $userInfo['ctime'] = date('Y-m-d H:i:s');
-        $userInfo['real_name'] = $uinfo['real_name'];
-        $userInfo['id_card_no'] = $uinfo['id_card_no'];
-        $uid = $this->_dao->add($userInfo);
+        $uinfo['ctime'] = date('Y-m-d H:i:s');
+        $uid = $this->_dao->add($uinfo);
         
-        $verify = Crm2_Auth_Api::createVerify($uid, $cid, $userInfo['password']);
+        $verify = Crm2_Auth_Api::createVerify($uid, $cid, $uinfo['password']);
 
 		return array('uid' => $uid, 'verify' => $verify);
     }
@@ -208,19 +200,19 @@ class Crm2_User extends Base_Func
     {   
         $where = 'status='.Conf_Base::STATUS_NORMAL;
         
-        if ($this->is($conf['cid']))
+        if (empty($conf['cid']))
         {
             $where .= ' and cid='.$conf['cid'];
         }
-        if ($this->is($conf['mobile']))
+        if (empty($conf['mobile']))
         {
             $where .= sprintf(' and mobile like "%%%s%%"', $conf['mobile']);
         }
-        if ($this->is($conf['name']))
+        if (empty($conf['name']))
         {
             $where  .= sprintf(' and name like "%%%s%%"', $conf['name']);
         }
-        if ($this->is($conf['sales_suid']))
+        if (empty($conf['sales_suid']))
         {
             $salesSuid = is_array($conf['sales_suid'])? implode(',', $conf['sales_suid']): $conf['sales_suid'];
             $where .= sprintf(' and cid in (select cid from t_customer where status=0 and sales_suid in (%s) )', $salesSuid);

@@ -15,6 +15,10 @@ class Conf_City
         //self::BEIJING
     );
 
+    public static function isCityExist($cityId)
+    {
+        return array_key_exists($cityId, self::$CITY_INFOS)? true: false;
+    }
     
     public static function getAllCities($key='')
     {

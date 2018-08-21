@@ -231,7 +231,7 @@ class Permission_Api extends Base_Api
         {
             foreach ($data['list'] as &$role)
             {
-                $role['_department'] = $role['department'] ? Conf_Permission::$DEPAREMENT[$role['department']] : '全部';
+                $role['_department'] = $role['department'] ? Conf_Permission::getDeparement($role['department']) : '全部';
             }
             
             Admin_Api::appendStaffInfos($data['list']);
