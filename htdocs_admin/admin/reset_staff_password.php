@@ -12,26 +12,16 @@ class App extends App_Admin_Page
 
     protected function main()
     {
-        $randNum = mt_rand(100000, 999999);
+        $dfPasswd = '123456';
         $randSalt = mt_rand(1000, 9999);
 
-        if (BASE_HOST != '.haocaisong.cn')
-        {
-            $randNum = 123456;
-        }
-
-        $password = md5($randSalt . ':' . $randNum);
+        $password = md5($randSalt . ':' . $dfPasswd);
         $update = array(
             'password' => $password,
             'salt' => $randSalt,
             'verify' => ''
         );
         Admin_Api::updateStaff($this->suid, $update);
-
-        $staffInfo = Admin_Api::getStaff($this->suid);
-        $words = '您的后台登录新密码是：' . $randNum;
-        //发信息
-        Data_Sms::send($staffInfo['mobile'], $words, 'verifycode');
 
         header('Location: /admin/staff_list.php');
     }

@@ -12,19 +12,14 @@ class CApp extends App_Admin_Ajax
         $this->new_password = Tool_Input::clean('r', 'new_password', TYPE_STR);
     }
 
-    protected function checkAuth()
+    protected function checkAuth($permission='')
     {
         parent::checkAuth('/user/chgpwd');
     }
 
     protected function checkPara()
     {
-        $msg = Security_Api::checkPassword($this->new_password);
-        if (!empty($msg))
-        {
-            throw new Exception($msg);
-        }
-        $this->checkIsLegal();
+        //$this->checkIsLegal();
     }
 
     protected function main()
@@ -41,8 +36,8 @@ class CApp extends App_Admin_Ajax
         }
 
         $ret = Admin_Auth_Api::chgPassword($this->_uid, $this->new_password, '');
-        $this->_uid = $ret['uid'];
-        $this->setSessionVerifyCookie($ret['verify'], Conf_Base::WEB_TOKEN_EXPIRED);
+        
+        $this->setCookie4LoginSucc(array(Conf_Base::COKEY_VERIFY_SA=>$ret['verify']), Conf_Base::WEB_TOKEN_EXPIRED);
     }
 
     protected function outputPage()

@@ -75,151 +75,6 @@ class Conf_Warehouse
         );
     }
 
-
-    /**
-     * 仓库ID定义
-     */
-    
-	CONST WID_3 = 3;
-	CONST WID_4 = 4;
-    CONST WID_5 = 5;
-    CONST WID_6 = 6;
-    CONST WID_7 = 7;
-    CONST WID_8 = 8;
-    CONST WID_101 = 101;
-	CONST WID_TJ1 = 21;
-    CONST WID_TJ2 = 22;
-    CONST WID_WH1 = 31;
-    
-    CONST WID_LF1 = 41;
-    
-    CONST WID_CQ1 = 51;
-    CONST WID_CHD1 = 61;
-    CONST WID_QD1 = 71;
-    
-    // 经销商仓库
-    CONST WID_CQ_5001 = 5001;
-    
-    // 新仓库命名规范 城市(3-4位)+类型(2位)+仓库id(3位)
-    // 类型：01-自营；02-wat；03-平台
-    CONST WID_BJ_WJ1 = 10101001;    //北京-五金仓库（流动）
-    CONST WID_LF_COOP1 = 131003001; //廊坊-合作仓库1
-    CONST WID_LF_COOP2 = 131003002; //廊坊-加盟仓1
-
-	/**
-	 * 仓库编号
-	 */
-	public static $WAREHOUSES = array(
-        // 华北地区
-		self::WID_3 => '3#玉泉营仓库',
-		self::WID_4 => '4#来广营仓库',
-        self::WID_5 => '5#通州仓库',
-        self::WID_6 => '6#北京西库',
-        self::WID_7 => '7#北京西库-中转',
-        self::WID_8 => '8#南库',
-        self::WID_BJ_WJ1 => '五金仓库#01',
-        
-        self::WID_101 => '北安河社区店',
-        self::WID_LF1 => '廊坊仓库',
-        
-		self::WID_TJ1 => '1#天津仓库',
-        self::WID_TJ2 => '2#天津津南仓库',
-        self::WID_QD1 => '1#青岛仓库',
-        
-        // 华中地区
-        self::WID_WH1 => '1#武汉仓库',
-        
-        // 重庆地区
-        self::WID_CQ1 => '1#重庆总仓',
-        self::WID_CQ_5001 => '重庆分仓#01',
-        self::WID_CHD1 => '1#成都仓',
-
-        self::WID_LF_COOP1 => '廊坊合作仓#01',
-        
-        // 加盟
-        self::WID_LF_COOP2 => '廊坊加盟仓#01',
-        
-    );
-
-	private static $ZitiAddress = array(
-	    self::WID_CQ1 => array(
-	        'name' => '沙坪坝自提点',
-            'address' => '重庆市沙坪坝区梨树湾5号',
-        ),
-        self::WID_CQ_5001 => array(
-            'name' => '渝北自提点',
-            'address' => '渝北区礼嘉街道袁家湾',
-        ),
-    );
-    public static function getZitiAddress()
-    {
-        return self::$ZitiAddress;
-    }
-    
-    /**
-     * 下线仓库.
-     */
-    public static $Offline_Warehouse = array(
-        self::WID_3, self::WID_5, self::WID_6, self::WID_7,  self::WID_101, self::WID_BJ_WJ1,
-        self::WID_WH1,
-        self::WID_LF1,
-        
-        self::WID_LF_COOP1, //self::WID_LF_COOP2,
-    );
-    
-    /**
-     * Mapping：城市 TO 仓库.
-     */
-	public static $WAREHOUSE_CITY = array(
-		Conf_City::BEIJING => array(
-            self::WID_3, self::WID_4, self::WID_5, self::WID_6, self::WID_7, self::WID_101, self::WID_8,
-            self::WID_BJ_WJ1 ),
-		Conf_City::TIANJIN => array(self::WID_TJ1, self::WID_TJ2),
-        Conf_City::WUHAN => array(self::WID_WH1),
-        Conf_City::LANGFANG => array(self::WID_LF1, self::WID_LF_COOP1, self::WID_LF_COOP2),
-        Conf_City::CHONGQING => array(self::WID_CQ1, self::WID_CQ_5001),
-        Conf_City::CHENGDU => array(self::WID_CHD1),
-        Conf_City::QINGDAO => array(self::WID_QD1),
-	);
-    
-    /**
-	 * Mapping: 仓库 TO 城市.
-	 */
-	public static $WAREHOUSE_CITY_MAPPING = array(
-		self::WID_3 => Conf_City::BEIJING,
-		self::WID_4 => Conf_City::BEIJING,
-        self::WID_5 => Conf_City::BEIJING,
-        self::WID_6 => Conf_City::BEIJING,
-        self::WID_7 => Conf_City::BEIJING,
-        self::WID_8 => Conf_City::BEIJING,
-        self::WID_101 => Conf_City::BEIJING,
-        self::WID_BJ_WJ1 => Conf_City::BEIJING,
-		
-        self::WID_LF1 => Conf_City::LANGFANG,
-        self::WID_LF_COOP1 => Conf_City::LANGFANG,
-        self::WID_LF_COOP2 => Conf_City::LANGFANG,
-        
-        self::WID_TJ1 => Conf_City::TIANJIN,
-        self::WID_TJ2 => Conf_City::TIANJIN,
-        
-        self::WID_WH1 => Conf_City::WUHAN,
-        
-        self::WID_CQ1 => Conf_City::CHONGQING,
-        self::WID_CQ_5001 => Conf_City::CHONGQING,
-        
-        self::WID_CHD1 => Conf_City::CHENGDU,
-        
-        self::WID_QD1 => Conf_City::QINGDAO,
-        
-	);
-    
-    public static $SELF_WAREHOUSES = array(
-        self::WID_3, self::WID_4, self::WID_5, self::WID_6, self::WID_7, self::WID_8, self::WID_101,
-        self::WID_BJ_WJ1, self::WID_CQ1, self::WID_LF1, self::WID_TJ1, self::WID_TJ2,
-        self::WID_WH1,self::WID_CHD1, self::WID_CQ_5001, self::WID_QD1,
-        
-    );
-    
     /**
      * 货位：虚拟货位标识.
      * 
@@ -243,79 +98,137 @@ class Conf_Warehouse
         self::VFLAG_DAMAGED         => array('name'=>'残损货位',  'flag'=>'VFLoc-1001'),
         self::VFLAG_LOSS            => array('name'=>'盘亏货位',  'flag'=>'VFLoc-1002'),
     );
+
+    /**
+     * 仓库ID定义
+     */
+    CONST WID_BJ_1 = 1;
+
+    private static $WAREHOUSE_INFOS = array(
+        self::WID_BJ_1 => array('name'=>'北京仓库#1', 'city'=>Conf_City::BEIJING, 'poi'=>array('lng'=>'116.343725', 'lat'=>'39.852428')),
+    );
     
     /**
-     *  获取全部仓库信息.
+     * 获取仓库的名称.
      */
-	public static function getWarehouses()
-	{
-		return self::$WAREHOUSES;
-	}
-     
-    /**
-     * 选择的仓库是否为升级的仓库.
-     * 
-     * @notice
-     *      仓库与2016年9月全部升级完毕，方法不能删除，并且return true；
-     *      可将调用处删除
-     * 
-     * @param int $wid
-     */
-    public static function isUpgradeWarehouse($wid)
+    public static function getNameOfWarehouses($wids=null)
     {
-        return 1;
+        $warehouses = array();
+        
+        
+        if (!empty($wids))
+        {
+            $_wids = is_string($wids)? explode(',', $wids): $wids;
+            
+            foreach($_wids as $_wid)
+            {
+                $warehouses[$_wid] = self::$WAREHOUSE_INFOS[$_wid]['name'];
+            }
+        }
+        else
+        {
+            foreach(self::$WAREHOUSE_INFOS as $_wid => $info)
+            {
+                $warehouses[$_wid] = $info['name'];
+            }
+        }
+        
+        return $warehouses;
+    }
+    
+    /**
+     * 获取城市下的仓库.
+     */
+    public static function getWarehousesOfCity($cityId)
+    {
+        $warehouses = array();
+        
+        foreach(self::$WAREHOUSE_INFOS as $_wid => $info)
+        {
+            if ($info['city'] == $cityId)
+            {
+                $warehouses[$_wid] = $info['name'];
+            }
+        }
+        
+        return $warehouses;
+    }
+    
+    public static function getCityOfWarehouse($wid)
+    {
+        return self::$WAREHOUSE_INFOS[$wid]['city'];
     }
 
-	
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
-	public static function getCityByWarehouse($warhouse)
-	{
-		$city = self::$WAREHOUSE_CITY_MAPPING[$warhouse];
+    /**
+	 * 仓库编号
+	 */
+	public static $WAREHOUSES = array(
+        // 华北地区
+		self::WID_BJ_1 => '3#玉泉营仓库',
+        
+    );
 
-		if (empty($city))
-		{
-			$city = Conf_City::BEIJING;
-		}
-
-		return $city;
-	}
+    /**
+     * 下线仓库.
+     */
+    public static $Offline_Warehouse = array(
+        //self::WID_3, 
+    );
+    
+  
 
 	public static $LOCATION = array(
-		self::WID_3         => array('lng' => '116.343725', 'lat' => '39.852428',),
-		self::WID_4         => array('lng' => '116.484653', 'lat' => '40.028131',),
-		self::WID_5         => array('lng' => '116.766895', 'lat' => '39.847127',),
-        self::WID_6         => array('lng' => '116.239767', 'lat' => '40.036149',),
-        self::WID_7         => array('lng' => '116.239767', 'lat' => '40.036149',),
-        self::WID_8         => array('lng' => '116.350757', 'lat' => '39.860674',),
-        self::WID_101       => array('lng' => '116.128082', 'lat' => '40.08748',),
-		self::WID_TJ1       => array('lng' => '117.259284', 'lat' => '39.076482',),
-        self::WID_TJ2       => array('lng' => '117.417611', 'lat' => '39.004673',),
-        self::WID_WH1       => array('lng' => '114.241149', 'lat' => '30.595838',),
-        self::WID_LF1       => array('lng' => '116.741849', 'lat' => '39.610803',),
-        self::WID_CQ1       => array('lng' => '106.445914', 'lat' => '29.56101',),
-        self::WID_CQ_5001   => array('lng' => '106.519121', 'lat' => '29.667917',),
-        self::WID_LF_COOP1  => array('lng' => '116.745948', 'lat' => '39.501103',),
-        self::WID_LF_COOP2  => array('lng' => '116.700925', 'lat' => '39.554936'),
-        self::WID_CHD1      => array('lng' => '104.010817', 'lat' => '30.614321'),
-        self::WID_QD1       => array('lng' => '120.377005', 'lat' => '36.325916'), 
+//		self::WID_3         => array('lng' => '116.343725', 'lat' => '39.852428',),
+//		self::WID_4         => array('lng' => '116.484653', 'lat' => '40.028131',),
+//		self::WID_5         => array('lng' => '116.766895', 'lat' => '39.847127',),
+//        self::WID_6         => array('lng' => '116.239767', 'lat' => '40.036149',),
+//        self::WID_7         => array('lng' => '116.239767', 'lat' => '40.036149',),
+//        self::WID_8         => array('lng' => '116.350757', 'lat' => '39.860674',),
+//        self::WID_101       => array('lng' => '116.128082', 'lat' => '40.08748',),
+//		self::WID_TJ1       => array('lng' => '117.259284', 'lat' => '39.076482',),
+//        self::WID_TJ2       => array('lng' => '117.417611', 'lat' => '39.004673',),
+//        self::WID_WH1       => array('lng' => '114.241149', 'lat' => '30.595838',),
+//        self::WID_LF1       => array('lng' => '116.741849', 'lat' => '39.610803',),
+//        self::WID_CQ1       => array('lng' => '106.445914', 'lat' => '29.56101',),
+//        self::WID_CQ_5001   => array('lng' => '106.519121', 'lat' => '29.667917',),
+//        self::WID_LF_COOP1  => array('lng' => '116.745948', 'lat' => '39.501103',),
+//        self::WID_LF_COOP2  => array('lng' => '116.700925', 'lat' => '39.554936'),
+//        self::WID_CHD1      => array('lng' => '104.010817', 'lat' => '30.614321'),
+//        self::WID_QD1       => array('lng' => '120.377005', 'lat' => '36.325916'), 
 	);
 
 	public static $DIAODU_MOBILE = array(
-		self::WID_3 => '15922262739',
-		self::WID_4 => '18410432202',
-		self::WID_5 => '18210965728',
-        self::WID_6 => '13240064508',
-        self::WID_7 => '13240064508',
-		self::WID_8 => '18631796862',
-		self::WID_TJ1 => '18709395437',
-        self::WID_TJ2 => '17717732518',
-        self::WID_WH1 => '18210965728',
-        self::WID_101 => 'wait.......',
-        self::WID_LF1 => 'wait.......',
-        self::WID_LF_COOP1 => '13930661300',
-        self::WID_LF_COOP2 => 'sorry',
-        self::WID_CHD1 => 'waiting...',
-        self::WID_QD1 => 'waiting...',
+//		self::WID_3 => '15922262739',
+//		self::WID_4 => '18410432202',
+//		self::WID_5 => '18210965728',
+//        self::WID_6 => '13240064508',
+//        self::WID_7 => '13240064508',
+//		self::WID_8 => '18631796862',
+//		self::WID_TJ1 => '18709395437',
+//        self::WID_TJ2 => '17717732518',
+//        self::WID_WH1 => '18210965728',
+//        self::WID_101 => 'wait.......',
+//        self::WID_LF1 => 'wait.......',
+//        self::WID_LF_COOP1 => '13930661300',
+//        self::WID_LF_COOP2 => 'sorry',
+//        self::WID_CHD1 => 'waiting...',
+//        self::WID_QD1 => 'waiting...',
 	);
 
 	public static $WAREHOUSE_PICKING_AREA = array(
@@ -327,7 +240,7 @@ class Conf_Warehouse
 		array('id' => 'tmp', 'name' => '临'),
 	);
 
-	public static function getWarehousesOfCity($city=0, $type='all')
+	public static function getWarehousesOfCityxx($city=0, $type='all')
 	{
 		if ($city>0)
 		{
@@ -348,94 +261,8 @@ class Conf_Warehouse
 	}
     
        
-    /**
-     * 根据功能获取仓库
-     */
-    public static function getWarehouseByAttr($type='all', $wids=array())
-    {
-        if (empty($wids))
-        {
-            $wids = self::$WAREHOUSES;
-        }
-        
-        $exceptWid = array();
-        switch($type)
-        {
-            case 'customer':    //客户相关   
-                $exceptWid = array(
-                    self::WID_3 => 1,
-                    self::WID_5 => 1,
-                    self::WID_6 => 1,
-                    self::WID_7 => 1,
-                    self::WID_WH1 => 1,
-                );
-                break;
-            case 'ext_customer': //大客户（含第三方库）
-                $exceptWid = array(
-                    self::WID_7 => 1,
-                );
-                break;
-            case 'stock':       //仓库相关
-                $exceptWid = array(
-                    self::WID_WH1 => 1,
-                );
-                break;
-            case 'order_stock':   //订单库存
-                $exceptWid = array(
-                    self::WID_3 => 1,
-                    self::WID_5 => 1,
-                    self::WID_6 => 1,
-                    self::WID_7 => 1,
-                    self::WID_WH1 => 1,
-                );
-                break;
-            default:
-                break;
-        }
-        return array_diff_key($wids, $exceptWid);
-    }
     
-    public static function getTestWids($type='')
-    {
-        $wids = array();
-        
-        switch($type)
-        {
-            case 'picked':
-                $wids = array(self::WID_3, self::WID_5);
-                break;
-            case 'stock':
-                $wids = array(self::WID_4, self::WID_8);
-                break;
-            default : //all
-                $wids = array_keys(self::$WAREHOUSES);
-                break;
-            
-        }
-        
-        return $wids;
-    }
     
-    /**
-     * 盘库逻辑.
-     */
-    public static function isLockedWarehouse($wid)
-    {
-        $_lockedWarehouses = array(
-            self::WID_3,
-//            self::WID_4,
-//            self::WID_5,
-//            self::WID_6,
-//            self::WID_7,
-//            self::WID_8,
-//            self::WID_TJ1,
-        );
-        
-        $st = self::LOCK_WAREHOUSE && (in_array($wid, $_lockedWarehouses))? true: false;
-        $msg = !$st? 'ok': '库存已锁，不能出入库！';
-                
-        return array('st'=>$st, 'msg'=>$msg);
-    }
 
     public static $STOCKTAKING_REASONS = array(
         1 => '商品残损',
@@ -477,73 +304,6 @@ class Conf_Warehouse
         }
 
         return $data;
-    }
-
-    public static function isCommunityWarehouse($wid)
-    {
-        $communityWids = array(
-            self::WID_101,
-            self::WID_LF1,
-        );
-
-        return in_array($wid, $communityWids);
-    }
-
-    public static function getWarehouseName($wid, $isShowId)
-    {
-        return isset(self::$WAREHOUSES[$wid])? self::$WAREHOUSES[$wid]:
-                ($isShowId? $wid: '');
-    }
-    
-    /**
-     * 是否是代理商/经销商仓库.
-     * 
-     * @param type $wid
-     */
-    public static function isAgentWid($wid)
-    {
-        return false;   //addby guoqiangyang:20180522 现在已经没有WAT模式，先下线
-        //return $wid==self::WID_CQ_5001? true: false;
-    }
-    
-    /**
-     * 是否是第三方仓库.
-     * 
-     */
-    public static function isCoopWid($wid)
-    {
-        return $wid==self::WID_LF_COOP1? true: false;
-    }
-    
-    /**
-     * 是否是自营仓库.
-     * 
-     * @param type $wid
-     */
-    public static function isOwnWid($wid, $cityId=0)
-    {
-        if (empty($cityId))
-        {
-            $cityId = self::$WAREHOUSE_CITY_MAPPING[$wid];
-        }
-        
-        if (!empty($wid))
-        {
-            return in_array($wid, self::$SELF_WAREHOUSES);
-        }
-        else if (!empty ($cityId))
-        {
-            $ownCities = Conf_City::getSelfCities(true);
-            
-            return array_key_exists($cityId, $ownCities);
-        }
-        
-        return true;
-//        
-//        $isAgentWid = self::isAgentWid($wid);
-//        $isCoopWid = self::isCoopWid($wid);
-//        
-//        return !$isAgentWid && !$isCoopWid;
     }
 
     /**

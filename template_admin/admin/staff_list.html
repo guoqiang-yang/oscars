@@ -1,12 +1,10 @@
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<h1 class="page-header">账号管理</h1>
-    {{if !empty($_permissions["/admin/edit_staff"])}}
-	<a href="/admin/edit_staff.php" class="btn btn-primary">添加</a>
-    {{/if}}
-	{{if !empty($_permissions["/admin/update_staff_ding"])}}
-	<a href="/admin/update_staff_ding.php" class="btn btn-primary" style="margin-left: 20px;" target="_blank">同步钉钉UserId</a>
-	{{/if}}
-	<hr>
+	<h1 class="page-header">账号管理
+        {{if !empty($_permissions["/admin/edit_staff"])}}
+        <a href="/admin/edit_staff.php" class="btn btn-primary" style="margin-left: 50px;">添加</a>
+        {{/if}}
+    </h1>
+    
 	<form id="search_form" class="form-inline" role="form" action="/admin/staff_list.php">
 		<div class="placeholder">
 			<div class="form-group" style="margin-right:30px;">
@@ -19,19 +17,10 @@
 			</div>
 			<div class="form-group" style="margin-right:30px;">
 				<label>部门：</label>
-				<select class="form-control" name="department" data-role-mapping="{{$role_mapping}}">
+				<select class="form-control" name="department">
 					<option value="0" {{if $search_conf.role==0}} selected="selected"{{/if}}>全部</option>
 					{{foreach $department_list as $_department => $department_desc}}
 					<option value="{{$_department}}" {{if $search_conf.department==$_department}}selected="selected"{{/if}}>{{$department_desc}}</option>
-					{{/foreach}}
-				</select>
-			</div>
-			<div class="form-group" style="margin-right:30px;">
-				<label>角色：</label>
-				<select class="form-control" name="role" >
-					<option value="0" {{if $search_conf.role==0}} selected="selected"{{/if}}>全部</option>
-					{{foreach $role_list as $role => $desc}}
-					<option value="{{$role}}" {{if $search_conf.role==$role}}selected="selected"{{/if}}>{{$desc.role}}</option>
 					{{/foreach}}
 				</select>
 			</div>
@@ -40,19 +29,11 @@
 				<select class="form-control" name="city_id" >
 					<option value="0" {{if $search_conf.city_id==0}} selected="selected"{{/if}}>全部</option>
 					{{foreach $cities as $_cityid => $desc}}
-					<option value="{{$_cityid}}" {{if $search_conf.city_id==$_cityid}}selected="selected"{{/if}}>{{$desc}}</option>
+					<option value="{{$_cityid}}" {{if $search_conf.city_id==$_cityid}}selected="selected"{{/if}}>{{$desc.cn}}</option>
 					{{/foreach}}
 				</select>
 			</div>
-            {{*
-            <div class="form-group" style="margin-right:30px;">
-				<label>状态：</label>
-				<select class="form-control" name="status" >
-					<option value="0" {{if $search_conf.status==0}}selected="selected"{{/if}}>在职</option>
-					<option value="1" {{if $search_conf.status==1}}selected="selected"{{/if}}>离职</option>
-				</select>
-			</div>
-            *}}
+            
 			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
 		</div>
 	</form>
@@ -63,7 +44,6 @@
 			<th style="width:8%;">ID</th>
 			<th style="width:12%;">个人</th>
 			<th style="width:8%;">部门</th>
-			<th style="width:8%;">组长</th>
 			<th style="width:30%;">角色</th>
             <th style="width:10%;">城市</th>
 			<th style="width:8%;">状态</th>
@@ -79,28 +59,19 @@
                 {{$staff.mobile}}
             </td>
             <td>{{$staff._department}}</td>
-			<td>{{if !empty($staff.leader)}} {{$staff.leader}} {{/if}}</td>
-			<td>
-				{{foreach $staff.roles as $_role}}
-				<span>{{$role_list[$_role]['role']}} </span>
-				{{/foreach}}
-            </td>
-            <td>{{$staff.city_desc}}</td>
+			<td>{{$staff._roles}}</td>
+            <td>{{$staff._cities_cn}}</td>
 			<td>{{if $staff.status}}离职{{else}}在职{{/if}}</td>
 			<td>
                 {{if !empty($_permissions["/admin/edit_staff"])}}
-				<a style="margin-right: 20px;" href="/admin/edit_staff.php?suid={{$staff.suid}}">基础信息</a>
-                <a style="margin-right: 20px;" href="/admin/edit_city_wid.php?suid={{$staff.suid}}">城市信息</a><br>
-                {{/if}}
-                {{if !empty($_permissions["/admin/edit_staff_role"])}}
-				<a style="margin-right: 20px;" href="/admin/edit_staff_role.php?suid={{$staff.suid}}">编辑角色</a>
+                <a style="margin-right: 20px;" href="/admin/edit_staff.php?suid={{$staff.suid}}">基础信息</a>
                 {{/if}}
                 {{if !empty($_permissions["/admin/reset_staff_password"])}}
-                <a style="margin-right: 20px;" href="/admin/reset_staff_password.php?suid={{$staff.suid}}" onclick="return confirm('确定要重置该用户密码吗？');">重置密码</a>
-                {{/if}}<br>
-				{{if !empty($_permissions["/admin/reset_staff_login_times"])}}
-				<a style="margin-right: 20px;" href="/admin/reset_staff_login_times.php?suid={{$staff.suid}}" onclick="return confirm('确定要清除该用户的登录失败次数吗？');">清登录次数</a>
-				{{/if}}
+                <a style="margin-right: 20px;" href="/admin/reset_staff_password.php?suid={{$staff.suid}}" onclick="return confirm('确定要重置该用户密码吗？');">重置密码</a><br>
+                {{/if}}
+                {{*if !empty($_permissions["/admin/edit_staff_role"])}}
+				<a style="margin-right: 20px;" href="/admin/edit_staff_role.php?suid={{$staff.suid}}">编辑角色</a>
+                {{/if*}}
 			</td>
 		</tr>
 		{{/foreach}}

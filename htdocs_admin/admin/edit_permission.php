@@ -6,7 +6,6 @@ class App extends App_Admin_Page
     private $id;
     private $allPermissions = array();
     private $permissionList = array();
-    private $relPermissionList = array();   //关联权限，不能编辑
     private $isNew;
 
     protected function getPara()
@@ -25,62 +24,13 @@ class App extends App_Admin_Page
 
     protected function main()
     {
-        $role = Permission_Api::get($this->id);
+        $roleInfo = Permission_Api::get($this->id);
         
-        if ($this->isNew)
+        if (!empty($roleInfo['permission']))
         {
-            $defaultPermissionList = Conf_Permission::$DEFAULT_PERMISSION[$role['department']];
-            if (!empty($defaultPermissionList))
-            {
-                foreach ($defaultPermissionList as $fkey => $fval)
-                {
-                    if ($fval == '*')
-                    {
-                        foreach (Conf_Admin_Page::$MODULES[$fkey]['pages'] as $flist)
-                        {
-                            foreach ($flist['buttons'] as $fitem)
-                            {
-                                $this->permissionList[] = $fitem['key'];
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach ($fval as $skey => $sval)
-                        {
-                            if ($sval == '*')
-                            {
-                                foreach (Conf_Admin_Page::$MODULES[$fkey]['pages'] as $flist)
-                                {
-                                    if ($flist['key'] == $skey)
-                                    {
-                                        foreach ($flist['buttons'] as $sitem)
-                                        {
-                                            $this->permissionList[] = $sitem['key'];
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                foreach ($sval as $p)
-                                {
-                                    $this->permissionList[] = $p;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            $this->permissionList = json_decode($roleInfo['permission'], true);
         }
-        else
-        {
-            if (!empty($role['permission']))
-            {
-                $this->permissionList = json_decode($role['permission'], true);
-            }
-        }
-        
+      
         $relPermissionList = Permission_Api::getRelRolePermission($this->id);
         
         // 将已选择的权限，关联权限标记到全部权限列表

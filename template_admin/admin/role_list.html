@@ -1,60 +1,10 @@
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<h1 class="page-header">角色管理</h1>
-	<a href="javascript: void(0)" class="btn {{if $search_type != 'role'}} btn-primary {{else}} btn-default {{/if}} select-search-type" data-search-type="account">查账号</a>
-	<a href="javascript: void(0)" class="btn {{if $search_type == 'role'}} btn-primary {{else}} btn-default {{/if}} select-search-type" style="margin-left: 20px;" data-search-type="role">查角色</a>
+	<h1 class="page-header">角色管理
 	{{if !empty($_permissions["/admin/edit_role"])}}
 	<a href="/admin/edit_role.php" class="btn btn-primary" style="margin-left: 50px;">添加角色</a>
 	{{/if}}
-	<a style="margin-left: 50px;" href="/admin/role_list.php?download=1" class="btn btn-success">导出角色</a>
-	<hr>
-	<form id="search_form" class="form-inline" role="form" action="/admin/role_list.php" data-modules="{{json_encode($modules)}}">
-		<div class="placeholder">
-			{{if $search_type != 'role'}}
-			<div class="form-group" style="margin-right:30px;">
-				<label>角色名：</label>
-				<input type="text" class="form-control" name="role" value="{{$search_conf.role}}">
-			</div>
-			<div class="form-group" style="margin-right:30px;">
-				<label>部门：</label>
-                <select class="form-control" name="department" >
-					<option value="0" {{if $search_conf.department==0}} selected="selected"{{/if}}>全部</option>
-					{{foreach $departments as $id => $name}}
-					<option value="{{$id}}" {{if $search_conf.department==$id}}selected="selected"{{/if}}>{{$name}}</option>
-					{{/foreach}}
-				</select>
-			</div>
-			{{else}}
-			<div class="form-group" style="margin-right:30px;">
-				<label>模块：</label>
-				<select class="form-control" name="module" >
-					{{foreach $modules as $mkey => $module}}
-					<option value="{{$mkey}}" {{if $search_conf.module==$mkey}}selected="selected"{{/if}}>{{$module.name}}</option>
-					{{/foreach}}
-				</select>
-			</div>
-
-			<div class="form-group" style="margin-right:30px;">
-				<label>列表：</label>
-				<select class="form-control" name="list_page" >
-					{{foreach $modules[$search_conf.module]['pages'] as $lkey => $list_page}}
-					<option value="{{$lkey}}" {{if $search_conf.list_page==$lkey}}selected="selected"{{/if}}>{{$list_page.name}}</option>
-					{{/foreach}}
-				</select>
-			</div>
-			<div class="form-group" style="margin-right:30px;">
-				<label>权限：</label>
-				<select class="form-control" name="permission" >
-					<option value="0">全部</option>
-					{{foreach $modules[$search_conf.module]['pages'][$search_conf.list_page]['buttons'] as $pkey => $permission}}
-					<option value="{{$pkey}}" {{if $search_conf.permission==$pkey}}selected="selected"{{/if}}>{{$permission}}</option>
-					{{/foreach}}
-				</select>
-			</div>
-			{{/if}}
-			<input type="hidden" name="search_type" value="{{if empty($search_type)}}account{{else}}{{$search_type}}{{/if}}">
-			<button type="submit" class="btn btn-primary" id="btn_search" style="margin-left:40px;">查询</button>
-		</div>
-	</form>
+    </h1>
+    
 
 	<table class="table">
 		<thead>
@@ -76,9 +26,8 @@
 			<td>{{$item.role}}</td>
 			<td>{{$item.rkey}}</td>
 			<td>{{$item.ctime}}</td>
-			<td>{{$item._suser}}</td>
+			<td>{{$item._suser.name}}</td>
 			<td>
-				<a style="margin-right: 20px;" href="/admin/staff_list.php?role={{$item.id}}&department={{$item.department}}&search_type=account">查看对应账号</a>
                 {{if !empty($_permissions["/admin/edit_role"])}}
                 <a style="margin-right: 20px;" href="/admin/edit_role.php?id={{$item.id}}">编辑信息</a>
                 {{/if}}

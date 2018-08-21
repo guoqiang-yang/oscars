@@ -27,10 +27,10 @@
         <div class="form-group">
             <label class="col-sm-2 control-label">城市：</label>
             <div class="col-sm-4">
-                <select class="form-control" name="city_id" id="staff_city_id">
-                    <option value="0" {{if empty($staff.city_id)}}selected="true"{{/if}}>-</option>
+                <select class="form-control" name="cities" id="staff_city_id">
+                    <option value="0" {{if empty($staff.cities)}}selected="true"{{/if}}>-</option>
                     {{foreach $cities as $city_id => $city}}
-                    <option value="{{$city_id}}" {{if $staff.city_id == $city_id}}selected="true"{{/if}}>{{$city}}</option>
+                    <option value="{{$city_id}}" {{if $staff.cities == $city_id}}selected="true"{{/if}}>{{$city}}</option>
                     {{/foreach}}
                 </select>
             </div>
@@ -49,70 +49,25 @@
 		<div class="form-group">
 			<label class="col-sm-2 control-label">角色：</label>
 			<div class="col-sm-4">
-				<select class="form-control" name="role" id="staff_role_select">
+				<select class="form-control" name="roles" id="staff_role_select">
 					<option value="0" {{if empty($staff.role)}}selected="true"{{/if}}>-</option>
 					{{foreach $role_list as $rid => $role}}
-					<option value="{{$rid}}" {{if $staff.role == $rid}}selected="true"{{/if}}>{{$role}}</option>
+					<option value="{{$rid}}" {{if $staff.roles == $rid}}selected="true"{{/if}}>{{$role.role}}</option>
 					{{/foreach}}
-				</select>
-			</div>
-		</div>
-		<div class="form-group" {{if $staff.role != '3'}} style="display:none"{{/if}} >
-			<label class="col-sm-2 control-label">组长：</label>
-			<div class="col-sm-4">
-				<select class="form-control" name="leader_suid" data-suid="{{$staff.leader_suid}}" id="staff_leader_suid">
-					<option value="0">-</option>
 				</select>
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="col-sm-2 control-label">仓库：</label>
 			<div class="col-sm-4">
-				<select class="form-control" name="wid">
-					<option value="0" {{if empty($staff.wid)}}selected="true"{{/if}}>-</option>
-					{{foreach $wareHouses as $wid => $wareHouse}}
-					<option value="{{$wid}}" {{if $staff.wid == $wid}}selected="true"{{/if}}>{{$wareHouse}}</option>
+				<select class="form-control" name="wids">
+					<option value="0" {{if empty($staff.wids)}}selected="true"{{/if}}>-</option>
+					{{foreach $warehouses as $wid => $w_desc}}
+					<option value="{{$wid}}" {{if $staff.wids == $wid}}selected="true"{{/if}}>{{$w_desc}}</option>
 					{{/foreach}}
 				</select>
 			</div>
 		</div>
-		<div class="form-group">
-			<label class="col-sm-2 control-label">销售职能：</label>
-			<div class="col-sm-4">
-				<select class="form-control" name="kind">
-					<option value="0" {{if empty($staff.kind)}}selected="true"{{/if}}>-</option>
-					{{foreach $kind_list as $kid => $kind}}
-					<option value="{{$kid}}" {{if $staff.kind == $kid}}selected="true"{{/if}}>{{$kind}}</option>
-					{{/foreach}}
-				</select>
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="col-sm-2 control-label">钉钉UserId：</label>
-			<div class="col-sm-4">
-				<input type="text" class="form-control" name="ding_id" value="{{$staff.ding_id}}" />
-			</div>
-		</div>
-        <div class="bg-warning" style="padding: 10px 0;">
-            <div class="form-group">
-                <label class="col-sm-2 control-label">坐席工号：</label>
-                <div class="col-sm-4">
-                    <input type="text" class="form-control" name="ce_agent_num" value="{{$staff.ce_agent_num}}" />
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label">坐席密码：</label>
-                <div class="col-sm-4">
-                    <input type="text" class="form-control" name="ce_agent_pass" value="{{$staff.ce_agent_pass}}" />
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label">坐席分机：</label>
-                <div class="col-sm-4">
-                    <input type="text" class="form-control" name="ce_agent_phone" value="{{$staff.ce_agent_phone}}" />
-                </div>
-            </div>
-        </div>
 		<div class="form-group">
 			<label class="col-sm-2 control-label">状态：</label>
 			<div class="col-sm-4">

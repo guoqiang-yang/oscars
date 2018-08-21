@@ -15,6 +15,26 @@ class Conf_City
         //self::BEIJING
     );
 
+    
+    public static function getAllCities($key='')
+    {
+        $allCities = array();
+        
+        if (!empty($key))
+        {
+            foreach(self::$CITY_INFOS as $cityId => $cityInfo)
+            {
+                $allCities[$cityId] = $cityInfo[$key];
+            }
+        }
+        else
+        {
+            $allCities = self::$CITY_INFOS;
+        }
+        
+        return $allCities;
+    }
+    
     /**
      * 获取城市信息.
      */
@@ -32,4 +52,24 @@ class Conf_City
         }
     }
     
+    /**
+     * 获取多个城市的名称.
+     */
+    public static function getCityCnamesByCityIds($cityIds)
+    {
+        $_cityIds = $cityIds;
+        
+        if (is_string($cityIds))
+        {
+            $_cityIds = explode(',', $cityIds);
+        }
+        
+        $cnames = array();
+        foreach($_cityIds as $cityId)
+        {
+            $cnames[] = self::getByCityId($cityId, 'cn');
+        }
+        
+        return $cnames;
+    }
 }

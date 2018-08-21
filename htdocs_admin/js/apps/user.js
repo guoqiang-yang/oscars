@@ -9,13 +9,13 @@
 			new_password = $('input[name=new_password]').val();
 
 		var para = {old_password:old_password, new_password:new_password};
-		K.post('/user/ajax/chgpwd.php', para, _onChgpwdSuccess);
+		K.post('/user/ajax/chgpwd.php', para, function(){
+            alert('修改密码成功!');
+            
+            window.location.href = '/';
+        });
 	}
-	function _onChgpwdSuccess(data) {
-		alert('修改密码成功！');
-        window.location.href = '/';
-	}
-
+    
 	main();
 
 } )();

@@ -34,7 +34,7 @@ class App extends App_Admin_Page
 
     protected function outputBody()
     {
-        $this->smarty->assign('departments', Conf_Permission::$DEPAREMENT);
+        $this->smarty->assign('departments', Conf_Permission::getDeparement());
         $this->smarty->assign('role', $this->role);
         $this->smarty->assign('rel_roles', $this->relRoleInfos);
 

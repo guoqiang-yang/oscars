@@ -18,7 +18,7 @@
 	function onSaveStaff() {
 		var name = $('input[name=name]').val();
 		var mobile = $('input[name=mobile]').val();
-		var role = $('select[name=role]').val();
+		var roles = $('select[name=roles]').val();
 
 		if (K.isEmpty(name)) {
 			alert('请填写姓名！');
@@ -28,7 +28,7 @@
 			alert('请填写手机号！');
 			return false;
 		}
-		if (K.isEmpty(role)) {
+		if (K.isEmpty(roles)) {
 			alert('请选择角色！');
 			return false;
 		}

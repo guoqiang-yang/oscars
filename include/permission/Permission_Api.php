@@ -17,6 +17,7 @@ class Permission_Api extends Base_Api
             'department' => $department,
             'suid' => $suid,
             'rel_role' => $relRole,
+            'permission' => '',
         );
 
         return $pr->add($info);
@@ -224,21 +225,18 @@ class Permission_Api extends Base_Api
     public static function getList($searchConf, $start = 0, $num = 20)
     {
         $pr = new Permission_Role();
-        $ad = new Admin_Staff();
-
-        $admins = $ad->getAll(true);
-        $adminMap = Tool_Array::list2Map($admins, 'suid');
-
         $data = $pr->getList($searchConf, $start, $num);
+        
         if (!empty($data['list']))
         {
             foreach ($data['list'] as &$role)
             {
                 $role['_department'] = $role['department'] ? Conf_Permission::$DEPAREMENT[$role['department']] : '全部';
-                $role['_suser'] = $adminMap[$role['suid']]['name'];
             }
+            
+            Admin_Api::appendStaffInfos($data['list']);
         }
-
+        
         return $data;
     }
 

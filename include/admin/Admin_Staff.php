@@ -97,16 +97,34 @@ class Admin_Staff extends Base_Func
         return $this->_staffDao->setFields($field)
                                ->limit($start, $num)
                                ->order($order)
-                               ->getListWhere($where, false);
+                               ->getListWhere($this->_formatWhere($where), false);
     }
     
     public function getTotal($where)
     {
-        return $this->_staffDao->getTotal($where);
+        return $this->_staffDao->getTotal($this->_formatWhere($where));
     }
     
     
-    
+    private function _formatWhere($where)
+    {
+        if (is_array($where))
+        {
+            $_where = '1=1';
+            
+            empty($where['name'])?'':$_where .= " AND name like '%{$where['name']}%' ";
+            empty($where['mobile'])?'':$_where .= " AND mobile = '{$where['mobile']}' ";
+            empty($where['role'])?'':$_where .= " AND find_in_set({$where['role']}, roles)";
+            empty($where['department'])?'':$_where .= " AND department = {$where['department']}";
+            empty($where['city_id'])? '': $_where .= " AND find_in_set({$where['city_id']}, cities)";
+        }
+        else
+        {
+            $_where = $where;
+        }
+        
+        return $_where;
+    }
     
     
     

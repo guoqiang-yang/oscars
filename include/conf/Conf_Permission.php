@@ -7,33 +7,36 @@
  */
 class Conf_Permission
 {
-    const DEPARTMENT_CS = 1;
-    const DEPARTMENT_RD = 2;
-    const DEPARTMENT_SELL = 3;
-    const DEPARTMENT_OP = 4;
-    const DEPARTMENT_STORAGE = 5;
-    const DEPARTMENT_SCHEDULING = 6;
-    const DEPARTMENT_PURCHASE = 7;
-    const DEPARTMENT_EDITOR = 8;
-    const DEPARTMENT_FINANCE = 9;
-    const DEPARTMENT_PERSONNEL = 10;
-    const DEPARTMENT_WAREHOUSE = 11;
-    const DEPARTMENT_AFTER_SALE = 12;
+    const DEPARTMENT_CS     = 1;
+    const DEPARTMENT_RD     = 2;
+    const DEPARTMENT_SELL   = 3;
+    const DEPARTMENT_OP     = 4;
+    const DEPARTMENT_WAREHOUSE  = 5;
+    const DEPARTMENT_LOGISTICS  = 6;
+    const DEPARTMENT_PURCHASE   = 7;
+    const DEPARTMENT_FINANCE    = 8;
+    const DEPARTMENT_PERSONNEL  = 9;
+    const DEPARTMENT_AFTER_SALE = 10;
 
     //研发部，仓储部，调度部，运营部，客服部，采购部，销售部，编辑部，财务部，人事部
-    public static $DEPAREMENT = array(
-        self::DEPARTMENT_CS => '客服部',
-        self::DEPARTMENT_RD => '研发部',
-        self::DEPARTMENT_SELL => '销售部',
-        self::DEPARTMENT_OP => '运营部',
-        self::DEPARTMENT_WAREHOUSE => '仓储部',
-        self::DEPARTMENT_STORAGE => '调度部',
-        self::DEPARTMENT_PURCHASE => '采购部',
-        self::DEPARTMENT_EDITOR => '编辑部',
-        self::DEPARTMENT_FINANCE => '财务部',
-        self::DEPARTMENT_PERSONNEL => '人事部',
-        self::DEPARTMENT_AFTER_SALE => '售后部',
-    );
+    public static function getDeparement($id=0)
+    {
+        $all = array(
+            self::DEPARTMENT_CS         => '客服部',
+            self::DEPARTMENT_RD         => '研发部',
+            self::DEPARTMENT_SELL       => '销售部',
+            self::DEPARTMENT_OP         => '运营部',
+            self::DEPARTMENT_WAREHOUSE  => '仓储部',
+            self::DEPARTMENT_LOGISTICS  => '调度部',
+            self::DEPARTMENT_PURCHASE   => '采购部',
+            self::DEPARTMENT_FINANCE    => '财务部',
+            self::DEPARTMENT_PERSONNEL  => '人事部',
+            self::DEPARTMENT_AFTER_SALE => '售后部',
+        );
+        
+        return array_key_exists($id, $all)? $all[$id]: $all;
+    }
+    
 
     // 锁库，需要排除的页面
     public static $Except_Pages_4_Locked_Warehouse = array(
@@ -44,21 +47,6 @@ class Conf_Permission
         '/warehouse/stock_warning',
     );
     
-    //部门默认权限
-    //如果某个tab下的权限都有，格式：tab_name => '*'
-    //如果某个tab下，某个菜单的权限都有，格式：tab_name => array(menu_name => '*'),
-    //如果要定义某个tab下，某个菜单的某些权限，格式： tab_name => array(menu_name => array(button1, button2...)),
-    public static $DEFAULT_PERMISSION = array(
-        self::DEPARTMENT_CS => array(
-            'crm2' => '*',
-            'order' => array(
-                'quick_order_list' => '*',
-                'order_list' => array(
-                    'order_detail', 'order_delete',
-                )),
-        ),
-    );
-
     public static function getModules($suer, $modules)
     {
         $newModules = array();

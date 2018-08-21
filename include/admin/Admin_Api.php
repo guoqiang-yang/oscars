@@ -8,9 +8,13 @@ class Admin_Api extends Base_Api
     
     public static function getStaff($suid, $status=Conf_Base::STATUS_NORMAL, $nocache=false)
     {
-        $memKey = Conf_Memcache::getMemcacheKey(Conf_Memcache::MEMKEY_STAFF_INFO, $suid);
+        $staff = array();
         
-        $staff = Data_Memcache::getInstance()->get($memKey);
+        if (!$nocache)
+        {
+            $memKey = Conf_Memcache::getMemcacheKey(Conf_Memcache::MEMKEY_STAFF_INFO, $suid);
+            $staff = Data_Memcache::getInstance()->get($memKey);
+        }
         
         if (empty($staff) || !is_array($staff))
         {
@@ -23,44 +27,94 @@ class Admin_Api extends Base_Api
         return $staff;
     }
     
-    
-    
-	public static function getStaffList($start = 0, $num = 1000, $searchConf='')
-	{
-		$as = new Admin_Staff();
-		$list = $as->getList($total, $start, $num, $searchConf);
-        $leaderSuids = Tool_Array::getFields($list, 'leader_suid');
-        if(!empty($leaderSuids))
-        {
-            $leaders = Tool_Array::list2Map($as->getUsers($leaderSuids, array('suid', 'name', 'mobile')), 'suid');
-        }else{
-            $leaders = array();
-        }
-
-        foreach ($list as &$v) 
-        {
-            if($v['leader_suid'])
-            {
-                $v['leader'] = $leaders[$v['leader_suid']]['name'];
-            }
-        }
-
-		$hasMore = $total > $start + $num;
-
-		foreach ($list as &$oner)
-		{
-			$oner['roles'] = explode(',', $oner['roles']);
-            foreach ($oner['roles'] as &$role) 
-            {
-                $tmp = explode(':', $role);
-                $role = $tmp[0];
-            }
-
-            $oner['_department'] = $oner['department'] ? Conf_Permission::$DEPAREMENT[$oner['department']] : '全部';
-		}
+    public static function getStaffsByWhere($where, $start=0, $num=100)
+    {
+        $as = new Admin_Staff();
         
-		return array('list' => $list, 'total' => $total, 'has_more' => $hasMore);
-	}
+        $list = array();
+        $total = $as->getTotal($where);
+        
+        if (!empty($total))
+        {
+            $list = $as->getByWhere($where, $start, $num);
+            
+            foreach($list as &$oner)
+            {
+                $oner['_department'] = !empty($oner['department'])? Conf_Permission::getDeparement($oner['department']): '空';
+                $oner['_cities_cn'] = implode(',', Conf_City::getCityCnamesByCityIds($oner['cities']));
+            }
+        }
+        
+        return array('list'=>$list, 'total'=>$total);
+    }
+    
+    /**
+     * 附加员工信息.
+     */
+    public static function appendStaffInfos(array &$list, $field='suid', $simpleInfo=true)
+	{
+		if (empty($list)) return ;
+        
+        $as = new Admin_Staff();
+		$suids = Tool_Array::getFields($list, $field);
+        $staffInfos = $as->getUsers($suids);
+        
+        foreach($list as &$item)
+        {
+            $_staffInfo = array();
+            $_suid = $item[$field];
+            if (!empty($staffInfos[$_suid]))
+            {
+                if ($simpleInfo)
+                {
+                    $_staffInfo = array('name'=>$staffInfos[$_suid]['name'], 'mobile'=>$staffInfos[$_suid]['mobile']);
+                }
+                else
+                {
+                    $_staffInfo = $staffInfos[$_suid];
+                }
+            }
+            $item['_suser'] = $_staffInfo;
+        }
+	}        
+    
+    //@todo-del
+//	public static function getStaffList($start = 0, $num = 1000, $searchConf='')
+//	{
+//		$as = new Admin_Staff();
+//		$list = $as->getList($total, $start, $num, $searchConf);
+//        $leaderSuids = Tool_Array::getFields($list, 'leader_suid');
+//        if(!empty($leaderSuids))
+//        {
+//            $leaders = Tool_Array::list2Map($as->getUsers($leaderSuids, array('suid', 'name', 'mobile')), 'suid');
+//        }else{
+//            $leaders = array();
+//        }
+//
+//        foreach ($list as &$v) 
+//        {
+//            if($v['leader_suid'])
+//            {
+//                $v['leader'] = $leaders[$v['leader_suid']]['name'];
+//            }
+//        }
+//
+//		$hasMore = $total > $start + $num;
+//
+//		foreach ($list as &$oner)
+//		{
+//			$oner['roles'] = explode(',', $oner['roles']);
+//            foreach ($oner['roles'] as &$role) 
+//            {
+//                $tmp = explode(':', $role);
+//                $role = $tmp[0];
+//            }
+//
+//            $oner['_department'] = $oner['department'] ? Conf_Permission::$DEPAREMENT[$oner['department']] : '全部';
+//		}
+//        
+//		return array('list' => $list, 'total' => $total, 'has_more' => $hasMore);
+//	}
 
 	public static function getSales4City($city_id)
     {

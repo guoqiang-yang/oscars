@@ -17,7 +17,7 @@ class App extends App_Admin_Ajax
     
     private $isNew;
 
-    protected function checkAuth()
+    protected function checkAuth($permission='')
     {
         parent::checkAuth('/admin/edit_role');
     }
